@@ -1,7 +1,9 @@
 # cBioPortal_Tools
 Tools for import of data and administration of the GSI cBioPortal instance
 
-Currently working on converting _.vcf_ -> _.maf_ -> Mutation Data
+Currently working on converting _.vcf_ -> _.maf_
+
+The mutation data that is required for cBioPortal is extended _.maf_.
 
 ## Usage
 Run the program with:
