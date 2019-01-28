@@ -1,38 +1,18 @@
 # cBioPortal_Tools
 Tools for import of data and administration of the GSI cBioPortal instance
 
-Currently working on converting _.vcf_ -> _.maf_
+import_mutation_data.py converts from _.vcf_ -> _.maf_. 
+This takes compressed _.vcf_ or _.maf_ files to usable _.maf_ files.
 
-The mutation data that is required for cBioPortal is extended _.maf_.
+More information on the file types from cBioPortal is [Data Loading](https://cbioportal.readthedocs.io/en/latest/Data-Loading.html),
+and [File Formats](https://cbioportal.readthedocs.io/en/latest/File-Formats.html). 
+We also have links to the OICR Wiki. [cBioPortal Study Components](https://wiki.oicr.on.ca/display/GSI/cBioPortal+Study+Components)
+and [cBioPortal-Tools](https://wiki.oicr.on.ca/display/GSI/cBioPortal-Tools)
 
-## Usage
-Run the program with:
+### What's in each folder?
+The _template_study_files_ contains a folder of template files that could theoretically be used.
+The only difficulty is actually finding all that data you would need to fill each file.
 
-```
-positional arguments:
-  inputFile             The input file, can be of compressed: .tar.gz | .gz |
-                        .zip] or uncompressed format in: [vcf | maf] If the
-                        file is compressed, optional tag -c must be added
+_src_ contains all the Python scripts (as of now).
 
-optional arguments:
-  -h, --help            show this help message and exit
-
-required arguments:
-  -c, --compressed      If the input file is compressed this tag must be added
-  -w , --workflowUsed   The workflow used is a mandatory tag, choices are:
-                        [GATKHaplotypeCaller | Mutect | Mutect2 | Strelka]
-```
-
-For example:
-
-```
-python main.py -h
-```
-or
-```
-python main.py banana.vcf.tar.gz -c -w Mutect
-```
-or
-```
-python main.py apple.maf -w GATKHaplotypeCaller
-```
+_src/test/fakes_ contains a fake set of files used for testing. Some of them could be generated or taken from sample data.
