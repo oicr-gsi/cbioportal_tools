@@ -13,6 +13,8 @@ and [cBioPortal-Tools](https://wiki.oicr.on.ca/display/GSI/cBioPortal-Tools)
 The _template_study_files_ contains a folder of template files that could theoretically be used.
 The only difficulty is actually finding all that data you would need to fill each file.
 
-_src_ contains all the Python scripts (as of now).
+_src/_ contains all the Python scripts (as of now).
+
+_src/test/_ contains testing scripts used for validation
 
 _src/test/fakes_ contains a fake set of files used for testing. Some of them could be generated or taken from sample data.
