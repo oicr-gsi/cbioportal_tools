@@ -63,8 +63,8 @@ def check_input(arguments):
         arguments.compressed = True
 
     if arguments.workflowUsed not in workflowChoices:
-        parser.error("Either no workflow has been specified, or there has been a misspelling."
-                     "\n Choices are: [" + " | ".join(workflowChoices) + "]")
+        arguments.error("Either no workflow has been specified, or there has been a misspelling."
+                        "\n Choices are: [" + " | ".join(workflowChoices) + "]")
 
 
 def decompress(input_file):
@@ -80,7 +80,7 @@ def decompress(input_file):
 def pre_process_files(args):
     input_file, extension = args.inputFile
     out = os.path.basename(input_file)
-    input_file = out + extension # Hmmm, not super sure if what I'm doing here makes any sense
+    input_file = out + extension  # Hmmm, not super sure if what I'm doing here makes any sense
     if input_file.endswith(tuple(compressedChoices)):
         decompress(input_file)
 

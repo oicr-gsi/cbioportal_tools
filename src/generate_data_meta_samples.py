@@ -5,17 +5,11 @@ import pandas as pd
 import numpy as np
 
 import re
+import helper
 
 extensionChoices = ["vcf", "maf"]
 compressedChoices = [".tar.gz", ".gz", ".zip"]
 verbosity = False
-
-
-def remove_end_string(string, remove):
-    string = str(string)
-    if string.endswith(remove):
-        string = string[:-len(remove)]
-    return string
 
 
 def check_files_in_folder(choices, folder, parser):
@@ -60,64 +54,39 @@ def define_parser():
 
 
 def gather_patient_and_sample_ids(args):
-    # List all files in folder, remove extensions and generate patient and sample IDs
+    # List all files in folder and generate patient and sample IDs
     folder = os.listdir(args.input_folder)
     key_val = []
+    # This regular expression is very specific to GECCO
+    # Make Regular Expression for: GECCO_1111_Xx_Y or something similar
     regex = re.compile('[A-Z]{5}_[0-9]{4}_[a-zA-Z]{2}_[A-Z]')
     for each in folder:
-        # Make Regular Expression for: GECCO_1111_Xx_Y or something similar
         try:
+            # Check if the file match the pattern
             start, end = regex.search(each).span()
             patient_id = each[start:start+10]
             sample_id = each[start:end]
         except AttributeError:
+            # As of now, throw an error.
+            # Later we can consider changing this to skip erroneous files
             raise ValueError('You have a possibly erroneous file in the folder please remove it or something?\n' + each)
-        key_val += [patient_id, sample_id]
-    key_val = np.reshape(key_val, (len(key_val) / 2, 2))
+        key_val += [[patient_id, sample_id]]
+    key_val = np.reshape(key_val, (len(key_val), 2))
+    # Convert list to np.array
     return key_val
 
 
-def change_folder(folder):
-    original_working_directory = os.getcwd()
-    try:
-        os.chdir(folder)
-    except OSError:
-        for a in range(30):
-            print('*',)
-        print 'The path to your folder probably does not exist. Trying to make the folder for you.'
-        for a in range(30):
-            print('*',)
-        try:
-            os.mkdir(folder)
-        except OSError:
-            raise ValueError('You may not have permission to create folders there. Very sad')
-    return original_working_directory
-
-
-def success():
-    print 'Success!'
-
-
-def working_on(message):
-    if verbosity:
-        print message
-
-
-def reset_folder(owd):
-    os.chdir(owd)
-
-
-def save_dataframe(dataset):
+def save_data_samples(data_set):
     # We are in destination folder, export the data_samples.txt that we have generated.
-    print dataset
-    new_dataset = pd.DataFrame({'PATIENT_ID': dataset[:, 0], 'SAMPLE_ID': dataset[:, 1]})
-    new_dataset.to_csv('data_clinical_samples.txt', sep='\t', index=False)
+    print data_set
+    new_data_set = pd.DataFrame({'PATIENT_ID': data_set[:, 0], 'SAMPLE_ID': data_set[:, 1]})
+    new_data_set.to_csv('data_clinical_samples.txt', sep='\t', index=False)
 
 
-def save_sample_metafile(id):
+def save_sample_meta_file(study_id):
     # Generating the meta file is almost as important
     f = open('meta_clinical_sample.txt', 'w+')
-    f.write('cancer_study_identifier: ' + id + '\n')
+    f.write('cancer_study_identifier: ' + study_id + '\n')
     f.write('genetic_alteration_type: CLINICAL\n')
     f.write('datatype: SAMPLE_ATTRIBUTES\n')
     f.write('data_filename: data_clinical_patient.txt\n')
@@ -130,27 +99,28 @@ def main():
     global verbosity
     verbosity = args.verbose
 
-    working_on('parsing arguments...')
+    helper.working_on(verbosity, message='parsing arguments...')
     study_folder = args.study_folder
     study_id = args.study_id
-    success()
+    helper.working_on(verbosity)
 
-    working_on('Gathering patient and sample IDs...')
+    helper.working_on(verbosity, message='Gathering patient and sample IDs...')
     patient_sample_ids = gather_patient_and_sample_ids(args)
-    success()
+    helper.working_on(verbosity)
 
     # This is where more information would be added to the patient_sample_ids
     # Ex. add_cancer_subtype(patient_sample_ids)
     # I would also consider renaming the variable to dataset
 
-    working_on('Saving gathered information...')
-    original_dir = change_folder(study_folder)
-    save_dataframe(patient_sample_ids)
-    save_sample_metafile(study_id)
-    success()
+    helper.working_on(verbosity, message='Saving gathered information...')
+    original_dir = helper.change_folder(study_folder)
+    save_data_samples(patient_sample_ids)
+    save_sample_meta_file(study_id)
+    helper.working_on(verbosity)
 
-    reset_folder(original_dir)
-    working_on('generating_bare_data_samples.py has successfully completed!')
+    helper.reset_folder(original_dir)
+    helper.working_on(verbosity, message='generating_bare_data_samples.py has successfully completed!')
+    helper.working_on(verbosity)
 
 
 if __name__ == '__main__':
