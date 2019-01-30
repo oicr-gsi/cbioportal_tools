@@ -1,0 +1,4 @@
+#Patient Identifier	Sample Identifier	Cancer Subtype	Detailed summary of Cancer Subtype	Displayed in addition to the ID	Sample Class Metastic Site, Override Tumour Site	Alias to Sample ID	Sample Icon in Timeline
+#Patient Identifier	Sample Identifier	Cancer Subtype	Detailed summary of Cancer Subtype	Displayed in addition to the ID	Sample Class Metastic Site, Override Tumour Site	Alias to Sample ID	Sample Icon in Timeline
+#STRING	STRING	STRING	STRING	STRING	STRING	STRING	STRING	STRING	STRING
+PATIENT_ID  SAMPLE_ID	CANCER_TYPE CANCER_TYPE_DETAILED	 SAMPLE_DISPLAY_NAME SAMPLE_CLASS	METASTATIC_SITE	OTHER_SAMPLE_ID	SAMPLE_TYPE
