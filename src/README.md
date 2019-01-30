@@ -1,24 +1,64 @@
 # src folder
+The _main_minimal.py_ script essentially combines the main scripts of the generate_study_meta and generate_data_meta_samples into one easy to understand script. All arguments are mandatory.
+
+
 This folder contains most scripts. 
 The test folder within has any scripts used in testing and validation.
 
-Right now each script has been designed to run individually. 
-My next change will be to bring them together.
+# Usage - main_minimal.py
+Run the main_minimal.py program with:
+
+```
+optional arguments:
+  -h, --help            show this help message and exit
+  -d, --default         Prevents need for user input by trying to parse study
+                        ID, you must follow format indicated in the help if
+                        you use this
+  -v, --verbose         Makes program verbose
+
+Required Arguments:
+  -f , --study-input-folder 
+                        The input folder can contain compressed: [.tar.gz |
+                        .gz | .zip] or uncompressed format in: [vcf | maf]
+  -i , --study-id       This is the cancer study ID, a unique string. Please
+                        use the format gene_lab_year. e.g.brca_gsi_2019 or
+                        mixed_tgl_2020
+  -s , --study-folder   The folder you want to export this generated
+                        data_samples.txt file to. Generally this will be the
+                        main folder of the study being generated. If left
+                        blank this will generate it wherever you run the
+                        script from.
+```
+
+For example:
+
+```
+python generate_study_meta.py -h
+or
+python main_minimal.py -f test/fakes/ -i brca_gsi_2019 -s new_study_2019/ -d -v
+or
+python main_minimal.py  -s new_study_2020/ -f test/fakes/ -i bcl_octane_2020
+```
+
 ## Usage - generate_study_meta.py
 Run the generate_study_meta.py program with:
 
 ```
 optional arguments:
   -h, --help            show this help message and exit
-  -i , --study-id       This is the cancer study ID, a unique string. Please
-                        use the format gene_lab_year. e.g.brca_gsi_2019
-  -f , --study-folder   This is the cancer study main directory.
-  -t , --type-of-cancer 
-                        Cancer type abbreviation, e.g.'brca' or 'mixed' for
-                        multiple types.
   -d, --default         Prevents need for user input by trying to parse study
                         ID, you must follow format indicated in the help if
                         you use this
+
+Required Arguments:
+  -i , --study-id       This is the cancer study ID, a unique string. Please
+                        use the format gene_lab_year. e.g.brca_gsi_2019 or
+                        mixed_tgl_2020
+  -s , --study-folder   The folder you want to export this generated
+                        data_samples.txt file to. Generally this will be the
+                        main folder of the study being generated. If left
+                        blank this will generate it wherever you run the
+                        script from.
 ```
 
 For example:
@@ -28,21 +68,24 @@ python generate_study_meta.py -h
 or
 python generate_study_meta.py -i brca_gsi_2019 -f new_study_2019/ -t brca
 or
-python generate_study_meta.py -i cbl_tgl_2000 -f new_study_2019/ -t bcl -d
+python generate_study_meta.py -i cbl_tgl_2000 -f new_study_2000/ -t bcl -d
 ```
 ## Usage - generate_data_meta_samples.py
 Run the generate_data_meta_samples.py program with:
 
 ```
-positional arguments:
-  input_folder          The input folder can contain compressed: [.tar.gz |
-                        .gz | .zip] or uncompressed format in: [vcf | maf]
-
 optional arguments:
   -h, --help            show this help message and exit
-  -i, --study-id        This is the cancer study ID, a unique string. This
-                        will soon be managed another way
-  -s, --study_folder    The folder you want to export this generated
+  -v, --verbose         Makes program verbose
+
+Required Arguments:
+  -f , --study-input-folder 
+                        The input folder can contain compressed: [.tar.gz |
+                        .gz | .zip] or uncompressed format in: [vcf | maf]
+  -i , --study-id       This is the cancer study ID, a unique string. Please
+                        use the format gene_lab_year. e.g.brca_gsi_2019 or
+                        mixed_tgl_2020
+  -s , --study-folder   The folder you want to export this generated
                         data_samples.txt file to. Generally this will be the
                         main folder of the study being generated. If left
                         blank this will generate it wherever you run the
