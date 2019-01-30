@@ -1,5 +1,7 @@
+# Command Line Imports
 import argparse
-import helper
+# Other Scripts
+import main_minimal
 
 
 def define_parser():
@@ -10,17 +12,17 @@ def define_parser():
                                                  "pipeline, and put them into the correct cBioPortal import files "
                                                  "(https://cbioportal.readthedocs.io/en/latest/File-Formats.html).")
 
-    parser.add_argument("-i", "--study-id",
-                        help="This is the cancer study ID, a unique string. Please use the format gene_lab_year. e.g."
-                             "brca_gsi_2019",
-                        metavar='')
-    parser.add_argument("-f", "--study-folder",
-                        help="This is the cancer study main directory.",
-                        metavar='')
-    # TODO: Remove need for type of cancer
-    parser.add_argument("-t", "--type-of-cancer",
-                        help="Cancer type abbreviation, e.g.'brca' or 'mixed' for multiple types.",
-                        metavar='')
+    required = parser.add_argument_group('Required Arguments')
+    required.add_argument("-i", "--study-id",
+                          help="This is the cancer study ID, a unique string. Please use the format gene_lab_year. e.g."
+                               "brca_gsi_2019 or mixed_tgl_2020",
+                          metavar='')
+    required.add_argument("-s", "--study-folder",
+                          help="The folder you want to export this generated data_samples.txt file to. Generally this "
+                               "will be the main folder of the study being generated. If left blank this will generate "
+                               "it wherever you run the script from.",
+                          metavar='',
+                          default='.')
     parser.add_argument("-d", "--default",
                         action="store_true",
                         help="Prevents need for user input by trying to parse study ID, you must follow format "
@@ -42,7 +44,6 @@ def get_user_input():
 
 def save_meta_cancer_study(args):
     study_id = args.study_id
-    type_of_cancer = args.type_of_cancer
     if not args.default:
         # If the user has not specified the default tag, ask for the rest of the missing data
         [description, name, short_name] = get_user_input()
@@ -56,7 +57,7 @@ def save_meta_cancer_study(args):
         short_name = '{} ({})'.format(*split)
     # Write information to file
     f = open('meta_study.txt', 'w+')
-    f.write('type_of_cancer: ' + type_of_cancer + '\n')
+    f.write('type_of_cancer: ' + study_id.split('_')[0] + '\n')
     f.write('cancer_study_identifier: ' + study_id + '\n')
     f.write('name: ' + name + '\n')
     f.write('description: ' + description + '\n')
@@ -64,13 +65,7 @@ def save_meta_cancer_study(args):
     f.close()
 
 
-def main():
-    args = define_parser().parse_args()
-
-    original_dir = helper.change_folder(args.study_folder)
-    save_meta_cancer_study(args)
-    helper.reset_folder(original_dir)
-
-
 if __name__ == '__main__':
-    main()
+    args = define_parser().parse_args()
+    verb = args.verbose
+    main_minimal.gen_study_meta(args, verb)
