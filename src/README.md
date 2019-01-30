@@ -17,13 +17,14 @@ optional arguments:
   -v, --verbose         Makes program verbose
 
 Required Arguments:
-  -f , --study-input-folder 
+  -i , --study-input-folder 
                         The input folder can contain compressed: [.tar.gz |
                         .gz | .zip] or uncompressed format in: [vcf | maf]
-  -i , --study-id       This is the cancer study ID, a unique string. Please
+  -s , --study-id       This is the cancer study ID, a unique string. Please
                         use the format gene_lab_year. e.g.brca_gsi_2019 or
                         mixed_tgl_2020
-  -s , --study-folder   The folder you want to export this generated
+  -o , --study-output-folder   
+  						The folder you want to export this generated
                         data_samples.txt file to. Generally this will be the
                         main folder of the study being generated. If left
                         blank this will generate it wherever you run the
@@ -51,10 +52,11 @@ optional arguments:
                         you use this
 
 Required Arguments:
-  -i , --study-id       This is the cancer study ID, a unique string. Please
+  -s , --study-id       This is the cancer study ID, a unique string. Please
                         use the format gene_lab_year. e.g.brca_gsi_2019 or
                         mixed_tgl_2020
-  -s , --study-folder   The folder you want to export this generated
+  -o , --study-output-folder   
+  						The folder you want to export this generated
                         data_samples.txt file to. Generally this will be the
                         main folder of the study being generated. If left
                         blank this will generate it wherever you run the
@@ -79,13 +81,14 @@ optional arguments:
   -v, --verbose         Makes program verbose
 
 Required Arguments:
-  -f , --study-input-folder 
+  -i , --study-input-folder 
                         The input folder can contain compressed: [.tar.gz |
                         .gz | .zip] or uncompressed format in: [vcf | maf]
-  -i , --study-id       This is the cancer study ID, a unique string. Please
+  -s , --study-id       This is the cancer study ID, a unique string. Please
                         use the format gene_lab_year. e.g.brca_gsi_2019 or
                         mixed_tgl_2020
-  -s , --study-folder   The folder you want to export this generated
+  -o , --study-output-folder   
+  						The folder you want to export this generated
                         data_samples.txt file to. Generally this will be the
                         main folder of the study being generated. If left
                         blank this will generate it wherever you run the
