@@ -13,11 +13,11 @@ def define_parser():
                                                  "(https://cbioportal.readthedocs.io/en/latest/File-Formats.html).")
 
     required = parser.add_argument_group('Required Arguments')
-    required.add_argument("-i", "--study-id",
+    required.add_argument("-s", "--study-id",
                           help="This is the cancer study ID, a unique string. Please use the format gene_lab_year. e.g."
                                "brca_gsi_2019 or mixed_tgl_2020",
                           metavar='')
-    required.add_argument("-s", "--study-folder",
+    required.add_argument("-o", "--study-output-folder",
                           help="The folder you want to export this generated data_samples.txt file to. Generally this "
                                "will be the main folder of the study being generated. If left blank this will generate "
                                "it wherever you run the script from.",
@@ -27,6 +27,9 @@ def define_parser():
                         action="store_true",
                         help="Prevents need for user input by trying to parse study ID, you must follow format "
                              "indicated in the help if you use this")
+    parser.add_argument("-v", "--verbose",
+                        action="store_true",
+                        help="Makes program verbose")
     # Still need to collect the name and the description
     return parser
 
