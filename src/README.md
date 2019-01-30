@@ -1,6 +1,35 @@
 # src folder
 This folder contains most scripts. 
 The test folder within has any scripts used in testing and validation.
+
+Right now each script has been designed to run individually. 
+My next change will be to bring them together.
+## Usage - generate_bare_data_samples.py
+Run the generate_bare_data_samples.py program with:
+
+```
+optional arguments:
+  -h, --help            show this help message and exit
+  -i , --study-id       This is the cancer study ID, a unique string. Please
+                        use the format gene_lab_year. e.g.brca_gsi_2019
+  -f , --study-folder   This is the cancer study main directory.
+  -t , --type-of-cancer 
+                        Cancer type abbreviation, e.g.'brca' or 'mixed' for
+                        multiple types.
+  -d, --default         Prevents need for user input by trying to parse study
+                        ID, you must follow format indicated in the help if
+                        you use this
+```
+
+For example:
+
+```
+python generate_study_meta.py -h
+or
+python generate_study_meta.py -i brca_gsi_2019 -f new_study_2019/ -t brca
+or
+python generate_study_meta.py -i cbl_tgl_2000 -f new_study_2019/ -t bcl -d
+```
 ## Usage - generate_bare_data_samples.py
 Run the generate_bare_data_samples.py program with:
 
@@ -25,7 +54,7 @@ For example:
 ```
 python generate_bare_data_samples.py -h
 or
-python generate_bare_data_samples.py ../GATKHaplotypeCaller/ brca_gsi_2019
+python generate_bare_data_samples.py test/fakes/ -i brca_gsi_2019 -s new_study/
 or
 python generate_bare_data_samples.py Mutect2/ kremen1_octane -s new_study/ 
 ```
