@@ -4,8 +4,8 @@ The test folder within has any scripts used in testing and validation.
 
 Right now each script has been designed to run individually. 
 My next change will be to bring them together.
-## Usage - generate_bare_data_samples.py
-Run the generate_bare_data_samples.py program with:
+## Usage - generate_study_meta.py
+Run the generate_study_meta.py program with:
 
 ```
 optional arguments:
@@ -30,8 +30,8 @@ python generate_study_meta.py -i brca_gsi_2019 -f new_study_2019/ -t brca
 or
 python generate_study_meta.py -i cbl_tgl_2000 -f new_study_2019/ -t bcl -d
 ```
-## Usage - generate_bare_data_samples.py
-Run the generate_bare_data_samples.py program with:
+## Usage - generate_data_meta_samples.py
+Run the generate_data_meta_samples.py program with:
 
 ```
 positional arguments:
@@ -52,11 +52,11 @@ optional arguments:
 For example:
 
 ```
-python generate_bare_data_samples.py -h
+python generate_data_meta_samples.py -h
 or
-python generate_bare_data_samples.py test/fakes/ -i brca_gsi_2019 -s new_study/
+python generate_data_meta_samples.py test/fakes/ -i brca_gsi_2019 -s new_study/
 or
-python generate_bare_data_samples.py Mutect2/ kremen1_octane -s new_study/ 
+python generate_data_meta_samples.py Mutect2/ kremen1_octane -s new_study/ 
 ```
 ## Usage - import_mutation_data.py
 Run the import_mutation_data.py program with:
