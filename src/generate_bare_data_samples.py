@@ -1,11 +1,14 @@
 import argparse
 import os
 
-import pandas
+import pandas as pd
 import numpy as np
+
+import re
 
 extensionChoices = ["vcf", "maf"]
 compressedChoices = [".tar.gz", ".gz", ".zip"]
+verbosity = False
 
 
 def remove_end_string(string, remove):
@@ -43,83 +46,111 @@ def define_parser():
                         help="This is the cancer study ID, a unique string. This will soon be managed another way",
                         metavar='')
 
-    parser.add_argument("-s", "--study_folder",
+    parser.add_argument("-s", "--study-folder",
                         help="The folder you want to export this generated data_samples.txt file to. Generally this "
                              "will be the main folder of the study being generated. If left blank this will generate it"
                              " wherever you run the script from.",
                         metavar='')
 
+    parser.add_argument("-v", "--verbose",
+                        action= "store_true",
+                        help="Makes program verbose")
+
     return parser
 
 
-def gather_patient_and_sample_ids(parser):
+def gather_patient_and_sample_ids(args):
     # List all files in folder, remove extensions and generate patient and sample IDs
-    folder = os.listdir(parser.parse_args().input_folder)
+    folder = os.listdir(args.input_folder)
     key_val = []
+    regex = re.compile('[A-Z]{5}_[0-9]{4}_[a-zA-Z]{2}_[A-Z]')
     for each in folder:
-        # Strips each of the exts from the string
-        exts = ['.gz', '.tar', '.vcf', '.maf']
-        for every in exts:
-            remove_end_string(each, every)
-
-        split = each.split("_")
-        patient_id = []
-        # Generate Patient ID from file name of the form "string_number"
-        for every in split:
-            try:
-                patient_id += every + '_'
-                int(every)
-                break
-            except ValueError:  # Catch and do nothing
-                continue
-        patient_id = ''.join(patient_id[:-1])
-        key_val += [patient_id, each]
+        # Make Regular Expression for: GECCO_1111_Xx_Y or something similar
+        try:
+            start, end = regex.search(each).span()
+            patient_id = each[start:start+10]
+            sample_id = each[start:end]
+        except AttributeError:
+            raise ValueError('You have a possibly erroneous file in the folder please remove it or something?\n' + each)
+        key_val += [patient_id, sample_id]
     key_val = np.reshape(key_val, (len(key_val) / 2, 2))
     return key_val
 
 
 def change_folder(folder):
+    original_working_directory = os.getcwd()
     try:
         os.chdir(folder)
     except OSError:
         for a in range(30):
-            print('*')
+            print('*',)
         print 'The path to your folder probably does not exist. Trying to make the folder for you.'
         for a in range(30):
-            print('*')
+            print('*',)
         try:
             os.mkdir(folder)
         except OSError:
             raise ValueError('You may not have permission to create folders there. Very sad')
+    return original_working_directory
+
+
+def success():
+    print 'Success!'
+
+
+def working_on(message):
+    if verbosity:
+        print message
+
+
+def reset_folder(owd):
+    os.chdir(owd)
 
 
 def save_dataframe(dataset):
-    # If we are in destination folder, export the data_samples.txt that we have generated.
-    dataset.to_csv('data_clinical_samples.txt', sep='\t')
+    # We are in destination folder, export the data_samples.txt that we have generated.
+    print dataset
+    new_dataset = pd.DataFrame({'PATIENT_ID': dataset[:, 0], 'SAMPLE_ID': dataset[:, 1]})
+    new_dataset.to_csv('data_clinical_samples.txt', sep='\t', index=False)
 
 
 def save_sample_metafile(id):
     # Generating the meta file is almost as important
     f = open('meta_clinical_sample.txt', 'w+')
-    f.write('cancer_study_identifier: ' + id)
-    f.write('genetic_alteration_type: CLINICAL')
-    f.write('datatype: SAMPLE_ATTRIBUTES')
-    f.write('data_filename: data_clinical_patient.txt')
+    f.write('cancer_study_identifier: ' + id + '\n')
+    f.write('genetic_alteration_type: CLINICAL\n')
+    f.write('datatype: SAMPLE_ATTRIBUTES\n')
+    f.write('data_filename: data_clinical_patient.txt\n')
     f.close()
 
 
 def main():
     # Regular main method
-    parser = define_parser()
-    study_folder = parser.parse_args().study_folder
-    study_id = parser.parse_args().study_id
-    patient_sample_ids = gather_patient_and_sample_ids(parser)
+    args = define_parser().parse_args()
+    global verbosity
+    verbosity = args.verbose
+
+    working_on('parsing arguments...')
+    study_folder = args.study_folder
+    study_id = args.study_id
+    success()
+
+    working_on('Gathering patient and sample IDs...')
+    patient_sample_ids = gather_patient_and_sample_ids(args)
+    success()
+
     # This is where more information would be added to the patient_sample_ids
     # Ex. add_cancer_subtype(patient_sample_ids)
     # I would also consider renaming the variable to dataset
-    change_folder(study_folder)
+
+    working_on('Saving gathered information...')
+    original_dir = change_folder(study_folder)
     save_dataframe(patient_sample_ids)
     save_sample_metafile(study_id)
+    success()
+
+    reset_folder(original_dir)
+    working_on('generating_bare_data_samples.py has successfully completed!')
 
 
 if __name__ == '__main__':

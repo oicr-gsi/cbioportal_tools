@@ -55,9 +55,8 @@ def define_parser():
     return parser
 
 
-def check_input(parser):
+def check_input(arguments):
     # Ensures arguments given are correct before trying to generate a study
-    arguments = parser.parse_args()
     input_file, extension = arguments.inputFile
     if (input_file[len(input_file) - 1] not in extensionChoices) and not arguments.compressed:
         print ("Compressed tag was not specified, please do that next time")
@@ -78,8 +77,8 @@ def decompress(input_file):
         subprocess.call("unzip -a " + input_file)
 
 
-def preprocess_files(parser):
-    input_file, extension = parser.parse_args().inputFile
+def pre_process_files(args):
+    input_file, extension = args.inputFile
     out = os.path.basename(input_file)
     input_file = out + extension # Hmmm, not super sure if what I'm doing here makes any sense
     if input_file.endswith(tuple(compressedChoices)):
@@ -109,7 +108,7 @@ def generate_study_space(CANCER_STUDY_IDENTIFIER="default"):
         os.mkdir(CANCER_STUDY_IDENTIFIER)
 
 
-def generate_metadata(meta_type, parser,
+def generate_metadata(meta_type, args,
                       CANCER_STUDY_IDENTIFIER="default", GENETIC_ALTERATION_TYPE=None, DATATYPE=None, STABLE_ID=None,
                       SHOW_PROFILE_IN_ANALYSIS_TAB=None, PROFILE_DESCRIPTION=None, PROFILE_NAME=None,
                       DATA_FILENAME=None):
@@ -123,13 +122,13 @@ def generate_metadata(meta_type, parser,
             PROFILE_DESCRIPTION == PROFILE_NAME == DATA_FILENAME:
         if meta_type == MUTATION_DATA_META:
             GENETIC_ALTERATION_TYPE = MUTATION_DATA_META
-            print parser.parse_args().inputFile
-            DATATYPE = parser.parse_args().inputFile[1].upper()  # accessing user input data, structure, list of size 2
+            print args.inputFile
+            DATATYPE = args.inputFile[1].upper()  # accessing user input data, structure, list of size 2
             STABLE_ID = "mutations"
             SHOW_PROFILE_IN_ANALYSIS_TAB = "true"
             PROFILE_DESCRIPTION = "Mutation data, more detail can be added here"
             PROFILE_NAME = "Mutations"
-            DATA_FILENAME = parser.parse_args().inputFile[0]
+            DATA_FILENAME = args.inputFile[0]
 
             file_out = open(CANCER_STUDY_IDENTIFIER + "/meta_mutations_extended.txt", "w+")
             file_out.write("cancer_study_identifier: " + CANCER_STUDY_IDENTIFIER + "\n")
@@ -144,11 +143,11 @@ def generate_metadata(meta_type, parser,
 
 def main():
     # Regular main method
-    parser = define_parser()
-    check_input(parser)
-    preprocess_files(parser)
+    arguments = define_parser().parse_args()
+    check_input(arguments)
+    pre_process_files(arguments)
     generate_study_space()
-    generate_metadata(MUTATION_DATA_META, parser)
+    generate_metadata(MUTATION_DATA_META, arguments)
 
 
 if __name__ == '__main__':
