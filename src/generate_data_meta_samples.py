@@ -3,7 +3,6 @@ import argparse
 import os
 
 # Data Processing Imports
-import pandas as pd
 import numpy as np
 
 import re
@@ -11,6 +10,9 @@ import re
 # Other Scripts
 import helper
 import main_minimal
+
+meta_samples = 'meta_clinical_sample.txt'
+data_samples = 'data_clinical_samples.txt'
 
 
 def define_parser():
@@ -71,17 +73,24 @@ def gather_patient_and_sample_ids(input_folder):
 
 def save_data_samples(data_set):
     # We are in destination folder, export the data_samples.txt that we have generated.
-    new_data_set = pd.DataFrame({'PATIENT_ID': data_set[:, 0], 'SAMPLE_ID': data_set[:, 1]})
-    helper.write_tsv_dataframe('data_clinical_samples.txt', new_data_set)
+    f = open(data_samples, 'w+')
+    f.write('#'+'\t'.join(['Patient Identifier', 'Sample Identifier']))
+    f.write('#'+'\t'.join(['Patient Identifier', 'Sample Identifier']))
+    f.write('#'+'\t'.join(['STRING', 'STRING']))
+    f.write('#'+'\t'.join(['1', '1']))
+    f.write('\t'.join(['PATIENT_ID', 'SAMPLE_ID']))
+    for each in data_set:
+        f.write('\t'.join(each))
+    f.close()
 
 
 def save_sample_meta_file(study_id):
     # Generating the meta file is almost as important
-    f = open('meta_clinical_sample.txt', 'w+')
+    f = open(meta_samples, 'w+')
     f.write('cancer_study_identifier: ' + study_id + '\n')
     f.write('genetic_alteration_type: CLINICAL\n')
     f.write('datatype: SAMPLE_ATTRIBUTES\n')
-    f.write('data_filename: data_clinical_patient.txt\n')
+    f.write('data_filename: {}\n'.format(data_samples))
     f.close()
 
 

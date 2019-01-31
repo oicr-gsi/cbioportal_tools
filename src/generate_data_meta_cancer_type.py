@@ -9,6 +9,10 @@ import random
 # Other Scripts
 import main_minimal
 
+meta_cancer_type = 'meta_cancer_type.txt'
+data_cancer_type = 'data_cancer_type.txt'
+meta_study = 'meta_study.txt'
+
 
 def define_parser():
     # Define program arguments
@@ -28,24 +32,24 @@ def get_colours():
 
 
 def gen_cancer_type_meta():
-    f = open('meta_cancer_type.txt', 'w+')
+    f = open(meta_cancer_type, 'w+')
     f.write('genetic_alteration_type: CANCER_TYPE\n')
     f.write('datatype: CANCER_TYPE\n')
-    f.write('data_filename: data_cancer_type.txt\n')
+    f.write('data_filename: {}\n'.format(data_cancer_type))
 
 
 def gen_cancer_type_data(colours):
     try:
-        os.stat('data_cancer_type.txt')
-        print 'data_cancer_type.txt already exists, if you want to regenerate it please remove it using'
-        print 'rm data_cancer_type.txt'
+        os.stat(data_cancer_type)
+        print '{} already exists, if you want to regenerate it please remove it using'.format(data_cancer_type)
+        print 'rm {}'.format(data_cancer_type)
     except OSError:
-        print 'There is no pre-existing meta_cancer_type.txt; attempting to generate one now...'
+        print 'There is no pre-existing {}; attempting to generate one now...'.format(meta_cancer_type)
         try:
-            os.stat('meta_study.txt')
-            f = open('meta_study.txt', 'r+')
+            os.stat(meta_study)
+            f = open(meta_study, 'r+')
             type_of_cancer = f.readline().split(':')[1].strip()
-        except:
+        except OSError:
             print('Could not find study_meta has it been deleted?')
             print("Write the type_of_cancer of the cancer e.g. 'colorectal': \n")
             type_of_cancer = raw_input()
@@ -53,7 +57,7 @@ def gen_cancer_type_data(colours):
         clinical_trial_keywords = [type_of_cancer, name]
         colour = colours.iloc[random.randint(0, len(colours))][0]
         parent_type_of_cancer = 'tissue'
-        f = open('data_cancer_type.txt', 'w+')
+        f = open(data_cancer_type, 'w+')
         f.write('{}\t{}\t{}\t{}\t{}'.format(type_of_cancer,
                                             name,
                                             ','.join(clinical_trial_keywords),
