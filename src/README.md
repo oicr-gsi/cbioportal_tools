@@ -13,7 +13,14 @@ optional arguments:
   -h, --help            show this help message and exit
   -d, --default         Prevents need for user input by trying to parse study
                         ID, you must follow format indicated in the help if
-                        you use this
+                        you use this. **This tag is not recommended and cannot
+                        be used alongside -c. If you do -c takes precedence.
+  -c , --cli            Command Line Input, the description, name, short_name
+                        and type_of_cancer in semi-colon separated values.
+                        Input needs to be wrapped with ''.e.g. -c 'GECCO
+                        Samples sequenced and analyzed at OICR;Genetics and
+                        Epidemiology of Colorectal Cancer
+                        Consortium;GECCO;colorectal'
   -v, --verbose         Makes program verbose
 
 Required Arguments:
@@ -23,8 +30,8 @@ Required Arguments:
   -s , --study-id       This is the cancer study ID, a unique string. Please
                         use the format gene_lab_year. e.g.brca_gsi_2019 or
                         mixed_tgl_2020
-  -o , --study-output-folder   
-  						The folder you want to export this generated
+  -o , --study-output-folder 
+                        The folder you want to export this generated
                         data_samples.txt file to. Generally this will be the
                         main folder of the study being generated. If left
                         blank this will generate it wherever you run the
@@ -36,11 +43,15 @@ For example:
 ```
 python generate_study_meta.py -h
 or
-python main_minimal.py -f test/fakes/ -i brca_gsi_2019 -s new_study_2019/ -d -v
-or
-python main_minimal.py  -s new_study_2020/ -f test/fakes/ -i bcl_octane_2020
+python main_minimal.py -i test/fakes/ -o new_study/ -s gecco_gsi_2019 -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal' -v
 ```
+___
+___
 
+\*\*
+**Using any of these scripts below individually is not recommended, and can lead to a malformed study. However documentation is still there if you're feeling lucky.**
+___
+___
 ## Usage - generate_study_meta.py
 Run the generate_study_meta.py program with:
 
@@ -49,14 +60,22 @@ optional arguments:
   -h, --help            show this help message and exit
   -d, --default         Prevents need for user input by trying to parse study
                         ID, you must follow format indicated in the help if
-                        you use this
+                        you use this. **This tag is not recommended and cannot
+                        be used alongside -c. If you do -c takes precedence.
+  -c , --cli            Command Line Input, the description, name, short_name
+                        and type_of_cancer in semi-colon separated values.
+                        Input needs to be wrapped with ''.e.g. -c 'GECCO
+                        Samples sequenced and analyzed at OICR;Genetics and
+                        Epidemiology of Colorectal Cancer
+                        Consortium;GECCO;colorectal'
+  -v, --verbose         Makes program verbose
 
 Required Arguments:
   -s , --study-id       This is the cancer study ID, a unique string. Please
                         use the format gene_lab_year. e.g.brca_gsi_2019 or
                         mixed_tgl_2020
-  -o , --study-output-folder   
-  						The folder you want to export this generated
+  -o , --study-output-folder 
+                        The folder you want to export this generated
                         data_samples.txt file to. Generally this will be the
                         main folder of the study being generated. If left
                         blank this will generate it wherever you run the

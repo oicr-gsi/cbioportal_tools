@@ -1,8 +1,7 @@
 # cBioPortal_Tools
-Tools for import of data and administration of the GSI cBioPortal instance
+Tools for import of data and administration of the GSI cBioPortal instance.
 
-import_mutation_data.py converts from _.vcf_ -> _.maf_. 
-This takes compressed _.vcf_ or _.maf_ files to usable _.maf_ files.
+In the current minimal state, the **_main_minimal.py_** script can import the bare minimum for a study. Features will be added as they are developed.
 
 More information on the file types from cBioPortal is [Data Loading](https://cbioportal.readthedocs.io/en/latest/Data-Loading.html),
 and [File Formats](https://cbioportal.readthedocs.io/en/latest/File-Formats.html). 
