@@ -4,6 +4,9 @@ import argparse
 import main_minimal
 
 
+meta_study = 'meta_study.txt'
+
+
 def define_parser():
     # Define program arguments
     parser = argparse.ArgumentParser(description="cBioPortal-Tools (https://github.com/oicr-gsi/cbioportal_tools) is a "
@@ -54,7 +57,7 @@ def save_meta_cancer_study(args):
         name = '{} {} ({})'.format(*split)
         short_name = '{} ({})'.format(*split)
     # Write information to file
-    f = open('meta_study.txt', 'w+')
+    f = open(meta_study, 'w+')
     f.write('type_of_cancer: ' + type_of_cancer + '\n')
     f.write('cancer_study_identifier: ' + study_id + '\n')
     f.write('name: ' + name + '\n')
