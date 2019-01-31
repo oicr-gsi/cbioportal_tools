@@ -36,13 +36,13 @@ def define_parser():
     parser.add_argument("-d", "--default",
                         action="store_true",
                         help="Prevents need for user input by trying to parse study ID, you must follow format "
-                             "indicated in the help if you use this.\n**This tag is not recommended and cannot be used "
+                             "indicated in the help if you use this. **This tag is not recommended and cannot be used "
                              "alongside -c. If you do -c takes precedence.")
     parser.add_argument("-c", "--cli",
                         help="Command Line Input, the description, name, short_name and type_of_cancer in semi-colon "
-                             "separated values. Spaces need to be escaped with '\\'. \n"
-                             "e.g. -c GECCO\\ Samples\\ sequenced\\ and\\ analyzed\\ at\\ OICR;Genetics\\ and\\ "
-                             "Epidemiology\\ of\\ Colorectal\\ Cancer\\ Consortium;GECCO;colorectal",
+                             "separated values. Input needs to be wrapped with ''."
+                             "e.g. -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and "
+                             "Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal'",
                         metavar='')
     parser.add_argument("-v", "--verbose",
                         action="store_true",

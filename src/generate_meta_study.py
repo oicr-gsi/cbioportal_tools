@@ -26,32 +26,25 @@ def define_parser():
     parser.add_argument("-d", "--default",
                         action="store_true",
                         help="Prevents need for user input by trying to parse study ID, you must follow format "
-                             "indicated in the help if you use this.\n**This tag is not recommended and cannot be used "
+                             "indicated in the help if you use this. **This tag is not recommended and cannot be used "
                              "alongside -c. If you do -c takes precedence.")
     parser.add_argument("-c", "--cli",
                         help="Command Line Input, the description, name, short_name and type_of_cancer in semi-colon "
-                             "separated values. Spaces need to be escaped with '\\'. \n"
-                             "e.g. -c GECCO\\ Samples\\ sequenced\\ and\\ analyzed\\ at\\ OICR;Genetics\\ and\\ "
-                             "Epidemiology\\ of\\ Colorectal\\ Cancer\\ Consortium;GECCO;colorectal",
+                             "separated values. Input needs to be wrapped with ''."
+                             "e.g. -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and "
+                             "Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal'",
                         metavar='')
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Makes program verbose")
-    # Still need to collect the name and the description
     return parser
-
-
-def get_user_input(args):
-    if args.cli:
-        return args.cli.split(';')
 
 
 def save_meta_cancer_study(args):
     study_id = args.study_id
-    if not args.default:
-        # If the user has not specified the default tag, ask for the rest of the missing data
-        [description, name, short_name, type_of_cancer] = get_user_input(args)
-    else:
+    if args.cli:
+        [description, name, short_name, type_of_cancer] = args.cli.split(';')
+    elif args.default:
         # Else attempt to make the best description with limited information
         split = study_id.split('_')
         type_of_cancer = split[0]
