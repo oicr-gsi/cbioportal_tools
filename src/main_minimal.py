@@ -1,8 +1,9 @@
 # Command Line Imports
 import argparse
 # Other Scripts
-import generate_study_meta
+import generate_meta_study
 import generate_data_meta_samples
+import generate_data_meta_cancer_type
 import helper
 
 
@@ -35,7 +36,14 @@ def define_parser():
     parser.add_argument("-d", "--default",
                         action="store_true",
                         help="Prevents need for user input by trying to parse study ID, you must follow format "
-                             "indicated in the help if you use this")
+                             "indicated in the help if you use this.\n**This tag is not recommended and cannot be used "
+                             "alongside -c. If you do -c takes precedence.")
+    parser.add_argument("-c", "--cli",
+                        help="Command Line Input, the description, name, short_name and type_of_cancer in semi-colon "
+                             "separated values. Spaces need to be escaped with '\\'. \n"
+                             "e.g. -c GECCO\\ Samples\\ sequenced\\ and\\ analyzed\\ at\\ OICR;Genetics\\ and\\ "
+                             "Epidemiology\\ of\\ Colorectal\\ Cancer\\ Consortium;GECCO;colorectal",
+                        metavar='')
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Makes program verbose")
@@ -45,11 +53,11 @@ def define_parser():
 
 def gen_study_meta(args, verb):
     helper.working_on(verb, message='Changing folder...')
-    original_dir = helper.change_folder(args.study_folder)
+    original_dir = helper.change_folder(args.study_output_folder)
     helper.working_on(args.verbose)
 
     helper.working_on(verb, message='Saving meta_study.txt ...')
-    generate_study_meta.save_meta_cancer_study(args)
+    generate_meta_study.save_meta_cancer_study(args)
     helper.working_on(args.verbose)
 
     helper.working_on(verb, message='Popping back...')
@@ -82,12 +90,36 @@ def gen_samples_meta_data(args, verb):
     helper.working_on(verb, message='Success! The cancer samples meta and data has been saved!')
 
 
+def gen_cancer_type_meta_data(args, verb):
+    # Read Colours
+    helper.working_on(verb, message='Reading colours...')
+    colours = generate_data_meta_cancer_type.get_colours()
+    helper.working_on(args.verbose)
+
+    helper.working_on(verb, message='Changing folder...')
+    original_dir = helper.change_folder(args.study_output_folder)
+    helper.working_on(args.verbose)
+
+    helper.working_on(verb, message='Generating cancer_type records')
+    generate_data_meta_cancer_type.gen_cancer_type_data(colours)
+    helper.working_on(args.verbose)
+
+    helper.working_on(verb, message='Generating cancer_type meta')
+    generate_data_meta_cancer_type.gen_cancer_type_meta()
+    helper.working_on(args.verbose)
+
+    helper.working_on(verb, message='Popping back...')
+    helper.reset_folder(original_dir)
+    helper.working_on(args.verbose, message='Success! The cancer study meta has been saved!')
+
+
 def main():
     args = define_parser().parse_args()
     verb = args.verbose
 
     gen_study_meta(args, verb)
     gen_samples_meta_data(args, verb)
+    gen_cancer_type_meta_data(args, verb)
     helper.working_on(verb, message='A minimal study should now be complete!')
 
 
