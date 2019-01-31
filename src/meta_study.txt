@@ -1,0 +1,5 @@
+type_of_cancer: colorectal
+cancer_study_identifier: gecco_gsi_2019
+name: Genetics\ and\ Epidemiology\ of\ Colorectal\ Cancer\ Consortium
+description: GECCO\ Samples\ sequenced\ and\ analyzed\ at\ OICR
+short_name: GECCO

@@ -1,11 +1,13 @@
 # Command Line Imports
 import argparse
 import os
+
 # Data Processing Imports
 import pandas as pd
 import numpy as np
 
 import re
+
 # Other Scripts
 import helper
 import main_minimal
@@ -70,7 +72,7 @@ def gather_patient_and_sample_ids(input_folder):
 def save_data_samples(data_set):
     # We are in destination folder, export the data_samples.txt that we have generated.
     new_data_set = pd.DataFrame({'PATIENT_ID': data_set[:, 0], 'SAMPLE_ID': data_set[:, 1]})
-    new_data_set.to_csv('data_clinical_samples.txt', sep='\t', index=False)
+    helper.write_tsv_dataframe('data_clinical_samples.txt', new_data_set)
 
 
 def save_sample_meta_file(study_id):

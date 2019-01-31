@@ -9,6 +9,7 @@ def stars():
     # Prints a row of stars
     for a in range(30):
         print'*',
+    print ''
 
 
 def change_folder(folder):
@@ -47,3 +48,6 @@ def check_files_in_folder(choices, folder, parser):
             parser.error(each + " file doesn't end with one of {}".format(choices))
     return folder
 
+
+def write_tsv_dataframe(name, dataset):
+    dataset.to_csv(name, sep='\t', index=False)
