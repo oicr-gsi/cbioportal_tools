@@ -3,16 +3,14 @@ import argparse
 import os
 
 # Data Processing Imports
-import numpy as np
-
-import re
+import pandas as pd
 
 # Other Scripts
 import helper
 import main_minimal
 
-meta_samples = 'meta_clinical_sample.txt'
-data_samples = 'data_clinical_samples.txt'
+case_folder = 'case_lists/'
+cases_txt = 'cases_all.txt'
 
 
 def define_parser():
@@ -23,6 +21,10 @@ def define_parser():
                                                  "pipeline, and put them into the correct cBioPortal import files "
                                                  "(https://cbioportal.readthedocs.io/en/latest/File-Formats.html).")
     required = parser.add_argument_group('Required Arguments')
+    required.add_argument("-s", "--study-id",
+                          help="This is the cancer study ID, a unique string. Please use the format gene_lab_year. e.g."
+                               "brca_gsi_2019 or mixed_tgl_2020",
+                          metavar='STRING')
     required.add_argument("-i", "--study-input-folder",
                           type=lambda folder: helper.check_files_in_folder(helper.extensionChoices, folder, parser),
                           help="The input folder can contain compressed: [" +
@@ -31,47 +33,39 @@ def define_parser():
                                " | ".join(helper.extensionChoices) + "] ",
                           default='.',
                           metavar='FOLDER')
-    required.add_argument("-o", "--study-output-folder",
-                          help="The folder you want to export this generated data_samples.txt file to. Generally this "
-                               "will be the main folder of the study being generated. If left blank this will generate "
-                               "it wherever you run the script from.",
-                          metavar='FOLDER',
-                          default='.')
-    required.add_argument("-s", "--study-id",
-                          help="This is the cancer study ID, a unique string. Please use the format gene_lab_year. e.g."
-                               "brca_gsi_2019 or mixed_tgl_2020",
+    required.add_argument("-l", "--cli-case-list",
+                          help="Command Line Input, case_list_name and case_list_description in semi-colon "
+                               "separated values. Input needs to be wrapped with ''."
+                               "e.g. -c 'All Tumours;All tumor samples (over 9000 samples)'",
                           metavar='STRING')
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Makes program verbose")
-
     return parser
 
 
-def save_data_samples(data_set):
-    # We are in destination folder, export the data_samples.txt that we have generated.
-    f = open(data_samples, 'w+')
-    f.write('#'  +'\t'.join(['Patient Identifier', 'Sample Identifier']))
-    f.write('\n#'+'\t'.join(['Patient Identifier', 'Sample Identifier']))
-    f.write('\n#'+'\t'.join(['STRING', 'STRING']))
-    f.write('\n#'+'\t'.join(['1', '1']))
-    f.write('\n' +'\t'.join(['PATIENT_ID', 'SAMPLE_ID']))
-    for each in data_set:
-        f.write('\n'+'\t'.join(each))
-    f.close()
+def test_case_lists_folder():
+    try:
+        os.stat(case_folder)
+    except OSError:
+        os.mkdir(case_folder)
 
 
-def save_meta_samples(study_id):
-    # Generating the meta file is almost as important
-    f = open(meta_samples, 'w+')
-    f.write('cancer_study_identifier: ' + study_id + '\n')
-    f.write('genetic_alteration_type: CLINICAL\n')
-    f.write('datatype: SAMPLE_ATTRIBUTES\n')
-    f.write('data_filename: {}\n'.format(data_samples))
+def save_meta_case_lists(patient_sample_ids, args):
+    samples = patient_sample_ids[:, 1]
+    stable_id = args.study_id + '_custom'
+    [case_list_name, case_list_description] = args.cli_case_list.split(';')
+
+    f = open(cases_txt, 'w+')
+    f.write('cancer_study_identifier: {}\n'.format(args.study_id))
+    f.write('stable_id: {}\n'.format(stable_id))
+    f.write('case_list_name: {}\n'.format(case_list_name))
+    f.write('case_list_description: {}\n'.format(case_list_description))
+    f.write('case_list_ids: ' + '\t'.join(samples))
     f.close()
 
 
 if __name__ == '__main__':
     args = define_parser().parse_args()
     verb = args.verbose
-    main_minimal.gen_samples_meta_data(args, verb)
+    main_minimal.gen_cancer_list_meta(args, verb)

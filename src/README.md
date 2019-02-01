@@ -22,20 +22,21 @@ optional arguments:
                         Epidemiology of Colorectal Cancer
                         Consortium;GECCO;colorectal'
   -v, --verbose         Makes program verbose
+  -f, --force           Forces overwriting of data_cancer_type.txt file.
 
 Required Arguments:
   -i , --study-input-folder 
                         The input folder can contain compressed: [.tar.gz |
                         .gz | .zip] or uncompressed format in: [vcf | maf]
-  -s , --study-id       This is the cancer study ID, a unique string. Please
-                        use the format gene_lab_year. e.g.brca_gsi_2019 or
-                        mixed_tgl_2020
   -o , --study-output-folder 
                         The folder you want to export this generated
                         data_samples.txt file to. Generally this will be the
                         main folder of the study being generated. If left
                         blank this will generate it wherever you run the
                         script from.
+  -s , --study-id       This is the cancer study ID, a unique string. Please
+                        use the format gene_lab_year. e.g.brca_gsi_2019 or
+                        mixed_tgl_2020
 ```
 
 For example:
@@ -43,7 +44,7 @@ For example:
 ```
 python generate_study_meta.py -h
 or
-python main_minimal.py -i test/fakes/ -o new_study/ -s gecco_gsi_2019 -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal' -v
+python main_minimal.py -i test/fakes/ -o new_study/ -s gecco_gsi_2019 -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal' -f -v
 ```
 ___
 ___
@@ -74,12 +75,6 @@ Required Arguments:
   -s , --study-id       This is the cancer study ID, a unique string. Please
                         use the format gene_lab_year. e.g.brca_gsi_2019 or
                         mixed_tgl_2020
-  -o , --study-output-folder 
-                        The folder you want to export this generated
-                        data_samples.txt file to. Generally this will be the
-                        main folder of the study being generated. If left
-                        blank this will generate it wherever you run the
-                        script from.
 ```
 
 For example:
