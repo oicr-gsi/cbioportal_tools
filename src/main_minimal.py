@@ -47,6 +47,9 @@ def define_parser():
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Makes program verbose")
+    parser.add_argument("-f", "--force",
+                        action="store_true",
+                        help="Forces overwriting of data_cancer_type.txt file.")
     # Still need to collect the name and the description
     return parser
 
@@ -101,7 +104,7 @@ def gen_cancer_type_meta_data(args, verb):
     helper.working_on(args.verbose)
 
     helper.working_on(verb, message='Generating cancer_type records')
-    generate_data_meta_cancer_type.gen_cancer_type_data(colours)
+    generate_data_meta_cancer_type.gen_cancer_type_data(args, colours)
     helper.working_on(args.verbose)
 
     helper.working_on(verb, message='Generating cancer_type meta')
