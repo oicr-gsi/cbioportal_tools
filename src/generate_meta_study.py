@@ -1,7 +1,5 @@
 # Command Line Imports
 import argparse
-# Other Scripts
-import main_minimal
 
 
 meta_study = 'meta_study.txt'
@@ -51,7 +49,8 @@ def save_meta_cancer_study(args):
         name = '{} {} ({})'.format(*split)
         short_name = '{} ({})'.format(*split)
     else:
-        raise AttributeError("ERROR: Neither --cli-study, nor --default were specified. Please try again specifying either!")
+        raise AttributeError("ERROR: Neither --cli-study, nor --default were specified. "
+                             + "Please try again specifying either!")
     # Write information to file
     f = open(meta_study, 'w+')
     f.write('type_of_cancer: ' + type_of_cancer + '\n')
@@ -64,6 +63,8 @@ def save_meta_cancer_study(args):
 
 
 if __name__ == '__main__':
+    # Other Scripts
+    import main_minimal
     args = define_parser().parse_args()
     verb = args.verbose
     main_minimal.gen_study_meta(args, verb)
