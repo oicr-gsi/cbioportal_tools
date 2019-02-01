@@ -3,7 +3,6 @@ import argparse
 
 # Other Scripts
 import helper
-import main_minimal
 
 meta_samples = 'meta_clinical_sample.txt'
 data_samples = 'data_clinical_samples.txt'
@@ -66,6 +65,7 @@ def save_meta_samples(study_id):
 
 
 if __name__ == '__main__':
+    import main_minimal
     args = define_parser().parse_args()
     verb = args.verbose
     main_minimal.gen_samples_meta_data(args, verb)

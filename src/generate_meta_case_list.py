@@ -7,7 +7,6 @@ import pandas as pd
 
 # Other Scripts
 import helper
-import main_minimal
 
 case_folder = 'case_lists/'
 cases_txt = 'cases_all.txt'
@@ -66,6 +65,7 @@ def save_meta_case_lists(patient_sample_ids, args):
 
 
 if __name__ == '__main__':
+    import main_minimal
     args = define_parser().parse_args()
     verb = args.verbose
     main_minimal.gen_cancer_list_meta(args, verb)

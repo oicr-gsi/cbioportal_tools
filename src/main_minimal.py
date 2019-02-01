@@ -155,8 +155,8 @@ def main():
 
     gen_study_meta(args, verb)
     gen_samples_meta_data(args, verb)
-    gen_cancer_list_meta(args, verb)
     gen_cancer_type_meta_data(args, verb)
+    gen_cancer_list_meta(args, verb)
     helper.stars()
     helper.working_on(verb, message='CONGRATULATIONS! A minimal study is now be complete!')
     helper.stars()

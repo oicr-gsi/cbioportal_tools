@@ -6,8 +6,6 @@ import os
 import pandas as pd
 import random
 
-# Other Scripts
-import main_minimal
 
 meta_cancer_type = 'meta_cancer_type.txt'
 data_cancer_type = 'data_cancer_type.txt'
@@ -52,7 +50,7 @@ def gen_cancer_type_meta():
 def write_data_meta_cancer_type(colours, type_of_cancer):
     name = type_of_cancer.capitalize()
     clinical_trial_keywords = [type_of_cancer, name]
-    colour = colours.iloc[random.randint(0, len(colours))][0]
+    colour = colours.iloc[random.randint(0, len(colours)-1)][0]
     parent_type_of_cancer = 'tissue'
     f = open(data_cancer_type, 'w+')
     f.write('{}\t{}\t{}\t{}\t{}\r'.format(type_of_cancer,
@@ -82,6 +80,8 @@ def gen_cancer_type_data(args, colours):
 
 
 if __name__ == '__main__':
+    # Other Scripts
+    import main_minimal
     args = define_parser().parse_args()
     verb = args.verbose
     main_minimal.gen_cancer_type_meta_data(args, verb)
