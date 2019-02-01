@@ -1,5 +1,8 @@
 import os
 
+import numpy as np
+import re
+
 
 extensionChoices = ["vcf", "maf"]
 compressedChoices = [".tar.gz", ".gz", ".zip"]
@@ -51,3 +54,27 @@ def check_files_in_folder(choices, folder, parser):
 
 def write_tsv_dataframe(name, dataset):
     dataset.to_csv(name, sep='\t', index=False)
+
+
+def gather_patient_and_sample_ids(input_folder):
+    # List all files in folder
+    folder = os.listdir(input_folder)
+    key_val = []
+    # This regular expression is very specific to GECCO
+    # Make Regular Expression for: GECCO_1111_Xx_Y or something similar
+    regex = re.compile('[A-Z]{5}_[0-9]{4}_[a-zA-Z]{2}_[A-Z]')
+    # Generate patient and sample IDs
+    for each in folder:
+        try:
+            # Check if the file match the pattern
+            start, end = regex.search(each).span()
+            patient_id = each[start:start+10]
+            sample_id = each[start:end]
+        except AttributeError:
+            # As of now, throw an error.
+            # Later we can consider changing this to skip erroneous files
+            raise ValueError('You have a possibly erroneous file in the folder please remove it or something?\n' + each)
+        key_val += [[patient_id, sample_id]]
+    key_val = np.reshape(key_val, (len(key_val), 2))
+    # Convert list to np.array
+    return key_val

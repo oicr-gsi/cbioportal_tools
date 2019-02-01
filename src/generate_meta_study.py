@@ -19,24 +19,18 @@ def define_parser():
     required.add_argument("-s", "--study-id",
                           help="This is the cancer study ID, a unique string. Please use the format gene_lab_year. e.g."
                                "brca_gsi_2019 or mixed_tgl_2020",
-                          metavar='')
-    required.add_argument("-o", "--study-output-folder",
-                          help="The folder you want to export this generated data_samples.txt file to. Generally this "
-                               "will be the main folder of the study being generated. If left blank this will generate "
-                               "it wherever you run the script from.",
-                          metavar='',
-                          default='.')
+                          metavar='STRING')
+    parser.add_argument("-c", "--cli-study",
+                        help="Command Line Input, the description, name, short_name and type_of_cancer in semi-colon "
+                             "separated values. Input needs to be wrapped with ''."
+                             "e.g. -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and "
+                             "Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal'",
+                        metavar='STRING')
     parser.add_argument("-d", "--default",
                         action="store_true",
                         help="Prevents need for user input by trying to parse study ID, you must follow format "
                              "indicated in the help if you use this. **This tag is not recommended and cannot be used "
                              "alongside -c. If you do -c takes precedence.")
-    parser.add_argument("-c", "--cli",
-                        help="Command Line Input, the description, name, short_name and type_of_cancer in semi-colon "
-                             "separated values. Input needs to be wrapped with ''."
-                             "e.g. -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and "
-                             "Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal'",
-                        metavar='')
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Makes program verbose")
@@ -45,8 +39,8 @@ def define_parser():
 
 def save_meta_cancer_study(args):
     study_id = args.study_id
-    if args.cli:
-        [description, name, short_name, type_of_cancer] = args.cli.split(';')
+    if args.cli_study:
+        [description, name, short_name, type_of_cancer] = args.cli_study.split(';')
     elif args.default:
         # Else attempt to make the best description with limited information
         split = study_id.split('_')
@@ -56,6 +50,8 @@ def save_meta_cancer_study(args):
         split[1] = split[1].upper()
         name = '{} {} ({})'.format(*split)
         short_name = '{} ({})'.format(*split)
+    else:
+        raise AttributeError("Neither --cli-study, nor --default were specified. Please try again specifying either!")
     # Write information to file
     f = open(meta_study, 'w+')
     f.write('type_of_cancer: ' + type_of_cancer + '\n')

@@ -52,11 +52,11 @@ def write_data_meta_cancer_type(colours, type_of_cancer):
     colour = colours.iloc[random.randint(0, len(colours))][0]
     parent_type_of_cancer = 'tissue'
     f = open(data_cancer_type, 'w+')
-    f.write('{}\t{}\t{}\t{}\t{}'.format(type_of_cancer,
-                                        name,
-                                        ','.join(clinical_trial_keywords),
-                                        colour,
-                                        parent_type_of_cancer))
+    f.write('{}\t{}\t{}\t{}\t{}\r'.format(type_of_cancer,
+                                          name,
+                                          ','.join(clinical_trial_keywords),
+                                          colour,
+                                          parent_type_of_cancer))
     f.close()
 
 

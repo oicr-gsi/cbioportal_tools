@@ -4,6 +4,7 @@ import argparse
 import generate_meta_study
 import generate_data_meta_samples
 import generate_data_meta_cancer_type
+import generate_meta_case_list
 import helper
 
 
@@ -22,28 +23,34 @@ def define_parser():
                                " | ".join(helper.compressedChoices) + "] "
                                                                       " or uncompressed format in: [" +
                                " | ".join(helper.extensionChoices) + "] ",
-                          metavar='')
-    required.add_argument("-s", "--study-id",
-                          help="This is the cancer study ID, a unique string. Please use the format gene_lab_year. e.g."
-                               "brca_gsi_2019 or mixed_tgl_2020",
-                          metavar='')
+                          default='.',
+                          metavar='FOLDER')
     required.add_argument("-o", "--study-output-folder",
                           help="The folder you want to export this generated data_samples.txt file to. Generally this "
                                "will be the main folder of the study being generated. If left blank this will generate "
                                "it wherever you run the script from.",
-                          metavar='',
+                          metavar='FOLDER',
                           default='.')
+    required.add_argument("-s", "--study-id",
+                          help="This is the cancer study ID, a unique string. Please use the format gene_lab_year. e.g."
+                               "brca_gsi_2019 or mixed_tgl_2020",
+                          metavar='STRING')
+    required.add_argument("-c", "--cli-study",
+                          help="Command Line Input, the description, name, short_name and type_of_cancer in semi-colon "
+                               "separated values. Input needs to be wrapped with ''."
+                               "e.g. -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and "
+                               "Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal'",
+                          metavar='STRING')
+    required.add_argument("-l", "--cli-case-list",
+                          help="Command Line Input, case_list_name and case_list_description in semi-colon "
+                               "separated values. Input needs to be wrapped with ''."
+                               "e.g. -c 'All Tumours;All tumor samples (over 9000 samples)'",
+                          metavar='STRING')
     parser.add_argument("-d", "--default",
                         action="store_true",
                         help="Prevents need for user input by trying to parse study ID, you must follow format "
                              "indicated in the help if you use this. **This tag is not recommended and cannot be used "
-                             "alongside -c. If you do -c takes precedence.")
-    parser.add_argument("-c", "--cli",
-                        help="Command Line Input, the description, name, short_name and type_of_cancer in semi-colon "
-                             "separated values. Input needs to be wrapped with ''."
-                             "e.g. -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and "
-                             "Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal'",
-                        metavar='')
+                             "alongside -c as -c takes precedence.")
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Makes program verbose")
@@ -70,7 +77,7 @@ def gen_study_meta(args, verb):
 
 def gen_samples_meta_data(args, verb):
     helper.working_on(verb, message='Gathering patient and sample IDs...')
-    patient_sample_ids = generate_data_meta_samples.gather_patient_and_sample_ids(args.study_input_folder)
+    patient_sample_ids = helper.gather_patient_and_sample_ids(args.study_input_folder)
     helper.working_on(verb)
 
     # TODO:: More information should be added to the patient_sample_ids
@@ -85,7 +92,7 @@ def gen_samples_meta_data(args, verb):
     helper.working_on(verb)
 
     helper.working_on(verb, message='Saving meta_clinical_samples.txt ...')
-    generate_data_meta_samples.save_sample_meta_file(args.study_id)
+    generate_data_meta_samples.save_meta_samples(args.study_id)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Popping back...')
@@ -116,6 +123,32 @@ def gen_cancer_type_meta_data(args, verb):
     helper.working_on(args.verbose, message='Success! The cancer study meta has been saved!')
 
 
+def gen_cancer_list_meta(args, verb):
+    helper.working_on(verb, message='Gathering patient and sample IDs...')
+    patient_sample_ids = helper.gather_patient_and_sample_ids(args.study_input_folder)
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Changing folder...')
+    original_dir = helper.change_folder(args.study_output_folder)
+    helper.working_on(args.verbose)
+
+    helper.working_on(verb, message='Testing Case_Lists Folder...')
+    generate_meta_case_list.test_case_lists_folder()
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Jumping into Case_Lists Folder...')
+    helper.change_folder(generate_meta_case_list.case_folder)
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Saving Meta Case List...')
+    generate_meta_case_list.save_meta_case_lists(patient_sample_ids, args)
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Popping back...')
+    helper.reset_folder(original_dir)
+    helper.working_on(args.verbose, message='Success! The cancer case lists has been saved!')
+
+
 def main():
     args = define_parser().parse_args()
     verb = args.verbose
@@ -123,7 +156,10 @@ def main():
     gen_study_meta(args, verb)
     gen_samples_meta_data(args, verb)
     gen_cancer_type_meta_data(args, verb)
-    helper.working_on(verb, message='A minimal study should now be complete!')
+    gen_cancer_list_meta(args, verb)
+    helper.stars()
+    helper.working_on(verb, message='\nA minimal study should now be complete!')
+    helper.stars()
 
 
 if __name__ == '__main__':
