@@ -20,12 +20,12 @@ def define_parser():
                           help="This is the cancer study ID, a unique string. Please use the format gene_lab_year. e.g."
                                "brca_gsi_2019 or mixed_tgl_2020",
                           metavar='STRING')
-    parser.add_argument("-c", "--cli-study",
-                        help="Command Line Input, the description, name, short_name and type_of_cancer in semi-colon "
-                             "separated values. Input needs to be wrapped with ''."
-                             "e.g. -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and "
-                             "Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal'",
-                        metavar='STRING')
+    required.add_argument("-c", "--cli-study",
+                          help="Command Line Input, the description, name, short_name and type_of_cancer in semi-colon "
+                               "separated values. Input needs to be wrapped with ''."
+                               "e.g. -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and "
+                               "Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal'",
+                          metavar='STRING')
     parser.add_argument("-d", "--default",
                         action="store_true",
                         help="Prevents need for user input by trying to parse study ID, you must follow format "
@@ -51,7 +51,7 @@ def save_meta_cancer_study(args):
         name = '{} {} ({})'.format(*split)
         short_name = '{} ({})'.format(*split)
     else:
-        raise AttributeError("Neither --cli-study, nor --default were specified. Please try again specifying either!")
+        raise AttributeError("ERROR: Neither --cli-study, nor --default were specified. Please try again specifying either!")
     # Write information to file
     f = open(meta_study, 'w+')
     f.write('type_of_cancer: ' + type_of_cancer + '\n')
@@ -59,6 +59,7 @@ def save_meta_cancer_study(args):
     f.write('name: ' + name + '\n')
     f.write('description: ' + description + '\n')
     f.write('short_name: ' + short_name + '\n')
+    f.write('add_global_case_list: true\r')
     f.close()
 
 
