@@ -21,6 +21,14 @@ def define_parser():
                                                  "the seqware workflows, as well as from tools run outside of the "
                                                  "pipeline, and put them into the correct cBioPortal import files "
                                                  "(https://cbioportal.readthedocs.io/en/latest/File-Formats.html).")
+
+    required = parser.add_argument_group('Required Arguments')
+    required.add_argument("-c", "--cli-study",
+                          help="Command Line Input, the description, name, short_name and type_of_cancer in semi-colon "
+                               "separated values. Input needs to be wrapped with ''."
+                               "e.g. -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and "
+                               "Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal'",
+                          metavar='STRING')
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Makes program verbose")
@@ -41,11 +49,6 @@ def gen_cancer_type_meta():
     f.write('data_filename: {}\n'.format(data_cancer_type))
 
 
-def read_meta_study():
-    f = open(meta_study, 'r+')
-    return f.readline().split(':')[1].strip()
-
-
 def write_data_meta_cancer_type(colours, type_of_cancer):
     name = type_of_cancer.capitalize()
     clinical_trial_keywords = [type_of_cancer, name]
@@ -60,19 +63,14 @@ def write_data_meta_cancer_type(colours, type_of_cancer):
     f.close()
 
 
-def create_file(colours):
-    try:
-        type_of_cancer = read_meta_study()
-    except (OSError, IOError):
-        print('Could not find study_meta has it been deleted?')
-        raise ValueError("Program will not continue until the meta_study.txt file has been generated with either "
-                         "main_minimal.py or generate_meta_study.py")
+def create_file(args, colours):
+    type_of_cancer = args.cli_study.split(';')[3]
     write_data_meta_cancer_type(colours, type_of_cancer)
 
 
 def gen_cancer_type_data(args, colours):
     if args.force:
-        create_file(colours)
+        create_file(args, colours)
     else:
         try:
             os.stat(data_cancer_type)
@@ -80,7 +78,7 @@ def gen_cancer_type_data(args, colours):
             print 'rm {}'.format(data_cancer_type)
             print 'or use the -f / --force tag'
         except OSError:
-            create_file(colours)
+            create_file(args, colours)
 
 
 if __name__ == '__main__':

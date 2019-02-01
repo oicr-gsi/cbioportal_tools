@@ -1,6 +1,9 @@
 # src folder
 The _main_minimal.py_ script essentially combines the main scripts of the generate_study_meta and generate_data_meta_samples into one easy to understand script. All arguments are mandatory.
 
+* _helper.py_ is a script that contains some of the shared functions of many files
+* All scripts starting with _generate\_..._ create their respective files specified by the _meta_ or _data_ files and the type.
+
 
 This folder contains most scripts. 
 The test folder within has any scripts used in testing and validation.
@@ -14,29 +17,36 @@ optional arguments:
   -d, --default         Prevents need for user input by trying to parse study
                         ID, you must follow format indicated in the help if
                         you use this. **This tag is not recommended and cannot
-                        be used alongside -c. If you do -c takes precedence.
-  -c , --cli            Command Line Input, the description, name, short_name
-                        and type_of_cancer in semi-colon separated values.
-                        Input needs to be wrapped with ''.e.g. -c 'GECCO
-                        Samples sequenced and analyzed at OICR;Genetics and
-                        Epidemiology of Colorectal Cancer
-                        Consortium;GECCO;colorectal'
+                        be used alongside -c as -c takes precedence.
   -v, --verbose         Makes program verbose
   -f, --force           Forces overwriting of data_cancer_type.txt file.
 
 Required Arguments:
-  -i , --study-input-folder 
+  -i FOLDER, --study-input-folder FOLDER
                         The input folder can contain compressed: [.tar.gz |
                         .gz | .zip] or uncompressed format in: [vcf | maf]
-  -o , --study-output-folder 
+  -o FOLDER, --study-output-folder FOLDER
                         The folder you want to export this generated
                         data_samples.txt file to. Generally this will be the
                         main folder of the study being generated. If left
                         blank this will generate it wherever you run the
                         script from.
-  -s , --study-id       This is the cancer study ID, a unique string. Please
+  -s STRING, --study-id STRING
+                        This is the cancer study ID, a unique string. Please
                         use the format gene_lab_year. e.g.brca_gsi_2019 or
                         mixed_tgl_2020
+  -c STRING, --cli-study STRING
+                        Command Line Input, the description, name, short_name
+                        and type_of_cancer in semi-colon separated values.
+                        Input needs to be wrapped with ''.e.g. -c 'GECCO
+                        Samples sequenced and analyzed at OICR;Genetics and
+                        Epidemiology of Colorectal Cancer
+                        Consortium;GECCO;colorectal'
+  -l STRING, --cli-case-list STRING
+                        Command Line Input, case_list_name and
+                        case_list_description in semi-colon separated values.
+                        Input needs to be wrapped with ''.e.g. -c 'All
+                        Tumours;All tumor samples (over 9000 samples)'
 ```
 
 For example:
@@ -44,7 +54,13 @@ For example:
 ```
 python generate_study_meta.py -h
 or
-python main_minimal.py -i test/fakes/ -o new_study/ -s gecco_gsi_2019 -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal' -f -v
+python main_minimal.py \
+-i test/fakes/ \
+-o new_study/ \
+-s gecco_gsi_2019 \
+-c 'GECCO Samples sequenced and analyzed at OICR;Genetics and Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal' \
+-l 'All Tumours;All tumor samples (over 9000 samples)' \
+-v -f
 ```
 ___
 ___
@@ -53,8 +69,8 @@ ___
 **Using any of these scripts below individually is not recommended, and can lead to a malformed study. However documentation is still there if you're feeling lucky.**
 ___
 ___
-## Usage - generate_study_meta.py
-Run the generate_study_meta.py program with:
+## Usage - generate_meta_study.py
+Run the generate_meta_study.py program with:
 
 ```
 optional arguments:
@@ -63,28 +79,30 @@ optional arguments:
                         ID, you must follow format indicated in the help if
                         you use this. **This tag is not recommended and cannot
                         be used alongside -c. If you do -c takes precedence.
-  -c , --cli            Command Line Input, the description, name, short_name
+  -v, --verbose         Makes program verbose
+
+Required Arguments:
+  -s STRING, --study-id STRING
+                        This is the cancer study ID, a unique string. Please
+                        use the format gene_lab_year. e.g.brca_gsi_2019 or
+                        mixed_tgl_2020
+  -c STRING, --cli-study STRING
+                        Command Line Input, the description, name, short_name
                         and type_of_cancer in semi-colon separated values.
                         Input needs to be wrapped with ''.e.g. -c 'GECCO
                         Samples sequenced and analyzed at OICR;Genetics and
                         Epidemiology of Colorectal Cancer
                         Consortium;GECCO;colorectal'
-  -v, --verbose         Makes program verbose
-
-Required Arguments:
-  -s , --study-id       This is the cancer study ID, a unique string. Please
-                        use the format gene_lab_year. e.g.brca_gsi_2019 or
-                        mixed_tgl_2020
 ```
 
 For example:
 
 ```
-python generate_study_meta.py -h
+python generate_meta_study.py -h
 or
-python generate_study_meta.py -i brca_gsi_2019 -f new_study_2019/ -t brca
+python generate_meta_study.py -s brca_gsi_2019 -c 'Descriptive description;Name of Study;Short Name;type_of_cancer'
 or
-python generate_study_meta.py -i cbl_tgl_2000 -f new_study_2000/ -t bcl -d
+python generate_meta_study.py -s cbl_tgl_2000 -c 'Descriptive description;Name of Study;Short Name;type_of_cancer'
 ```
 ## Usage - generate_data_meta_samples.py
 Run the generate_data_meta_samples.py program with:
@@ -95,18 +113,19 @@ optional arguments:
   -v, --verbose         Makes program verbose
 
 Required Arguments:
-  -i , --study-input-folder 
+  -i FOLDER, --study-input-folder FOLDER
                         The input folder can contain compressed: [.tar.gz |
                         .gz | .zip] or uncompressed format in: [vcf | maf]
-  -s , --study-id       This is the cancer study ID, a unique string. Please
-                        use the format gene_lab_year. e.g.brca_gsi_2019 or
-                        mixed_tgl_2020
-  -o , --study-output-folder   
-  						The folder you want to export this generated
+  -o FOLDER, --study-output-folder FOLDER
+                        The folder you want to export this generated
                         data_samples.txt file to. Generally this will be the
                         main folder of the study being generated. If left
                         blank this will generate it wherever you run the
                         script from.
+  -s STRING, --study-id STRING
+                        This is the cancer study ID, a unique string. Please
+                        use the format gene_lab_year. e.g.brca_gsi_2019 or
+                        mixed_tgl_2020
 ```
 
 For example:
@@ -114,11 +133,13 @@ For example:
 ```
 python generate_data_meta_samples.py -h
 or
-python generate_data_meta_samples.py test/fakes/ -i brca_gsi_2019 -s new_study/
+python generate_data_meta_samples.py -i test/fakes/ -i brca_gsi_2019 -o new_study/
 or
-python generate_data_meta_samples.py Mutect2/ kremen1_octane -s new_study/ 
+python generate_data_meta_samples.py -i Mutect2/ -s kremen1_octane_2020 -o new_study/ 
 ```
-## Usage - import_mutation_data.py
+\*\*
+**import_mutation_data.py is currently in an unusable state.**
+### Usage - import_mutation_data.py
 Run the import_mutation_data.py program with:
 
 ```

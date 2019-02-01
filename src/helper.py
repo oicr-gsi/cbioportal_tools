@@ -26,6 +26,7 @@ def change_folder(folder):
         stars()
         try:
             os.mkdir(folder)
+            os.chdir(folder)
         except OSError:
             stars()
             raise ValueError('You may not have permission to create folders there. Very sad')
@@ -73,7 +74,8 @@ def gather_patient_and_sample_ids(input_folder):
         except AttributeError:
             # As of now, throw an error.
             # Later we can consider changing this to skip erroneous files
-            raise ValueError('You have a possibly erroneous file in the folder please remove it or something?\n' + each)
+            raise ValueError('ERROR: You have a possibly erroneous file in the folder please remove it or something?\n'
+                             + each)
         key_val += [[patient_id, sample_id]]
     key_val = np.reshape(key_val, (len(key_val), 2))
     # Convert list to np.array
