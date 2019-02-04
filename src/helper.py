@@ -11,8 +11,8 @@ compressedChoices = [".tar.gz", ".gz", ".zip"]
 def stars():
     # Prints a row of stars
     for a in range(30):
-        print'*',
-    print ''
+        print('*'),
+    print('')
 
 
 def change_folder(folder):
@@ -22,7 +22,7 @@ def change_folder(folder):
         os.chdir(folder)
     except OSError:
         stars()
-        print 'The path to your folder probably does not exist. Trying to make the folder for you.'
+        print('The path to your folder probably does not exist. Trying to make the folder for you.')
         stars()
         try:
             os.mkdir(folder)
@@ -41,7 +41,7 @@ def reset_folder(owd):
 def working_on(verbosity, message='Success!'):
     # Method is for verbose option. Prints Success if no parameter specified
     if verbosity:
-        print message
+        print(message)
 
 
 def check_files_in_folder(choices, folder, parser):

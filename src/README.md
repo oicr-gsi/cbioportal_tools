@@ -52,9 +52,9 @@ Required Arguments:
 For example:
 
 ```
-python generate_study_meta.py -h
+python3 generate_study_meta.py -h
 or
-python main_minimal.py \
+python3 main_minimal.py \
 -i test/fakes/ \
 -o new_study/ \
 -s gecco_gsi_2019 \
@@ -98,11 +98,11 @@ Required Arguments:
 For example:
 
 ```
-python generate_meta_study.py -h
+python3 generate_meta_study.py -h
 or
-python generate_meta_study.py -s brca_gsi_2019 -c 'Descriptive description;Name of Study;Short Name;type_of_cancer'
+python3 generate_meta_study.py -s brca_gsi_2019 -c 'Descriptive description;Name of Study;Short Name;type_of_cancer'
 or
-python generate_meta_study.py -s cbl_tgl_2000 -c 'Descriptive description;Name of Study;Short Name;type_of_cancer'
+python3 generate_meta_study.py -s cbl_tgl_2000 -c 'Descriptive description;Name of Study;Short Name;type_of_cancer'
 ```
 ## Usage - generate_data_meta_samples.py
 Run the generate_data_meta_samples.py program with:
@@ -131,11 +131,11 @@ Required Arguments:
 For example:
 
 ```
-python generate_data_meta_samples.py -h
+python3 generate_data_meta_samples.py -h
 or
-python generate_data_meta_samples.py -i test/fakes/ -i brca_gsi_2019 -o new_study/
+python3 generate_data_meta_samples.py -i test/fakes/ -i brca_gsi_2019 -o new_study/
 or
-python generate_data_meta_samples.py -i Mutect2/ -s kremen1_octane_2020 -o new_study/ 
+python3 generate_data_meta_samples.py -i Mutect2/ -s kremen1_octane_2020 -o new_study/ 
 ```
 \*\*
 **import_mutation_data.py is currently in an unusable state.**
@@ -160,9 +160,9 @@ required arguments:
 For example:
 
 ```
-python import_mutation_data.py -h
+python3 import_mutation_data.py -h
 or
-python import_mutation_data.py banana.vcf.tar.gz -c -w Mutect
+python3 import_mutation_data.py banana.vcf.tar.gz -c -w Mutect
 or
-python import_mutation_data.py apple.maf -w GATKHaplotypeCaller
+python3 import_mutation_data.py apple.maf -w GATKHaplotypeCaller
 ```

@@ -72,9 +72,9 @@ def gen_cancer_type_data(args, colours):
     else:
         try:
             os.stat(data_cancer_type)
-            print '{} already exists, if you want to regenerate it please remove it using'.format(data_cancer_type)
-            print 'rm {}'.format(data_cancer_type)
-            print 'or use the -f / --force tag'
+            print('{} already exists, if you want to regenerate it please remove it using'.format(data_cancer_type))
+            print('rm {}'.format(data_cancer_type))
+            print('or use the -f / --force tag')
         except OSError:
             create_file(args, colours)
 
