@@ -2,24 +2,13 @@ import argparse
 import subprocess
 import os
 
+import helper
+
 # Define important constants
 REFERENCE_FASTA = "/.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa"
 MUTATION_DATA_META = "MUTATION_EXTENDED"
 workflowChoices = ['GATKHaplotypeCaller', 'Mutect', 'Mutect2', 'Strelka']
-extensionChoices = ["vcf", "maf"]
-compressedChoices = [".tar.gz", ".gz", ".zip"]
 
-
-def file_choices(choices, fname, parser):
-    # Checks file extension for belonging in extensionChoices (important constants)
-    ext = fname.split('.')
-    if bool(set(ext) & set(choices)):
-        ext = list(set(ext) & set(choices))[0]
-        # If it belongs return the file name and extension
-        return fname, ext
-    else:
-        parser.error("file doesn't end with one of {}".format(choices))
-    return fname
 
 
 def define_parser():
@@ -30,41 +19,28 @@ def define_parser():
                                                  "pipeline, and put them into the correct cBioPortal import files "
                                                  "(https://cbioportal.readthedocs.io/en/latest/File-Formats.html).")
 
-    parser.add_argument("inputFile",
-                        type=lambda s: file_choices(extensionChoices, s, parser),
-                        help="The input file, can be of compressed: [" +
-                             " | ".join(compressedChoices) + "] "
-                             " or uncompressed format in: [" +
-                             " | ".join(extensionChoices) + "] "
-                             "If the file is compressed, optional tag -c must be added")
-
-    parser.add_argument("-d", "--defaults", action="store_true")
-
-    ######### OPTIONAL ARGUMENTS ###########
-    reqArg = parser.add_argument_group('required arguments')
-
-    reqArg.add_argument("-c", "--compressed",
-                        help="If the input file is compressed this tag must be added",
-                        action="store_true")
-
-    reqArg.add_argument("-w", "--workflowUsed",
-                        help="The workflow used is a mandatory tag, choices are: [" + " | ".join(workflowChoices) + "]",
-                        choices=workflowChoices,
-                        metavar='',
-                        default='')
+    required = parser.add_argument_group('Required Arguments')
+    required.add_argument("-i", "--study-input-folder",
+                          type=lambda folder: helper.check_files_in_folder(helper.extensionChoices, folder, parser),
+                          help="The input folder can contain compressed: [" +
+                               " | ".join(helper.compressedChoices) + "] "
+                                                                      " or uncompressed format in: [" +
+                               " | ".join(helper.extensionChoices) + "] ",
+                          default='.',
+                          metavar='FOLDER')
+    parser.add_argument("-d", "--default",
+                        action="store_true",
+                        help="Prevents need for user input by trying to parse study ID, you must follow format "
+                             "indicated in the help if you use this. **This tag is not recommended and cannot be used "
+                             "alongside -c as -c takes precedence.")
+    parser.add_argument("-v", "--verbose",
+                        action="store_true",
+                        help="Makes program verbose")
+    parser.add_argument("--force-vcf2maf",
+                        action="store_true",
+                        help="Forces overwriting of files converted from vcf to maf.")
+    # Still need to collect the name and the description
     return parser
-
-
-def check_input(arguments):
-    # Ensures arguments given are correct before trying to generate a study
-    input_file, extension = arguments.inputFile
-    if (input_file[len(input_file) - 1] not in extensionChoices) and not arguments.compressed:
-        print ("Compressed tag was not specified, please do that next time")
-        arguments.compressed = True
-
-    if arguments.workflowUsed not in workflowChoices:
-        arguments.error("Either no workflow has been specified, or there has been a misspelling."
-                        "\n Choices are: [" + " | ".join(workflowChoices) + "]")
 
 
 def decompress(input_file):
@@ -100,55 +76,23 @@ def pre_process_files(args):
                         " --ref-fasta " + REFERENCE_FASTA)
 
 
-def generate_study_space(CANCER_STUDY_IDENTIFIER="default"):
-    # Creates a folder/directory that will contain the generated study
-    try:
-        os.stat(CANCER_STUDY_IDENTIFIER+"/")
-    except OSError:
-        os.mkdir(CANCER_STUDY_IDENTIFIER)
-
-
-def generate_metadata(meta_type, args,
-                      CANCER_STUDY_IDENTIFIER="default", GENETIC_ALTERATION_TYPE=None, DATATYPE=None, STABLE_ID=None,
-                      SHOW_PROFILE_IN_ANALYSIS_TAB=None, PROFILE_DESCRIPTION=None, PROFILE_NAME=None,
-                      DATA_FILENAME=None):
-    # Generates Cancer Study Meta file
-    print("The meta file needs to be generated, adding the tag -d or --default "
-          "sets all parts of the file to the defaults")
-
-    print("THIS IS WHERE I NEED TO FIGURE OUT THE CANCER STUDY IDENTIFIER")
-
-    if GENETIC_ALTERATION_TYPE == DATATYPE == STABLE_ID == SHOW_PROFILE_IN_ANALYSIS_TAB == \
-            PROFILE_DESCRIPTION == PROFILE_NAME == DATA_FILENAME:
-        if meta_type == MUTATION_DATA_META:
-            GENETIC_ALTERATION_TYPE = MUTATION_DATA_META
-            print args.inputFile
-            DATATYPE = args.inputFile[1].upper()  # accessing user input data, structure, list of size 2
-            STABLE_ID = "mutations"
-            SHOW_PROFILE_IN_ANALYSIS_TAB = "true"
-            PROFILE_DESCRIPTION = "Mutation data, more detail can be added here"
-            PROFILE_NAME = "Mutations"
-            DATA_FILENAME = args.inputFile[0]
-
-            file_out = open(CANCER_STUDY_IDENTIFIER + "/meta_mutations_extended.txt", "w+")
-            file_out.write("cancer_study_identifier: " + CANCER_STUDY_IDENTIFIER + "\n")
-            file_out.write("genetic_alteration_type: " + GENETIC_ALTERATION_TYPE + "\n")
-            file_out.write("datatype: " + DATATYPE + "\n")
-            file_out.write("stable_id: " + STABLE_ID + "\n")
-            file_out.write("show_profile_in_analysis_tab: " + SHOW_PROFILE_IN_ANALYSIS_TAB + "\n")
-            file_out.write("profile_description: " + PROFILE_DESCRIPTION + "\n")
-            file_out.write("profile_name: " + PROFILE_NAME + "\n")
-            file_out.write("data_filename: " + DATA_FILENAME + "\n")
-
-
 def main():
-    # Regular main method
-    arguments = define_parser().parse_args()
-    check_input(arguments)
-    pre_process_files(arguments)
-    generate_study_space()
-    generate_metadata(MUTATION_DATA_META, arguments)
+    import main_minimal
+    args = define_parser().parse_args()
+    verb = args.verbose
+    main_minimal.gen_cancer_(args, verb)
 
 
+'''
+vcf2maf.pl  --input-vcf merpi.vcf \
+            --output-maf ../GATKMAF/GECCO_0001_Li_R_TS.g.maf \
+            --tumor-id GECCO_0001_Li_R_TS.g \
+            --normal-id GECCO_0001_Ly_P_TS.g \
+            --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
+            --filter-vcf ../../reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
+            --vep-path $VEP_PATH \
+            --vep-data $VEP_DATA \
+            --species homo_sapiens
+'''
 if __name__ == '__main__':
     main()

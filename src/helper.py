@@ -11,7 +11,7 @@ compressedChoices = [".tar.gz", ".gz", ".zip"]
 def stars():
     # Prints a row of stars
     for a in range(30):
-        print('*'),
+        print('*', end="")
     print('')
 
 
