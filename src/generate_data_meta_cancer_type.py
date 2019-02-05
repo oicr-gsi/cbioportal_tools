@@ -4,7 +4,6 @@ import os
 
 # Data Processing Imports
 import pandas as pd
-import random
 
 
 meta_cancer_type = 'meta_cancer_type.txt'
@@ -37,7 +36,7 @@ def define_parser():
 
 
 def get_colours():
-    return pd.read_csv('colours.txt', delimiter='|', header=None)
+    return pd.read_csv('cancer_colours.csv', delimiter=',', header=None)
 
 
 def gen_cancer_type_meta():
@@ -47,10 +46,16 @@ def gen_cancer_type_meta():
     f.write('data_filename: {}\n'.format(data_cancer_type))
 
 
-def write_data_meta_cancer_type(colours, type_of_cancer):
+def write_data_meta_cancer_type(type_of_cancer, colour_definitions):
     name = type_of_cancer.capitalize()
     clinical_trial_keywords = [type_of_cancer, name]
-    colour = colours.iloc[random.randint(0, len(colours)-1)][0]
+    # Define colour here:
+    row = colour_definitions[colour_definitions[1].str.lower().str.contains(type_of_cancer)]
+    colour = row.iloc[0][2]
+
+    if colour == '':
+        colour = colour_definitions.iloc[0][2]
+
     parent_type_of_cancer = 'tissue'
     f = open(data_cancer_type, 'w+')
     f.write('{}\t{}\t{}\t{}\t{}\r'.format(type_of_cancer,
@@ -63,7 +68,7 @@ def write_data_meta_cancer_type(colours, type_of_cancer):
 
 def create_file(args, colours):
     type_of_cancer = args.cli_study.split(';')[3]
-    write_data_meta_cancer_type(colours, type_of_cancer)
+    write_data_meta_cancer_type(type_of_cancer, colours)
 
 
 def gen_cancer_type_data(args, colours):

@@ -25,7 +25,7 @@ This tool depends on:
 
 These both require pip, to install everything mentioned, run:
 ```
-sudo apt install python-pip
+sudo apt install python3-pip
 
-pip install numpy pandas
+pip3 install numpy pandas
 ```
