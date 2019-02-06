@@ -1,10 +1,16 @@
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 # Command Line Imports
 import argparse
 # Other Scripts
 import generate_meta_study
+import generate_meta_case_list
 import generate_data_meta_samples
 import generate_data_meta_cancer_type
-import generate_meta_case_list
+import generate_data_meta_mutation_data
 import helper
 
 
@@ -56,8 +62,7 @@ def define_parser():
                         help="Makes program verbose")
     parser.add_argument("-f", "--force",
                         action="store_true",
-                        help="Forces overwriting of data_cancer_type.txt file.")
-    # Still need to collect the name and the description
+                        help="Forces overwriting of data_cancer_type.txt file and *.maf files.")
     return parser
 
 
@@ -149,6 +154,49 @@ def gen_cancer_list_meta(args, verb):
     helper.working_on(args.verbose, message='Success! The cancer case lists has been saved!')
 
 
+def gen_mutation_meta_data(args, verb):
+    helper.working_on(verb, message='Jumping into input folder...')
+    original_dir = helper.change_folder(args.study_input_folder)
+    helper.working_on(args.verbose)
+
+    helper.working_on(verb, message='Gathering and decompressing files into temporary folder...')
+    generate_data_meta_mutation_data.decompress()
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Jumping into temp folder...')
+    helper.change_folder('../temp/')
+    helper.working_on(args.verbose)
+
+    helper.working_on(verb, message='Adding UNMATCHED column...')
+    generate_data_meta_mutation_data.add_unmatched()
+    helper.working_on(args.verbose)
+
+    helper.working_on(verb, message='Exporting from .vcf 2 .maf...')
+    helper.working_on(verb, message='And deleting .vcf s...')
+    generate_data_meta_mutation_data.export2maf()
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Popping back...')
+    helper.reset_folder(original_dir)
+    helper.working_on(args.verbose, message='Success! The .maf files have been exported!')
+
+    helper.working_on(verb, message='Copying .maf mutation data to output folder...')
+    generate_data_meta_mutation_data.copy_mutation_data(args.study_input_folder+'../temp/', args.study_output_folder)
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Jumping into output folder...')
+    original_dir = helper.change_folder(args.study_output_folder)
+    helper.working_on(args.verbose)
+
+    helper.working_on(verb, message='Generating Meta file...')
+    generate_data_meta_mutation_data.save_meta_mutation(args)
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Popping back...')
+    helper.reset_folder(original_dir)
+    helper.working_on(args.verbose, message='Success! The cancer case lists has been saved!')
+
+
 def main():
     args = define_parser().parse_args()
     verb = args.verbose
@@ -157,9 +205,12 @@ def main():
     gen_samples_meta_data(args, verb)
     gen_cancer_type_meta_data(args, verb)
     gen_cancer_list_meta(args, verb)
+    gen_mutation_meta_data(args, verb)
     helper.stars()
     helper.working_on(verb, message='CONGRATULATIONS! A minimal study is now be complete!')
     helper.stars()
+    # Export study to cbioportal with
+    # scp -r -i /u/kchandan/cbioportal.pem output_folder/ debian@10.30.133.80:/home/debian/oicr_studies
 
 
 if __name__ == '__main__':

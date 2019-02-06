@@ -1,3 +1,8 @@
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 # Command Line Imports
 import argparse
 import os
@@ -31,7 +36,7 @@ def define_parser():
                         help="Makes program verbose")
     parser.add_argument("-f", "--force",
                         action="store_true",
-                        help="Forces overwriting of data_cancer_type.txt file.")
+                        help="Forces overwriting of data_cancer_type.txt file and *.maf files.")
     return parser
 
 

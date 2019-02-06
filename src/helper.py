@@ -1,3 +1,8 @@
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 import os
 
 import numpy as np
@@ -33,12 +38,19 @@ def change_folder(folder):
     return original_working_directory
 
 
+def make_folder(path):
+    try:
+        os.stat(path)
+    except OSError:
+        os.mkdir(path)
+
+
 def reset_folder(owd):
     os.chdir(owd)
     # Go to original working directory, needs to be used in junction to stored variable
 
 
-def working_on(verbosity, message='Success!'):
+def working_on(verbosity, message='Success!\n'):
     # Method is for verbose option. Prints Success if no parameter specified
     if verbosity:
         print(message)
