@@ -1,3 +1,8 @@
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 # Collect names of mutation files and convert them to PATIENT_IDs and SAMPLE_IDs
 # Script maps each file to a patient ID.
 import os

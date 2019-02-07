@@ -35,11 +35,12 @@ def define_parser():
                                " | ".join(helper.extensionChoices) + "] ",
                           default='.',
                           metavar='FOLDER')
-    parser.add_argument("-d", "--default",
-                        action="store_true",
-                        help="Prevents need for user input by trying to parse study ID, you must follow format "
-                             "indicated in the help if you use this. **This tag is not recommended and cannot be used "
-                             "alongside -c as -c takes precedence.")
+    required.add_argument("-o", "--study-output-folder",
+                          help="The folder you want to export this generated data_samples.txt file to. Generally this "
+                               "will be the main folder of the study being generated. If left blank this will generate "
+                               "it wherever you run the script from.",
+                          metavar='FOLDER',
+                          default='.')
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Makes program verbose")
@@ -86,38 +87,46 @@ def add_unmatched():
     for each in os.listdir():
         # Add unmatched column to files
         pre_process_vcf_unmatched(each, each)
-        # Make .maf file
-        # Delete .vcf file
-        print('lel')
-        # move files to final directory
 
 
-def export2maf():
+def export2maf(args):
     # Load Modules
     reg_norms = re.compile('GECCO_[0-9]{4}_Li_P')
     reg_tumor = re.compile('GECCO_[0-9]{4}_Ly_R')
     subprocess.call("module use /oicr/local/analysis/Modules/modulefiles /.mounts/labs/PDE/Modules/modulefiles")
     subprocess.call("module load vep/92 vcf2maf")
-    for vcf in [x for x in os.listdir('.') if x.endswith('.vcf')]:  # Get all files ending in .vcf
+    # Get all files ending in .vcf
+    for vcf in [x for x in os.listdir('.') if x.endswith('.vcf')]:
+        # Figure out if the .maf file should be generated
+        if args.force:
+            write = True
+        try:
+            os.stat(os.path.basename(vcf) + '.maf')
+            if not args.force:
+                write = False
+        except OSError:
+            write = True
+
         # Split for tumor and normal?
-        if len(reg_tumor.findall(vcf)) > 0:
-            os.call('vcf2maf.pl  --input-vcf ' + vcf + '\
-                    --output-maf ../GATKMAF/' + os.path.basename(vcf)+'.maf \
-                    --tumor-id ' + reg_tumor.findall(vcf)[0] + ' \
-                    --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
-                    --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
-                    --vep-path $VEP_PATH \
-                    --vep-data $VEP_DATA \
-                    --species homo_sapiens')
-        elif len(reg_norms.findall(vcf)) > 0:
-            os.call('vcf2maf.pl  --input-vcf ' + vcf + '\
-                    --output-maf ../GATKMAF/' + os.path.basename(vcf)+'.maf \
-                    --normal-id ' + reg_norms.findall(vcf)[0] + ' \
-                    --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
-                    --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
-                    --vep-path $VEP_PATH \
-                    --vep-data $VEP_DATA \
-                    --species homo_sapiens')
+        if write:
+            if len(reg_tumor.findall(vcf)) > 0:
+                os.call('vcf2maf.pl  --input-vcf ' + vcf + '\
+                        --output-maf ../GATKMAF/' + os.path.basename(vcf)+'.maf \
+                        --tumor-id ' + reg_tumor.findall(vcf)[0] + ' \
+                        --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
+                        --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
+                        --vep-path $VEP_PATH \
+                        --vep-data $VEP_DATA \
+                        --species homo_sapiens')
+            elif len(reg_norms.findall(vcf)) > 0:
+                os.call('vcf2maf.pl  --input-vcf ' + vcf + '\
+                        --output-maf ../GATKMAF/' + os.path.basename(vcf)+'.maf \
+                        --normal-id ' + reg_norms.findall(vcf)[0] + ' \
+                        --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
+                        --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
+                        --vep-path $VEP_PATH \
+                        --vep-data $VEP_DATA \
+                        --species homo_sapiens')
         os.remove(vcf)
 
 
@@ -151,7 +160,6 @@ def main():
     # Apply vcf2maf command on each depending on name:
     #       Ly_R are normals
     #       Li_P are tumour
-    # VCF2MAF command is in import_mutation_data
 
 
 if __name__ == '__main__':
