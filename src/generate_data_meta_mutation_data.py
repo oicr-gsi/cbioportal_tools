@@ -8,6 +8,7 @@ import subprocess
 import os
 
 import re
+import numpy as np
 
 import helper
 
@@ -41,6 +42,12 @@ def define_parser():
                                "it wherever you run the script from.",
                           metavar='FOLDER',
                           default='.')
+    required.add_argument("-c", "--caller",
+                          choices=helper.caller_choices,
+                          help="The caller from which the mutation data is being created from. Choices: ["
+                               " | ".join(helper.caller_choices) + "]",
+                          metavar='CALLER_NAME',
+                          default='.')
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Makes program verbose")
@@ -51,7 +58,7 @@ def define_parser():
     return parser
 
 
-def pre_process_vcf_unmatched(input_file, output_file):
+def pre_process_vcf_GATK(input_file, output_file):
     i = open(input_file, 'r')
     o = open(output_file, 'w')
     while True:
@@ -73,7 +80,7 @@ def pre_process_vcf_unmatched(input_file, output_file):
     o.close()
 
 
-def decompress():
+def decompress_to_temp():
     # Decompresses each file in the current folder to ../temp/ if it is compressed. otherwise, copy it over
     for file in os.listdir("."):
         helper.make_folder("../temp/")
@@ -84,9 +91,9 @@ def decompress():
 
 
 def add_unmatched():
-    for each in os.listdir():
+    for each in os.listdir('.'):
         # Add unmatched column to files
-        pre_process_vcf_unmatched(each, each)
+        pre_process_vcf_GATK(each, each)
 
 
 def export2maf(args):
@@ -100,6 +107,8 @@ def export2maf(args):
         # Figure out if the .maf file should be generated
         if args.force:
             write = True
+        else:
+            write = False
         try:
             os.stat(os.path.basename(vcf) + '.maf')
             if not args.force:
@@ -110,28 +119,94 @@ def export2maf(args):
         # Split for tumor and normal?
         if write:
             if len(reg_tumor.findall(vcf)) > 0:
-                os.call('vcf2maf.pl  --input-vcf ' + vcf + '\
-                        --output-maf ../GATKMAF/' + os.path.basename(vcf)+'.maf \
-                        --tumor-id ' + reg_tumor.findall(vcf)[0] + ' \
-                        --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
-                        --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
-                        --vep-path $VEP_PATH \
-                        --vep-data $VEP_DATA \
-                        --species homo_sapiens')
+                subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
+                --output-maf ../GATKMAF/' + os.path.basename(vcf) + '.maf \
+                --tumor-id ' + reg_tumor.findall(vcf)[0] + ' \
+                --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
+                --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
+                --vep-path $VEP_PATH \
+                --vep-data $VEP_DATA \
+                --species homo_sapiens')
             elif len(reg_norms.findall(vcf)) > 0:
-                os.call('vcf2maf.pl  --input-vcf ' + vcf + '\
-                        --output-maf ../GATKMAF/' + os.path.basename(vcf)+'.maf \
-                        --normal-id ' + reg_norms.findall(vcf)[0] + ' \
-                        --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
-                        --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
-                        --vep-path $VEP_PATH \
-                        --vep-data $VEP_DATA \
-                        --species homo_sapiens')
+                subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
+                --output-maf ../GATKMAF/' + os.path.basename(vcf) + '.maf \
+                --normal-id ' + reg_norms.findall(vcf)[0] + ' \
+                --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
+                --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
+                --vep-path $VEP_PATH \
+                --vep-data $VEP_DATA \
+                --species homo_sapiens')
         os.remove(vcf)
 
 
 def copy_mutation_data(input_folder, output_folder):
-    os.call('cp -r ' + input_folder + ' ' + output_folder)
+    subprocess.call('cp -r ' + input_folder + ' ' + output_folder)
+
+
+def gather_files_mutect(type):
+    # Check if files have a filtered/sorted version, otherwise get the regular version
+    files = os.listdir('.')
+    gathered_files = []
+
+    for each in files:
+        verified_file = False
+        with open(each, 'r') as f:
+            tumor_id, normal_id = ['', '']
+            for read in f:
+                if '##source=mutect' in read:
+                    # Ensure the source is MuTect
+                    verified_file = True
+                elif '##inputs=' in read:
+                    # Get the patient and sample ID
+                    read.replace('##inputs=').split(' ')
+                    normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
+
+                    # If the file is a filtered/sorted file remove it if you want unfiltered files
+                    if type == 'unfiltered':
+                        if '.filter' in normal_id and '.filter' in tumor_id:
+                            verified_file = False
+                    elif type == 'filtered':
+                        if not('.filter' in normal_id and '.filter' in tumor_id):
+                            verified_file = False
+                    # Don't need to read the entire file
+                    break
+        # Do NOT append the file if it is unverified for any reason.
+        if verified_file:
+            gathered_files.append([each, tumor_id, normal_id])
+    return gathered_files
+
+
+def gather_files_mutect2(type):
+    # Check if files have a filtered/sorted version, otherwise get the regular version
+    files = os.listdir('.')
+    gathered_files = []
+    tumor_only = re.compile('tumor_only')
+
+    for each in files:
+        verified_file = False
+        with open(each, 'r') as f:
+            tumor_id, normal_id = ['', '']
+            for read in f:
+                # Ensure the source is MuTect
+                if '##GATKCommandLine.MuTect2' in read:
+                    verified_file = True
+                elif '##SAMPLE=<ID=NORMAL,SampleName=' in read:
+                    normal_id = read.replace('##SAMPLE=<ID=NORMAL,SampleName=', '').split(',')[0]
+                elif '##SAMPLE=<ID=TUMOR,SampleName=' in read:
+                    tumor_id = read.replace('##SAMPLE=<ID=TUMOR,SampleName=', '').split(',')[0]
+
+                # BREAK CONDITIONS
+                # Don't need to read the entire file if we've found what we need
+                if all(normal_id, tumor_id):
+                    break
+                # This implies a tumor only MuTect2 file which we don't want?
+                elif tumor_only.findall(read):
+                    verified_file = False
+                    break
+        # Do NOT append the file if it is unverified for any reason.
+        if verified_file:
+            gathered_files.append([each, tumor_id, normal_id])
+    return gathered_files
 
 
 def save_meta_mutation(args):
