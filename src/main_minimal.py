@@ -173,6 +173,7 @@ def gen_mutation_meta_data(args, verb):
     helper.change_folder('../temp/')
     helper.working_on(args.verbose)
 
+    # TODO:: Find a less wasteful way for these if/else statements
     if args.caller == 'GATKHaplotype':
         helper.working_on(verb, message='Adding UNMATCHED column...')
         generate_data_meta_mutation_data.add_unmatched()
@@ -190,8 +191,12 @@ def gen_mutation_meta_data(args, verb):
         helper.working_on(args.verbose)
 
     elif args.caller == 'Strelka':
-        helper.working_on(verb, message='Concating pairs of SNVs and InDel Strelka files')
-        files_tumors_normals = generate_data_meta_mutation_data.gather_files_mutect2()
+        helper.working_on(verb, message='Gathering valid Strelka Files...')
+        files_tumors_normals = generate_data_meta_mutation_data.gather_files_strelka()
+        helper.working_on(args.verbose)
+
+        helper.working_on(verb, message='Gathering valid Strelka Files...')
+        files_tumors_normals = generate_data_meta_mutation_data.concat_files_strelka(files_tumors_normals)
         helper.working_on(args.verbose)
 
     helper.working_on(verb, message='Exporting from .vcf 2 .maf...')
