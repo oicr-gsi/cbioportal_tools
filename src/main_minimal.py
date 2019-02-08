@@ -174,7 +174,8 @@ def gen_mutation_meta_data(args, verb):
     helper.working_on(args.verbose)
 
     # TODO:: Find a less wasteful way for these if/else statements
-    if args.caller == 'GATKHaplotype':
+    if False and args.caller == 'GATKHaplotype':  # Will never run until corrected
+        # TODO:: Do GATKHaplotype later
         helper.working_on(verb, message='Adding UNMATCHED column...')
         generate_data_meta_mutation_data.add_unmatched()
         helper.working_on(args.verbose)
@@ -195,13 +196,13 @@ def gen_mutation_meta_data(args, verb):
         files_tumors_normals = generate_data_meta_mutation_data.gather_files_strelka()
         helper.working_on(args.verbose)
 
-        helper.working_on(verb, message='Gathering valid Strelka Files...')
+        helper.working_on(verb, message='Concating Strelka Files.........')
         files_tumors_normals = generate_data_meta_mutation_data.concat_files_strelka(files_tumors_normals)
         helper.working_on(args.verbose)
 
     helper.working_on(verb, message='Exporting from .vcf 2 .maf...')
     helper.working_on(verb, message='And deleting .vcf s...')
-    generate_data_meta_mutation_data.export2maf(files_tumors_normals)
+    generate_data_meta_mutation_data.export2maf(files_tumors_normals, args)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Popping back...')

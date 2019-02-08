@@ -96,15 +96,14 @@ def add_unmatched():
         pre_process_vcf_GATK(each, each)
 
 
-def export2maf(args):
+def export2maf(files_tumors_normals, args):
     # Load Modules
-    reg_norms = re.compile('GECCO_[0-9]{4}_Li_P')
-    reg_tumor = re.compile('GECCO_[0-9]{4}_Ly_R')
     subprocess.call("module use /oicr/local/analysis/Modules/modulefiles /.mounts/labs/PDE/Modules/modulefiles")
-    subprocess.call("module load vep/92 vcf2maf")
+    subprocess.call("module load vep/92 vcf2maf python-gsi/3.6.4")
     # Get all files ending in .vcf
-    for vcf in [x for x in os.listdir('.') if x.endswith('.vcf')]:
+    for i in range(len(files_tumors_normals)):
         # Figure out if the .maf file should be generated
+        vcf = files_tumors_normals[i][0]
         if args.force:
             write = True
         else:
@@ -118,19 +117,10 @@ def export2maf(args):
 
         # Split for tumor and normal?
         if write:
-            if len(reg_tumor.findall(vcf)) > 0:
                 subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
                 --output-maf ../GATKMAF/' + os.path.basename(vcf) + '.maf \
-                --tumor-id ' + reg_tumor.findall(vcf)[0] + ' \
-                --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
-                --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
-                --vep-path $VEP_PATH \
-                --vep-data $VEP_DATA \
-                --species homo_sapiens')
-            elif len(reg_norms.findall(vcf)) > 0:
-                subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
-                --output-maf ../GATKMAF/' + os.path.basename(vcf) + '.maf \
-                --normal-id ' + reg_norms.findall(vcf)[0] + ' \
+                --normal-id ' + files_tumors_normals[i][1] + '\
+                --tumor-id ' + files_tumors_normals[i][0] + ' \
                 --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
                 --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
                 --vep-path $VEP_PATH \
@@ -173,7 +163,7 @@ def gather_files_mutect(mutect_type):
         # Do NOT append the file if it is unverified for any reason.
         if verified_file:
             gathered_files.append([each, tumor_id, normal_id])
-    return gathered_files
+    return np.array(gathered_files)
 
 
 def gather_files_mutect2():
@@ -206,7 +196,7 @@ def gather_files_mutect2():
         # Do NOT append the file if it is unverified for any reason.
         if verified_file:
             gathered_files.append([each, tumor_id, normal_id])
-    return gathered_files
+    return np.array(gathered_files)
 
 
 def gather_files_strelka():
