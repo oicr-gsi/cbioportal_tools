@@ -9,6 +9,7 @@ import numpy as np
 import re
 
 
+caller_choices = ['GATKHaplotype', 'Mutect', 'Mutect2', 'Strelka', 'MutectStrelka']
 extensionChoices = ["vcf", "maf"]
 compressedChoices = [".tar.gz", ".gz", ".zip"]
 
@@ -70,6 +71,7 @@ def write_tsv_dataframe(name, dataset):
 
 
 def gather_patient_and_sample_ids(input_folder):
+    # TODO:: Change this to more closely reflect Patient and Sample IDs from generate_data_meta_mutation_data.py
     # List all files in folder
     folder = os.listdir(input_folder)
     key_val = []

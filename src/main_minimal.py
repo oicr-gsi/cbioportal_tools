@@ -47,6 +47,12 @@ def define_parser():
                                "e.g. -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and "
                                "Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal'",
                           metavar='STRING')
+    required.add_argument("-C", "--caller",
+                          choices=helper.caller_choices,
+                          help="The caller from which the mutation data is being created from. Choices: ["
+                               " | ".join(helper.caller_choices) + "]",
+                          metavar='CALLER_NAME',
+                          default='.')
     required.add_argument("-l", "--cli-case-list",
                           help="Command Line Input, case_list_name and case_list_description in semi-colon "
                                "separated values. Input needs to be wrapped with ''."
@@ -92,7 +98,7 @@ def gen_samples_meta_data(args, verb):
     original_dir = helper.change_folder(args.study_output_folder)
     helper.working_on(args.verbose)
 
-    helper.working_on(verb, message='Saving data_clinical_samples.txt ...')
+    helper.working_on(verb, message='Saving data_clinica_samples.txt ...')
     generate_data_meta_samples.save_data_samples(patient_sample_ids)
     helper.working_on(verb)
 
@@ -160,20 +166,37 @@ def gen_mutation_meta_data(args, verb):
     helper.working_on(args.verbose)
 
     helper.working_on(verb, message='Gathering and decompressing files into temporary folder...')
-    generate_data_meta_mutation_data.decompress()
+    generate_data_meta_mutation_data.decompress_to_temp()
     helper.working_on(verb)
 
     helper.working_on(verb, message='Jumping into temp folder...')
     helper.change_folder('../temp/')
     helper.working_on(args.verbose)
 
-    helper.working_on(verb, message='Adding UNMATCHED column...')
-    generate_data_meta_mutation_data.add_unmatched()
-    helper.working_on(args.verbose)
+    if args.caller == 'GATKHaplotype':
+        helper.working_on(verb, message='Adding UNMATCHED column...')
+        generate_data_meta_mutation_data.add_unmatched()
+        helper.working_on(args.verbose)
+    elif args.caller == 'Mutect':
+        helper.working_on(verb, message='Gathering unfiltered MuTect files...\n'
+                                        'Gathering tumor and normal IDs......')
+        files_tumors_normals = generate_data_meta_mutation_data.gather_files_mutect('unfiltered')
+        helper.working_on(args.verbose)
+
+    elif args.caller == 'Mutect2':
+        helper.working_on(verb, message='Gathering MuTect2 files..........\n'
+                                        'Gathering tumor and normal IDs...')
+        files_tumors_normals = generate_data_meta_mutation_data.gather_files_mutect2()
+        helper.working_on(args.verbose)
+
+    elif args.caller == 'Strelka':
+        helper.working_on(verb, message='Concating pairs of SNVs and InDel Strelka files')
+        files_tumors_normals = generate_data_meta_mutation_data.gather_files_mutect2()
+        helper.working_on(args.verbose)
 
     helper.working_on(verb, message='Exporting from .vcf 2 .maf...')
     helper.working_on(verb, message='And deleting .vcf s...')
-    generate_data_meta_mutation_data.export2maf()
+    generate_data_meta_mutation_data.export2maf(files_tumors_normals)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Popping back...')
