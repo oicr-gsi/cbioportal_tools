@@ -143,7 +143,7 @@ def copy_mutation_data(input_folder, output_folder):
     subprocess.call('cp -r ' + input_folder + ' ' + output_folder)
 
 
-def gather_files_mutect(type):
+def gather_files_mutect(mutect_type):
     # Check if files have a filtered/sorted version, otherwise get the regular version
     files = os.listdir('.')
     gathered_files = []
@@ -162,10 +162,10 @@ def gather_files_mutect(type):
                     normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
 
                     # If the file is a filtered/sorted file remove it if you want unfiltered files
-                    if type == 'unfiltered':
+                    if mutect_type == 'unfiltered':
                         if '.filter' in normal_id and '.filter' in tumor_id:
                             verified_file = False
-                    elif type == 'filtered':
+                    elif mutect_type == 'filtered':
                         if not('.filter' in normal_id and '.filter' in tumor_id):
                             verified_file = False
                     # Don't need to read the entire file
@@ -176,7 +176,7 @@ def gather_files_mutect(type):
     return gathered_files
 
 
-def gather_files_mutect2(type):
+def gather_files_mutect2():
     # Check if files have a filtered/sorted version, otherwise get the regular version
     files = os.listdir('.')
     gathered_files = []
@@ -207,6 +207,62 @@ def gather_files_mutect2(type):
         if verified_file:
             gathered_files.append([each, tumor_id, normal_id])
     return gathered_files
+
+
+def gather_files_strelka():
+    files = os.listdir('.')
+    gathered_files = []
+
+    for each in files:
+        verified_file = False
+        with open(each, 'r') as f:
+            tumor_id, normal_id = ['', '']
+            for read in f:
+                if '##source=strelka' in read:
+                    # Ensure the source is Strelka
+                    verified_file = True
+                elif '##content=strelka somatic indel calls'in read:
+                    flag = 'indel'
+                elif '##content=strelka somatic snv calls' in read:
+                    flag = 'snvs'
+                elif '##inputs=' in read:
+                    # Get the patient and sample ID
+                    read.replace('##inputs=').split(' ')
+                    normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
+                    # Don't need to read the entire file
+                    break
+        # Do NOT append the file if it is unverified for any reason.
+        if verified_file:
+            os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
+            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), tumor_id, normal_id])
+    return np.array(gathered_files)
+
+
+def concat_files_strelka(files_and_more):
+    body = []
+    # I can do this only because of the renaming that I did previously. This still seems unsafe
+    # TODO:: Make this safe by checking ID too
+    for each in files_and_more[:, 0]:
+        f = open(each, 'r')
+        li = f.readlines()
+        if '##content=strelka somatic indel calls\n' in li:
+            index = max(loc for loc, val in enumerate(li) if '#' in val) + 1
+            body = li[index:]
+            f.close()
+            os.remove(each)
+        if '##content=strelka somatic snv calls\n' in li:
+            f.close()
+            f = open(each, 'a')
+            f.writelines(body)
+            f.close()
+
+    # Remove removed files
+    files_and_more = list(files_and_more)
+    new_files = os.listdir('.')
+    for each in files_and_more:
+        if not each[0] in new_files:
+            files_and_more.remove(each)
+    return np.array(files_and_more)
 
 
 def save_meta_mutation(args):
