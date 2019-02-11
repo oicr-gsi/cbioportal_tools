@@ -42,6 +42,11 @@ def define_parser():
                                "it wherever you run the script from.",
                           metavar='FOLDER',
                           default='.')
+    required.add_argument("-m", "--mutation-data",
+                          help="Command Line Input, the profile_name and profile_description in semi-colon separated "
+                               "values. Input needs to be wrapped with ''. e.g. -c 'Mutations (Colorectal);Mutation "
+                               "data from whole exome sequencing.'",
+                          metavar='STRING')
     required.add_argument("-c", "--caller",
                           choices=helper.caller_choices,
                           help="The caller from which the mutation data is being created from. Choices: ["
@@ -67,7 +72,10 @@ def decompress_to_temp():
         if file.endswith(".tar.gz"):
             subprocess.call("tar -xzf {} -C {}".format(file, temp_folder), shell=True)
         elif file.endswith('.gz'):
-            subprocess.call("gunzip -kc {} > {}{}".format(file, temp_folder, os.path.basename(file)))
+            subprocess.call("gunzip -c {} > {}/{}".format(file,
+                                                          temp_folder,
+                                                          os.path.splitext(os.path.basename(file))[0],
+                                                          shell=True))
         else:
             subprocess.call("cp {} {}".format(file, temp_folder), shell=True)
 
@@ -225,7 +233,7 @@ def gather_files_strelka():
                     flag = 'snvs'
                 elif '##inputs=' in read:
                     # Get the patient and sample ID
-                    read.replace('##inputs=', '').split(' ')
+                    read = read.strip().replace('##inputs=', '').split(' ')
                     normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
                     # Don't need to read the entire file
                     break
@@ -257,9 +265,9 @@ def concat_files_strelka(files_and_more):
     # Remove removed files
     files_and_more = list(files_and_more)
     new_files = os.listdir('.')
-    for each in files_and_more:
-        if not each[0] in new_files:
-            files_and_more.remove(each)
+    for i in range(len(files_and_more), 0, -1):
+        if not files_and_more[i][0] == new_files:
+            del files_and_more[i]
     return np.array(files_and_more)
 
 
@@ -271,10 +279,10 @@ def save_meta_mutation(args):
     f.write('datatype: MAF\n')
     f.write('stable_id: mutations\n')
     f.write('show_profile_in_analysis_tab: true\n')
-    f.write('profile_name: {}\n'.format(args.profile_name))
-    f.write('profile_description: {}\n'.format(args.profile_description))
+    f.write('profile_name: {}\n'.format(args.mutation_data.split(';')[0]))
+    f.write('profile_description: {}\n'.format(args.mutation_data.split(';')[1]))
     f.write('datatype: MAF\n')
-    f.write('data_filename: {}\n'.format(args.study_id + '.maf'))
+    f.write('data_filename: data_mutations_extended.maf\n')
     # This part ^^^ will be wrong until I understand what exactly and extended maf file is and how to make it
     f.close()
 
