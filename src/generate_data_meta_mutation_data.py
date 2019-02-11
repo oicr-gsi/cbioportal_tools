@@ -13,7 +13,7 @@ import numpy as np
 import helper
 
 # Define important constants
-REFERENCE_FASTA = "/.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa"
+REFERENCE_FASTA = "/.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa "
 
 meta_mutations = 'meta_mutations.txt'
 data_mutations = 'data_mutations.txt'
@@ -74,8 +74,8 @@ def decompress_to_temp():
         elif file.endswith('.gz'):
             subprocess.call("gunzip -c {} > {}/{}".format(file,
                                                           temp_folder,
-                                                          os.path.splitext(os.path.basename(file))[0],
-                                                          shell=True))
+                                                          os.path.splitext(os.path.basename(file))[0]),
+                            shell=True)
         else:
             subprocess.call("cp {} {}".format(file, temp_folder), shell=True)
 
@@ -110,7 +110,7 @@ def export2maf(files_tumors_normals, args):
                                 --output-maf ../GATKMAF/' + os.path.basename(vcf) + '.maf \
                                 --normal-id ' + files_tumors_normals[i][1] + '\
                                 --tumor-id ' + files_tumors_normals[i][0] + ' \
-                                --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
+                                --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa vcf2maf.pl \
                                 --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
                                 --vep-path $VEP_PATH \
                                 --vep-data $VEP_DATA \
@@ -265,7 +265,7 @@ def concat_files_strelka(files_and_more):
     # Remove removed files
     files_and_more = list(files_and_more)
     new_files = os.listdir('.')
-    for i in range(len(files_and_more), 0, -1):
+    for i in range(len(files_and_more)-1, 0, -1):
         if not files_and_more[i][0] == new_files:
             del files_and_more[i]
     return np.array(files_and_more)

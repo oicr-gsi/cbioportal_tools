@@ -67,7 +67,7 @@ def define_parser():
     required.add_argument("-k", "--cbioportal-key",
                           help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
                           metavar='FILE',
-                          default='u/kchandan/cbioportal.pem')
+                          default='/u/kchandan/cbioportal.pem')
     parser.add_argument("-d", "--default",
                         action="store_true",
                         help="Prevents need for user input by trying to parse study ID, you must follow format "
@@ -222,7 +222,7 @@ def gen_mutation_meta_data(args, verb):
     helper.working_on(args.verbose, message='Success! The .maf files have been exported!')
 
     helper.working_on(verb, message='Copying .maf mutation data to output folder...')
-    generate_data_meta_mutation_data.copy_mutation_data(args.study_input_folder+'../temp/', args.study_output_folder)
+    generate_data_meta_mutation_data.copy_mutation_data(args.study_input_folder+'/../temp/', args.study_output_folder)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Jumping into output folder...')
