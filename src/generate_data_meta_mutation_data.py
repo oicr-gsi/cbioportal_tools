@@ -61,8 +61,9 @@ def define_parser():
 def decompress_to_temp():
     # Decompresses each file in the current folder to ../temp/ if it is compressed. otherwise, copy it over
     for file in os.listdir("."):
+        file = os.path.abspath(file)
         helper.make_folder("../temp/")
-        if file.endswith(".tar.gz"):
+        if file.endswith(".tar.gz") or file.endswith('.gz'):
             subprocess.call("tar -xzf " + file + " -C ../temp/")
         else:
             subprocess.call("cp " + file + " ../temp/")

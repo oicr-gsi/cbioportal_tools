@@ -50,7 +50,7 @@ def define_parser():
                           metavar='STRING')
     required.add_argument("-C", "--caller",
                           choices=helper.caller_choices,
-                          help="The caller from which the mutation data is being created from. Choices: ["
+                          help="The caller from which the mutation data is being created from. Choices: [" +
                                " | ".join(helper.caller_choices) + "]",
                           metavar='CALLER_NAME',
                           default='.')
@@ -61,7 +61,7 @@ def define_parser():
                           metavar='STRING')
     required.add_argument("-k", "--cbioportal-key",
                           help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
-                          metavar='STRING',
+                          metavar='FILE',
                           default='u/kchandan/cbioportal.pem')
     parser.add_argument("-d", "--default",
                         action="store_true",

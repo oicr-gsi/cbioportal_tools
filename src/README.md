@@ -19,7 +19,8 @@ optional arguments:
                         you use this. **This tag is not recommended and cannot
                         be used alongside -c as -c takes precedence.
   -v, --verbose         Makes program verbose
-  -f, --force           Forces overwriting of data_cancer_type.txt file.
+  -f, --force           Forces overwriting of data_cancer_type.txt file and
+                        *.maf files.
 
 Required Arguments:
   -i FOLDER, --study-input-folder FOLDER
@@ -42,23 +43,31 @@ Required Arguments:
                         Samples sequenced and analyzed at OICR;Genetics and
                         Epidemiology of Colorectal Cancer
                         Consortium;GECCO;colorectal'
+  -C CALLER_NAME, --caller CALLER_NAME
+                        The caller from which the mutation data is being
+                        created from. Choices: [GATKHaplotype | Mutect |
+                        Mutect2 | Strelka | MutectStrelka]
   -l STRING, --cli-case-list STRING
                         Command Line Input, case_list_name and
                         case_list_description in semi-colon separated values.
                         Input needs to be wrapped with ''.e.g. -c 'All
                         Tumours;All tumor samples (over 9000 samples)'
+  -k FILE, --cbioportal-key FILE
+                        The RSA key to cBioPortal. Should have appropriate
+                        read write restrictions
 ```
 
 For example:
 
 ```
-python3 generate_study_meta.py -h
+python3.6m generate_study_meta.py -h
 or
-python3 main_minimal.py \
--i test/fakes/ \
--o new_study/ \
--s gecco_gsi_2019 \
+python3.6m main_minimal.py \
+-i /.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/Strelka \
+-o /.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/cbioStrelka \
+-s gecco_gsiMore_2019 \
 -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal' \
+-C Strelka \
 -l 'All Tumours;All tumor samples (over 9000 samples)' \
 -v -f
 ```
@@ -133,36 +142,7 @@ For example:
 ```
 python3 generate_data_meta_samples.py -h
 or
-python3 generate_data_meta_samples.py -i test/fakes/ -i brca_gsi_2019 -o new_study/
+python3 generate_data_meta_samples.py -i test/fakes/ -s brca_gsi_2019 -o new_study/
 or
 python3 generate_data_meta_samples.py -i Mutect2/ -s kremen1_octane_2020 -o new_study/ 
-```
-\*\*
-**import_mutation_data.py is currently in an unusable state.**
-### Usage - import_mutation_data.py
-Run the import_mutation_data.py program with:
-
-```
-positional arguments:
-  inputFile             The input file, can be of compressed: .tar.gz | .gz |
-                        .zip] or uncompressed format in: [vcf | maf] If the
-                        file is compressed, optional tag -c must be added
-
-optional arguments:
-  -h, --help            show this help message and exit
-
-required arguments:
-  -c, --compressed      If the input file is compressed this tag must be added
-  -w, --workflowUsed    The workflow used is a mandatory tag, choices are:
-                        [GATKHaplotypeCaller | Mutect | Mutect2 | Strelka]
-```
-
-For example:
-
-```
-python3 import_mutation_data.py -h
-or
-python3 import_mutation_data.py banana.vcf.tar.gz -c -w Mutect
-or
-python3 import_mutation_data.py apple.maf -w GATKHaplotypeCaller
 ```
