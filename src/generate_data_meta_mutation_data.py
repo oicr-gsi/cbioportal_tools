@@ -94,6 +94,7 @@ def export2maf(files_tumors_normals, args):
     else:
         write = False
     # Get all legitimate files
+
     for i in range(len(files_tumors_normals)):
         # Figure out if the .maf file should be generated
         vcf = files_tumors_normals[i][0]
@@ -221,9 +222,9 @@ def gather_files_strelka():
     for each in files:
         verified_file = False
         flag = False
+        tumor_id, normal_id = ['', '']
 
         with open(each, 'r') as f:
-            tumor_id, normal_id = ['', '']
             for read in f:
                 if '##source=strelka' in read:
                     # Ensure the source is Strelka
@@ -238,10 +239,11 @@ def gather_files_strelka():
                     normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
                     # Don't need to read the entire file
                     break
-        # Do NOT append the file if it is unverified for any reason.
-        if verified_file:
-            os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
-            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), tumor_id, normal_id])
+            # Do NOT append the file if it is unverified for any reason.
+            if verified_file:
+                os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
+                gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), tumor_id, normal_id])
+
     return np.array(gathered_files)
 
 
