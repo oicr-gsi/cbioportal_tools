@@ -237,14 +237,16 @@ def export_study_to_cbioportal(args, verb):
     # Copying folder to cBioPortal
     helper.working_on(verb, message='Copying folder to cBioPortal...')
     subprocess.call('scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies'.format(args.cbioportal_key,
-                                                                                           args.study_output_folder))
+                                                                                           args.study_output_folder),
+                    shell=True)
     helper.working_on(verb)
     # Importing study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
     subprocess.call("ssh -i {} debian@10.30.133.80:/home/debian/cbioportal/core/src/main/scripts/importer "
                     "'./metaImport.py -s ../../../../../../oicr_studies/{} "
                     "-u http://10.30.133.80:8080/cbioportal "
-                    "-o'".format(args.cbioportal_key, args.study_output_folder))
+                    "-o'".format(args.cbioportal_key, args.study_output_folder),
+                    shell=True)
     helper.working_on(verb)
 
 
