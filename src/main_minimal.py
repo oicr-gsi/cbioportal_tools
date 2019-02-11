@@ -48,6 +48,11 @@ def define_parser():
                                "e.g. -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and "
                                "Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal'",
                           metavar='STRING')
+    required.add_argument("-m", "--mutation-data",
+                          help="Command Line Input, the profile_name and profile_description in semi-colon separated "
+                               "values. Input needs to be wrapped with ''. e.g. -c 'Mutations (Colorectal);Mutation "
+                               "data from whole exome sequencing.'",
+                          metavar='STRING')
     required.add_argument("-C", "--caller",
                           choices=helper.caller_choices,
                           help="The caller from which the mutation data is being created from. Choices: [" +
