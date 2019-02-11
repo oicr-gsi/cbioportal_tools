@@ -58,28 +58,6 @@ def define_parser():
     return parser
 
 
-def pre_process_vcf_GATK(input_file, output_file):
-    i = open(input_file, 'r')
-    o = open(output_file, 'w')
-    while True:
-        line = i.readline()
-        if '\t' in line:
-            break
-        else:
-            o.write(line)
-    o.write(i.readline() + '\tUNMATCHED')
-    while True:
-        line = i.readline().split('\t')
-        index = len(line) - 1
-        write = '\t'.join([*line, line[index]])
-        if index < 2:
-            break
-        else:
-            o.write(write)
-    i.close()
-    o.close()
-
-
 def decompress_to_temp():
     # Decompresses each file in the current folder to ../temp/ if it is compressed. otherwise, copy it over
     for file in os.listdir("."):
@@ -90,10 +68,8 @@ def decompress_to_temp():
             subprocess.call("cp " + file + " ../temp/")
 
 
-def add_unmatched():
-    for each in os.listdir('.'):
-        # Add unmatched column to files
-        pre_process_vcf_GATK(each, each)
+def copy_mutation_data(input_folder, output_folder):
+    subprocess.call('cp -r ' + input_folder + ' ' + output_folder)
 
 
 def export2maf(files_tumors_normals, args):
@@ -129,8 +105,32 @@ def export2maf(files_tumors_normals, args):
         os.remove(vcf)
 
 
-def copy_mutation_data(input_folder, output_folder):
-    subprocess.call('cp -r ' + input_folder + ' ' + output_folder)
+def add_unmatched_GATK():
+    for each in os.listdir('.'):
+        # Add unmatched column to files
+        pre_process_vcf_GATK(each, each)
+
+
+def pre_process_vcf_GATK(input_file, output_file):
+    i = open(input_file, 'r')
+    o = open(output_file, 'w')
+    while True:
+        line = i.readline()
+        if '\t' in line:
+            break
+        else:
+            o.write(line)
+    o.write(i.readline() + '\tUNMATCHED')
+    while True:
+        line = i.readline().split('\t')
+        index = len(line) - 1
+        write = '\t'.join([*line, line[index]])
+        if index < 2:
+            break
+        else:
+            o.write(write)
+    i.close()
+    o.close()
 
 
 def gather_files_mutect(mutect_type):
@@ -148,7 +148,7 @@ def gather_files_mutect(mutect_type):
                     verified_file = True
                 elif '##inputs=' in read:
                     # Get the patient and sample ID
-                    read.replace('##inputs=').split(' ')
+                    read.replace('##inputs=', '').split(' ')
                     normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
 
                     # If the file is a filtered/sorted file remove it if you want unfiltered files
@@ -187,7 +187,7 @@ def gather_files_mutect2():
 
                 # BREAK CONDITIONS
                 # Don't need to read the entire file if we've found what we need
-                if all(normal_id, tumor_id):
+                if all([normal_id, tumor_id]):
                     break
                 # This implies a tumor only MuTect2 file which we don't want?
                 elif tumor_only.findall(read):
@@ -205,6 +205,8 @@ def gather_files_strelka():
 
     for each in files:
         verified_file = False
+        flag = False
+
         with open(each, 'r') as f:
             tumor_id, normal_id = ['', '']
             for read in f:
@@ -217,7 +219,7 @@ def gather_files_strelka():
                     flag = 'snvs'
                 elif '##inputs=' in read:
                     # Get the patient and sample ID
-                    read.replace('##inputs=').split(' ')
+                    read.replace('##inputs=', '').split(' ')
                     normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
                     # Don't need to read the entire file
                     break
