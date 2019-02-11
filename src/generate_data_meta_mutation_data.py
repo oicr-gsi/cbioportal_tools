@@ -62,21 +62,25 @@ def decompress_to_temp():
     # Decompresses each file in the current folder to ../temp/ if it is compressed. otherwise, copy it over
     for file in os.listdir("."):
         file = os.path.abspath(file)
-        helper.make_folder("../temp/")
-        if file.endswith(".tar.gz") or file.endswith('.gz'):
-            subprocess.call("tar -xzf " + file + " -C ../temp/")
+        temp_folder = os.path.abspath('../temp/')
+        helper.make_folder(temp_folder)
+        if file.endswith(".tar.gz"):
+            subprocess.call("tar -xzf {} -C {}".format(file, temp_folder), shell=True)
+        elif file.endswith('.gz'):
+            subprocess.call("gunzip -kc {} > {}{}".format(file, temp_folder, os.path.basename(file)))
         else:
-            subprocess.call("cp " + file + " ../temp/")
+            subprocess.call("cp {} {}".format(file, temp_folder), shell=True)
 
 
 def copy_mutation_data(input_folder, output_folder):
-    subprocess.call('cp -r ' + input_folder + ' ' + output_folder)
+    subprocess.call('cp -r {} {}'.format(input_folder, output_folder), shell=True)
 
 
 def export2maf(files_tumors_normals, args):
     # Load Modules
-    subprocess.call("module use /oicr/local/analysis/Modules/modulefiles /.mounts/labs/PDE/Modules/modulefiles")
-    subprocess.call("module load vep/92 vcf2maf python-gsi/3.6.4")
+    subprocess.call("module use /oicr/local/analysis/Modules/modulefiles /.mounts/labs/PDE/Modules/modulefiles",
+                    shell=True)
+    subprocess.call("module load vep/92 vcf2maf python-gsi/3.6.4", shell=True)
     # Get all files ending in .vcf
     for i in range(len(files_tumors_normals)):
         # Figure out if the .maf file should be generated
@@ -95,14 +99,15 @@ def export2maf(files_tumors_normals, args):
         # Split for tumor and normal?
         if write:
                 subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
-                --output-maf ../GATKMAF/' + os.path.basename(vcf) + '.maf \
-                --normal-id ' + files_tumors_normals[i][1] + '\
-                --tumor-id ' + files_tumors_normals[i][0] + ' \
-                --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
-                --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
-                --vep-path $VEP_PATH \
-                --vep-data $VEP_DATA \
-                --species homo_sapiens')
+                                --output-maf ../GATKMAF/' + os.path.basename(vcf) + '.maf \
+                                --normal-id ' + files_tumors_normals[i][1] + '\
+                                --tumor-id ' + files_tumors_normals[i][0] + ' \
+                                --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.favcf2maf.pl \
+                                --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
+                                --vep-path $VEP_PATH \
+                                --vep-data $VEP_DATA \
+                                --species homo_sapiens',
+                                shell=True)
         os.remove(vcf)
 
 
