@@ -6,6 +6,7 @@ __status__ = "Pre-Production"
 # Command Line Imports
 import argparse
 import subprocess
+import os
 # Other Scripts
 import generate_meta_study
 import generate_meta_case_list
@@ -25,7 +26,9 @@ def define_parser():
 
     required = parser.add_argument_group('Required Arguments')
     required.add_argument("-i", "--study-input-folder",
-                          type=lambda folder: helper.check_files_in_folder(helper.extensionChoices, folder, parser),
+                          type=lambda folder: os.path.abspath(helper.check_files_in_folder(helper.extensionChoices,
+                                                                                           folder,
+                                                                                           parser)),
                           help="The input folder can contain compressed: [" +
                                " | ".join(helper.compressedChoices) + "] "
                                                                       " or uncompressed format in: [" +
@@ -33,6 +36,7 @@ def define_parser():
                           default='.',
                           metavar='FOLDER')
     required.add_argument("-o", "--study-output-folder",
+                          type=lambda folder: os.path.abspath(folder),
                           help="The folder you want to export this generated data_samples.txt file to. Generally this "
                                "will be the main folder of the study being generated. If left blank this will generate "
                                "it wherever you run the script from.",
@@ -247,7 +251,7 @@ def export_study_to_cbioportal(args, verb):
     helper.working_on(verb)
     # Importing study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
-    subprocess.call("ssh -i {} debian@10.30.133.80:8080:/home/debian/cbioportal/core/src/main/scripts/importer "
+    subprocess.call("ssh -i {} debian@10.30.133.80:/home/debian/cbioportal/core/src/main/scripts/importer "
                     "'./metaImport.py -s ../../../../../../oicr_studies/{} "
                     "-u http://10.30.133.80:8080/cbioportal "
                     "-o'".format(args.cbioportal_key, args.study_output_folder),
