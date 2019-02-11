@@ -5,6 +5,7 @@ __status__ = "Pre-Production"
 
 # Command Line Imports
 import argparse
+import subprocess
 # Other Scripts
 import generate_meta_study
 import generate_meta_case_list
@@ -58,6 +59,10 @@ def define_parser():
                                "separated values. Input needs to be wrapped with ''."
                                "e.g. -c 'All Tumours;All tumor samples (over 9000 samples)'",
                           metavar='STRING')
+    required.add_argument("-k", "--cbioportal-key",
+                          help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
+                          metavar='STRING',
+                          default='u/kchandan/cbioportal.pem')
     parser.add_argument("-d", "--default",
                         action="store_true",
                         help="Prevents need for user input by trying to parse study ID, you must follow format "
@@ -173,11 +178,13 @@ def gen_mutation_meta_data(args, verb):
     helper.change_folder('../temp/')
     helper.working_on(args.verbose)
 
+    files_tumors_normals = []
+
     # TODO:: Find a less wasteful way for these if/else statements
     if False and args.caller == 'GATKHaplotype':  # Will never run until corrected
         # TODO:: Do GATKHaplotype later
         helper.working_on(verb, message='Adding UNMATCHED column...')
-        generate_data_meta_mutation_data.add_unmatched()
+        generate_data_meta_mutation_data.add_unmatched_GATK()
         helper.working_on(args.verbose)
     elif args.caller == 'Mutect':
         helper.working_on(verb, message='Gathering unfiltered MuTect files...\n'
@@ -226,6 +233,21 @@ def gen_mutation_meta_data(args, verb):
     helper.working_on(args.verbose, message='Success! The cancer case lists has been saved!')
 
 
+def export_study_to_cbioportal(args, verb):
+    # Copying folder to cBioPortal
+    helper.working_on(verb, message='Copying folder to cBioPortal...')
+    subprocess.call('scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies'.format(args.cbioportal_key,
+                                                                                           args.study_output_folder))
+    helper.working_on(verb)
+    # Importing study to cBioPortal
+    helper.working_on(verb, message='Importing study to cBioPortal...')
+    subprocess.call("ssh -i {} debian@10.30.133.80:/home/debian/cbioportal/core/src/main/scripts/importer "
+                    "'./metaImport.py -s ../../../../../../oicr_studies/{} "
+                    "-u http://10.30.133.80:8080/cbioportal "
+                    "-o'".format(args.cbioportal_key, args.study_output_folder))
+    helper.working_on(verb)
+
+
 def main():
     args = define_parser().parse_args()
     verb = args.verbose
@@ -235,11 +257,10 @@ def main():
     gen_cancer_type_meta_data(args, verb)
     gen_cancer_list_meta(args, verb)
     gen_mutation_meta_data(args, verb)
+    export_study_to_cbioportal(args, verb)
     helper.stars()
     helper.working_on(verb, message='CONGRATULATIONS! A minimal study is now be complete!')
     helper.stars()
-    # Export study to cbioportal with
-    # scp -r -i /u/kchandan/cbioportal.pem output_folder/ debian@10.30.133.80:/home/debian/oicr_studies
 
 
 if __name__ == '__main__':
