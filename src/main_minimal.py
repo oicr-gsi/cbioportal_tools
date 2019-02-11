@@ -247,7 +247,7 @@ def export_study_to_cbioportal(args, verb):
     helper.working_on(verb)
     # Importing study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
-    subprocess.call("ssh -i {} debian@10.30.133.80:/home/debian/cbioportal/core/src/main/scripts/importer "
+    subprocess.call("ssh -i {} debian@10.30.133.80:8080:/home/debian/cbioportal/core/src/main/scripts/importer "
                     "'./metaImport.py -s ../../../../../../oicr_studies/{} "
                     "-u http://10.30.133.80:8080/cbioportal "
                     "-o'".format(args.cbioportal_key, args.study_output_folder),

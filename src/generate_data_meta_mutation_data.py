@@ -89,7 +89,7 @@ def export2maf(files_tumors_normals, args):
     subprocess.call("module use /oicr/local/analysis/Modules/modulefiles /.mounts/labs/PDE/Modules/modulefiles",
                     shell=True)
     subprocess.call("module load vep/92 vcf2maf python-gsi/3.6.4", shell=True)
-    # Get all files ending in .vcf
+    # Get all legitimate files
     for i in range(len(files_tumors_normals)):
         # Figure out if the .maf file should be generated
         vcf = files_tumors_normals[i][0]
@@ -104,10 +104,14 @@ def export2maf(files_tumors_normals, args):
         except OSError:
             write = True
 
+        helper.make_folder('../{}MAF/'.format(args.caller))
         # Split for tumor and normal?
         if write:
                 subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
-                                --output-maf ../GATKMAF/' + os.path.basename(vcf) + '.maf \
+                                --output-maf ../{}MAF/{}.maf'.format(args.caller,
+                                                                     os.path.splitext(
+                                                                         os.path.basename(
+                                                                             vcf))[0]) + ' \
                                 --normal-id ' + files_tumors_normals[i][1] + '\
                                 --tumor-id ' + files_tumors_normals[i][0] + ' \
                                 --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa vcf2maf.pl \
