@@ -43,6 +43,12 @@ Required Arguments:
                         Samples sequenced and analyzed at OICR;Genetics and
                         Epidemiology of Colorectal Cancer
                         Consortium;GECCO;colorectal'
+  -m STRING, --mutation-data STRING
+                        Command Line Input, the profile_name and
+                        profile_description in semi-colon separated values.
+                        Input needs to be wrapped with ''. e.g. -c 'Mutations
+                        (Colorectal);Mutation data from whole exome
+                        sequencing.'
   -C CALLER_NAME, --caller CALLER_NAME
                         The caller from which the mutation data is being
                         created from. Choices: [GATKHaplotype | Mutect |
@@ -68,6 +74,7 @@ python3.6m main_minimal.py \
 -s gecco_gsiMore_2019 \
 -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal' \
 -C Strelka \
+-m 'Mutations (Colorectal);Mutation data from whole exome sequencing.' \
 -l 'All Tumours;All tumor samples (over 9000 samples)' \
 -v -f
 ```
