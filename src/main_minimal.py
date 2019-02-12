@@ -263,6 +263,8 @@ def main():
     args = define_parser().parse_args()
     verb = args.verbose
 
+    if args.force:
+        helper.clean_folder(args.study_output_folder)
     gen_study_meta(args, verb)
     gen_samples_meta_data(args, verb)
     gen_cancer_type_meta_data(args, verb)

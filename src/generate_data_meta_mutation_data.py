@@ -69,6 +69,7 @@ def decompress_to_temp():
         file = os.path.abspath(file)
         temp_folder = os.path.abspath('../temp/')
         helper.make_folder(temp_folder)
+        helper.clean_folder(temp_folder)
         if file.endswith(".tar.gz"):
             subprocess.call("tar -xzf {} -C {}".format(file, temp_folder), shell=True)
         elif file.endswith('.gz'):
@@ -82,42 +83,6 @@ def decompress_to_temp():
 
 def copy_mutation_data(input_folder, output_folder):
     subprocess.call('cp -r {} {}'.format(input_folder, output_folder), shell=True)
-
-
-def export2maf(files_normals_tumors, args):
-    # Load Modules
-    subprocess.call("module use /oicr/local/analysis/Modules/modulefiles /.mounts/labs/PDE/Modules/modulefiles",
-                    shell=True)
-    subprocess.call("module load vep/92 vcf2maf python-gsi/3.6.4", shell=True)
-    if args.force:
-        write = True
-    else:
-        write = False
-    # Get all legitimate files
-
-    for i in range(len(files_normals_tumors)):
-        # Figure out if the .maf file should be generated
-        vcf = files_normals_tumors[i][0]
-        try:
-            os.stat(os.path.basename(vcf) + '.maf')
-            if not args.force:
-                write = False
-        except OSError:
-            write = True
-
-        if write:
-                subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
-                                --output-maf {}/case_lists/{}.maf'.format(args.study_output_folder,
-                                                               os.path.splitext(os.path.basename(vcf))[0]) + ' \
-                                --normal-id ' + files_normals_tumors[i][1] + '\
-                                --tumor-id ' + files_normals_tumors[i][2] + ' \
-                                --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa vcf2maf.pl \
-                                --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
-                                --vep-path $VEP_PATH \
-                                --vep-data $VEP_DATA \
-                                --species homo_sapiens',
-                                shell=True)
-        os.remove(vcf)
 
 
 def add_unmatched_GATK():
@@ -153,6 +118,7 @@ def pre_process_vcf_GATK(input_file, output_file):
 
 def gather_files_mutect(mutect_type):
     files = os.listdir('.')
+    files.sort()
     gathered_files = []
 
     for each in files:
@@ -193,6 +159,7 @@ def gather_files_mutect(mutect_type):
 
 def gather_files_mutect2():
     files = os.listdir('.')
+    files.sort()
     gathered_files = []
 
     for each in files:
@@ -232,6 +199,7 @@ def gather_files_mutect2():
 
 def gather_files_strelka():
     files = os.listdir('.')
+    files.sort()
     gathered_files = []
 
     for each in files:
@@ -269,6 +237,7 @@ def gather_files_strelka():
 
 def concat_files_strelka(files_and_more):
     body = []
+    files_and_more.sort(axis=0)
     # I can do this only because of the renaming that I did previously. This still seems unsafe
     # TODO:: Make this safe by checking ID too
     for i in range(len(files_and_more)):
@@ -296,6 +265,42 @@ def concat_files_strelka(files_and_more):
             i -= 1
         i -= 1
     return np.array(files_and_more)
+
+
+def export2maf(files_normals_tumors, args):
+    # Load Modules
+    subprocess.call("module use /oicr/local/analysis/Modules/modulefiles /.mounts/labs/PDE/Modules/modulefiles",
+                    shell=True)
+    subprocess.call("module load vep/92 vcf2maf python-gsi/3.6.4", shell=True)
+    if args.force:
+        write = True
+    else:
+        write = False
+    # Get all legitimate files
+
+    for i in range(len(files_normals_tumors)):
+        # Figure out if the .maf file should be generated
+        vcf = files_normals_tumors[i][0]
+        try:
+            os.stat(os.path.basename(vcf) + '.maf')
+            if not args.force:
+                write = False
+        except OSError:
+            write = True
+
+        if write:
+                subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
+                                --output-maf {}/case_lists/{}.maf'.format(args.study_output_folder,
+                                                               os.path.splitext(os.path.basename(vcf))[0]) + ' \
+                                --normal-id ' + files_normals_tumors[i][1] + '\
+                                --tumor-id ' + files_normals_tumors[i][2] + ' \
+                                --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa vcf2maf.pl \
+                                --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
+                                --vep-path $VEP_PATH \
+                                --vep-data $VEP_DATA \
+                                --species homo_sapiens',
+                                shell=True)
+        os.remove(vcf)
 
 
 def save_meta_mutation(args):
