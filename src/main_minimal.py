@@ -187,7 +187,7 @@ def gen_mutation_meta_data(args, verb):
     helper.change_folder('../temp/')
     helper.working_on(args.verbose)
 
-    files_tumors_normals = []
+    files_normals_tumors = []
 
     # TODO:: Find a less wasteful way for these if/else statements
     if False and args.caller == 'GATKHaplotype':  # Will never run until corrected
@@ -197,28 +197,28 @@ def gen_mutation_meta_data(args, verb):
         helper.working_on(args.verbose)
     elif args.caller == 'Mutect':
         helper.working_on(verb, message='Gathering unfiltered MuTect files...\n'
-                                        'Gathering tumor and normal IDs......')
-        files_tumors_normals = generate_data_meta_mutation_data.gather_files_mutect('unfiltered')
+                                        'Gathering normal and tumor IDs......')
+        files_normals_tumors = generate_data_meta_mutation_data.gather_files_mutect('unfiltered')
         helper.working_on(args.verbose)
 
     elif args.caller == 'Mutect2':
         helper.working_on(verb, message='Gathering MuTect2 files..........\n'
-                                        'Gathering tumor and normal IDs...')
-        files_tumors_normals = generate_data_meta_mutation_data.gather_files_mutect2()
+                                        'Gathering normal and tumor IDs...')
+        files_normals_tumors = generate_data_meta_mutation_data.gather_files_mutect2()
         helper.working_on(args.verbose)
 
     elif args.caller == 'Strelka':
         helper.working_on(verb, message='Gathering valid Strelka Files...')
-        files_tumors_normals = generate_data_meta_mutation_data.gather_files_strelka()
+        files_normals_tumors = generate_data_meta_mutation_data.gather_files_strelka()
         helper.working_on(args.verbose)
 
         helper.working_on(verb, message='Concating Strelka Files.........')
-        files_tumors_normals = generate_data_meta_mutation_data.concat_files_strelka(files_tumors_normals)
+        files_normals_tumors = generate_data_meta_mutation_data.concat_files_strelka(files_normals_tumors)
         helper.working_on(args.verbose)
 
     helper.working_on(verb, message='Exporting from .vcf 2 .maf...')
     helper.working_on(verb, message='And deleting .vcf s...')
-    generate_data_meta_mutation_data.export2maf(files_tumors_normals, args)
+    generate_data_meta_mutation_data.export2maf(files_normals_tumors, args)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Popping back...')
