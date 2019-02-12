@@ -149,69 +149,85 @@ def pre_process_vcf_GATK(input_file, output_file):
     o.close()
 
 
+## The currently working caller readers
+
+
 def gather_files_mutect(mutect_type):
-    # Check if files have a filtered/sorted version, otherwise get the regular version
     files = os.listdir('.')
     gathered_files = []
 
     for each in files:
         verified_file = False
-        with open(each, 'r') as f:
-            tumor_id, normal_id = ['', '']
-            for read in f:
-                if '##source=mutect' in read:
-                    # Ensure the source is MuTect
-                    verified_file = True
-                elif '##inputs=' in read:
-                    # Get the patient and sample ID
-                    read.replace('##inputs=', '').split(' ')
-                    normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
+        flag = False
+        tumor_id, normal_id = [False, False]
+        f = open(each, 'r')
+        while not all([verified_file, flag, tumor_id, normal_id]):
+            read = f.readline()
 
-                    # If the file is a filtered/sorted file remove it if you want unfiltered files
-                    if mutect_type == 'unfiltered':
-                        if '.filter' in normal_id and '.filter' in tumor_id:
-                            verified_file = False
-                    elif mutect_type == 'filtered':
-                        if not('.filter' in normal_id and '.filter' in tumor_id):
-                            verified_file = False
-                    # Don't need to read the entire file
-                    break
+            if not read.startswith('#'):
+                break
+
+            if read.startswith('##source=mutect'):
+                # Ensure the source is MuTect
+                verified_file = True
+            elif read.startswith('##inputs='):
+                # Get the patient and sample ID
+                read.replace('##inputs=', '').split(' ')
+                normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
+
+                # If the file is a filtered/sorted file remove it if you want unfiltered files
+                if mutect_type == 'unfiltered':
+                    if '.filter' in normal_id and '.filter' in tumor_id:
+                        verified_file = False
+                elif mutect_type == 'filtered':
+                    if not('.filter' in normal_id and '.filter' in tumor_id):
+                        verified_file = False
+                # Don't need to read the entire file
+                break
         # Do NOT append the file if it is unverified for any reason.
+        f.close()
         if verified_file:
-            gathered_files.append([each, tumor_id, normal_id])
+            os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
+            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), tumor_id, normal_id])
     return np.array(gathered_files)
 
 
 def gather_files_mutect2():
-    # Check if files have a filtered/sorted version, otherwise get the regular version
     files = os.listdir('.')
     gathered_files = []
-    tumor_only = re.compile('tumor_only')
 
     for each in files:
         verified_file = False
-        with open(each, 'r') as f:
-            tumor_id, normal_id = ['', '']
-            for read in f:
-                # Ensure the source is MuTect
-                if '##GATKCommandLine.MuTect2' in read:
-                    verified_file = True
-                elif '##SAMPLE=<ID=NORMAL,SampleName=' in read:
-                    normal_id = read.replace('##SAMPLE=<ID=NORMAL,SampleName=', '').split(',')[0]
-                elif '##SAMPLE=<ID=TUMOR,SampleName=' in read:
-                    tumor_id = read.replace('##SAMPLE=<ID=TUMOR,SampleName=', '').split(',')[0]
+        flag = False
+        tumor_id, normal_id = [False, False]
+        f = open(each, 'r')
+        while not all([verified_file, flag, tumor_id, normal_id]):
+            read = f.readline()
 
-                # BREAK CONDITIONS
-                # Don't need to read the entire file if we've found what we need
-                if all([normal_id, tumor_id]):
-                    break
-                # This implies a tumor only MuTect2 file which we don't want?
-                elif tumor_only.findall(read):
-                    verified_file = False
-                    break
+            if not read.startswith('#'):
+                break
+
+            # Ensure the source is MuTect
+            if read.startswith('##GATKCommandLine.MuTect2'):
+                verified_file = True
+            elif read.startswith('##SAMPLE=<ID=NORMAL,SampleName='):
+                normal_id = read.replace('##SAMPLE=<ID=NORMAL,SampleName=', '').split(',')[0]
+            elif read.startswith('##SAMPLE=<ID=TUMOR,SampleName='):
+                tumor_id = read.replace('##SAMPLE=<ID=TUMOR,SampleName=', '').split(',')[0]
+
+            # BREAK CONDITIONS
+            # Don't need to read the entire file if we've found what we need
+            if all([normal_id, tumor_id]):
+                break
+            # This implies a tumor only MuTect2 file which we don't want?
+            elif 'tumor_only' in read:
+                verified_file = False
+                break
         # Do NOT append the file if it is unverified for any reason.
+        f.close()
         if verified_file:
-            gathered_files.append([each, tumor_id, normal_id])
+            os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
+            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), tumor_id, normal_id])
     return np.array(gathered_files)
 
 
@@ -222,27 +238,32 @@ def gather_files_strelka():
     for each in files:
         verified_file = False
         flag = False
-        tumor_id, normal_id = ['', '']
+        tumor_id, normal_id = [False, False]
+        f = open(each, 'r')
+        while not all([verified_file, flag, tumor_id, normal_id]):
+            read = f.readline()
 
-        with open(each, 'r') as f:
-            for read in f:
-                if '##source=strelka' in read:
-                    # Ensure the source is Strelka
-                    verified_file = True
-                elif '##content=strelka somatic indel calls'in read:
-                    flag = 'indel'
-                elif '##content=strelka somatic snv calls' in read:
-                    flag = 'snvs'
-                elif '##inputs=' in read:
-                    # Get the patient and sample ID
-                    read = read.strip().replace('##inputs=', '').split(' ')
-                    normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
-                    # Don't need to read the entire file
-                    break
-            # Do NOT append the file if it is unverified for any reason.
-            if verified_file:
-                os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
-                gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), tumor_id, normal_id])
+            if not read.startswith('#'):
+                break
+
+            # Ensure the source is Strelka
+            if read.startswith('##source=strelka'):
+                verified_file = True
+            elif read.startswith('##content=strelka somatic indel calls'):
+                flag = 'indel'
+            elif read.startswith('##content=strelka somatic snv calls'):
+                flag = 'snvs'
+            elif read.startswith('##inputs='):
+                # Get the patient and sample ID
+                read = read.strip().replace('##inputs=', '').split(' ')
+                normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
+                # Don't need to read the entire file
+                break
+        # Do NOT append the file if it is unverified for any reason.
+        f.close()
+        if verified_file:
+            os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
+            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), tumor_id, normal_id])
 
     return np.array(gathered_files)
 
