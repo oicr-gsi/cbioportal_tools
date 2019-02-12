@@ -105,13 +105,12 @@ def export2maf(files_tumors_normals, args):
         except OSError:
             write = True
 
-        # Split for tumor and normal?
         if write:
                 subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
                                 --output-maf {}/case_lists/{}.maf'.format(args.study_output_folder,
                                                                os.path.splitext(os.path.basename(vcf))[0]) + ' \
                                 --normal-id ' + files_tumors_normals[i][1] + '\
-                                --tumor-id ' + files_tumors_normals[i][0] + ' \
+                                --tumor-id ' + files_tumors_normals[i][2] + ' \
                                 --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa vcf2maf.pl \
                                 --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
                                 --vep-path $VEP_PATH \
@@ -263,7 +262,7 @@ def gather_files_strelka():
         f.close()
         if verified_file:
             os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
-            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), tumor_id, normal_id])
+            gathered_files.append([os.path.abspath('{}.{}.vcf'.format(normal_id, flag)), tumor_id, normal_id])
 
     return np.array(gathered_files)
 
@@ -272,26 +271,30 @@ def concat_files_strelka(files_and_more):
     body = []
     # I can do this only because of the renaming that I did previously. This still seems unsafe
     # TODO:: Make this safe by checking ID too
-    for each in files_and_more[:, 0]:
-        f = open(each, 'r')
+    for i in range(len(files_and_more)):
+        f = open(files_and_more[i][0], 'r')
         li = f.readlines()
         if '##content=strelka somatic indel calls\n' in li:
             index = max(loc for loc, val in enumerate(li) if '#' in val) + 1
             body = li[index:]
             f.close()
-            os.remove(each)
+            os.remove(files_and_more[i][0])
         if '##content=strelka somatic snv calls\n' in li:
             f.close()
-            f = open(each, 'a')
+            f = open(files_and_more[i][0], 'a')
             f.writelines(body)
             f.close()
+            os.rename(files_and_more[i][0], '{}.vcf'.format(files_and_more[i][1]))
 
     # Remove removed files
     files_and_more = list(files_and_more)
     new_files = os.listdir('.')
-    for i in range(len(files_and_more)-1, 0, -1):
+    i = len(files_and_more)-1
+    while i >= 0:
         if not files_and_more[i][0] == new_files:
-            del files_and_more[i]
+            del files_and_more[i-1]
+            i -= 1
+        i -= 1
     return np.array(files_and_more)
 
 
