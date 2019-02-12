@@ -84,7 +84,7 @@ def copy_mutation_data(input_folder, output_folder):
     subprocess.call('cp -r {} {}'.format(input_folder, output_folder), shell=True)
 
 
-def export2maf(files_tumors_normals, args):
+def export2maf(files_normals_tumors, args):
     # Load Modules
     subprocess.call("module use /oicr/local/analysis/Modules/modulefiles /.mounts/labs/PDE/Modules/modulefiles",
                     shell=True)
@@ -95,9 +95,9 @@ def export2maf(files_tumors_normals, args):
         write = False
     # Get all legitimate files
 
-    for i in range(len(files_tumors_normals)):
+    for i in range(len(files_normals_tumors)):
         # Figure out if the .maf file should be generated
-        vcf = files_tumors_normals[i][0]
+        vcf = files_normals_tumors[i][0]
         try:
             os.stat(os.path.basename(vcf) + '.maf')
             if not args.force:
@@ -109,8 +109,8 @@ def export2maf(files_tumors_normals, args):
                 subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
                                 --output-maf {}/case_lists/{}.maf'.format(args.study_output_folder,
                                                                os.path.splitext(os.path.basename(vcf))[0]) + ' \
-                                --normal-id ' + files_tumors_normals[i][1] + '\
-                                --tumor-id ' + files_tumors_normals[i][2] + ' \
+                                --normal-id ' + files_normals_tumors[i][1] + '\
+                                --tumor-id ' + files_normals_tumors[i][2] + ' \
                                 --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa vcf2maf.pl \
                                 --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
                                 --vep-path $VEP_PATH \
@@ -158,9 +158,9 @@ def gather_files_mutect(mutect_type):
     for each in files:
         verified_file = False
         flag = False
-        tumor_id, normal_id = [False, False]
+        normal_id, tumor_id = [False, False]
         f = open(each, 'r')
-        while not all([verified_file, flag, tumor_id, normal_id]):
+        while not all([verified_file, flag, normal_id, tumor_id]):
             read = f.readline()
 
             if not read.startswith('#'):
@@ -187,7 +187,7 @@ def gather_files_mutect(mutect_type):
         f.close()
         if verified_file:
             os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
-            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), tumor_id, normal_id])
+            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), normal_id, tumor_id])
     return np.array(gathered_files)
 
 
@@ -198,9 +198,9 @@ def gather_files_mutect2():
     for each in files:
         verified_file = False
         flag = False
-        tumor_id, normal_id = [False, False]
+        normal_id, tumor_id = [False, False]
         f = open(each, 'r')
-        while not all([verified_file, flag, tumor_id, normal_id]):
+        while not all([verified_file, flag, normal_id, tumor_id]):
             read = f.readline()
 
             if not read.startswith('#'):
@@ -226,7 +226,7 @@ def gather_files_mutect2():
         f.close()
         if verified_file:
             os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
-            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), tumor_id, normal_id])
+            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), normal_id, tumor_id])
     return np.array(gathered_files)
 
 
@@ -239,7 +239,7 @@ def gather_files_strelka():
         flag = False
         tumor_id, normal_id = [False, False]
         f = open(each, 'r')
-        while not all([verified_file, flag, tumor_id, normal_id]):
+        while not all([verified_file, flag, normal_id, tumor_id]):
             read = f.readline()
 
             if not read.startswith('#'):
@@ -262,7 +262,7 @@ def gather_files_strelka():
         f.close()
         if verified_file:
             os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
-            gathered_files.append([os.path.abspath('{}.{}.vcf'.format(normal_id, flag)), tumor_id, normal_id])
+            gathered_files.append([os.path.abspath('{}.{}.vcf'.format(normal_id, flag)), normal_id, tumor_id])
 
     return np.array(gathered_files)
 
