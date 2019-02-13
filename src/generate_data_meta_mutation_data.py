@@ -162,10 +162,9 @@ def gather_files_mutect2():
 
     for each in files:
         verified_file = False
-        flag = False
         normal_id, tumor_id = [False, False]
-        f = open(each, 'r')
-        while not all([verified_file, flag, normal_id, tumor_id]):
+        f = open(each, 'r', encoding='latin1')
+        while not all([verified_file, normal_id, tumor_id]):
             read = f.readline()
 
             if not read.startswith('#'):
@@ -190,8 +189,8 @@ def gather_files_mutect2():
         # Do NOT append the file if it is unverified for any reason.
         f.close()
         if verified_file:
-            os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
-            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), normal_id, tumor_id, 'NORMAL', 'TUMOR'])
+            os.rename(each, '{}.vcf'.format(normal_id))
+            gathered_files.append(['{}.vcf'.format(normal_id), normal_id, tumor_id, 'NORMAL', 'TUMOR'])
     return np.array(gathered_files)
 
 
