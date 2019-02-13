@@ -190,6 +190,8 @@ def gen_mutation_meta_data(args, verb):
     files_normals_tumors = []
 
     # TODO:: Find a less wasteful way for these if/else statements
+    # files_normals_tumors has the format:
+    #   FileName, normal_id, tumor_id, genotype-normal, genotype-tumor
     if False and args.caller == 'GATKHaplotype':  # Will never run until corrected
         # TODO:: Do GATKHaplotype later
         helper.working_on(verb, message='Adding UNMATCHED column...')
@@ -225,10 +227,6 @@ def gen_mutation_meta_data(args, verb):
     helper.reset_folder(original_dir)
     helper.working_on(args.verbose, message='Success! The .maf files have been exported!')
 
-    helper.working_on(verb, message='Copying .maf mutation data to output folder...')
-    generate_data_meta_mutation_data.copy_mutation_data(args.study_input_folder+'/../temp/', args.study_output_folder)
-    helper.working_on(verb)
-
     helper.working_on(verb, message='Jumping into output folder...')
     original_dir = helper.change_folder(args.study_output_folder)
     helper.working_on(args.verbose)
@@ -251,10 +249,10 @@ def export_study_to_cbioportal(args, verb):
     helper.working_on(verb)
     # Importing study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
-    subprocess.call("ssh -i {} debian@10.30.133.80:/home/debian/cbioportal/core/src/main/scripts/importer "
-                    "'./metaImport.py -s ../../../../../../oicr_studies/{} "
+    subprocess.call("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+                    "./metaImport.py -s ../../../../../../oicr_studies/{} "
                     "-u http://10.30.133.80:8080/cbioportal "
-                    "-o'".format(args.cbioportal_key, args.study_output_folder),
+                    "-o'".format(args.cbioportal_key, os.path.basename(args.study_output_folder)),
                     shell=True)
     helper.working_on(verb)
 

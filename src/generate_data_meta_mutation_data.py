@@ -7,7 +7,6 @@ import argparse
 import subprocess
 import os
 
-import re
 import numpy as np
 
 import helper
@@ -65,24 +64,20 @@ def define_parser():
 
 def decompress_to_temp():
     # Decompresses each file in the current folder to ../temp/ if it is compressed. otherwise, copy it over
-    for file in os.listdir("."):
+    temp_folder = os.path.abspath('../temp/')
+    helper.make_folder(temp_folder)
+    helper.clean_folder(temp_folder)
+    for file in os.listdir('.'):
         file = os.path.abspath(file)
-        temp_folder = os.path.abspath('../temp/')
-        helper.make_folder(temp_folder)
-        helper.clean_folder(temp_folder)
         if file.endswith(".tar.gz"):
             subprocess.call("tar -xzf {} -C {}".format(file, temp_folder), shell=True)
         elif file.endswith('.gz'):
-            subprocess.call("gunzip -c {} > {}/{}".format(file,
-                                                          temp_folder,
-                                                          os.path.splitext(os.path.basename(file))[0]),
+            subprocess.call("zcat {} > {}/{}".format(file,
+                                                     temp_folder,
+                                                     os.path.splitext(os.path.basename(file))[0]),
                             shell=True)
         else:
             subprocess.call("cp {} {}".format(file, temp_folder), shell=True)
-
-
-def copy_mutation_data(input_folder, output_folder):
-    subprocess.call('cp -r {} {}'.format(input_folder, output_folder), shell=True)
 
 
 def add_unmatched_GATK():
@@ -153,7 +148,7 @@ def gather_files_mutect(mutect_type):
         f.close()
         if verified_file:
             os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
-            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), normal_id, tumor_id])
+            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), normal_id, tumor_id, normal_id, tumor_id])
     return np.array(gathered_files)
 
 
@@ -193,7 +188,7 @@ def gather_files_mutect2():
         f.close()
         if verified_file:
             os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
-            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), normal_id, tumor_id])
+            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), normal_id, tumor_id, 'NORMAL', 'TUMOR'])
     return np.array(gathered_files)
 
 
@@ -219,9 +214,9 @@ def gather_files_strelka():
             elif read.startswith('##content=strelka somatic indel calls'):
                 flag = 'indel'
             elif read.startswith('##content=strelka somatic snv calls'):
-                flag = 'snvs'
+                flag = 'snv'
             elif read.startswith('##inputs='):
-                # Get the patient and sample ID
+                # Get the patient and sample ID`
                 read = read.strip().replace('##inputs=', '').split(' ')
                 normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
                 # Don't need to read the entire file
@@ -230,41 +225,70 @@ def gather_files_strelka():
         f.close()
         if verified_file:
             os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
-            gathered_files.append([os.path.abspath('{}.{}.vcf'.format(normal_id, flag)), normal_id, tumor_id])
-
+            gathered_files.append([os.path.abspath('{}.{}.vcf'.format(normal_id, flag)),
+                                   normal_id,
+                                   tumor_id,
+                                   'NORMAL',
+                                   'TUMOR'])
     return np.array(gathered_files)
 
 
 def concat_files_strelka(files_and_more):
     body = []
+    normal_id = ''
     files_and_more.sort(axis=0)
     # I can do this only because of the renaming that I did previously. This still seems unsafe
-    # TODO:: Make this safe by checking ID too
+
     for i in range(len(files_and_more)):
         f = open(files_and_more[i][0], 'r')
         li = f.readlines()
-        if '##content=strelka somatic indel calls\n' in li:
+        if ('indel' in files_and_more[i][0].split('.')) and not (normal_id == files_and_more[i][1]):
+            normal_id = files_and_more[i][1]
+            # Find end of header
             index = max(loc for loc, val in enumerate(li) if '#' in val) + 1
+            # Get all text after header
             body = li[index:]
             f.close()
+            # Delete file
             os.remove(files_and_more[i][0])
-        if '##content=strelka somatic snv calls\n' in li:
+            files_and_more[i][0] = '{}.vcf'.format(files_and_more[i][1])
+        elif ('snv' in files_and_more[i][0].split('.')) and (normal_id == files_and_more[i][1]):
             f.close()
             f = open(files_and_more[i][0], 'a')
             f.writelines(body)
             f.close()
-            os.rename(files_and_more[i][0], '{}.vcf'.format(files_and_more[i][1]))
+            os.rename(files_and_more[i][0], '{}.vcf'.format(normal_id))
+            files_and_more[i][0] = '{}.vcf'.format(files_and_more[i][1])
+        else:
+            # If only an snv or indel file of that name is there
+            f.close()
+            os.rename(files_and_more[i-1][0], '{}.vcf'.format(normal_id))
+            files_and_more[i-1][0] = '{}.vcf'.format(files_and_more[i-1][1])
+
+            # Gather the data from the current file
+            f = open(files_and_more[i][0], 'r')
+            normal_id = files_and_more[i][1]
+            index = max(loc for loc, val in enumerate(li) if '#' in val) + 1
+            body = li[index:]
+            f.close()
+            os.remove(files_and_more[i][0])
 
     # Remove removed files
     files_and_more = list(files_and_more)
     new_files = os.listdir('.')
     i = len(files_and_more)-1
     while i >= 0:
-        if not files_and_more[i][0] == new_files:
-            del files_and_more[i-1]
+        try:
+            if not os.path.abspath(files_and_more[i][0]) == os.path.abspath(new_files):
+                del files_and_more[i-1]
             i -= 1
-        i -= 1
-    return np.array(files_and_more)
+        except TypeError:
+            i -= 1
+            pass
+    # Remove duplicates
+    files_and_more = np.array(list(set(tuple(e) for e in files_and_more)))
+    files_and_more.sort(axis=0)
+    return files_and_more
 
 
 def export2maf(files_normals_tumors, args):
@@ -289,18 +313,23 @@ def export2maf(files_normals_tumors, args):
             write = True
 
         if write:
-                subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
-                                --output-maf {}/case_lists/{}.maf'.format(args.study_output_folder,
-                                                               os.path.splitext(os.path.basename(vcf))[0]) + ' \
-                                --normal-id ' + files_normals_tumors[i][1] + '\
-                                --tumor-id ' + files_normals_tumors[i][2] + ' \
-                                --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa vcf2maf.pl \
-                                --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
-                                --vep-path $VEP_PATH \
-                                --vep-data $VEP_DATA \
-                                --species homo_sapiens',
-                                shell=True)
-        os.remove(vcf)
+            subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
+                            --output-maf {}/case_lists/{}.maf'.format(args.study_output_folder,
+                                                                      os.path.splitext(os.path.basename(vcf))[0]) + ' \
+                            --normal-id ' + files_normals_tumors[i][1] + '\
+                            --tumor-id ' + files_normals_tumors[i][2] + ' \
+                            --vcf-normal-id ' + files_normals_tumors[i][3] + '\
+                            --vcf-tumor-id ' + files_normals_tumors[i][4] + ' \
+                            --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa \
+                            --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
+                            --vep-path $VEP_PATH \
+                            --vep-data $VEP_DATA \
+                            --species homo_sapiens',
+                            shell=True)
+        try:
+            os.remove(vcf)
+        except (FileExistsError, OSError):
+            pass
 
 
 def save_meta_mutation(args):
@@ -324,11 +353,6 @@ def main():
     args = define_parser().parse_args()
     verb = args.verbose
     main_minimal.gen_mutation_meta_data(args, verb)
-    # Import mutation data from .vcf 2 .maf
-    # Pre-process files first by adding unmatched coloumn
-    # Apply vcf2maf command on each depending on name:
-    #       Ly_R are normals
-    #       Li_P are tumour
 
 
 if __name__ == '__main__':
