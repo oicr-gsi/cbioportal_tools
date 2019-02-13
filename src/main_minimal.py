@@ -112,7 +112,7 @@ def gen_samples_meta_data(args, verb):
     original_dir = helper.change_folder(args.study_output_folder)
     helper.working_on(args.verbose)
 
-    helper.working_on(verb, message='Saving data_clinica_samples.txt ...')
+    helper.working_on(verb, message='Saving data_clinical_samples.txt ...')
     generate_data_meta_samples.save_data_samples(patient_sample_ids)
     helper.working_on(verb)
 
@@ -188,8 +188,6 @@ def gen_mutation_meta_data(args, verb):
     helper.working_on(args.verbose)
 
     files_normals_tumors = []
-
-    # TODO:: Find a less wasteful way for these if/else statements
     # files_normals_tumors has the format:
     #   FileName, normal_id, tumor_id, genotype-normal, genotype-tumor
     if False and args.caller == 'GATKHaplotype':  # Will never run until corrected
@@ -218,7 +216,7 @@ def gen_mutation_meta_data(args, verb):
         files_normals_tumors = generate_data_meta_mutation_data.concat_files_strelka(files_normals_tumors)
         helper.working_on(args.verbose)
 
-    helper.working_on(verb, message='Exporting from .vcf 2 .maf...')
+    helper.working_on(verb, message='Exporting vcf2maf...')
     helper.working_on(verb, message='And deleting .vcf s...')
     generate_data_meta_mutation_data.export2maf(files_normals_tumors, args)
     helper.working_on(verb)
@@ -250,9 +248,15 @@ def export_study_to_cbioportal(args, verb):
     # Importing study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
     subprocess.call("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                    "./metaImport.py -s ../../../../../../oicr_studies/{} "
+                    "rm -r ~/oicr_studies/{}; "
+                    "mkdir ~/oicr_studies/{}; "
+                    "./metaImport.py -s ~/oicr_studies/{} "
                     "-u http://10.30.133.80:8080/cbioportal "
-                    "-o'".format(args.cbioportal_key, os.path.basename(args.study_output_folder)),
+                    "-o'".format(args.cbioportal_key,
+                                 os.path.basename(args.study_output_folder),
+                                 os.path.basename(args.study_output_folder),
+                                 os.path.basename(args.study_output_folder)
+                                 ),
                     shell=True)
     helper.working_on(verb)
 

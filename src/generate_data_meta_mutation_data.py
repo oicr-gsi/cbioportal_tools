@@ -12,7 +12,8 @@ import numpy as np
 import helper
 
 # Define important constants
-REFERENCE_FASTA = "/.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa "
+ref_fasta = "/.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa "
+filter_vcf = '/.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz'
 
 meta_mutations = 'meta_mutations.txt'
 data_mutations = 'data_mutations.txt'
@@ -116,12 +117,13 @@ def gather_files_mutect(mutect_type):
     files.sort()
     gathered_files = []
 
+    print(files)
     for each in files:
-        verified_file = False
-        flag = False
-        normal_id, tumor_id = [False, False]
+        verified_file = correct_filter = False
+        normal_id = tumor_id = False
+
         f = open(each, 'r')
-        while not all([verified_file, flag, normal_id, tumor_id]):
+        while not all([verified_file, normal_id, tumor_id]):
             read = f.readline()
 
             if not read.startswith('#'):
@@ -132,23 +134,24 @@ def gather_files_mutect(mutect_type):
                 verified_file = True
             elif read.startswith('##inputs='):
                 # Get the patient and sample ID
-                read.replace('##inputs=', '').split(' ')
+                read = read.replace('##inputs=', '').strip().split(' ')
                 normal_id, tumor_id = np.array([x.split(':') for x in read])[:, 1]
+                # If the file is a filtered/sorted file set true
+                if 'filter' in normal_id and 'filter' in tumor_id:
+                    correct_filter = True
+                elif not('filter' in normal_id and 'filter' in tumor_id):
+                    correct_filter = False
 
-                # If the file is a filtered/sorted file remove it if you want unfiltered files
+                # Flip it if it's unfiltered
                 if mutect_type == 'unfiltered':
-                    if '.filter' in normal_id and '.filter' in tumor_id:
-                        verified_file = False
-                elif mutect_type == 'filtered':
-                    if not('.filter' in normal_id and '.filter' in tumor_id):
-                        verified_file = False
+                    correct_filter = not correct_filter
                 # Don't need to read the entire file
-                break
         # Do NOT append the file if it is unverified for any reason.
         f.close()
-        if verified_file:
-            os.rename(each, '{}.{}.vcf'.format(normal_id, flag))
-            gathered_files.append(['{}.{}.vcf'.format(normal_id, flag), normal_id, tumor_id, normal_id, tumor_id])
+        if verified_file and correct_filter:
+            os.rename(each, '{}.vcf'.format(normal_id))
+            gathered_files.append(['{}.vcf'.format(normal_id), normal_id, tumor_id, normal_id, tumor_id])
+    print(gathered_files)
     return np.array(gathered_files)
 
 
@@ -313,18 +316,25 @@ def export2maf(files_normals_tumors, args):
             write = True
 
         if write:
-            subprocess.call('vcf2maf.pl  --input-vcf ' + vcf + '\
-                            --output-maf {}/case_lists/{}.maf'.format(args.study_output_folder,
-                                                                      os.path.splitext(os.path.basename(vcf))[0]) + ' \
-                            --normal-id ' + files_normals_tumors[i][1] + '\
-                            --tumor-id ' + files_normals_tumors[i][2] + ' \
-                            --vcf-normal-id ' + files_normals_tumors[i][3] + '\
-                            --vcf-tumor-id ' + files_normals_tumors[i][4] + ' \
-                            --ref-fasta /.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa \
-                            --filter-vcf /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz \
+            subprocess.call('vcf2maf.pl  --input-vcf {}\
+                            --output-maf {}/case_lists/{}.maf \
+                            --normal-id {}\
+                            --tumor-id {} \
+                            --vcf-normal-id {}\
+                            --vcf-tumor-id {}\
+                            --ref-fasta {} \
+                            --filter-vcf {} \
                             --vep-path $VEP_PATH \
                             --vep-data $VEP_DATA \
-                            --species homo_sapiens',
+                            --species homo_sapiens'.format(files_normals_tumors[i][0],
+                                                           args.study_output_folder,
+                                                           os.path.splitext(os.path.basename(vcf))[0],
+                                                           files_normals_tumors[i][1],
+                                                           files_normals_tumors[i][2],
+                                                           files_normals_tumors[i][3],
+                                                           files_normals_tumors[i][4],
+                                                           ref_fasta,
+                                                           filter_vcf),
                             shell=True)
         try:
             os.remove(vcf)
