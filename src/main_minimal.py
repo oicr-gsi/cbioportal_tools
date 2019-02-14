@@ -69,6 +69,7 @@ def define_parser():
                                "e.g. -c 'All Tumours;All tumor samples (over 9000 samples)'",
                           metavar='STRING')
     required.add_argument("-k", "--cbioportal-key",
+                          type=lambda key: os.path.abspath(key),
                           help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
                           metavar='FILE',
                           default='/u/kchandan/cbioportal.pem')
@@ -101,19 +102,21 @@ def gen_study_meta(args, verb):
 
 
 def gen_samples_meta_data(args, verb):
-    helper.working_on(verb, message='Gathering patient and sample IDs...')
-    patient_sample_ids = helper.gather_patient_and_sample_ids(args.study_input_folder)
-    helper.working_on(verb)
+    helper.working_on(verb, message='Changing folder to temp...')
+    original_dir = helper.change_folder(os.path.join(os.path.abspath(args.study_input_folder), '../temp'))
+    helper.working_on(args.verbose)
 
-    # TODO:: More information should be added to the patient_sample_ids
-    # Think about adding attributes like add_cancer_subtype(patient_sample_ids)
+    helper.working_on(verb, message='Gathering conversion information...')
+    conv_info = gather_conversion_information(args, False)
+    helper.working_on(args.verbose)
 
-    helper.working_on(verb, message='Changing folder...')
+    helper.working_on(verb, message='Changing folder to output...')
+    helper.reset_folder(original_dir)
     original_dir = helper.change_folder(args.study_output_folder)
     helper.working_on(args.verbose)
 
     helper.working_on(verb, message='Saving data_clinical_samples.txt ...')
-    generate_data_meta_samples.save_data_samples(patient_sample_ids)
+    generate_data_meta_samples.save_data_samples(conv_info)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Saving meta_clinical_samples.txt ...')
@@ -187,7 +190,31 @@ def gen_mutation_meta_data(args, verb):
     helper.change_folder('../temp/')
     helper.working_on(args.verbose)
 
-    files_normals_tumors = []
+    files_normals_tumors = gather_conversion_information(args, verb)
+
+    helper.working_on(verb, message='Exporting vcf2maf...')
+    helper.working_on(verb, message='And deleting .vcf s...')
+    generate_data_meta_mutation_data.export2maf(files_normals_tumors, args)
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Popping back...')
+    helper.reset_folder(original_dir)
+    helper.working_on(args.verbose, message='Success! The .maf files have been exported!')
+
+    helper.working_on(verb, message='Jumping into output folder...')
+    original_dir = helper.change_folder(args.study_output_folder)
+    helper.working_on(args.verbose)
+
+    helper.working_on(verb, message='Generating Meta file...')
+    generate_data_meta_mutation_data.save_meta_mutation(args)
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Popping back...')
+    helper.reset_folder(original_dir)
+    helper.working_on(args.verbose, message='Success! The cancer case lists has been saved!')
+
+
+def gather_conversion_information(args, verb):
     # files_normals_tumors has the format:
     #   FileName, normal_id, tumor_id, genotype-normal, genotype-tumor
     if False and args.caller == 'GATKHaplotype':  # Will never run until corrected
@@ -215,41 +242,29 @@ def gen_mutation_meta_data(args, verb):
         helper.working_on(verb, message='Concating Strelka Files.........')
         files_normals_tumors = generate_data_meta_mutation_data.concat_files_strelka(files_normals_tumors)
         helper.working_on(args.verbose)
-
-    helper.working_on(verb, message='Exporting vcf2maf...')
-    helper.working_on(verb, message='And deleting .vcf s...')
-    generate_data_meta_mutation_data.export2maf(files_normals_tumors, args)
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Popping back...')
-    helper.reset_folder(original_dir)
-    helper.working_on(args.verbose, message='Success! The .maf files have been exported!')
-
-    helper.working_on(verb, message='Jumping into output folder...')
-    original_dir = helper.change_folder(args.study_output_folder)
-    helper.working_on(args.verbose)
-
-    helper.working_on(verb, message='Generating Meta file...')
-    generate_data_meta_mutation_data.save_meta_mutation(args)
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Popping back...')
-    helper.reset_folder(original_dir)
-    helper.working_on(args.verbose, message='Success! The cancer case lists has been saved!')
+    return files_normals_tumors
 
 
 def export_study_to_cbioportal(args, verb):
     # Copying folder to cBioPortal
     helper.working_on(verb, message='Copying folder to cBioPortal...')
+
+    # Cleanup Location
+    subprocess.call("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+                    "rm -r ~/oicr_studies/{}; "
+                    "mkdir ~/oicr_studies/{}'".format(args.cbioportal_key,
+                                                      os.path.basename(args.study_output_folder),
+                                                      os.path.basename(args.study_output_folder)
+                                                      ),
+                    shell=True)
+    # Copy over
     subprocess.call('scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies'.format(args.cbioportal_key,
                                                                                            args.study_output_folder),
                     shell=True)
     helper.working_on(verb)
-    # Importing study to cBioPortal
+    # Import study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
     subprocess.call("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                    "rm -r ~/oicr_studies/{}; "
-                    "mkdir ~/oicr_studies/{}; "
                     "./metaImport.py -s ~/oicr_studies/{} "
                     "-u http://10.30.133.80:8080/cbioportal "
                     "-o'".format(args.cbioportal_key,
@@ -268,10 +283,10 @@ def main():
     if args.force:
         helper.clean_folder(args.study_output_folder)
     gen_study_meta(args, verb)
-    gen_samples_meta_data(args, verb)
     gen_cancer_type_meta_data(args, verb)
     gen_cancer_list_meta(args, verb)
     gen_mutation_meta_data(args, verb)
+    gen_samples_meta_data(args, verb)
     export_study_to_cbioportal(args, verb)
     helper.stars()
     helper.working_on(verb, message='CONGRATULATIONS! A minimal study is now be complete!')

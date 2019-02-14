@@ -117,7 +117,6 @@ def gather_files_mutect(mutect_type):
     files.sort()
     gathered_files = []
 
-    print(files)
     for each in files:
         verified_file = correct_filter = False
         normal_id = tumor_id = False
@@ -151,7 +150,6 @@ def gather_files_mutect(mutect_type):
         if verified_file and correct_filter:
             os.rename(each, '{}.vcf'.format(normal_id))
             gathered_files.append(['{}.vcf'.format(normal_id), normal_id, tumor_id, normal_id, tumor_id])
-    print(gathered_files)
     return np.array(gathered_files)
 
 
