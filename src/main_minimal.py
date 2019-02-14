@@ -101,13 +101,9 @@ def gen_study_meta(args, verb):
     helper.working_on(args.verbose, message='Success! The cancer study meta has been saved!')
 
 
-def gen_samples_meta_data(args, verb):
+def gen_samples_meta_data(args, verb, conv_info):
     helper.working_on(verb, message='Changing folder to temp...')
-    original_dir = helper.change_folder(os.path.join(os.path.abspath(args.study_input_folder), '../temp'))
-    helper.working_on(args.verbose)
-
-    helper.working_on(verb, message='Gathering conversion information...')
-    conv_info = gather_conversion_information(args, False)
+    original_dir = helper.change_folder(helper.get_temp_folder(args, 'vcf'))
     helper.working_on(args.verbose)
 
     helper.working_on(verb, message='Changing folder to output...')
@@ -138,11 +134,11 @@ def gen_cancer_type_meta_data(args, verb):
     original_dir = helper.change_folder(args.study_output_folder)
     helper.working_on(args.verbose)
 
-    helper.working_on(verb, message='Generating cancer_type records')
+    helper.working_on(verb, message='Generating cancer_type records...')
     generate_data_meta_cancer_type.gen_cancer_type_data(args, colours)
     helper.working_on(args.verbose)
 
-    helper.working_on(verb, message='Generating cancer_type meta')
+    helper.working_on(verb, message='Generating cancer_type meta...')
     generate_data_meta_cancer_type.gen_cancer_type_meta()
     helper.working_on(args.verbose)
 
@@ -151,14 +147,14 @@ def gen_cancer_type_meta_data(args, verb):
     helper.working_on(args.verbose, message='Success! The cancer study meta has been saved!')
 
 
-def gen_cancer_list_meta(args, verb):
-    helper.working_on(verb, message='Gathering patient and sample IDs...')
-    patient_sample_ids = helper.gather_patient_and_sample_ids(args.study_input_folder)
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Changing folder...')
-    original_dir = helper.change_folder(args.study_output_folder)
+def gen_cancer_list_meta(args, verb, conv_info):
+    helper.working_on(verb, message='Changing folder to temp...')
+    original_dir = helper.change_folder(helper.get_temp_folder(args, 'vcf'))
     helper.working_on(args.verbose)
+
+    helper.working_on(verb, message='Jumping into Study Output Folder...')
+    helper.change_folder(args.study_output_folder)
+    helper.working_on(verb)
 
     helper.working_on(verb, message='Testing Case_Lists Folder...')
     generate_meta_case_list.test_case_lists_folder()
@@ -169,7 +165,7 @@ def gen_cancer_list_meta(args, verb):
     helper.working_on(verb)
 
     helper.working_on(verb, message='Saving Meta Case List...')
-    generate_meta_case_list.save_meta_case_lists(patient_sample_ids, args)
+    generate_meta_case_list.save_meta_case_lists(conv_info, args)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Popping back...')
@@ -183,11 +179,11 @@ def gen_mutation_meta_data(args, verb):
     helper.working_on(args.verbose)
 
     helper.working_on(verb, message='Gathering and decompressing files into temporary folder...')
-    generate_data_meta_mutation_data.decompress_to_temp()
+    generate_data_meta_mutation_data.decompress_to_temp(args)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Jumping into temp folder...')
-    helper.change_folder('../temp/')
+    helper.change_folder(helper.get_temp_folder(args, 'vcf'))
     helper.working_on(args.verbose)
 
     files_normals_tumors = gather_conversion_information(args, verb)
@@ -195,6 +191,11 @@ def gen_mutation_meta_data(args, verb):
     helper.working_on(verb, message='Exporting vcf2maf...')
     helper.working_on(verb, message='And deleting .vcf s...')
     generate_data_meta_mutation_data.export2maf(files_normals_tumors, args)
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Concatenating maf files...')
+    helper.working_on(verb, message='And Yeeeting it over...')
+    generate_data_meta_mutation_data.concat_files_maf(files_normals_tumors, args)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Popping back...')
@@ -212,6 +213,7 @@ def gen_mutation_meta_data(args, verb):
     helper.working_on(verb, message='Popping back...')
     helper.reset_folder(original_dir)
     helper.working_on(args.verbose, message='Success! The cancer case lists has been saved!')
+    return files_normals_tumors
 
 
 def gather_conversion_information(args, verb):
@@ -239,7 +241,7 @@ def gather_conversion_information(args, verb):
         files_normals_tumors = generate_data_meta_mutation_data.gather_files_strelka()
         helper.working_on(args.verbose)
 
-        helper.working_on(verb, message='Concating Strelka Files.........')
+        helper.working_on(verb, message='Concatenating Strelka Files.........')
         files_normals_tumors = generate_data_meta_mutation_data.concat_files_strelka(files_normals_tumors)
         helper.working_on(args.verbose)
     return files_normals_tumors
@@ -284,9 +286,9 @@ def main():
         helper.clean_folder(args.study_output_folder)
     gen_study_meta(args, verb)
     gen_cancer_type_meta_data(args, verb)
-    gen_cancer_list_meta(args, verb)
-    gen_mutation_meta_data(args, verb)
-    gen_samples_meta_data(args, verb)
+    conv_info = gen_mutation_meta_data(args, verb)
+    gen_cancer_list_meta(args, verb, conv_info)
+    gen_samples_meta_data(args, verb, conv_info)
     export_study_to_cbioportal(args, verb)
     helper.stars()
     helper.working_on(verb, message='CONGRATULATIONS! A minimal study is now be complete!')

@@ -6,6 +6,7 @@ __status__ = "Pre-Production"
 import argparse
 import subprocess
 import os
+import time
 
 import numpy as np
 
@@ -17,6 +18,7 @@ filter_vcf = '/.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.
 
 meta_mutations = 'meta_mutations.txt'
 data_mutations = 'data_mutations.txt'
+data_mutations_extended = 'data_mutations_extended.maf'
 
 
 def define_parser():
@@ -63,9 +65,9 @@ def define_parser():
     return parser
 
 
-def decompress_to_temp():
-    # Decompresses each file in the current folder to ../temp/ if it is compressed. otherwise, copy it over
-    temp_folder = os.path.abspath('../temp/')
+def decompress_to_temp(args):
+    # Decompresses each file in the current folder to ../temp_vcf/ if it is compressed. otherwise, copy it over
+    temp_folder = helper.get_temp_folder(args, 'vcf')
     helper.make_folder(temp_folder)
     helper.clean_folder(temp_folder)
     for file in os.listdir('.'):
@@ -238,7 +240,6 @@ def concat_files_strelka(files_and_more):
     normal_id = ''
     files_and_more.sort(axis=0)
     # I can do this only because of the renaming that I did previously. This still seems unsafe
-
     for i in range(len(files_and_more)):
         f = open(files_and_more[i][0], 'r')
         li = f.readlines()
@@ -249,10 +250,11 @@ def concat_files_strelka(files_and_more):
             # Get all text after header
             body = li[index:]
             f.close()
-            # Delete file
-            os.remove(files_and_more[i][0])
-            files_and_more[i][0] = '{}.vcf'.format(files_and_more[i][1])
         elif ('snv' in files_and_more[i][0].split('.')) and (normal_id == files_and_more[i][1]):
+            # Delete file
+            os.remove(files_and_more[i-1][0])
+            files_and_more[i-1][0] = '{}.vcf'.format(files_and_more[i-1][1])
+
             f.close()
             f = open(files_and_more[i][0], 'a')
             f.writelines(body)
@@ -293,18 +295,23 @@ def concat_files_strelka(files_and_more):
 
 def export2maf(files_normals_tumors, args):
     # Load Modules
-    subprocess.call("module use /oicr/local/analysis/Modules/modulefiles /.mounts/labs/PDE/Modules/modulefiles",
-                    shell=True)
-    subprocess.call("module load vep/92 vcf2maf python-gsi/3.6.4", shell=True)
     if args.force:
         write = True
     else:
         write = False
     # Get all legitimate files
+    temp_folder = helper.get_temp_folder(args, 'maf')
+    helper.make_folder(temp_folder)
+    helper.clean_folder(temp_folder)
 
+    # TODO:: run these in parallel
     for i in range(len(files_normals_tumors)):
         # Figure out if the .maf file should be generated
         vcf = files_normals_tumors[i][0]
+        normal_id = files_normals_tumors[i][1]
+        tumors_id = files_normals_tumors[i][2]
+        gene_col_normal = files_normals_tumors[i][3]
+        gene_col_tumors = files_normals_tumors[i][3]
         try:
             os.stat(os.path.basename(vcf) + '.maf')
             if not args.force:
@@ -313,30 +320,51 @@ def export2maf(files_normals_tumors, args):
             write = True
 
         if write:
-            subprocess.call('vcf2maf.pl  --input-vcf {}\
-                            --output-maf {}/case_lists/{}.maf \
-                            --normal-id {}\
-                            --tumor-id {} \
-                            --vcf-normal-id {}\
-                            --vcf-tumor-id {}\
-                            --ref-fasta {} \
-                            --filter-vcf {} \
-                            --vep-path $VEP_PATH \
-                            --vep-data $VEP_DATA \
-                            --species homo_sapiens'.format(files_normals_tumors[i][0],
-                                                           args.study_output_folder,
+            subprocess.call('vcf2maf.pl  --input-vcf {} \
+                            --output-maf {}/{}.maf       \
+                            --normal-id {}              \
+                            --tumor-id {}                \
+                            --vcf-normal-id {}          \
+                            --vcf-tumor-id {}            \
+                            --ref-fasta {}              \
+                            --filter-vcf {}              \
+                            --vep-path $VEP_PATH        \
+                            --vep-data $VEP_DATA         \
+                            --species homo_sapiens'.format(vcf,
+                                                           helper.get_temp_folder(args, 'maf'),
                                                            os.path.splitext(os.path.basename(vcf))[0],
-                                                           files_normals_tumors[i][1],
-                                                           files_normals_tumors[i][2],
-                                                           files_normals_tumors[i][3],
-                                                           files_normals_tumors[i][4],
+                                                           normal_id,
+                                                           tumors_id,
+                                                           gene_col_normal,
+                                                           gene_col_tumors,
                                                            ref_fasta,
                                                            filter_vcf),
                             shell=True)
         try:
+            files_normals_tumors[i][0] = 'maf'.join(files_normals_tumors[i][0].rsplit('vcf'))
             os.remove(vcf)
         except (FileExistsError, OSError):
             pass
+
+
+def concat_files_maf(files_normals_tumors, args):
+    # Yeet all the maf files to the study output folder after concating them
+    helper.change_folder(helper.get_temp_folder(args, 'maf'))
+
+    output = open(data_mutations_extended, 'w')
+    header = open(files_normals_tumors[0][0])
+
+    output.write(header.readline() + header.readline())
+    header.close()
+
+    for files in files_normals_tumors[:, 0]:
+        f = open(files, 'r')
+        output.writelines(f.readlines()[2:])
+        f.close()
+    # Now to Yeeeeet it over
+    os.rename(os.path.abspath(data_mutations_extended),
+              os.path.join(os.path.abspath(args.study_output_folder), data_mutations_extended))
+    # Tis been yeeted
 
 
 def save_meta_mutation(args):
@@ -351,7 +379,6 @@ def save_meta_mutation(args):
     f.write('profile_description: {}\n'.format(args.mutation_data.split(';')[1]))
     f.write('datatype: MAF\n')
     f.write('data_filename: data_mutations_extended.maf\n')
-    # This part ^^^ will be wrong until I understand what exactly and extended maf file is and how to make it
     f.close()
 
 
