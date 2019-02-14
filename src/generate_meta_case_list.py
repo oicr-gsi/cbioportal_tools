@@ -12,6 +12,7 @@ import helper
 
 case_folder = 'case_lists/'
 cases_txt = 'cases_all.txt'
+cases_seq = 'cases_sequenced.txt'
 
 
 def define_parser():
@@ -53,16 +54,22 @@ def test_case_lists_folder():
 
 
 def save_meta_case_lists(patient_sample_ids, args):
+    print(patient_sample_ids)
     samples = patient_sample_ids[:, 1]
     stable_id = args.study_id + '_custom'
     [case_list_name, case_list_description] = args.cli_case_list.split(';')
+    write_case_file(cases_txt, args.study_id, stable_id, case_list_name, case_list_description, samples)
+    stable_id = args.study_id + '_sequenced'
+    write_case_file(cases_seq, args.study_id, stable_id, case_list_name, case_list_description, samples)
 
-    f = open(cases_txt, 'w+')
-    f.write('cancer_study_identifier: {}\n'.format(args.study_id))
+
+def write_case_file(file, study_tag, stable_id, name, description, case):
+    f = open(file, 'w+')
+    f.write('cancer_study_identifier: {}\n'.format(study_tag))
     f.write('stable_id: {}\n'.format(stable_id))
-    f.write('case_list_name: {}\n'.format(case_list_name))
-    f.write('case_list_description: {}\n'.format(case_list_description))
-    f.write('case_list_ids: ' + '\t'.join(samples))
+    f.write('case_list_name: {}\n'.format(name))
+    f.write('case_list_description: {}\n'.format(description))
+    f.write('case_list_ids: ' + '\t'.join(case))
     f.close()
 
 

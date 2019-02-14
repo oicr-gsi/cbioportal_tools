@@ -61,10 +61,9 @@ def save_data_samples(data_set):
     f.write(' \n'+'\t'.join(['SAMPLE_ID', 'PATIENT_ID']))
 
     samples = np.concatenate((data_set[:, 1], data_set[:, 2]))
-    patient = np.concatenate((data_set[:, 1], data_set[:, 2]))
-
+    patient = np.concatenate((data_set[:, 1], data_set[:, 1]))
     for i in range(len(samples)):
-        f.write('\n'+'\t'.join([samples[i], patient[i]]))
+        f.write('\n'+'\t'.join(list([samples[i], patient[i]])))
     f.close()
 
 
