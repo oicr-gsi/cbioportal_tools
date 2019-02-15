@@ -1,5 +1,13 @@
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 # Command Line Imports
 import argparse
+
+# Other Useful
+import numpy as np
 
 # Other Scripts
 import helper
@@ -42,15 +50,20 @@ def define_parser():
 
 
 def save_data_samples(data_set):
+    data_set = np.array(data_set)
     # We are in destination folder, export the data_samples.txt that we have generated.
+
     f = open(data_samples, 'w+')
-    f.write('#'  +'\t'.join(['Patient Identifier', 'Sample Identifier']))
-    f.write('\n#'+'\t'.join(['Patient Identifier', 'Sample Identifier']))
+    f.write('#'  +'\t'.join(['Sample Identifier', 'Patient Identifier']))
+    f.write('\n#'+'\t'.join(['Sample Identifier', 'Patient Identifier']))
     f.write('\n#'+'\t'.join(['STRING', 'STRING']))
     f.write('\n#'+'\t'.join(['1', '1']))
-    f.write('\n' +'\t'.join(['PATIENT_ID', 'SAMPLE_ID']))
-    for each in data_set:
-        f.write('\n'+'\t'.join(each))
+    f.write(' \n'+'\t'.join(['SAMPLE_ID', 'PATIENT_ID']))
+
+    samples = np.concatenate((data_set[:, 1], data_set[:, 2]))
+    patient = np.concatenate((data_set[:, 1], data_set[:, 1]))
+    for i in range(len(samples)):
+        f.write('\n'+'\t'.join(list([samples[i], patient[i]])))
     f.close()
 
 
@@ -65,7 +78,7 @@ def save_meta_samples(study_id):
 
 
 if __name__ == '__main__':
-    import main_minimal
+    import main
     args = define_parser().parse_args()
     verb = args.verbose
-    main_minimal.gen_samples_meta_data(args, verb)
+    main.gen_samples_meta_data(args, verb)

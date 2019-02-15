@@ -1,3 +1,8 @@
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 # Collect names of mutation files and convert them to PATIENT_IDs and SAMPLE_IDs
 # Script maps each file to a patient ID.
 import os
@@ -28,7 +33,7 @@ for each in files:
             continue
 
     patient_id = ''.join(patient_id[:-1])
-    print patient_id
+    print(patient_id)
     key_val += [patient_id, each]
 # print key_val
 # key_val is a map for all files to their relevant patient_id.
@@ -38,12 +43,12 @@ import numpy as np
 
 key_val = np.reshape(key_val, (len(key_val)/2, 2))
 # key_val is now reshaped to a 2D array where a patient ID corresponds to a sample ID
-print key_val
+print(key_val)
 
 import pandas as pd
 dataset = pd.DataFrame({'PATIENT_ID': key_val[:, 0], 'SAMPLE_ID': key_val[:, 1]}, index=False)
 
-print dataset
+print(dataset)
 os.chdir('../')
 
 new_study_folder = 'lololol/'

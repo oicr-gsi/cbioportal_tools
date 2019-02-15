@@ -1,5 +1,5 @@
 # src folder
-The _main_minimal.py_ script essentially combines the main scripts of the generate_study_meta and generate_data_meta_samples into one easy to understand script. All arguments are mandatory.
+The _main.py_ script essentially combines the main scripts of the generate_study_meta and generate_data_meta_samples into one easy to understand script. All arguments are mandatory.
 
 * _helper.py_ is a script that contains some of the shared functions of many files
 * All scripts starting with _generate\_..._ create their respective files specified by the _meta_ or _data_ files and the type.
@@ -8,8 +8,8 @@ The _main_minimal.py_ script essentially combines the main scripts of the genera
 This folder contains most scripts. 
 The test folder within has any scripts used in testing and validation.
 
-# Usage - main_minimal.py
-Run the main_minimal.py program with:
+# Usage - main.py
+Run the main.py program with:
 
 ```
 optional arguments:
@@ -19,7 +19,8 @@ optional arguments:
                         you use this. **This tag is not recommended and cannot
                         be used alongside -c as -c takes precedence.
   -v, --verbose         Makes program verbose
-  -f, --force           Forces overwriting of data_cancer_type.txt file.
+  -f, --force           Forces overwriting of data_cancer_type.txt file and
+                        *.maf files.
 
 Required Arguments:
   -i FOLDER, --study-input-folder FOLDER
@@ -42,23 +43,38 @@ Required Arguments:
                         Samples sequenced and analyzed at OICR;Genetics and
                         Epidemiology of Colorectal Cancer
                         Consortium;GECCO;colorectal'
+  -m STRING, --mutation-data STRING
+                        Command Line Input, the profile_name and
+                        profile_description in semi-colon separated values.
+                        Input needs to be wrapped with ''. e.g. -c 'Mutations
+                        (Colorectal);Mutation data from whole exome
+                        sequencing.'
+  -C CALLER_NAME, --caller CALLER_NAME
+                        The caller from which the mutation data is being
+                        created from. Choices: [GATKHaplotype | Mutect |
+                        Mutect2 | Strelka | MutectStrelka]
   -l STRING, --cli-case-list STRING
                         Command Line Input, case_list_name and
                         case_list_description in semi-colon separated values.
                         Input needs to be wrapped with ''.e.g. -c 'All
                         Tumours;All tumor samples (over 9000 samples)'
+  -k FILE, --cbioportal-key FILE
+                        The RSA key to cBioPortal. Should have appropriate
+                        read write restrictions
 ```
 
 For example:
 
 ```
-python generate_study_meta.py -h
+python3.6m generate_study_meta.py -h
 or
-python main_minimal.py \
--i test/fakes/ \
--o new_study/ \
--s gecco_gsi_2019 \
+python3.6m main.py \
+-i /.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/Strelka \
+-o /.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/cbioStrelka \
+-s gecco_gsiMore_2019 \
 -c 'GECCO Samples sequenced and analyzed at OICR;Genetics and Epidemiology of Colorectal Cancer Consortium;GECCO;colorectal' \
+-C Strelka \
+-m 'Mutations (Colorectal);Mutation data from whole exome sequencing.' \
 -l 'All Tumours;All tumor samples (over 9000 samples)' \
 -v -f
 ```
@@ -98,11 +114,11 @@ Required Arguments:
 For example:
 
 ```
-python generate_meta_study.py -h
+python3 generate_meta_study.py -h
 or
-python generate_meta_study.py -s brca_gsi_2019 -c 'Descriptive description;Name of Study;Short Name;type_of_cancer'
+python3 generate_meta_study.py -s brca_gsi_2019 -c 'Descriptive description;Name of Study;Short Name;type_of_cancer'
 or
-python generate_meta_study.py -s cbl_tgl_2000 -c 'Descriptive description;Name of Study;Short Name;type_of_cancer'
+python3 generate_meta_study.py -s cbl_tgl_2000 -c 'Descriptive description;Name of Study;Short Name;type_of_cancer'
 ```
 ## Usage - generate_data_meta_samples.py
 Run the generate_data_meta_samples.py program with:
@@ -131,38 +147,9 @@ Required Arguments:
 For example:
 
 ```
-python generate_data_meta_samples.py -h
+python3 generate_data_meta_samples.py -h
 or
-python generate_data_meta_samples.py -i test/fakes/ -i brca_gsi_2019 -o new_study/
+python3 generate_data_meta_samples.py -i test/fakes/ -s brca_gsi_2019 -o new_study/
 or
-python generate_data_meta_samples.py -i Mutect2/ -s kremen1_octane_2020 -o new_study/ 
-```
-\*\*
-**import_mutation_data.py is currently in an unusable state.**
-### Usage - import_mutation_data.py
-Run the import_mutation_data.py program with:
-
-```
-positional arguments:
-  inputFile             The input file, can be of compressed: .tar.gz | .gz |
-                        .zip] or uncompressed format in: [vcf | maf] If the
-                        file is compressed, optional tag -c must be added
-
-optional arguments:
-  -h, --help            show this help message and exit
-
-required arguments:
-  -c, --compressed      If the input file is compressed this tag must be added
-  -w, --workflowUsed    The workflow used is a mandatory tag, choices are:
-                        [GATKHaplotypeCaller | Mutect | Mutect2 | Strelka]
-```
-
-For example:
-
-```
-python import_mutation_data.py -h
-or
-python import_mutation_data.py banana.vcf.tar.gz -c -w Mutect
-or
-python import_mutation_data.py apple.maf -w GATKHaplotypeCaller
+python3 generate_data_meta_samples.py -i Mutect2/ -s kremen1_octane_2020 -o new_study/ 
 ```
