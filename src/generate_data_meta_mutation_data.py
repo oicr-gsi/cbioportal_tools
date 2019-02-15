@@ -383,10 +383,10 @@ def save_meta_mutation(args):
 
 
 def main():
-    import main_minimal
+    import main
     args = define_parser().parse_args()
     verb = args.verbose
-    main_minimal.gen_mutation_meta_data(args, verb)
+    main.gen_mutation_meta_data(args, verb)
 
 
 if __name__ == '__main__':

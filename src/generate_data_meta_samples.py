@@ -78,7 +78,7 @@ def save_meta_samples(study_id):
 
 
 if __name__ == '__main__':
-    import main_minimal
+    import main
     args = define_parser().parse_args()
     verb = args.verbose
-    main_minimal.gen_samples_meta_data(args, verb)
+    main.gen_samples_meta_data(args, verb)

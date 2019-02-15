@@ -275,6 +275,10 @@ def export_study_to_cbioportal(args, verb):
                                  os.path.basename(args.study_output_folder)
                                  ),
                     shell=True)
+    subprocess.call("ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(args.cbioportal_key),
+                    shell=True)
+    subprocess.call("ssh -i {} debian@10.30.133.80 'sudo systemctl start tomcat'".format(args.cbioportal_key),
+                    shell=True)
     helper.working_on(verb)
 
 

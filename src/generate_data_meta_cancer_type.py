@@ -91,7 +91,7 @@ def gen_cancer_type_data(args, colours):
 
 if __name__ == '__main__':
     # Other Scripts
-    import main_minimal
+    import main
     args = define_parser().parse_args()
     verb = args.verbose
-    main_minimal.gen_cancer_type_meta_data(args, verb)
+    main.gen_cancer_type_meta_data(args, verb)
