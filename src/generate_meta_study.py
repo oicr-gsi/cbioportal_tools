@@ -1,3 +1,8 @@
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 # Command Line Imports
 import argparse
 
@@ -64,7 +69,7 @@ def save_meta_cancer_study(args):
 
 if __name__ == '__main__':
     # Other Scripts
-    import main_minimal
+    import main
     args = define_parser().parse_args()
     verb = args.verbose
-    main_minimal.gen_study_meta(args, verb)
+    main.gen_study_meta(args, verb)

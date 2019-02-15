@@ -1,15 +1,18 @@
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 # Command Line Imports
 import argparse
 import os
-
-# Data Processing Imports
-import pandas as pd
 
 # Other Scripts
 import helper
 
 case_folder = 'case_lists/'
 cases_txt = 'cases_all.txt'
+cases_seq = 'cases_sequenced.txt'
 
 
 def define_parser():
@@ -51,21 +54,32 @@ def test_case_lists_folder():
 
 
 def save_meta_case_lists(patient_sample_ids, args):
+    # TODO:: When generating stable_ids, based on information add suffixes:
+    # samples:_all
+    # More:
+    # mutation:_sequenced
+    #
+    print(patient_sample_ids)
     samples = patient_sample_ids[:, 1]
-    stable_id = args.study_id + '_custom'
+    stable_id = args.study_id + '_all'
     [case_list_name, case_list_description] = args.cli_case_list.split(';')
+    write_case_file(cases_txt, args.study_id, stable_id, case_list_name, case_list_description, samples)
+    stable_id = args.study_id + '_sequenced'
+    write_case_file(cases_seq, args.study_id, stable_id, case_list_name, case_list_description, samples)
 
-    f = open(cases_txt, 'w+')
-    f.write('cancer_study_identifier: {}\n'.format(args.study_id))
+
+def write_case_file(file, study_tag, stable_id, name, description, case):
+    f = open(file, 'w+')
+    f.write('cancer_study_identifier: {}\n'.format(study_tag))
     f.write('stable_id: {}\n'.format(stable_id))
-    f.write('case_list_name: {}\n'.format(case_list_name))
-    f.write('case_list_description: {}\n'.format(case_list_description))
-    f.write('case_list_ids: ' + '\t'.join(samples))
+    f.write('case_list_name: {}\n'.format(name))
+    f.write('case_list_description: {}\n'.format(description))
+    f.write('case_list_ids: ' + '\t'.join(case))
     f.close()
 
 
 if __name__ == '__main__':
-    import main_minimal
+    import main
     args = define_parser().parse_args()
     verb = args.verbose
-    main_minimal.gen_cancer_list_meta(args, verb)
+    main.gen_cancer_list_meta(args, verb)
