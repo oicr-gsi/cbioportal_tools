@@ -1,5 +1,5 @@
 # src folder
-The _main_minimal.py_ script essentially combines the main scripts of the generate_study_meta and generate_data_meta_samples into one easy to understand script. All arguments are mandatory.
+The _main.py_ script essentially combines the main scripts of the generate_study_meta and generate_data_meta_samples into one easy to understand script. All arguments are mandatory.
 
 * _helper.py_ is a script that contains some of the shared functions of many files
 * All scripts starting with _generate\_..._ create their respective files specified by the _meta_ or _data_ files and the type.
@@ -8,8 +8,8 @@ The _main_minimal.py_ script essentially combines the main scripts of the genera
 This folder contains most scripts. 
 The test folder within has any scripts used in testing and validation.
 
-# Usage - main_minimal.py
-Run the main_minimal.py program with:
+# Usage - main.py
+Run the main.py program with:
 
 ```
 optional arguments:
@@ -68,7 +68,7 @@ For example:
 ```
 python3.6m generate_study_meta.py -h
 or
-python3.6m main_minimal.py \
+python3.6m main.py \
 -i /.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/Strelka \
 -o /.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/cbioStrelka \
 -s gecco_gsiMore_2019 \
