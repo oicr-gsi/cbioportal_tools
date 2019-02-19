@@ -1,0 +1,10 @@
+#type_of_cancer=colorectal
+#cancer_study_identifier=gecco_gsi_mutect_2019
+#name=Genetics and Epidemiology of Colorectal Cancer Consortium
+#short_name=GECCO
+#description=GECCO Samples sequenced and analyzed at OICR
+#study_output_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/cbioMutect/
+#cbioportal_key=/u/kchandan/cbioportal.pem
+Type	File
+mutation	mutation.txt
+sample	sample.txt
