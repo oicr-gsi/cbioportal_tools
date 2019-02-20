@@ -30,7 +30,7 @@ def define_parser():
     required.add_argument("-i", "--study-input-folder",
                           type=lambda folder: helper.check_files_in_folder(helper.extensionChoices, folder, parser),
                           help="The input folder can contain compressed: [" +
-                               " | ".join(helper.compressedChoices) + "] "
+                               " | ".join(helper.c_choices) + "] "
                                                                       " or uncompressed format in: [" +
                                " | ".join(helper.extensionChoices) + "] ",
                           default='.',
@@ -82,4 +82,4 @@ if __name__ == '__main__':
     import main
     args = define_parser().parse_args()
     verb = args.verbose
-    main.gen_cancer_list_meta(args, verb)
+    main.gen_case_list_meta(args, verb)

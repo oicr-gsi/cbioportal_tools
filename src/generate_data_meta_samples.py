@@ -27,7 +27,7 @@ def define_parser():
     required.add_argument("-i", "--study-input-folder",
                           type=lambda folder: helper.check_files_in_folder(helper.extensionChoices, folder, parser),
                           help="The input folder can contain compressed: [" +
-                               " | ".join(helper.compressedChoices) + "] "
+                               " | ".join(helper.c_choices) + "] "
                                                                       " or uncompressed format in: [" +
                                " | ".join(helper.extensionChoices) + "] ",
                           default='.',

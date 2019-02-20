@@ -3,7 +3,7 @@
 #name=Genetics and Epidemiology of Colorectal Cancer Consortium
 #short_name=GECCO
 #description=GECCO Samples sequenced and analyzed at OICR
-#study_output_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/cbioMutect/
+#output_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/cbioMutect/
 #cbioportal_key=/u/kchandan/cbioportal.pem
 Type	File
 mutation	mutation.txt
