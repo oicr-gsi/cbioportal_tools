@@ -24,7 +24,22 @@ mutation	mutation.txt
 sample	sample.txt
 ```
 
-To add **Mutation Data** you need to add 'mutation:mutation.txt' to the bottom in TSV format. 
+The breakdown of the form is essentially
+~~~
+#Property=value
+#profile_name=Something relavent (Required for)
+#profile_description=Mutation data from whole exome sequencing. (12 Samples)
+...
+Col_Name	Patient_ID	Other_Relavent_Information
+Value_01	GSI_0001	Blah_Blah
+~~~
+
+Each Data File that is added must also contain a ```Patient_ID``` column
+
+
+## Example: Adding Mutation Data
+
+To add **Mutation Data** you need to add ```mutation:mutation.txt``` to the bottom in TSV format. 
 
 The format of the file will be:
 

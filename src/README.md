@@ -1,5 +1,5 @@
 # src folder
-The _main.py_ script essentially combines the main scripts of the generate_study_meta and generate_data_meta_samples into one easy to understand script. All arguments are mandatory.
+The _main.py_ script essentially combines the main scripts of the generate_study_meta and generate_data_meta_samples into one easy to get_config script. All arguments are mandatory.
 
 * _helper.py_ is a script that contains some of the shared functions of many files
 * All scripts starting with _generate\_..._ create their respective files specified by the _meta_ or _data_ files and the type.
