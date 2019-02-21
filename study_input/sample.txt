@@ -1,6 +1,10 @@
 #profile_name=All samples
 #profile_description=All GECCO Samples (12 Samples)
-Patient_ID	Sample_ID
+Patient Identifier	Sample Identifier
+Patient Identifier	Sample Identifier
+STRING	STRING
+1	1
+PATIENT_ID	SAMPLE_ID
 GECCO_0001	GECCO_0001_Ly_R_TS
 GECCO_0002	GECCO_0002_Ly_R_TS
 GECCO_0003	GECCO_0003_Ly_R_TS

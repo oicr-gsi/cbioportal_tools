@@ -4,7 +4,6 @@
 #short_name=GECCO
 #description=GECCO Samples sequenced and analyzed at OICR
 #output_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/cbioMutect/
-#cbioportal_key=/u/kchandan/cbioportal.pem
 Type	File
 mutation	mutation.txt
 sample	sample.txt
