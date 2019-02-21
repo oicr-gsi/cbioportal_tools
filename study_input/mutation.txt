@@ -2,10 +2,10 @@
 #caller=Mutect
 #profile_name=Mutations (Colorectal)
 #profile_description=Mutation data from whole exome sequencing. (12 Samples)
-File_Name	Patient_ID	Normal_col	Tumor_col	Normal_ID	Tumor_ID
-GECCO_0001_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0001	GECCO_0001_Ly_R_TS.sorted.filter	GECCO_0001_Li_P_TS.sorted.filter	GECCO_0001_Ly_R_TS	GECCO_0001_Li_P_TS
-GECCO_0002_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0002	GECCO_0002_Ly_R_TS.sorted.filter	GECCO_0002_Li_P_TS.sorted.filter	GECCO_0002_Ly_R_TS	GECCO_0002_Li_P_TS
-GECCO_0003_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0003	GECCO_0003_Ly_R_TS.sorted.filter	GECCO_0003_Li_P_TS.sorted.filter	GECCO_0003_Ly_R_TS	GECCO_0003_Li_P_TS
-GECCO_0004_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0004	GECCO_0004_Ly_R_TS.sorted.filter	GECCO_0004_Li_P_TS.sorted.filter	GECCO_0004_Ly_R_TS	GECCO_0004_Li_P_TS
-GECCO_0005_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0005	GECCO_0005_Ly_R_TS.sorted.filter	GECCO_0005_Li_P_TS.sorted.filter	GECCO_0005_Ly_R_TS	GECCO_0005_Li_P_TS
-GECCO_0006_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0006	GECCO_0006_Ly_R_TS.sorted.filter	GECCO_0006_Li_P_TS.sorted.filter	GECCO_0006_Ly_R_TS	GECCO_0006_Li_P_TS
+FILE_NAME	PATIENT_ID	NORMAL_COL	TUMOR_COL	NORMAL_ID	TUMOR_ID
+GECCO_0001_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0001	GECCO_0001_Ly_R_TS	GECCO_0001_Li_P_TS	GECCO_0001_Ly_R_TS.sorted.filter	GECCO_0001_Li_P_TS.sorted.filter
+GECCO_0002_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0002	GECCO_0002_Ly_R_TS	GECCO_0002_Li_P_TS	GECCO_0002_Ly_R_TS.sorted.filter	GECCO_0002_Li_P_TS.sorted.filter
+GECCO_0003_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0003	GECCO_0003_Ly_R_TS	GECCO_0003_Li_P_TS	GECCO_0003_Ly_R_TS.sorted.filter	GECCO_0003_Li_P_TS.sorted.filter
+GECCO_0004_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0004	GECCO_0004_Ly_R_TS	GECCO_0004_Li_P_TS	GECCO_0004_Ly_R_TS.sorted.filter	GECCO_0004_Li_P_TS.sorted.filter
+GECCO_0005_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0005	GECCO_0005_Ly_R_TS	GECCO_0005_Li_P_TS	GECCO_0005_Ly_R_TS.sorted.filter	GECCO_0005_Li_P_TS.sorted.filter
+GECCO_0006_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0006	GECCO_0006_Ly_R_TS	GECCO_0006_Li_P_TS	GECCO_0006_Ly_R_TS.sorted.filter	GECCO_0006_Li_P_TS.sorted.filter

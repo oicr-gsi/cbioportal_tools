@@ -9,6 +9,7 @@ import subprocess
 import os
 
 import pandas as pd
+import numpy as np
 
 # Other Scripts
 import generate_meta_case_list
@@ -53,6 +54,11 @@ def define_parser():
     required.add_argument("-s", "--study-info",
                           help="The location of the study input information",
                           metavar='FILE')
+    required.add_argument("-k", "--cbioportal-key",
+                          type=lambda key: os.path.abspath(key),
+                          help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
+                          metavar='FILE',
+                          default='/u/kchandan/cbioportal.pem')
     parser.add_argument("-p", "--push",
                         action="store_true",
                         help="Push the generated study to the cBioPortal Instance")
@@ -65,10 +71,14 @@ def define_parser():
     return parser
 
 
-def get_config(file, f_type, verb):
+def get_config(file, f_type, verb) -> Config.Config:
+    if os.path.isfile(file):
+        print('File Name: {}'.format(file))
+    else:
+        raise OSError('ERROR: Is not a file\n' + file)
     f = open(file, 'r')
 
-    helper.working_on(verb, message='Reading information')
+    helper.working_on(verb, message='Reading information\n')
     file_map = {}
     for line in f:
         if line[0] == '#':
@@ -76,14 +86,37 @@ def get_config(file, f_type, verb):
             file_map[line[0]] = line[1]
         else:
             break
+    f.close()
     data_frame = pd.read_csv(file, delimiter='\t', skiprows=len(file_map), dtype=object)
     config_file = Config.Config(file_map, data_frame, f_type)
     return config_file
 
 
+def get_config_clinical(file: str, f_type: str, verb) -> Config.Clinical_Config:
+    if os.path.isfile(file):
+        print('File Name: {}'.format(file))
+    else:
+        raise OSError('ERROR: Is not a file\n' + file)
+    f = open(file, 'r')
+
+    helper.working_on(verb, message='Reading information\n')
+    file_map = {}
+    data_frame = []
+    for line in f:
+        if line[0] == '#':
+            line = line.strip().replace('#', '').split('=')
+            file_map[line[0]] = line[1]
+        else:
+            data_frame.append(line.strip().split('\t'))
+    config_file = Config.Clinical_Config(file_map, data_frame, f_type)
+    return config_file
+
+
 def generate_meta_file(meta_config: Config.Config, study_config: Config.Config, verb):
+    # NOTE:: Should be able to generate any from the set of all meta files
+
     helper.working_on(verb, message='Changing folder...')
-    original_dir = helper.change_folder(study_config.config_map['study_output_folder'])
+    original_dir = helper.change_folder(study_config.config_map['output_folder'])
     helper.working_on(verb)
 
     # TODO:: Add functionality for optional fields
@@ -120,7 +153,7 @@ def generate_meta_file(meta_config: Config.Config, study_config: Config.Config, 
 
 def generate_meta_study(study_config: Config.Config, verb):
     helper.working_on(verb, message='Changing folder...')
-    original_dir = helper.change_folder(study_config.config_map['study_output_folder'])
+    original_dir = helper.change_folder(study_config.config_map['output_folder'])
     helper.working_on(verb)
 
     helper.working_on(verb, message='Saving meta_study.txt ...')
@@ -153,7 +186,7 @@ def generate_data_file(meta_config: Config.Config, study_config: Config.Config, 
 
         helper.working_on(verb, message='Exporting vcf2maf...')
         helper.working_on(verb, message='And deleting .vcf s...')
-        generate_data_meta_mutation_data.export2maf(meta_config, force, verb)
+        meta_config = generate_data_meta_mutation_data.export2maf(meta_config, force, verb)
         helper.working_on(verb)
 
         helper.working_on(verb, message='Concatenating .maf files...')
@@ -173,45 +206,33 @@ def generate_case_list(meta_config: Config.Config, study_config: Config.Config):
                                            case_list_map[meta_config.type_config]))
         f.write('case_list_name: {}\n'.format(meta_config.config_map['profile_name']))
         f.write('case_list_description: {}\n'.format(meta_config.config_map['profile_description']))
-        f.write('case_list_ids: {}\n'.format('\t'.join(meta_config.data_frame['Patient_ID'])))
+        f.write('case_list_ids: {}\n'.format('\t'.join(meta_config.data_frame['PATIENT_ID'])))
         f.flush()
         os.fsync(f)
         f.close()
 
 
+def generate_data_clinical(samples_config: Config.Clinical_Config, study_config: Config.Config, verb):
+    num_header_lines = 4
 
-def gen_samples_meta_data(args, verb, conv_info):
-    # TODO:: Port to new format
-    helper.working_on(verb, message='Changing folder to temp...')
-    original_dir = helper.change_folder(helper.get_temp_folder(args, 'vcf'))
-    helper.working_on(verb)
+    output_file = os.path.join(os.path.abspath(study_config.config_map['output_folder']),
+                                               'data_{}.txt'.format(samples_config.type_config))
 
-    helper.working_on(verb, message='Changing folder to output...')
-    helper.reset_folder(original_dir)
-    original_dir = helper.change_folder(args.study_output_folder)
-    helper.working_on(verb)
+    array = np.array(samples_config.data_frame)
 
-    helper.working_on(verb, message='Saving data_clinical_samples.txt ...')
-    generate_data_meta_samples.save_data_samples(conv_info)
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Saving meta_clinical_samples.txt ...')
-    generate_data_meta_samples.save_meta_samples(args.study_id)
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Popping back...')
-    helper.reset_folder(original_dir)
-    helper.working_on(verb, message='Success! The cancer samples meta and data has been saved!')
+    f = open(output_file, 'w')
+    for i in range(array.shape[0]):
+        if i < num_header_lines:
+            f.write('#{}\n'.format('\t'.join(samples_config.data_frame[i])))
+        else:
+            f.write('{}\n'.format('\t'.join(samples_config.data_frame[i])))
+    f.close()
 
 
 def gen_cancer_type_meta_data(args, verb):
     # TODO:: Port to new format
     helper.working_on(verb, message='Reading colours...')
     colours = generate_data_meta_cancer_type.get_colours()
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Changing folder...')
-    original_dir = helper.change_folder(args.study_output_folder)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Generating cancer_type records...')
@@ -222,53 +243,21 @@ def gen_cancer_type_meta_data(args, verb):
     generate_data_meta_cancer_type.gen_cancer_type_meta()
     helper.working_on(verb)
 
-    helper.working_on(verb, message='Popping back...')
-    helper.reset_folder(original_dir)
-    helper.working_on(verb, message='Success! The cancer study meta has been saved!')
 
-
-def gen_case_list_meta(args, verb, conv_info):
-    # TODO:: Port to new format
-    helper.working_on(verb, message='Changing folder to temp...')
-    original_dir = helper.change_folder(helper.get_temp_folder(args, 'vcf'))
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Jumping into Study Output Folder...')
-    helper.change_folder(args.study_output_folder)
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Testing Case_Lists Folder...')
-    generate_meta_case_list.test_case_lists_folder()
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Jumping into Case_Lists Folder...')
-    helper.change_folder(generate_meta_case_list.case_folder)
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Saving Meta Case List...')
-    generate_meta_case_list.save_meta_case_lists(conv_info, args)
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Popping back...')
-    helper.reset_folder(original_dir)
-    helper.working_on(verb, message='Success! The cancer case lists has been saved!')
-
-
-def export_study_to_cbioportal(args, verb):
+def export_study_to_cbioportal(key, folder, verb):
     # Copying folder to cBioPortal
     helper.working_on(verb, message='Copying folder to cBioPortal instance at 10.30.133.80 ...')
 
     # Cleanup Location
     subprocess.call("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                     "rm -r ~/oicr_studies/{}; "
-                    "mkdir ~/oicr_studies/{}'".format(args.cbioportal_key,
-                                                      os.path.basename(args.study_output_folder),
-                                                      os.path.basename(args.study_output_folder)
+                    "mkdir ~/oicr_studies/{}'".format(key,
+                                                      os.path.basename(folder),
+                                                      os.path.basename(folder)
                                                       ),
                     shell=True)
     # Copy over
-    subprocess.call('scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies'.format(args.cbioportal_key,
-                                                                                           args.study_output_folder),
+    subprocess.call('scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies'.format(key, folder),
                     shell=True)
     helper.working_on(verb)
     # Import study to cBioPortal
@@ -276,16 +265,16 @@ def export_study_to_cbioportal(args, verb):
     subprocess.call("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                     "./metaImport.py -s ~/oicr_studies/{} "
                     "-u http://10.30.133.80:8080/cbioportal "
-                    "-o'".format(args.cbioportal_key,
-                                 os.path.basename(args.study_output_folder),
-                                 os.path.basename(args.study_output_folder),
-                                 os.path.basename(args.study_output_folder)
+                    "-o'".format(key,
+                                 os.path.basename(folder),
+                                 os.path.basename(folder),
+                                 os.path.basename(folder)
                                  ),
                     shell=True)
-    subprocess.call("ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(args.cbioportal_key),
+    subprocess.call("ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(key),
                     shell=True)
     os.wait()
-    subprocess.call("ssh -i {} debian@10.30.133.80 'sudo systemctl start tomcat'".format(args.cbioportal_key),
+    subprocess.call("ssh -i {} debian@10.30.133.80 'sudo systemctl start tomcat'".format(key),
                     shell=True)
     helper.working_on(verb)
 
@@ -298,23 +287,42 @@ def main():
     study_config_file = get_config(args.study_info, 'study', verb)
 
     information = []
-    for index, row in study_config_file.data_frame.iterrows():
-        row[1] = os.path.join(os.path.dirname(os.path.abspath(args.study_info)), row[1])
-        information.append(get_config(row[1], row[0], verb))
+    clinic_data = []
 
-    [print(a) for a in information] if verb else print(),
+    for i in range(study_config_file.data_frame.shape[0]):
+        config_file_name = os.path.join(os.path.dirname(os.path.abspath(args.study_info)),
+                                   study_config_file.data_frame.iloc[i][1])
 
-    samples_config = Config.Config(c for c in information if c.type_config == 'sample')
-    print(samples_config)
+        config_file_type = study_config_file.data_frame.iloc[i][0]
 
+        if study_config_file.data_frame.iloc[i][0] in ['sample', 'patient']:
+            clinic_data.append(get_config_clinical(config_file_name,
+                                                 config_file_type,
+                                                 verb))
+        else:
+            information.append(get_config(config_file_name,
+                                          config_file_type,
+                                          verb))
+
+    [print('Information File {}:\n{}\n'.format(a.type_config, a)) for a in information] if verb else print(),
+    [print('\nClinical Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
+
+    helper.clean_folder(study_config_file.config_map['output_folder'])
+
+    for each in clinic_data:
+        generate_meta_file(each, study_config_file, verb)
+        generate_data_clinical(each, study_config_file, verb)
     for each in information:
         generate_meta_file(each, study_config_file, verb)
         generate_data_file(each, study_config_file, force, verb)
         generate_case_list(each, study_config_file)
     generate_meta_study(study_config_file, verb)
 
+    export_study_to_cbioportal(args.key, study_config_file.config_map['output_folder'], verb)
+
     helper.stars()
     helper.working_on(verb, message='CONGRATULATIONS! A minimal study is now be complete!')
+    helper.working_on(verb, message='Output folder: {}'.format(study_config_file.config_map['output_folder']))
     helper.stars()
 
 
