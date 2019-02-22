@@ -6,13 +6,10 @@ __status__ = "Pre-Production"
 import os
 import shutil
 
-import numpy as np
-import re
-
 
 caller_choices = ['GATKHaplotype', 'Mutect', 'Mutect2', 'Strelka', 'MutectStrelka']
 extensionChoices = ["vcf", "maf"]
-compressedChoices = [".tar.gz", ".gz", ".zip"]
+c_choices = [".tar.gz", ".gz", ".zip"]
 
 
 def stars():
@@ -71,18 +68,9 @@ def working_on(verbosity, message='Success!\n'):
         print(message)
 
 
-def check_files_in_folder(choices, folder, parser):
-    # Checks file extensions within folder for belonging in extensionChoices (important constants)
-    for each in os.listdir(folder):
-        ext = each.split('.')
-        if not (bool(set(ext) & set(choices))):
-            parser.error(each + " file doesn't end with one of {}".format(choices))
-    return folder
-
-
 def write_tsv_dataframe(name, dataset):
     dataset.to_csv(name, sep='\t', index=False)
 
 
-def get_temp_folder(args, ext):
-    return os.path.abspath(os.path.join(args.study_input_folder, '../temp_{}/'.format(ext)))
+def get_temp_folder(input_folder, ext):
+    return os.path.abspath(os.path.join(input_folder, '../temp_{}/'.format(ext)))
