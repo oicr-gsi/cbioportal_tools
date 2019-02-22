@@ -19,7 +19,7 @@ class Config(object):
         return str([self.config_map, self.data_frame, self.type_config])
 
 
-class Clinical_Config(Config):
+class ClinicalConfig(Config):
     data_frame: list
 
     def __init__(self, config_map: dict, array, type_config: str):
