@@ -7,3 +7,5 @@
 Type	File
 mutation	mutation.txt
 sample	sample.txt
+patient	patient.txt
+cancer_type	cancer_type.txt

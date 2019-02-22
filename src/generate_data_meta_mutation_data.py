@@ -13,8 +13,6 @@ import Config
 ref_fasta = "/.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa "
 filter_vcf = '/.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz'
 
-data_mutations_extended = 'data_mutations_extended.maf'
-
 
 def decompress_to_temp(mutate_config: Config.Config):
     # Decompresses each file in the current folder to ../temp_vcf/ if it is compressed. otherwise, copy it over
@@ -147,11 +145,13 @@ def export2maf(exports_config: Config.Config, force, verb):
 
 def concat_files_maf(mutate_config: Config.Config, study_config: Config.Config):
     print(type(mutate_config))
-    f_name = os.path.join(os.path.abspath(study_config.config_map['output_folder']), data_mutations_extended)
+    f_name = os.path.join(os.path.abspath(study_config.config_map['output_folder']),
+                          'data_{}.txt'.format(mutate_config.type_config))
     output = open(f_name, 'w')
 
     # Write .maf header to output file
-    header = open(os.path.join(os.path.abspath(mutate_config.config_map['input_folder']), mutate_config.data_frame.iloc[0][0]))
+    header = open(os.path.join(os.path.abspath(mutate_config.config_map['input_folder']),
+                               mutate_config.data_frame.iloc[0][0]))
     output.write(header.readline() + header.readline())
     header.close()
 
