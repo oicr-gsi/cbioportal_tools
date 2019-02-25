@@ -12,16 +12,15 @@ import pandas as pd
 import numpy as np
 
 # Other Scripts
-import generate_data_meta_samples
 import generate_data_meta_cancer_type
 import generate_data_meta_mutation_data
 import helper
 import Config
 
-meta_info_map = {'mutation':   ['MUTATION_EXTENDED', 'MAF', 'mutations', 'true'],
-                 'sample':     ['CLINICAL', 'SAMPLE_ATTRIBUTES'],
-                 'patient':    ['CLINICAL', 'PATIENT_ATTRIBUTES'],
-                 'cancer_type':['CANCER_TYPE', 'CANCER_TYPE']}
+meta_info_map = {'mutation':    ['MUTATION_EXTENDED', 'MAF', 'mutations', 'true'],
+                 'sample':      ['CLINICAL', 'SAMPLE_ATTRIBUTES'],
+                 'patient':     ['CLINICAL', 'PATIENT_ATTRIBUTES'],
+                 'cancer_type': ['CANCER_TYPE', 'CANCER_TYPE']}
 
 # TODO:: Add all the other data types.
 # Keep note that a datatype will always have either:
@@ -30,7 +29,7 @@ meta_info_map = {'mutation':   ['MUTATION_EXTENDED', 'MAF', 'mutations', 'true']
 # The exception is Expression Data which also has source_stable_id on top of the other 4
 
 # A set of default ordered values all meta files have to a certain extent
-global_zip =    ['genetic_alteration_type', 'datatype', 'stable_id', 'show_profile_in_analysis_tab']
+global_zip = ['genetic_alteration_type', 'datatype', 'stable_id', 'show_profile_in_analysis_tab']
 
 case_list_map = {'mutation': '_sequenced',
                  'dCNA': '_cna'}
@@ -212,8 +211,8 @@ def generate_case_list(meta_config: Config.Config, study_config: Config.Config):
             os.makedirs(case_list_folder)
 
         f = open('{}/data_{}{}.txt'.format(case_list_folder,
-                                       meta_config.type_config,
-                                       case_list_map[meta_config.type_config]), 'w')
+                                           meta_config.type_config,
+                                           case_list_map[meta_config.type_config]), 'w')
 
         f.write('cancer_study_identifier: {}\n'.format(study_config.config_map['cancer_study_identifier']))
         f.write('stable_id: {}{}\n'.format(study_config.config_map['cancer_study_identifier'],
@@ -230,8 +229,10 @@ def generate_case_list(meta_config: Config.Config, study_config: Config.Config):
 def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: Config.Config, verb):
     num_header_lines = 4
 
+    helper.working_on(verb, message='Writing to data_{}.txt ...'.format(samples_config.type_config))
+
     output_file = os.path.join(os.path.abspath(study_config.config_map['output_folder']),
-                                               'data_{}.txt'.format(samples_config.type_config))
+                               'data_{}.txt'.format(samples_config.type_config))
 
     array = np.array(samples_config.data_frame)
 
@@ -242,6 +243,7 @@ def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: 
         else:
             f.write('{}\n'.format('\t'.join(samples_config.data_frame[i])))
     f.close()
+    helper.working_on(verb)
 
 
 def export_study_to_cbioportal(key, study_folder, verb):
@@ -251,11 +253,11 @@ def export_study_to_cbioportal(key, study_folder, verb):
 
     # Cleanup Location
     print("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                    "rm -r ~/oicr_studies/{}; "
-                    "mkdir ~/oicr_studies/{}'".format(key,
-                                                      folder,
-                                                      folder
-                                                      )) if verb else print(),
+          "rm -r ~/oicr_studies/{}; "
+          "mkdir ~/oicr_studies/{}'".format(key,
+                                            folder,
+                                            folder
+                                            )) if verb else print(),
     subprocess.call("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                     "rm -r ~/oicr_studies/{}; "
                     "mkdir ~/oicr_studies/{}'".format(key,
@@ -273,11 +275,11 @@ def export_study_to_cbioportal(key, study_folder, verb):
     helper.working_on(verb, message='Importing study to cBioPortal...')
 
     print("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                    "./metaImport.py -s ~/oicr_studies/{} "
-                    "-u http://10.30.133.80:8080/cbioportal "
-                    "-o'".format(key, folder)) if verb else print(),
+          "./metaImport.py -s ~/oicr_studies/{} "
+          "-u http://10.30.133.80:8080/cbioportal "
+          "-o'".format(key, folder)) if verb else print(),
     subprocess.call("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                    "./metaImport.py -s ~/oicr_studies/{} "
+                    "sudo ./metaImport.py -s ~/oicr_studies/{} "
                     "-u http://10.30.133.80:8080/cbioportal "
                     "-o'".format(key,
                                  folder,),
@@ -314,10 +316,10 @@ def main():
 
         if study_config_file.data_frame.iloc[i][0] in ['sample', 'patient']:
             clinic_data.append(get_config_clinical(config_file_name,
-                                                 config_file_type,
-                                                 verb))
+                                                   config_file_type,
+                                                   verb))
         elif study_config_file.data_frame.iloc[i][0] in ['cancer_type']:
-             cancer_type = get_config(config_file_name,
+            cancer_type = get_config(config_file_name,
                                      config_file_type,
                                      verb)
         else:
