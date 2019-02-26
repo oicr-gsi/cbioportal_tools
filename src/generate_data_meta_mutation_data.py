@@ -58,7 +58,8 @@ def export2maf(exports_config: Config.Config, force, verb):
         output_maf = export_data.iloc[i][0]
         for a in helper.c_choices:
             output_maf = output_maf.replace(a, '')
-        output_maf = output_maf.replace('.maf', '.vcf')
+        output_maf = output_maf.replace('.vcf', '.maf')
+        helper.working_on(verb, 'Output .maf being generated... ' + output_maf)
 
         input_vcf = os.path.join(helper.get_temp_folder(input_folder, 'vcf'),
                                  'vcf'.join(os.path.basename(output_maf).rsplit('maf')))
