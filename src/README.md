@@ -18,7 +18,7 @@ Run with ```./runner.sh``` all arguments can be modified:
 # Prints verbose, for debugging
 ```
 
-###Detailed help:
+### Detailed help:
 
 ```
 usage: main.py [-h] [-o FOLDER] [-s FILE] [-k FILE] [-p] [-v] [-f]

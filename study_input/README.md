@@ -5,7 +5,9 @@ The minimum required files are:
 - _study.txt_
 - _samples.txt_
 - _case_lists/cases_all.txt_
-- _cancer_type.txt_
+- _cancer_type.txt_ **
+
+** If cancer type is not already in the database
 
 Once they are filled they will produce the minimum required files.
 
@@ -23,8 +25,18 @@ Type	File
 mutation	mutation.txt
 sample	sample.txt
 ```
+There are a limited number of types. Although no error is currently thrown, it will possibly generate an error during the import step of cBioPortal.
 
-The breakdown of the form is essentially
+As of this commit, the supported types are:
+- `mutation`
+- `sample`
+- `patient`
+- `cancer_type`
+
+Each one of these files can have any name that you desire, they simply need to have their relative path specified.
+
+
+The breakdown of the form of all files is essentially
 ~~~
 #Property=value
 #profile_name=Something relavent (Required for)
