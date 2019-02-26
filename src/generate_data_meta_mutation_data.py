@@ -39,34 +39,6 @@ def decompress_to_temp(mutate_config: Config.Config):
                             shell=True)
 
 
-def add_unmatched_GATK():
-    for each in os.listdir('.'):
-        # Add unmatched column to files
-        pre_process_vcf_GATK(each, each)
-
-
-def pre_process_vcf_GATK(input_file, output_file):
-    i = open(input_file, 'r')
-    o = open(output_file, 'w')
-    while True:
-        line = i.readline()
-        if '\t' in line:
-            break
-        else:
-            o.write(line)
-    o.write(i.readline() + '\tUNMATCHED')
-    while True:
-        line = i.readline().split('\t')
-        index = len(line) - 1
-        write = '\t'.join([*line, line[index]])
-        if index < 2:
-            break
-        else:
-            o.write(write)
-    i.close()
-    o.close()
-
-
 def export2maf(exports_config: Config.Config, force, verb):
     # Prep
     temp_folder = helper.get_temp_folder(exports_config.config_map['input_folder'], 'maf')
@@ -86,7 +58,8 @@ def export2maf(exports_config: Config.Config, force, verb):
         output_maf = export_data.iloc[i][0]
         for a in helper.c_choices:
             output_maf = output_maf.replace(a, '')
-        output_maf = output_maf.replace('.maf', '.vcf')
+        output_maf = output_maf.replace('.vcf', '.maf')
+        helper.working_on(verb, 'Output .maf being generated... ' + output_maf)
 
         input_vcf = os.path.join(helper.get_temp_folder(input_folder, 'vcf'),
                                  'vcf'.join(os.path.basename(output_maf).rsplit('maf')))
