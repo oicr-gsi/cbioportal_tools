@@ -1,3 +1,5 @@
+from typing import Any, Union
+
 __author__ = "Kunal Chandan"
 __license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
@@ -10,8 +12,24 @@ import helper
 import Config
 
 # Define important constants
-ref_fasta = "/.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa "
+ref_fasta = "/.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa"
 filter_vcf = '/.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz'
+
+
+def wanted_columns(mutate_config: Config.Config, study_config: Config.Config):
+    print('I am the MEME LORD')
+    f = open(mutate_config.data_frame['FILE_NAME'][0], 'r')
+    f.readline()
+
+    wanted = os.path.join(helper.get_temp_folder(study_config.data_frame['output_folder'], 'study'),
+                          'wanted_columns.txt')
+
+    # Write Columns of Maf File
+    o = open(wanted, 'w+')
+    o.write('\n'.join(f.readline().split('\t')))
+
+    f.close()
+    o.close()
 
 
 def decompress_to_temp(mutate_config: Config.Config):

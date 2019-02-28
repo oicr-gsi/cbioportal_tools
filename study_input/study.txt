@@ -4,8 +4,8 @@
 #short_name=GECCO
 #description=GECCO Samples sequenced and analyzed at OICR
 #output_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/cbioMutect/
-Type	File
-mutation	mutation.txt
-sample	sample.txt
-patient	patient.txt
-cancer_type	cancer_type.txt
+TYPE	FILE
+MAF	mutation.txt
+SAMPLE_ATTRIBUTES	sample.txt
+PATIENT_ATTRIBUTES	patient.txt
+CANCER_TYPE	cancer_type.txt

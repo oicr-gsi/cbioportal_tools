@@ -6,6 +6,8 @@ __status__ = "Pre-Production"
 import os
 import shutil
 
+import Config
+
 
 caller_choices = ['GATKHaplotype', 'Mutect', 'Mutect2', 'Strelka', 'MutectStrelka']
 extensionChoices = ["vcf", "maf"]
@@ -19,7 +21,7 @@ def stars():
     print('')
 
 
-def change_folder(folder):
+def change_folder(folder) -> str:
     # Try to safely change working directory
     original_working_directory = os.getcwd()
     try:
@@ -68,9 +70,9 @@ def working_on(verbosity, message='Success!\n'):
         print(message)
 
 
-def write_tsv_dataframe(name, dataset):
-    dataset.to_csv(name, sep='\t', index=False)
-
-
-def get_temp_folder(input_folder, ext):
+def get_temp_folder(input_folder, ext) -> str:
     return os.path.abspath(os.path.join(input_folder, '../temp_{}/'.format(ext)))
+
+
+def get_cbiowrap_file(study_config: Config.Config, name: str) -> str:
+    return os.path.join(get_temp_folder(study_config.config_map['output_folder'], 'study'), name)
