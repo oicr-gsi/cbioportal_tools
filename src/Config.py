@@ -1,4 +1,7 @@
 import pandas as pd
+import os
+
+import helper
 
 
 class Config(object):
@@ -26,3 +29,45 @@ class ClinicalConfig(Config):
         self.config_map = config_map
         self.data_frame = array
         self.type_config = type_config
+
+
+def get_config(file, f_type, verb) -> Config:
+    if os.path.isfile(file):
+        print('File Name: {}'.format(file))
+    else:
+        raise OSError('ERROR: Is not a file\n' + file)
+    f = open(file, 'r')
+
+    helper.working_on(verb, message='Reading information\n')
+    file_map = {}
+    for line in f:
+        if line[0] == '#':
+            line = line.strip().replace('#', '').split('=')
+            file_map[line[0]] = line[1]
+        else:
+            break
+    f.close()
+    data_frame = pd.read_csv(file, delimiter='\t', skiprows=len(file_map), dtype=object)
+
+    config_file = Config(file_map, data_frame, f_type)
+    return config_file
+
+
+def get_config_clinical(file: str, f_type: str, verb) -> ClinicalConfig:
+    if os.path.isfile(file):
+        print('File Name: {}'.format(file))
+    else:
+        raise OSError('ERROR: Is not a file\n' + file)
+    f = open(file, 'r')
+
+    helper.working_on(verb, message='Reading information\n')
+    file_map = {}
+    data_frame = []
+    for line in f:
+        if line[0] == '#':
+            line = line.strip().replace('#', '').split('=')
+            file_map[line[0]] = line[1]
+        else:
+            data_frame.append(line.strip().split('\t'))
+    config_file = ClinicalConfig(file_map, data_frame, f_type)
+    return config_file
