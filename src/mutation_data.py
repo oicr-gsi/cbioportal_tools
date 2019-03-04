@@ -15,7 +15,6 @@ filter_vcf = '/.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.
 
 
 def wanted_columns(mutate_config: Config.Config, study_config: Config.Config):
-    print('I am the MEME LORD')
     f = open(os.path.join(mutate_config.config_map['input_folder'],
                           mutate_config.data_frame['FILE_NAME'][0]), 'r')
     f.readline()
@@ -32,12 +31,19 @@ def wanted_columns(mutate_config: Config.Config, study_config: Config.Config):
     o.close()
 
 
-def decompress_to_temp(mutate_config: Config.Config):
+def decompress_to_temp(mutate_config: Config.Config, verb):
     # Decompresses each file in the current folder to ../temp_vcf/ if it is compressed. otherwise, copy it over
-    temp_folder = helper.get_temp_folder(mutate_config.config_map['input_folder'], 'vcf')
-    print(temp_folder)
+    if mutate_config.type_config == 'MAF':
+        temp_folder = helper.get_temp_folder(mutate_config.config_map['input_folder'], 'vcf')
+    elif mutate_config.type_config == 'SEG':
+        temp_folder = helper.get_temp_folder(mutate_config.config_map['input_folder'], 'seg')
+    else:
+        temp_folder = helper.get_temp_folder(mutate_config.config_map['input_folder'],mutate_config.type_config.lower())
+
+    helper.working_on(verb, message='extracting/copying to {}'.format(temp_folder))
     helper.make_folder(temp_folder)
     helper.clean_folder(temp_folder)
+
     for file in mutate_config.data_frame.iloc[:, 0]:
         file = os.path.abspath(os.path.join(mutate_config.config_map['input_folder'], file))
         if file.endswith(".tar.gz"):

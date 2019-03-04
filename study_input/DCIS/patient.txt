@@ -1,0 +1,13 @@
+#profile_name=All samples
+#profile_description=All GECCO Samples (12 Samples)
+Patient Identifier	Patient Name
+Patient Identifier	Patient Name
+STRING	STRING
+1	1
+PATIENT_ID	PATIENT_DISPLAY_NAME
+DCIS_0001	DCIS_0001
+DCIS_0002	DCIS_0002
+DCIS_0003	DCIS_0003
+DCIS_0004	DCIS_0004
+DCIS_0005	DCIS_0005
+DCIS_0006	DCIS_0006
