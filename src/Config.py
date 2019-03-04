@@ -1,8 +1,6 @@
 import pandas as pd
 import os
 
-import helper
-
 
 class Config(object):
     config_map: dict = {}
@@ -38,7 +36,7 @@ def get_config(file, f_type, verb) -> Config:
         raise OSError('ERROR: Is not a file\n' + file)
     f = open(file, 'r')
 
-    helper.working_on(verb, message='Reading information\n')
+    print('Reading information') if verb else print(),
     file_map = {}
     for line in f:
         if line[0] == '#':
@@ -60,7 +58,7 @@ def get_config_clinical(file: str, f_type: str, verb) -> ClinicalConfig:
         raise OSError('ERROR: Is not a file\n' + file)
     f = open(file, 'r')
 
-    helper.working_on(verb, message='Reading information\n')
+    print('Reading information') if verb else print(),
     file_map = {}
     data_frame = []
     for line in f:

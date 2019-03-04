@@ -40,6 +40,13 @@ ref_gene_id_zip = ['genetic_alteration_type', 'datatype', 'reference_genome_id']
 case_list_map =   {'MAF': '_sequenced',
                    'DISCRETE': '_cna'}
 cbiowrap_export = ['MAF', 'SEG', 'GEP']
+
+config2name_map = {'MAF':                 'mutations_extended',
+                   'SEG':                 'expression_file',
+                   'GEP':                 'log2CNA',
+                   'SAMPLE_ATTRIBUTES':   'clinical_samples',
+                   'PATIENT_ATTRIBUTES':  'clinical_patients',
+                   'CANCER_TYPE':         'cancer_type'}
 # dCNA => discrete Copy Number Variation
 
 
@@ -85,9 +92,9 @@ def generate_meta_file(meta_config: Config.Config, study_config: Config.Config, 
 
     # TODO:: Add functionality for optional fields
 
-    helper.working_on(verb, message='Saving meta_{}.txt ...'.format(meta_config.type_config))
+    helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[meta_config.type_config]))
 
-    f_out = 'meta_{}.txt'.format(meta_config.type_config)
+    f_out = 'meta_{}.txt'.format(config2name_map[meta_config.type_config])
     f = open(f_out, 'w')
 
     if not meta_config.type_config == 'CANCER_TYPE':
@@ -108,19 +115,20 @@ def generate_meta_file(meta_config: Config.Config, study_config: Config.Config, 
         for field, entry in zip(general_zip, meta_info_map[meta_config.type_config]):
             f.write('{}: {}\n'.format(field, entry))
 
-    #
-    if 'profile_name' in meta_config.config_map and 'profile_description' in meta_config.config_map:
-        f.write('profile_name: {}\n'.format(meta_config.config_map['profile_name']))
-        f.write('profile_description: {}\n'.format(meta_config.config_map['profile_description']))
+    # Add profile_name and description, but exclude clinical data
+    if meta_config.type_config not in ['SAMPLE_ATTRIBUTES', 'PATIENT_ATTRIBUTES']:
+        if all([i in meta_config.config_map for i in ['profile_name', 'profile_description']]):
+            f.write('profile_name: {}\n'.format(meta_config.config_map['profile_name']))
+            f.write('profile_description: {}\n'.format(meta_config.config_map['profile_description']))
 
-    f.write('data_filename: data_{}.txt\n'.format(meta_config.type_config))
-    f.close()
+    f.write('data_filename: data_{}.txt\n'.format(config2name_map[meta_config.type_config]))
     f.flush()
+    f.close()
     helper.working_on(verb)
 
     helper.working_on(verb, message='Popping back...')
     helper.reset_folder(original_dir)
-    helper.working_on(verb, message='Success! The {} meta has been saved!'.format(meta_config.type_config))
+    helper.working_on(verb, message='Success! The {} meta has been saved!'.format(config2name_map[meta_config.type_config]))
 
 
 def generate_meta_study(study_config: Config.Config, verb):
@@ -138,8 +146,8 @@ def generate_meta_study(study_config: Config.Config, verb):
     f.write('short_name: {}\n'.format(study_config.config_map['short_name']))
     f.write('description: {}\n'.format(study_config.config_map['description']))
     f.write('add_global_case_list: true\r')
-    f.close()
     f.flush()
+    f.close()
 
     helper.working_on(verb)
 
@@ -164,6 +172,12 @@ def generate_data_file(meta_config: Config.Config, study_config: Config.Config, 
         mutation_data.wanted_columns(meta_config, study_config)
         helper.working_on(verb)
 
+        print(meta_config)
+        helper.working_on(verb, message='Re-zipping .mafs for cBioWrap ...')
+        meta_config = mutation_data.zip_maf_files(meta_config, force)
+        helper.working_on(verb)
+        print(meta_config)
+
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')
         colours = cancer_type.get_colours()
@@ -177,10 +191,10 @@ def generate_data_file(meta_config: Config.Config, study_config: Config.Config, 
 def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: Config.Config, verb):
     num_header_lines = 4
 
-    helper.working_on(verb, message='Writing to data_{}.txt ...'.format(samples_config.type_config))
+    helper.working_on(verb, message='Writing to data_{}.txt ...'.format(config2name_map[samples_config.type_config]))
 
     output_file = os.path.join(os.path.abspath(study_config.config_map['output_folder']),
-                               'data_{}.txt'.format(samples_config.type_config))
+                               'data_{}.txt'.format(config2name_map[samples_config.type_config]))
 
     array = np.array(samples_config.data_frame)
 
@@ -201,7 +215,7 @@ def generate_case_list(meta_config: Config.Config, study_config: Config.Config):
             os.makedirs(case_list_folder)
 
         f = open('{}/data_{}{}.txt'.format(case_list_folder,
-                                           meta_config.type_config,
+                                           config2name_map[meta_config.type_config],
                                            case_list_map[meta_config.type_config]), 'w')
 
         f.write('cancer_study_identifier: {}\n'.format(study_config.config_map['cancer_study_identifier']))
@@ -209,12 +223,12 @@ def generate_case_list(meta_config: Config.Config, study_config: Config.Config):
                                            case_list_map[meta_config.type_config]))
         f.write('case_list_name: {}\n'.format(meta_config.config_map['profile_name']))
         f.write('case_list_description: {}\n'.format(meta_config.config_map['profile_description']))
-        f.write('case_list_ids: {}\n'.format('\t'.join(meta_config.data_frame['TUMOR_COL'])))
-        f.close()
+        f.write('case_list_ids: {}\n'.format('\t'.join(meta_config.data_frame['TUMOR_ID'])))
         f.flush()
+        f.close()
 
 
-def generate_cbiowrap_config(information: Information, study_config: Config.Config):
+def generate_cbiowrap_configs(information: Information, study_config: Config.Config):
     # Copy fixed config.
     ini = open('config_fixed.ini', 'r')
     fixed = ini.readlines()
@@ -225,23 +239,38 @@ def generate_cbiowrap_config(information: Information, study_config: Config.Conf
         wanted = helper.get_cbiowrap_file(study_config, 'wanted_columns.txt')
         o = open(wanted, 'w+')
         o.write('')
-        o.close()
         o.flush()
+        o.close()
+
+    info = information.copy()
+    for each in info:
+        if each.type_config in cbiowrap_export:
+            for i in range(each.data_frame.shape[0]):
+                each.data_frame['FILE_NAME'][i] = os.path.join(each.config_map['input_folder'],
+                                                               each.data_frame['FILE_NAME'][i])
 
     # Generate Mapping.csv
-    [i.data_frame.rename(columns={'FILE_NAME': i.type_config}, inplace=True) for i in information]
+    [i.data_frame.rename(columns={'FILE_NAME': i.type_config}, inplace=True) for i in info]
     # Merge all data_frames, and gather mutation, seg and gep
-    result = information[0]
-    for i in information:
-        result.data_frame = pd.merge(result.data_frame, i.data_frame)
+    # TODO:: Convert the TUMOR_ID to a SAMPLE_ID
+    if len(info) == 0:
+        result = Config.Config({}, pd.DataFrame('PATIENT_ID', 'TUMOR_ID'), '')
+    elif len(info) == 1:
+        result = info[0]
+    else:
+        result = info[0]
+        for i in range(1, len(info)):
+            result.data_frame = pd.merge(result.data_frame, info[i].data_frame, on=['PATIENT_ID', 'TUMOR_ID'])
+
     result.data_frame.replace(np.nan, 'NA', inplace=True)
 
     for col in cbiowrap_export:
         if col not in result.data_frame:
             result.data_frame[col] = 'NA'
 
-    csv = result.data_frame[['PATIENT_ID', 'SAMPLE_ID', *cbiowrap_export]]
-    csv.to_csv(study_config.config_map['study_output_folder'])
+    print(result)
+    csv = result.data_frame[['PATIENT_ID', 'TUMOR_ID', *cbiowrap_export]]
+    csv.to_csv(helper.get_cbiowrap_file(study_config, 'mapping.csv'), header=False, index=False)
     # Write arguments to config.ini
     out = open(helper.get_cbiowrap_file(study_config, 'config.ini'), 'w+')
     out.writelines(fixed)
@@ -259,20 +288,20 @@ def run_cbiowrap(study_config: Config.Config):
 
 
 def export_study_to_cbioportal(key, study_folder, verb):
-    folder = os.path.basename(os.path.abspath(study_folder))
+    base_folder = os.path.basename(os.path.abspath(study_folder))
     # Copying folder to cBioPortal
     helper.working_on(verb, message='Copying folder to cBioPortal instance at 10.30.133.80 ...')
 
     # Cleanup Location
     helper.working_on(verb, "ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                             "rm -r ~/oicr_studies/{}; "
-                            "mkdir ~/oicr_studies/{}'".format(key, folder, folder))
+                            "mkdir ~/oicr_studies/{}'".format(key, base_folder, base_folder))
 
     subprocess.call("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                     "rm -r ~/oicr_studies/{}; "
                     "mkdir ~/oicr_studies/{}'".format(key,
-                                                      folder,
-                                                      folder
+                                                      base_folder,
+                                                      base_folder
                                                       ),
                     shell=True)
     # Copy over
@@ -287,12 +316,12 @@ def export_study_to_cbioportal(key, study_folder, verb):
     print("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
           "./metaImport.py -s ~/oicr_studies/{} "
           "-u http://10.30.133.80:8080/cbioportal "
-          "-o'".format(key, folder)) if verb else print(),
+          "-o'".format(key, base_folder)) if verb else print(),
     subprocess.call("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                     "sudo ./metaImport.py -s ~/oicr_studies/{} "
                     "-u http://10.30.133.80:8080/cbioportal "
                     "-o'".format(key,
-                                 folder,),
+                                 base_folder),
                     shell=True)
 
     helper.working_on(verb, "ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(key))
@@ -322,7 +351,7 @@ def main():
 
         config_file_type = study_config_file.data_frame.iloc[i][int(0)]
 
-        if study_config_file.data_frame.iloc[i][0] in ['sample', 'patient']:
+        if study_config_file.data_frame.iloc[i][0] in ['SAMPLE_ATTRIBUTES', 'PATIENT_ATTRIBUTES']:
             clinic_data.append(Config.get_config_clinical(config_file_name,
                                                           config_file_type,
                                                           verb))
@@ -345,14 +374,14 @@ def main():
     for each in information:
         # Convert vcf to maf
         generate_data_file(each, study_config_file, force, verb)
-        generate_case_list(each, study_config_file)
 
     # Generate Config.ini file
-    generate_cbiowrap_config(information, study_config_file)
+    generate_cbiowrap_configs(information, study_config_file)
 
     # run cBioWrap.sh
     run_cbiowrap(study_config_file)
 
+    study_config_file.config_map['output_folder'] = os.path.join(study_config_file.config_map['output_folder'], 'cbioportal_import_data')
     # Overwrite some of the meta files (Optional)
     # Generate CANCER_TYPE
     if type(cancer_type) == Config.Config:
