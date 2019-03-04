@@ -1,5 +1,3 @@
-from typing import Any, Union
-
 __author__ = "Kunal Chandan"
 __license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
@@ -18,13 +16,15 @@ filter_vcf = '/.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.
 
 def wanted_columns(mutate_config: Config.Config, study_config: Config.Config):
     print('I am the MEME LORD')
-    f = open(mutate_config.data_frame['FILE_NAME'][0], 'r')
+    f = open(os.path.join(mutate_config.config_map['input_folder'],
+                          mutate_config.data_frame['FILE_NAME'][0]), 'r')
     f.readline()
 
-    wanted = os.path.join(helper.get_temp_folder(study_config.data_frame['output_folder'], 'study'),
+    wanted = os.path.join(helper.get_temp_folder(study_config.config_map['output_folder'], 'study'),
                           'wanted_columns.txt')
 
     # Write Columns of Maf File
+    helper.make_folder(os.path.dirname(wanted))
     o = open(wanted, 'w+')
     o.write('\n'.join(f.readline().split('\t')))
 
@@ -82,13 +82,13 @@ def export2maf(exports_config: Config.Config, force, verb):
         input_vcf = os.path.join(helper.get_temp_folder(input_folder, 'vcf'),
                                  'vcf'.join(os.path.basename(output_maf).rsplit('maf')))
 
-        normal_id = export_data.iloc[i][2]
-        tumors_id = export_data.iloc[i][3]
+        normal_id = export_data['NORMAL_ID'][i]
+        tumors_id = export_data['TUMOR_ID'][i]
 
         # Since the last 2 columns are optional and represent what's written in the file vs what should be in the output
         if export_data.shape[1] == 6:
-            gene_col_normal = export_data.iloc[i][4]
-            gene_col_tumors = export_data.iloc[i][5]
+            gene_col_normal = export_data['NORMAL_COL'][i]
+            gene_col_tumors = export_data['TUMOR_COL'][i]
         else:
             gene_col_normal = normal_id
             gene_col_tumors = tumors_id
@@ -120,7 +120,6 @@ def export2maf(exports_config: Config.Config, force, verb):
                                                                                           ref_fasta,
                                                                                           filter_vcf),
                                               shell=True))
-
         try:
             exports_config.data_frame.iloc[i][0] = output_maf
             exports_config.config_map['input_folder'] = maf_temp
@@ -128,6 +127,29 @@ def export2maf(exports_config: Config.Config, force, verb):
         except (FileExistsError, OSError):
             pass
     # Wait until cooked
+    exit_codes = [p.wait() for p in processes]
+    if verb:
+        print(exit_codes)
+    return exports_config
+
+
+def zip_maf_files(exports_config: Config.Config, verb) -> Config.Config:
+    processes = []
+    for i in range(exports_config.data_frame.shape[0]):
+        file_name = os.path.join(exports_config.config_map['input_folder'], exports_config.data_frame['FILE_NAME'][i])
+        helper.working_on(verb, 'Compressing {} ...'.format(file_name))
+
+        fin = open(file_name, 'r')
+        data = fin.read().splitlines(True)
+        fout = open(file_name, 'w')
+        fout.writelines(data[1:])
+        fout.flush()
+        fout.close()
+
+        processes.append(subprocess.Popen('gzip {}'.format(file_name),
+                                          shell=True))
+        exports_config.data_frame['FILE_NAME'][i] += '.gz'
+
     exit_codes = [p.wait() for p in processes]
     if verb:
         print(exit_codes)
