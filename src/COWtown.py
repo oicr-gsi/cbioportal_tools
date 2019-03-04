@@ -159,8 +159,8 @@ def generate_meta_study(study_config: Config.Config, verb):
 def generate_data_file(meta_config: Config.Config, study_config: Config.Config, force, verb):
 
     if meta_config.type_config == 'MAF':
-        helper.working_on(verb, message='Gathering and decompressing files into temporary folder...')
-        mutation_data.decompress_to_temp(meta_config)
+        helper.working_on(verb, message='Gathering and decompressing MAF files into temporary folder...')
+        mutation_data.decompress_to_temp(meta_config, verb)
         helper.working_on(verb)
 
         helper.working_on(verb, message='Exporting vcf2maf...')
@@ -177,6 +177,14 @@ def generate_data_file(meta_config: Config.Config, study_config: Config.Config, 
         meta_config = mutation_data.zip_maf_files(meta_config, force)
         helper.working_on(verb)
         print(meta_config)
+
+    elif meta_config.type_config == 'SEG':
+        print('THE MEME LORD IS HERE!!')
+        helper.working_on(verb, message='Gathering and decompressing SEG files into temporary folder')
+        mutation_data.decompress_to_temp(meta_config, verb)
+        helper.working_on(verb)
+
+
 
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')
@@ -370,12 +378,11 @@ def main():
     # Clean Output Folder/Initialize it
     helper.clean_folder(study_config_file.config_map['output_folder'])
 
-    # TODO:: Ensure this does not get lost
     for each in information:
         # Convert vcf to maf
         generate_data_file(each, study_config_file, force, verb)
 
-    # Generate Config.ini file
+    # Generate Config.ini file, Mapping.csv and wanted_columns.txt
     generate_cbiowrap_configs(information, study_config_file)
 
     # run cBioWrap.sh
