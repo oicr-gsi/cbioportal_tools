@@ -42,7 +42,7 @@ case_list_map =   {'MAF': '_sequenced',
 cbiowrap_export = ['MAF', 'SEG', 'GEP']
 
 config2name_map = {'MAF':                 'mutations_extended',
-                   'SEG':                 'expression_file',
+                   'SEG':                 'segments',
                    'GEP':                 'log2CNA',
                    'SAMPLE_ATTRIBUTES':   'clinical_samples',
                    'PATIENT_ATTRIBUTES':  'clinical_patients',
@@ -102,7 +102,7 @@ def generate_meta_file(meta_config: Config.Config, study_config: Config.Config, 
         f.write('cancer_study_identifier: {}\n'.format(study_config.config_map['cancer_study_identifier']))
 
     # Write genetic_alteration_type, datatype, stable_id, reference_genome and other values
-    if meta_config.type_config == 'expression':
+    if meta_config.type_config == 'MRNA_EXPRESSION':
         for field, entry in zip(general_zip[:3] + ['source_stable_id'] + general_zip[3:],
                                 meta_info_map[meta_config.type_config]):
             f.write('{}: {}\n'.format(field, entry))
@@ -110,6 +110,8 @@ def generate_meta_file(meta_config: Config.Config, study_config: Config.Config, 
     elif meta_config.type_config in ['SEG', 'GISTIC']:
         for field, entry in zip(ref_gene_id_zip, meta_info_map[meta_config.type_config]):
             f.write('{}: {}\n'.format(field, entry))
+        if meta_config.type_config == 'SEG':
+            f.write('{}: {}\n'.format('description', meta_config.config_map['description']))
 
     else:
         for field, entry in zip(general_zip, meta_info_map[meta_config.type_config]):
@@ -128,7 +130,7 @@ def generate_meta_file(meta_config: Config.Config, study_config: Config.Config, 
 
     helper.working_on(verb, message='Popping back...')
     helper.reset_folder(original_dir)
-    helper.working_on(verb, message='Success! The {} meta has been saved!'.format(config2name_map[meta_config.type_config]))
+    helper.working_on(verb, message='Success! {} meta has been saved!'.format(config2name_map[meta_config.type_config]))
 
 
 def generate_meta_study(study_config: Config.Config, verb):
@@ -163,6 +165,13 @@ def generate_data_file(meta_config: Config.Config, study_config: Config.Config, 
         mutation_data.decompress_to_temp(meta_config, verb)
         helper.working_on(verb)
 
+        if meta_config.config_map['caller'] == 'Strelka':
+            # Do some pre-processing
+            print('Something should be done')
+        elif meta_config.config_map['caller'] in 'GATKHaplotypeCaller':
+            # Do some other sort of pre-processing
+            print('Something else should be done')
+
         helper.working_on(verb, message='Exporting vcf2maf...')
         helper.working_on(verb, message='And deleting .vcf s...')
         meta_config = mutation_data.export2maf(meta_config, force, verb)
@@ -179,12 +188,9 @@ def generate_data_file(meta_config: Config.Config, study_config: Config.Config, 
         print(meta_config)
 
     elif meta_config.type_config == 'SEG':
-        print('THE MEME LORD IS HERE!!')
         helper.working_on(verb, message='Gathering and decompressing SEG files into temporary folder')
         mutation_data.decompress_to_temp(meta_config, verb)
         helper.working_on(verb)
-
-
 
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')
@@ -236,21 +242,25 @@ def generate_case_list(meta_config: Config.Config, study_config: Config.Config):
         f.close()
 
 
-def generate_cbiowrap_configs(information: Information, study_config: Config.Config):
+def generate_cbiowrap_configs(information: Information, study_config: Config.Config, verb):
     # Copy fixed config.
     ini = open('config_fixed.ini', 'r')
     fixed = ini.readlines()
     ini.close()
 
     # Write wanted_columns.txt
+    helper.working_on(verb, 'Writing wanted at {}'.format(helper.get_cbiowrap_file(study_config, 'wanted_columns.txt')))
     if 'MAF' not in [each.type_config for each in information]:
         wanted = helper.get_cbiowrap_file(study_config, 'wanted_columns.txt')
+        helper.clean_folder(os.path.dirname(wanted))
         o = open(wanted, 'w+')
         o.write('')
         o.flush()
         o.close()
 
     info = information.copy()
+    print([a for a in info])
+    print([a for a in information])
     for each in info:
         if each.type_config in cbiowrap_export:
             for i in range(each.data_frame.shape[0]):
@@ -278,8 +288,11 @@ def generate_cbiowrap_configs(information: Information, study_config: Config.Con
 
     print(result)
     csv = result.data_frame[['PATIENT_ID', 'TUMOR_ID', *cbiowrap_export]]
+    print(csv)
+    helper.working_on(verb, 'Writing mapping.csv at {}'.format(helper.get_cbiowrap_file(study_config, 'mapping.csv')))
     csv.to_csv(helper.get_cbiowrap_file(study_config, 'mapping.csv'), header=False, index=False)
     # Write arguments to config.ini
+    helper.working_on(verb, 'Writing Config.ini at {}'.format(helper.get_cbiowrap_file(study_config, 'config.ini')))
     out = open(helper.get_cbiowrap_file(study_config, 'config.ini'), 'w+')
     out.writelines(fixed)
     out.write('\nstudy="{}"'.format(study_config.config_map['cancer_study_identifier']))
@@ -346,24 +359,24 @@ def main():
     verb = args.verbose
     force = args.force
 
-    study_config_file = Config.get_config(args.study_info, 'study', verb)
+    study_config = Config.get_config(args.study_info, 'study', verb)
 
     information = []
     clinic_data = []
     cancer_type = []
 
     # Gather Config files
-    for i in range(int(study_config_file.data_frame.shape[0])):
+    for i in range(int(study_config.data_frame.shape[0])):
         config_file_name = os.path.join(os.path.dirname(os.path.abspath(args.study_info)),
-                                        study_config_file.data_frame.iloc[i][int(1)])
+                                        study_config.data_frame['FILE'][i])
 
-        config_file_type = study_config_file.data_frame.iloc[i][int(0)]
+        config_file_type = study_config.data_frame['TYPE'][i]
 
-        if study_config_file.data_frame.iloc[i][0] in ['SAMPLE_ATTRIBUTES', 'PATIENT_ATTRIBUTES']:
+        if study_config.data_frame.iloc[i][0] in ['SAMPLE_ATTRIBUTES', 'PATIENT_ATTRIBUTES']:
             clinic_data.append(Config.get_config_clinical(config_file_name,
                                                           config_file_type,
                                                           verb))
-        elif study_config_file.data_frame.iloc[i][0] in ['CANCER_TYPE']:
+        elif study_config.data_frame.iloc[i][0] in ['CANCER_TYPE']:
             cancer_type = Config.get_config(config_file_name,
                                             config_file_type,
                                             verb)
@@ -376,37 +389,41 @@ def main():
     [print('\nClinical Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
 
     # Clean Output Folder/Initialize it
-    helper.clean_folder(study_config_file.config_map['output_folder'])
+    helper.clean_folder(study_config.config_map['output_folder'])
 
     for each in information:
         # Convert vcf to maf
-        generate_data_file(each, study_config_file, force, verb)
+        generate_data_file(each, study_config, force, verb)
 
     # Generate Config.ini file, Mapping.csv and wanted_columns.txt
-    generate_cbiowrap_configs(information, study_config_file)
+    generate_cbiowrap_configs(information, study_config, verb)
 
     # run cBioWrap.sh
-    run_cbiowrap(study_config_file)
+    run_cbiowrap(study_config)
 
-    study_config_file.config_map['output_folder'] = os.path.join(study_config_file.config_map['output_folder'], 'cbioportal_import_data')
+    os.rename(os.path.join(study_config.config_map['output_folder'], 'cbioportal_import_data'),
+              os.path.join(study_config.config_map['output_folder'], study_config.config_map['cancer_study_identifier']))
+
+    study_config.config_map['output_folder'] = os.path.join(study_config.config_map['output_folder'],
+                                                            study_config.config_map['cancer_study_identifier'])
     # Overwrite some of the meta files (Optional)
     # Generate CANCER_TYPE
     if type(cancer_type) == Config.Config:
-        generate_meta_file(cancer_type, study_config_file, verb)
-        generate_data_file(cancer_type, study_config_file, force, verb)
+        generate_meta_file(cancer_type, study_config, verb)
+        generate_data_file(cancer_type, study_config, force, verb)
     for each in information:
-        generate_meta_file(each, study_config_file, verb)
+        generate_meta_file(each, study_config, verb)
     for each in clinic_data:
-        generate_meta_file(each, study_config_file, verb)
-        generate_data_clinical(each, study_config_file, verb)
-    generate_meta_study(study_config_file, verb)
+        generate_meta_file(each, study_config, verb)
+        generate_data_clinical(each, study_config, verb)
+    generate_meta_study(study_config, verb)
 
     # export to cbioportal!
-    export_study_to_cbioportal(args.key, study_config_file.config_map['output_folder'], verb)
+    export_study_to_cbioportal(args.key, study_config.config_map['output_folder'], verb)
 
     helper.stars()
     helper.working_on(verb, message='CONGRATULATIONS! A minimal study is now be complete!')
-    helper.working_on(verb, message='Output folder: {}'.format(study_config_file.config_map['output_folder']))
+    helper.working_on(verb, message='Output folder: {}'.format(study_config.config_map['output_folder']))
     helper.stars()
 
 
