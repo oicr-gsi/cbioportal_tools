@@ -10,8 +10,6 @@ import helper
 import Config
 
 # Define important constants
-ref_fasta = "/.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa"
-filter_vcf = '/.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz'
 
 
 def wanted_columns(mutate_config: Config.Config, study_config: Config.Config):
@@ -66,7 +64,6 @@ def decompress_to_temp(mutate_config: Config.Config, verb):
 def export2maf(exports_config: Config.Config, force, verb):
     # Prep
     temp_folder = helper.get_temp_folder(exports_config.config_map['input_folder'], 'maf')
-    helper.make_folder(temp_folder)
     helper.clean_folder(temp_folder)
 
     # Gather ingredients
@@ -75,6 +72,7 @@ def export2maf(exports_config: Config.Config, force, verb):
     export_data = exports_config.data_frame
 
     maf_temp = helper.get_temp_folder(input_folder, 'maf')
+    helper.clean_folder(maf_temp)
 
     # Cook
     for i in range(len(export_data)):
@@ -98,13 +96,15 @@ def export2maf(exports_config: Config.Config, force, verb):
         else:
             gene_col_normal = normal_id
             gene_col_tumors = tumors_id
+        ref_fasta = exports_config.config_map['ref_fasta']
+        filter_vcf = exports_config.config_map['filter_vcf']
 
         if os.path.isfile(os.path.basename(output_maf) + '.maf') and not force:
             write = False
         else:
             write = True
 
-        # collect statuses
+        # Bake in Parallel
         if write:
             processes.append(subprocess.Popen('vcf2maf.pl  --input-vcf {}              \
                                                            --output-maf {}/{}           \
@@ -132,7 +132,7 @@ def export2maf(exports_config: Config.Config, force, verb):
             os.remove(output_maf)
         except (FileExistsError, OSError):
             pass
-    # Wait until cooked
+    # Wait until Baked
     exit_codes = [p.wait() for p in processes]
     if verb:
         print(exit_codes)
@@ -160,27 +160,3 @@ def zip_maf_files(exports_config: Config.Config, verb) -> Config.Config:
     if verb:
         print(exit_codes)
     return exports_config
-
-
-def concat_files_maf(mutate_config: Config.Config, study_config: Config.Config):
-    print(type(mutate_config))
-    f_name = os.path.join(os.path.abspath(study_config.config_map['output_folder']),
-                          'data_{}.txt'.format(mutate_config.type_config))
-    output = open(f_name, 'w')
-
-    # Write .maf header to output file
-    header = open(os.path.join(os.path.abspath(mutate_config.config_map['input_folder']),
-                               mutate_config.data_frame.iloc[0][0]))
-    output.write(header.readline() + header.readline())
-    header.close()
-
-    # Concat the bodies of each of the files to the output
-    for files in mutate_config.data_frame.iloc[:, 0]:
-        f = open(os.path.join(os.path.abspath(mutate_config.config_map['input_folder']), files), 'r')
-        output.writelines(f.readlines()[2:])
-        f.close()
-
-    # Ensure file is written to to prevent race condition
-    output.flush()
-    os.fsync(output)
-    output.close()

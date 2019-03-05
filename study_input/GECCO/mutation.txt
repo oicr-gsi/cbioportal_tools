@@ -2,6 +2,8 @@
 #caller=Mutect
 #profile_name=Mutations (Colorectal)
 #profile_description=Mutation data from whole exome sequencing. (12 Samples)
+#ref_fasta=/.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa
+#filter_vcf=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz
 FILE_NAME	PATIENT_ID	NORMAL_ID	TUMOR_ID	NORMAL_COL	TUMOR_COL
 GECCO_0001_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0001	GECCO_0001_Ly_R_TS	GECCO_0001_Li_P_TS	GECCO_0001_Ly_R_TS.sorted.filter	GECCO_0001_Li_P_TS.sorted.filter
 GECCO_0002_Li_P_TS.sorted.filter.P.final.muTect.snvs.vcf.gz	GECCO_0002	GECCO_0002_Ly_R_TS	GECCO_0002_Li_P_TS	GECCO_0002_Ly_R_TS.sorted.filter	GECCO_0002_Li_P_TS.sorted.filter
