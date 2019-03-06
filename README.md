@@ -1,7 +1,7 @@
-#  CbiOportalWrapper TOol (COW TOwn)
-Tools for import of data and administration of the GSI cBioPortal instance. It is dependant on cBioWrap.
+#  Heyoka
+Heyoka is a tool for the import of data and administration of the GSI cBioPortal instance. 
 
-This will generate the configuration and prep files for cBioWrap, generate the study using it then import to the cBioPortal instance.
+This will generate meta and data files for cBioPortal, then import to the cBioPortal instance.
 
 More information on the file types from cBioPortal is [Data Loading](https://cbioportal.readthedocs.io/en/latest/Data-Loading.html),
 and [File Formats](https://cbioportal.readthedocs.io/en/latest/File-Formats.html). 
@@ -21,7 +21,7 @@ Within the runner script you must specify the location of your study configurati
 
 _src/_ contains all the Python scripts (as of now).
 
-_study_input/_ contains the required input configuration files for generating a study.
+_study_input/_ contains example input configuration files for sample studies.
 
 ### Dependencies
 This tool depends on:
