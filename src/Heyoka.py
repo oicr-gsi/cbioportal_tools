@@ -41,6 +41,14 @@ case_list_map =   {'MAF': '_sequenced',
                    'DISCRETE': '_cna'}
 cbiowrap_export = ['MAF', 'SEG', 'GEP']
 
+args2config_map = {'mutation_data':         'MAF',
+                   'segmented_data':        'SEG',
+                   'expression_data':       'GEP',
+                   'sample_info':           'SAMPLE_ATTRIBUTES',
+                   'patient_info':          'PATIENT_ATTRIBUTES',
+                   'cancer_data':           'CANCER_TYPE'}
+
+
 config2name_map = {'MAF':                 'mutations_extended',
                    'SEG':                 'segments',
                    'GEP':                 'log2CNA',
@@ -52,20 +60,36 @@ config2name_map = {'MAF':                 'mutations_extended',
 
 def define_parser() -> argparse.ArgumentParser:
     # Define program arguments
-    parser = argparse.ArgumentParser(description="CbiOportal Wrapper TOol (COWTOwn) "
-                                                 "(https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool that "
-                                                 "interfaces with cBioWrap to generate an importable study for a "
-                                                 "cBioPortal instance.  ")
+    parser = argparse.ArgumentParser(description="Heyoka "
+                                                 "(https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool "
+                                                 "to generate an importable study for a cBioPortal instance."
+                                                 "Recommended usage can be seen in the examples located in "
+                                                 "study_input/ .")
 
-    required = parser.add_argument_group('Required Arguments')
-    required.add_argument("-o", "--study-output-folder",
-                          type=lambda folder: os.path.abspath(folder),
-                          help="The main folder of the study you want to generate.",
-                          metavar='FOLDER',
-                          default='new_study/')
-    required.add_argument("-s", "--study-info",
-                          help="The location of the study input information",
-                          metavar='FILE')
+    parser.add_argument("-o", "--study-output-folder",
+                        type=lambda folder: os.path.abspath(folder),
+                        help="The main folder of the study you want to generate.",
+                        metavar='FOLDER',
+                        default='new_study/')
+    parser.add_argument("-c", "--config",
+                        help="The location of the study config file.",
+                        metavar='FILE')
+    parser.add_argument("-t", "--cancer-type",
+                        help="The type of cancer.",
+                        metavar='TYPE')
+    parser.add_argument("-i", "--cancer-study-identifier",
+                        help="The cancer study ID.",
+                        metavar='ID')
+    parser.add_argument("-N", "--name",
+                        help="The name of the study.",
+                        metavar='NAME')
+    parser.add_argument("-n", "--short-name",
+                        help="A short name for the study.",
+                        metavar='NAME')
+    parser.add_argument("-d", "--description",
+                        help="A description of the study.",
+                        metavar='DESCRIPTION')
+
     parser.add_argument("-k", "--key",
                         type=lambda key: os.path.abspath(key),
                         help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
@@ -81,6 +105,25 @@ def define_parser() -> argparse.ArgumentParser:
                         action="store_true",
                         help="Forces overwriting of data_cancer_type.txt file and *.maf files.")
     return parser
+
+
+def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) -> Config.Config:
+    meta_args = ['cancer_type', 'cancer_study', 'name', 'short_name', 'description', 'output_folder']
+    helper.working_on(verb, 'Merging Config information from command line and configuration file')
+    dictionary = vars(args)
+    for each in dictionary.keys():
+        if each in meta_args:
+            study_config.config_map[each] = dictionary[each]
+
+        elif any([each.endswith('_data'), each.endswith('_info')]):
+            study_config.data_frame.append(pd.DataFrame({'TYPE': args2config_map[each], 'FILE': dictionary[each]}))
+
+    study_config.type_config = 'study'
+
+    # Check to ensure minimum conditions are filled.
+    if not set(meta_args).issubset(set(study_config.config_map.keys())):
+        raise IOError('The minimum number of arguments have not been provided. \nSee: {}'.format(meta_args))
+    return study_config
 
 
 def generate_meta_file(meta_config: Config.Config, study_config: Config.Config, verb):
@@ -165,12 +208,30 @@ def generate_data_file(meta_config: Config.Config, study_config: Config.Config, 
         mutation_data.decompress_to_temp(meta_config, verb)
         helper.working_on(verb)
 
-        if meta_config.config_map['caller'] == 'Strelka':
+        # TODO:: if the caller contains .maf inside or does not exist, do not do conversion
+        if '.maf' in meta_config.config_map['caller']:
+            # TODO:: alter meta_config information in some way??
+            pass
+        elif meta_config.config_map['caller'] == 'Strelka':
             # Do some pre-processing
             print('Something should be done')
-        elif meta_config.config_map['caller'] in 'GATKHaplotypeCaller':
+        elif meta_config.config_map['caller'] == 'Mutect':
+            # Do some pre-processing
+            print('Something should be done')
+        elif meta_config.config_map['caller'] == 'Mutect2':
+            # Do some pre-processing
+            print('Something should be done')
+        elif meta_config.config_map['caller'] == 'MutectStrelka':
+            # Do some pre-processing
+            print('Something should be done')
+        elif meta_config.config_map['caller'] == 'GATKHaplotypeCaller':
             # Do some other sort of pre-processing
             print('Something else should be done')
+        else:
+            helper.stars()
+            print('WARNING:: Unknown caller, have you spelled it right?')
+            print('See: {}'.format(mutation_data.mutation_callers))
+            helper.stars()
 
         helper.working_on(verb, message='Exporting vcf2maf...')
         helper.working_on(verb, message='And deleting .vcf s...')
@@ -244,7 +305,7 @@ def generate_case_list(meta_config: Config.Config, study_config: Config.Config):
 
 def generate_cbiowrap_configs(information: Information, study_config: Config.Config, verb):
     # Copy fixed config.
-    ini = open('config_fixed.ini', 'r')
+    ini = open('cbiowrap_config_template.ini', 'r')
     fixed = ini.readlines()
     ini.close()
 
@@ -320,11 +381,7 @@ def export_study_to_cbioportal(key, study_folder, verb):
 
     subprocess.call("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                     "rm -r ~/oicr_studies/{}; "
-                    "mkdir ~/oicr_studies/{}'".format(key,
-                                                      base_folder,
-                                                      base_folder
-                                                      ),
-                    shell=True)
+                    "mkdir ~/oicr_studies/{}'".format(key, base_folder, base_folder), shell=True)
     # Copy over
     helper.working_on(verb, 'scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies/ '.format(key, study_folder))
     subprocess.call('scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies/'.format(key, study_folder),
@@ -334,16 +391,12 @@ def export_study_to_cbioportal(key, study_folder, verb):
     # Import study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
 
-    print("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-          "./metaImport.py -s ~/oicr_studies/{} "
-          "-u http://10.30.133.80:8080/cbioportal "
-          "-o'".format(key, base_folder)) if verb else print(),
+    helper.working_on("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+                      "./metaImport.py -s ~/oicr_studies/{} "
+                      "-u http://10.30.133.80:8080/cbioportal -o'".format(key, base_folder))
     subprocess.call("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                     "sudo ./metaImport.py -s ~/oicr_studies/{} "
-                    "-u http://10.30.133.80:8080/cbioportal "
-                    "-o'".format(key,
-                                 base_folder),
-                    shell=True)
+                    "-u http://10.30.133.80:8080/cbioportal -o'".format(key, base_folder), shell=True)
 
     helper.working_on(verb, "ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(key))
     subprocess.call("ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(key), shell=True)
@@ -359,15 +412,21 @@ def main():
     verb = args.verbose
     force = args.force
 
-    study_config = Config.get_config(args.study_info, 'study', verb)
+    # TODO:: Fail gracefully if some arguments are not given
+
+    if args.config:
+        study_config = Config.get_config(args.config, 'study', verb)
+    else:
+        study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE']), 'study')
+    add_cli_args(study_config, args, verb)
 
     information = []
     clinic_data = []
     cancer_type = []
 
     # Gather Config files
-    for i in range(int(study_config.data_frame.shape[0])):
-        config_file_name = os.path.join(os.path.dirname(os.path.abspath(args.study_info)),
+    for i in range(study_config.data_frame.shape[0]):
+        config_file_name = os.path.join(os.path.dirname(os.path.abspath(args.config)),
                                         study_config.data_frame['FILE'][i])
 
         config_file_type = study_config.data_frame['TYPE'][i]
@@ -419,7 +478,8 @@ def main():
     generate_meta_study(study_config, verb)
 
     # export to cbioportal!
-    export_study_to_cbioportal(args.key, study_config.config_map['output_folder'], verb)
+    if args.key:
+        export_study_to_cbioportal(args.key, study_config.config_map['output_folder'], verb)
 
     helper.stars()
     helper.working_on(verb, message='CONGRATULATIONS! A minimal study is now be complete!')

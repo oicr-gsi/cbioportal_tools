@@ -53,7 +53,7 @@ def get_config(file, f_type, verb) -> Config:
 
 def get_config_clinical(file: str, f_type: str, verb) -> ClinicalConfig:
     if os.path.isfile(file):
-        print('File Name: {}'.format(file))
+        print('Configuration File Name: {}'.format(file))
     else:
         raise OSError('ERROR: Is not a file\n' + file)
     f = open(file, 'r')

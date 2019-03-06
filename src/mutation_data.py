@@ -10,7 +10,7 @@ import helper
 import Config
 
 # Define important constants
-
+mutation_callers = ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller']
 
 def wanted_columns(mutate_config: Config.Config, study_config: Config.Config):
     f = open(os.path.join(mutate_config.config_map['input_folder'],
@@ -32,46 +32,44 @@ def wanted_columns(mutate_config: Config.Config, study_config: Config.Config):
 def decompress_to_temp(mutate_config: Config.Config, verb):
     # Decompresses each file in the current folder to ../temp_vcf/ if it is compressed. otherwise, copy it over
     if mutate_config.type_config == 'MAF':
-        temp_folder = helper.get_temp_folder(mutate_config.config_map['input_folder'], 'vcf')
-    elif mutate_config.type_config == 'SEG':
-        temp_folder = helper.get_temp_folder(mutate_config.config_map['input_folder'], 'seg')
+        temp = helper.get_temp_folder(mutate_config.config_map['output_folder'], 'vcf')
     else:
-        temp_folder = helper.get_temp_folder(mutate_config.config_map['input_folder'],mutate_config.type_config.lower())
+        temp = helper.get_temp_folder(mutate_config.config_map['output_folder'],mutate_config.type_config.lower())
 
-    helper.working_on(verb, message='extracting/copying to {}'.format(temp_folder))
-    helper.make_folder(temp_folder)
-    helper.clean_folder(temp_folder)
+    helper.working_on(verb, message='extracting/copying to {}'.format(temp))
+    helper.make_folder(temp)
+    helper.clean_folder(temp)
 
     for file in mutate_config.data_frame.iloc[:, 0]:
         file = os.path.abspath(os.path.join(mutate_config.config_map['input_folder'], file))
         if file.endswith(".tar.gz"):
             subprocess.call("tar -xzf {} -C {}".format(file,
-                                                       temp_folder),
+                                                       temp),
                             shell=True)
 
         elif file.endswith('.gz'):
             subprocess.call("zcat {} > {}/{}".format(file,
-                                                     temp_folder,
+                                                     temp,
                                                      os.path.splitext(os.path.basename(file))[0]),
                             shell=True)
 
         else:
             subprocess.call("cp {} {}".format(file,
-                                              temp_folder),
+                                              temp),
                             shell=True)
 
 
 def export2maf(exports_config: Config.Config, force, verb):
     # Prep
-    temp_folder = helper.get_temp_folder(exports_config.config_map['input_folder'], 'maf')
+    temp_folder = helper.get_temp_folder(exports_config.config_map['output_folder'], 'maf')
     helper.clean_folder(temp_folder)
 
     # Gather ingredients
     processes = []
-    input_folder = exports_config.config_map['input_folder']
+    output_folder = exports_config.config_map['output_folder']
     export_data = exports_config.data_frame
 
-    maf_temp = helper.get_temp_folder(input_folder, 'maf')
+    maf_temp = helper.get_temp_folder(output_folder, 'maf')
     helper.clean_folder(maf_temp)
 
     # Cook
@@ -83,7 +81,7 @@ def export2maf(exports_config: Config.Config, force, verb):
         output_maf = output_maf.replace('.vcf', '.maf')
         helper.working_on(verb, 'Output .maf being generated... ' + output_maf)
 
-        input_vcf = os.path.join(helper.get_temp_folder(input_folder, 'vcf'),
+        input_vcf = os.path.join(helper.get_temp_folder(output_folder, 'vcf'),
                                  'vcf'.join(os.path.basename(output_maf).rsplit('maf')))
 
         normal_id = export_data['NORMAL_ID'][i]
