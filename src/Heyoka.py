@@ -66,7 +66,7 @@ def define_parser() -> argparse.ArgumentParser:
                                                  "Recommended usage can be seen in the examples located in "
                                                  "study_input/ .")
 
-    parser.add_argument("-o", "--study-output-folder",
+    parser.add_argument("-o", "--output-folder",
                         type=lambda folder: os.path.abspath(folder),
                         help="The main folder of the study you want to generate.",
                         metavar='FOLDER',
@@ -74,7 +74,7 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument("-c", "--config",
                         help="The location of the study config file.",
                         metavar='FILE')
-    parser.add_argument("-t", "--cancer-type",
+    parser.add_argument("-t", "--type-of-cancer",
                         help="The type of cancer.",
                         metavar='TYPE')
     parser.add_argument("-i", "--cancer-study-identifier",
@@ -108,9 +108,9 @@ def define_parser() -> argparse.ArgumentParser:
 
 
 def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) -> Config.Config:
-    meta_args = ['cancer_type', 'cancer_study', 'name', 'short_name', 'description', 'output_folder']
+    meta_args = ['type_of_cancer', 'cancer_study_identifier', 'name', 'short_name', 'description', 'output_folder']
     helper.working_on(verb, 'Merging Config information from command line and configuration file')
-    dictionary = vars(args)
+    dictionary = {k: v for k, v in vars(args).items() if v is not None}
     for each in dictionary.keys():
         if each in meta_args:
             study_config.config_map[each] = dictionary[each]
@@ -128,16 +128,12 @@ def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) ->
 
 def generate_meta_file(meta_config: Config.Config, study_config: Config.Config, verb):
     # NOTE:: Should be able to generate any from the set of all meta files
-
-    helper.working_on(verb, message='Changing folder...')
-    original_dir = helper.change_folder(study_config.config_map['output_folder'])
-    helper.working_on(verb)
-
     # TODO:: Add functionality for optional fields
 
     helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[meta_config.type_config]))
 
-    f_out = 'meta_{}.txt'.format(config2name_map[meta_config.type_config])
+    f_out = os.path.join(study_config.config_map['output_folder'],
+                         'meta_{}.txt'.format(config2name_map[meta_config.type_config]))
     f = open(f_out, 'w')
 
     if not meta_config.type_config == 'CANCER_TYPE':
@@ -171,19 +167,14 @@ def generate_meta_file(meta_config: Config.Config, study_config: Config.Config, 
     f.close()
     helper.working_on(verb)
 
-    helper.working_on(verb, message='Popping back...')
-    helper.reset_folder(original_dir)
-    helper.working_on(verb, message='Success! {} meta has been saved!'.format(config2name_map[meta_config.type_config]))
 
 
 def generate_meta_study(study_config: Config.Config, verb):
-    helper.working_on(verb, message='Changing folder...')
-    original_dir = helper.change_folder(study_config.config_map['output_folder'])
-    helper.working_on(verb)
 
+    output_meta = os.path.join(study_config.config_map['output_folder'], 'meta_study.txt')
     helper.working_on(verb, message='Saving meta_study.txt ...')
 
-    f = open('meta_study.txt', 'w')
+    f = open(output_meta, 'w')
 
     f.write('type_of_cancer: {}\n'.format(study_config.config_map['type_of_cancer']))
     f.write('cancer_study_identifier: {}\n'.format(study_config.config_map['cancer_study_identifier']))
@@ -196,61 +187,60 @@ def generate_meta_study(study_config: Config.Config, verb):
 
     helper.working_on(verb)
 
-    helper.working_on(verb, message='Popping back...')
-    helper.reset_folder(original_dir)
-    helper.working_on(verb, message='Success! The cancer study meta has been saved!')
-
 
 def generate_data_file(meta_config: Config.Config, study_config: Config.Config, force, verb):
 
     if meta_config.type_config == 'MAF':
-        helper.working_on(verb, message='Gathering and decompressing MAF files into temporary folder...')
-        mutation_data.decompress_to_temp(meta_config, verb)
+        helper.working_on(verb, message='Gathering and decompressing mutation files into temporary folder...')
+        mutation_data.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
 
-        # TODO:: if the caller contains .maf inside or does not exist, do not do conversion
-        if '.maf' in meta_config.config_map['caller']:
-            # TODO:: alter meta_config information in some way??
-            pass
-        elif meta_config.config_map['caller'] == 'Strelka':
-            # Do some pre-processing
-            print('Something should be done')
-        elif meta_config.config_map['caller'] == 'Mutect':
-            # Do some pre-processing
-            print('Something should be done')
-        elif meta_config.config_map['caller'] == 'Mutect2':
-            # Do some pre-processing
-            print('Something should be done')
-        elif meta_config.config_map['caller'] == 'MutectStrelka':
-            # Do some pre-processing
-            print('Something should be done')
-        elif meta_config.config_map['caller'] == 'GATKHaplotypeCaller':
-            # Do some other sort of pre-processing
-            print('Something else should be done')
-        else:
-            helper.stars()
-            print('WARNING:: Unknown caller, have you spelled it right?')
-            print('See: {}'.format(mutation_data.mutation_callers))
-            helper.stars()
+        convert_vcf_2_maf: bool= True
 
-        helper.working_on(verb, message='Exporting vcf2maf...')
-        helper.working_on(verb, message='And deleting .vcf s...')
-        meta_config = mutation_data.export2maf(meta_config, force, verb)
-        helper.working_on(verb)
+        # If the caller contains .maf inside or does not exist, do not do conversion
+        try:
+            if '.maf' in meta_config.config_map['caller']:
+                convert_vcf_2_maf = False
+            elif meta_config.config_map['caller'] == 'Strelka':
+                # Do some pre-processing
+                print('Something should be done')
+            elif meta_config.config_map['caller'] == 'Mutect':
+                mutation_data.filter_vcf(meta_config, verb)
+
+            elif meta_config.config_map['caller'] == 'Mutect2':
+                mutation_data.filter_vcf(meta_config, verb)
+
+            elif meta_config.config_map['caller'] == 'MutectStrelka':
+                mutation_data.filter_vcf(meta_config, verb)
+
+            elif meta_config.config_map['caller'] == 'GATKHaplotypeCaller':
+                # Do some other sort of pre-processing
+                print('Something else should be done')
+            else:
+                helper.stars()
+                print('WARNING:: Unknown caller, have you spelled it right?')
+                print('See: {}'.format(mutation_data.mutation_callers))
+                helper.stars()
+        except KeyError:
+            convert_vcf_2_maf = False
+
+        if convert_vcf_2_maf:
+            helper.working_on(verb, message='Exporting vcf2maf...')
+            helper.working_on(verb, message='And deleting .vcf s...')
+            meta_config = mutation_data.export2maf(meta_config, study_config, force, verb)
+            helper.working_on(verb)
 
         helper.working_on(verb, message='Generating wanted_columns.txt file for cBioWrap...')
         mutation_data.wanted_columns(meta_config, study_config)
         helper.working_on(verb)
 
-        print(meta_config)
         helper.working_on(verb, message='Re-zipping .mafs for cBioWrap ...')
         meta_config = mutation_data.zip_maf_files(meta_config, force)
         helper.working_on(verb)
-        print(meta_config)
 
     elif meta_config.type_config == 'SEG':
         helper.working_on(verb, message='Gathering and decompressing SEG files into temporary folder')
-        mutation_data.decompress_to_temp(meta_config, verb)
+        mutation_data.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
 
     elif meta_config.type_config == 'CANCER_TYPE':
@@ -320,8 +310,6 @@ def generate_cbiowrap_configs(information: Information, study_config: Config.Con
         o.close()
 
     info = information.copy()
-    print([a for a in info])
-    print([a for a in information])
     for each in info:
         if each.type_config in cbiowrap_export:
             for i in range(each.data_frame.shape[0]):
@@ -347,9 +335,9 @@ def generate_cbiowrap_configs(information: Information, study_config: Config.Con
         if col not in result.data_frame:
             result.data_frame[col] = 'NA'
 
-    print(result)
+
     csv = result.data_frame[['PATIENT_ID', 'TUMOR_ID', *cbiowrap_export]]
-    print(csv)
+
     helper.working_on(verb, 'Writing mapping.csv at {}'.format(helper.get_cbiowrap_file(study_config, 'mapping.csv')))
     csv.to_csv(helper.get_cbiowrap_file(study_config, 'mapping.csv'), header=False, index=False)
     # Write arguments to config.ini

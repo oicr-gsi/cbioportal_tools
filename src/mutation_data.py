@@ -29,60 +29,88 @@ def wanted_columns(mutate_config: Config.Config, study_config: Config.Config):
     o.close()
 
 
-def decompress_to_temp(mutate_config: Config.Config, verb):
+def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config, verb):
     # Decompresses each file in the current folder to ../temp_vcf/ if it is compressed. otherwise, copy it over
     if mutate_config.type_config == 'MAF':
-        temp = helper.get_temp_folder(mutate_config.config_map['output_folder'], 'vcf')
+        temp = helper.get_temp_folder(study_config.config_map['output_folder'], 'vcf')
     else:
-        temp = helper.get_temp_folder(mutate_config.config_map['output_folder'],mutate_config.type_config.lower())
+        temp = helper.get_temp_folder(study_config.config_map['output_folder'], mutate_config.type_config.lower())
 
-    helper.working_on(verb, message='extracting/copying to {}'.format(temp))
-    helper.make_folder(temp)
+    helper.working_on(verb, message='Extracting/copying to {}'.format(temp))
     helper.clean_folder(temp)
 
-    for file in mutate_config.data_frame.iloc[:, 0]:
-        file = os.path.abspath(os.path.join(mutate_config.config_map['input_folder'], file))
-        if file.endswith(".tar.gz"):
-            subprocess.call("tar -xzf {} -C {}".format(file,
+    for i in range(len(mutate_config.data_frame['FILE_NAME'])):
+        input_file =  os.path.abspath(os.path.join(mutate_config.config_map['input_folder'],
+                                                   mutate_config.data_frame['FILE_NAME'][i]))
+
+        output_file = os.path.abspath(os.path.join(temp, mutate_config.data_frame['FILE_NAME'][i]))
+
+        if input_file.endswith(".tar.gz"):
+            subprocess.call("tar -xzf {} -C {}".format(input_file,
                                                        temp),
                             shell=True)
-
-        elif file.endswith('.gz'):
-            subprocess.call("zcat {} > {}/{}".format(file,
-                                                     temp,
-                                                     os.path.splitext(os.path.basename(file))[0]),
+            mutate_config.data_frame['FILE_NAME'][i] = mutate_config.data_frame['FILE_NAME'][i].strip('.tar.gz')
+        elif input_file.endswith('.gz'):
+            subprocess.call("zcat {} > {}".format(input_file,
+                                                     output_file.strip('.gz')),
                             shell=True)
-
+            mutate_config.data_frame['FILE_NAME'][i] = mutate_config.data_frame['FILE_NAME'][i].strip('.gz')
         else:
-            subprocess.call("cp {} {}".format(file,
+            subprocess.call("cp {} {}".format(input_file,
                                               temp),
                             shell=True)
 
+    mutate_config.config_map['input_folder'] = temp
 
-def export2maf(exports_config: Config.Config, force, verb):
-    # Prep
-    temp_folder = helper.get_temp_folder(exports_config.config_map['output_folder'], 'maf')
-    helper.clean_folder(temp_folder)
 
+def filter_vcf(mutation_config: Config.Config, verb):
+    processes = []
+    for file in mutation_config.data_frame['FILE_NAME']:
+        file = os.path.join(mutation_config.config_map['input_folder'], file)
+        processes.append(subprocess.Popen("cat {} | grep 'PASS\|#' > {}".format(file, file + 'temp'), shell=True))
+
+    # Wait until Baked
+    exit_codes = [p.wait() for p in processes]
+    if verb:
+        print('Exit codes for unfiltered .vcf ...')
+        print(exit_codes)
+    if any(exit_codes):
+        raise ValueError('ERROR:: File not found?')
+
+    processes = []
+    for file in mutation_config.data_frame['FILE_NAME']:
+        file = os.path.join(mutation_config.config_map['input_folder'], file)
+        processes.append(subprocess.Popen("cat {} > {}".format(file + 'temp', file), shell=True))
+
+    # Wait until Baked
+    exit_codes = [p.wait() for p in processes]
+    if verb:
+        print('Exit codes for filtered .vcf ...')
+        print(exit_codes)
+    if any(exit_codes):
+        raise ValueError('ERROR:: Temporary Filter VCF file not found?')
+
+
+def export2maf(exports_config: Config.Config, study_config: Config.Config, force, verb):
     # Gather ingredients
     processes = []
-    output_folder = exports_config.config_map['output_folder']
+    output_folder = study_config.config_map['output_folder']
     export_data = exports_config.data_frame
 
     maf_temp = helper.get_temp_folder(output_folder, 'maf')
+
+    # Prep
     helper.clean_folder(maf_temp)
+
 
     # Cook
     for i in range(len(export_data)):
         # Figure out if the .maf file should be generated
         output_maf = export_data.iloc[i][0]
-        for a in helper.c_choices:
-            output_maf = output_maf.replace(a, '')
         output_maf = output_maf.replace('.vcf', '.maf')
         helper.working_on(verb, 'Output .maf being generated... ' + output_maf)
 
-        input_vcf = os.path.join(helper.get_temp_folder(output_folder, 'vcf'),
-                                 'vcf'.join(os.path.basename(output_maf).rsplit('maf')))
+        input_vcf = os.path.join(exports_config.config_map['input_folder'], export_data['FILE_NAME'][i])
 
         normal_id = export_data['NORMAL_ID'][i]
         tumors_id = export_data['TUMOR_ID'][i]
@@ -126,12 +154,14 @@ def export2maf(exports_config: Config.Config, force, verb):
                                               shell=True))
         try:
             exports_config.data_frame.iloc[i][0] = output_maf
-            exports_config.config_map['input_folder'] = maf_temp
             os.remove(output_maf)
         except (FileExistsError, OSError):
             pass
+    exports_config.config_map['input_folder'] = maf_temp
     # Wait until Baked
     exit_codes = [p.wait() for p in processes]
+    if any(exit_codes):
+        raise ValueError('ERROR:: Conversion from vcf 2 maf failed. Please Resolve the issue')
     if verb:
         print(exit_codes)
     return exports_config
