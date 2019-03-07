@@ -4,7 +4,7 @@ qsub 	-l h_vmem=32g \
  		-cwd \
  		-b y \
  		-m beas -M kunal.chandan@oicr.on.ca \
- 		-N COWTOwn_DCIS \
+ 		-N Janus_DCIS \
  		./runner.sh
 
 # Memory

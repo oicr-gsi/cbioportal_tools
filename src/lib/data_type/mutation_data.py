@@ -3,11 +3,10 @@ __license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
-import subprocess
 import os
+import subprocess
 
-import helper
-import Config
+from lib.support import Config, helper
 
 # Define important constants
 mutation_callers = ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller']
@@ -46,19 +45,17 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
         output_file = os.path.abspath(os.path.join(temp, mutate_config.data_frame['FILE_NAME'][i]))
 
         if input_file.endswith(".tar.gz"):
-            subprocess.call("tar -xzf {} -C {}".format(input_file,
-                                                       temp),
-                            shell=True)
+            helper.call_shell("tar -xzf {} -C {}".format(input_file, temp), verb)
+
             mutate_config.data_frame['FILE_NAME'][i] = mutate_config.data_frame['FILE_NAME'][i].strip('.tar.gz')
+
         elif input_file.endswith('.gz'):
-            subprocess.call("zcat {} > {}".format(input_file,
-                                                     output_file.strip('.gz')),
-                            shell=True)
+            helper.call_shell("zcat {} > {}".format(input_file, output_file.strip('.gz')), verb)
+
             mutate_config.data_frame['FILE_NAME'][i] = mutate_config.data_frame['FILE_NAME'][i].strip('.gz')
+
         else:
-            subprocess.call("cp {} {}".format(input_file,
-                                              temp),
-                            shell=True)
+            helper.call_shell("cp {} {}".format(input_file, temp), verb)
 
     mutate_config.config_map['input_folder'] = temp
 
