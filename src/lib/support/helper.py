@@ -1,3 +1,5 @@
+import subprocess
+
 __author__ = "Kunal Chandan"
 __license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
@@ -6,8 +8,7 @@ __status__ = "Pre-Production"
 import os
 import shutil
 
-import Config
-
+from lib.support import Config
 
 extensionChoices = ["vcf", "maf"]
 c_choices = [".tar.gz", ".gz", ".zip"]
@@ -53,3 +54,8 @@ def get_temp_folder(output_folder, ext) -> str:
 
 def get_cbiowrap_file(study_config: Config.Config, name: str) -> str:
     return os.path.join(get_temp_folder(study_config.config_map['output_folder'], 'study'), name)
+
+
+def call_shell(command: str, verb):
+    working_on(verb, message=command)
+    subprocess.call(command, shell=True)

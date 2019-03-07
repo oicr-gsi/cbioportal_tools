@@ -1,5 +1,5 @@
-#  Heyoka
-Heyoka is a tool for the import of data and administration of the GSI cBioPortal instance. 
+#  Janus
+Janus is a tool for the import of data and administration of the GSI cBioPortal instance. 
 
 This will generate meta and data files for cBioPortal, then import to the cBioPortal instance.
 
@@ -7,6 +7,19 @@ More information on the file types from cBioPortal is [Data Loading](https://cbi
 and [File Formats](https://cbioportal.readthedocs.io/en/latest/File-Formats.html). 
 We also have links to the OICR Wiki. [cBioPortal Study Components](https://wiki.oicr.on.ca/display/GSI/cBioPortal+Study+Components)
 and [cBioPortal-Tools](https://wiki.oicr.on.ca/display/GSI/cBioPortal-Tools)
+
+```
+   ______            ______   
+  /(@/@@@@\        /@@@@/@)\  
+ |(@|@@@@@@\__  __/@@@@@@|@)| 
+  \(@\@@@@@@|)\/)|@@@@@@@)/   
+     |    @@@|)(|@@@    |     
+     /~     @|@@|@     ~\     
+    /_     @@|@@|@@     _\    
+      ~   @@@@@@@@@@   ~     
+@    %@@@@@@      @@@@@@%    @
+ @@@@@@@@@ \______/ @@@@@@@@@ 
+```
 
 ## Usage
 
