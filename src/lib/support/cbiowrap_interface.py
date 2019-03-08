@@ -10,7 +10,7 @@ from lib.support import Config, helper
 
 def generate_cbiowrap_configs(information: Information, study_config: Config.Config, verb):
     # Copy fixed config.
-    ini = open('lib/cbiowrap_config_template.ini', 'r')
+    ini = open('lib/support/cbiowrap_config_template.ini', 'r')
     fixed = ini.readlines()
     ini.close()
 

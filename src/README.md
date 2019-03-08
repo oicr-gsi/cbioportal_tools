@@ -34,3 +34,27 @@ optional arguments:
   -f, --force           Forces overwriting of data_cancer_type.txt file and
                         *.maf files.
 ```
+### Examples:
+```
+python3.6 Janus.py \
+			--output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/ \
+			--config ../study_input/DCIS/study.txt \
+			--type-of-cancer 'ductal carcinoma' \
+			--cancer-study-identifier dcis_gsi_2019 \
+			--name 'Ductal Carcinoma in Situ' \
+			--short-name 'dcis' \
+			--description 'DCIS Samples sequenced and analyzed at OICR' \
+			--key /u/kchandan/cbioportal.pem \
+			--push \
+			--verbose \
+			--force
+			
+or 
+
+python3.6m Janus.py 	--config ../study_input/DCIS/study.txt \
+			--output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/  \
+			--key /u/kchandan/cbioportal.pem \
+			--push \
+			--verbose \
+			--force
+```

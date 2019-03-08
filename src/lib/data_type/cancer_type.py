@@ -14,7 +14,7 @@ from lib.support import Config
 
 
 def get_colours() -> pd.DataFrame:
-    return pd.read_csv('lib/cancer_colours.csv', delimiter=',', header=None)
+    return pd.read_csv('lib/support/cancer_colours.csv', delimiter=',', header=None)
 
 
 def gen_cancer_type_data(cancer_type_config: Config.Config, study_config: Config.Config, colours: pd.DataFrame):
