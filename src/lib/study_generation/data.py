@@ -14,7 +14,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         mutation_data.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
 
-        convert_vcf_2_maf: bool= True
+        convert_vcf_2_maf = True
 
         # If the caller contains .maf inside or does not exist, do not do conversion
         try:
