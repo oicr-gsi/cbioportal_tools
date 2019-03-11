@@ -2,8 +2,9 @@ import os
 
 import numpy as np
 
+import lib.support.helper
 from lib.constants import config2name_map
-from lib.data_type import mutation_data, cancer_type
+from lib.data_type import mutation_data, segmented_data, cancer_type
 from lib.support import Config, helper
 
 
@@ -11,7 +12,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
     if meta_config.type_config == 'MAF':
         helper.working_on(verb, message='Gathering and decompressing mutation files into temporary folder...')
-        mutation_data.decompress_to_temp(meta_config, study_config, verb)
+        lib.support.helper.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
 
         convert_vcf_2_maf = True
@@ -59,8 +60,18 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
     elif meta_config.type_config == 'SEG':
         helper.working_on(verb, message='Gathering and decompressing SEG files into temporary folder')
-        mutation_data.decompress_to_temp(meta_config, study_config, verb)
+        lib.support.helper.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
+
+        helper.working_on(verb, 'Caller is {}, beginning pre-processing...'.format(meta_config.config_map['pipeline']))
+
+        if meta_config.config_map['pipeline'] == 'CNVkit':
+            # Do some pre-processing
+            print('Seems nothing should be done')
+
+        elif meta_config.config_map['pipeline'] == 'Sequenza':
+
+            segmented_data.fix_sequenza_chrom(meta_config, study_config, verb)
 
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')
