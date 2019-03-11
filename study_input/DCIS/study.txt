@@ -1,0 +1,12 @@
+#type_of_cancer=ductal carcinoma
+#cancer_study_identifier=dcis_gsi_2019
+#name=Ductal Carcinoma in Situ
+#short_name=DCIS
+#description=DCIS Samples sequenced and analyzed at OICR
+#output_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/
+TYPE	FILE
+MAF	mutation.txt
+SEG	segmented.txt
+SAMPLE_ATTRIBUTES	sample.txt
+PATIENT_ATTRIBUTES	patient.txt
+CANCER_TYPE	cancer_type.txt

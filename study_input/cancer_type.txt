@@ -1,2 +1,0 @@
-name	clinical_trial_keywords	parent_type_of_cancer
-colorectal	colorectal, colorectal invasive	tissue
