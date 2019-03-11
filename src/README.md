@@ -5,10 +5,10 @@ Run with ```./runner.sh``` all arguments can be modified:
 ### Detailed help:
 
 ```
-usage: Janus.py [-h] [-o FOLDER] [-c FILE] [-t TYPE] [-i ID] [-N NAME]
+usage: janus.py [-h] [-o FOLDER] [-c FILE] [-t TYPE] [-i ID] [-N NAME]
                 [-n NAME] [-d DESCRIPTION] [-k FILE] [-p] [-v] [-f]
 
-Heyoka (https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to
+Janu (https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to
 generate an importable study for a cBioPortal instance.Recommended usage can
 be seen in the examples located in study_input/ .
 
@@ -36,7 +36,7 @@ optional arguments:
 ```
 ### Examples:
 ```
-python3.6 Janus.py \
+python3.6 janus.py \
 			--output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/ \
 			--config ../study_input/DCIS/study.txt \
 			--type-of-cancer 'ductal carcinoma' \
@@ -51,7 +51,7 @@ python3.6 Janus.py \
 			
 or 
 
-python3.6m Janus.py 	--config ../study_input/DCIS/study.txt \
+python3.6m janus.py 	--config ../study_input/DCIS/study.txt \
 			--output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/  \
 			--key /u/kchandan/cbioportal.pem \
 			--push \
