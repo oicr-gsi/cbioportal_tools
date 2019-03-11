@@ -8,7 +8,7 @@ Run with ```./runner.sh``` all arguments can be modified:
 usage: janus.py [-h] [-o FOLDER] [-c FILE] [-t TYPE] [-i ID] [-N NAME]
                 [-n NAME] [-d DESCRIPTION] [-k FILE] [-p] [-v] [-f]
 
-Heyoka (https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to
+Janu (https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to
 generate an importable study for a cBioPortal instance.Recommended usage can
 be seen in the examples located in study_input/ .
 
