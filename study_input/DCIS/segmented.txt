@@ -1,0 +1,9 @@
+#input_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/Sequenza
+#pipeline=Sequenza
+#description=Copy Number Variations from whole exome sequencing. (10 Samples)
+FILE_NAME	PATIENT_ID	TUMOR_ID
+DCIS_0001_Br_P_EX.varscanSomatic_Total_CN.seg	DCIS_0001	DCIS_0001_Br_P_EX_1
+DCIS_0002_Br_P_EX.varscanSomatic_Total_CN.seg	DCIS_0002	DCIS_0002_Br_P_EX_1
+DCIS_0003_Br_P_EX.varscanSomatic_Total_CN.seg	DCIS_0003	DCIS_0003_Br_P_EX_1
+DCIS_0004_Br_P_EX.varscanSomatic_Total_CN.seg	DCIS_0004	DCIS_0004_Br_P_EX_1
+DCIS_0005_Br_P_EX.varscanSomatic_Total_CN.seg	DCIS_0005	DCIS_0005_Br_P_EX_1

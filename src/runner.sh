@@ -9,9 +9,9 @@ module load python-gsi/3.6.4
 
 # Run main script:
 
-python3.6m main.py 	--study-info ../study_input/study.txt \
-					--study-output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/cbioMutect \
-					--key /u/kchandan/cbioportal.pem \
-					--push \
-					--verbose \
-					--force
+python3.6m Janus.py 	--config ../study_input/DCIS/study.txt \
+						--output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/  \
+						--key /u/kchandan/cbioportal.pem \
+						--push \
+						--verbose \
+						--force
