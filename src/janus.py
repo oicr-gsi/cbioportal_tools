@@ -24,15 +24,14 @@ def define_parser() -> argparse.ArgumentParser:
         description="janus "
                     "(https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate an importable study for "
                     "a cBioPortal instance. Recommended usage can be seen in the examples located in ../study_input/ .")
-
+    parser.add_argument("-c", "--config",
+                        help="The location of the study config file, containing command line arguments as key/value pairs",
+                        metavar='FILE')
     parser.add_argument("-o", "--output-folder",
                         type=lambda folder: os.path.abspath(folder),
                         help="The main folder of the study you want to generate.",
                         metavar='FOLDER',
                         default='new_study/')
-    parser.add_argument("-c", "--config",
-                        help="The location of the study config file.",
-                        metavar='FILE')
     parser.add_argument("-t", "--type-of-cancer",
                         help="The type of cancer.",
                         metavar='TYPE')
