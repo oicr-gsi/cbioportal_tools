@@ -1,5 +1,5 @@
-#  Janus
-Janus is a tool for the import of data and administration of the GSI cBioPortal instance. 
+#  janus
+janus is a tool for the import of data and administration of the GSI cBioPortal instance. 
 
 This will generate meta and data files for cBioPortal, then import to the cBioPortal instance.
 
@@ -12,9 +12,9 @@ and [cBioPortal-Tools](https://wiki.oicr.on.ca/display/GSI/cBioPortal-Tools)
    ______            ______   
   /(@/@@@@\        /@@@@/@)\  
  |(@|@@@@@@\__  __/@@@@@@|@)| 
-  \(@\@@@@@@|)\/)|@@@@@@@)/   
+  \(@\@@@@@@|)\/(|@@@@@@@)/   
      |    @@@|)(|@@@    |     
-     /~)    @|@@|@    (~\     
+     /~     @|@@|@    (~\     
     /_     @@|@@|@@     _\    
       ~    @@@@@@@@    ~     
 @     %@@@@@      @@@@@%     @

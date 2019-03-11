@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from Janus import Information
+from janus import Information
 from lib.constants import cbiowrap_export
 from lib.support import Config, helper
 
@@ -50,7 +50,6 @@ def generate_cbiowrap_configs(information: Information, study_config: Config.Con
         if col not in result.data_frame:
             result.data_frame[col] = 'NA'
 
-
     csv = result.data_frame[['PATIENT_ID', 'TUMOR_ID', *cbiowrap_export]]
 
     helper.working_on(verb, 'Writing mapping.csv at {}'.format(helper.get_cbiowrap_file(study_config, 'mapping.csv')))
@@ -71,7 +70,8 @@ def run_cbiowrap(study_config: Config.Config, verb):
                       './cBioWrap.sh -c {}'.format(helper.get_cbiowrap_file(study_config, 'config.ini')), verb)
 
     os.rename(os.path.join(study_config.config_map['output_folder'], 'cbioportal_import_data'),
-              os.path.join(study_config.config_map['output_folder'], study_config.config_map['cancer_study_identifier']))
+              os.path.join(study_config.config_map['output_folder'], study_config.config_map['cancer_study_identifier'])
+              )
 
     study_config.config_map['output_folder'] = os.path.join(study_config.config_map['output_folder'],
                                                             study_config.config_map['cancer_study_identifier'])

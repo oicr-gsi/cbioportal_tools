@@ -21,7 +21,7 @@ Information = typing.List[Config.Config]
 def define_parser() -> argparse.ArgumentParser:
     # Define program arguments
     parser = argparse.ArgumentParser(
-        description="Janus "
+        description="janus "
                     "(https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate an importable study for "
                     "a cBioPortal instance. Recommended usage can be seen in the examples located in ../study_input/ .")
 

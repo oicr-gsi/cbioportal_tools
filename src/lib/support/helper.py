@@ -59,3 +59,35 @@ def get_cbiowrap_file(study_config: Config.Config, name: str) -> str:
 def call_shell(command: str, verb):
     working_on(verb, message=command)
     subprocess.call(command, shell=True)
+
+
+def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config, verb):
+    # Decompresses each file in the current folder to ../temp_vcf/ if it is compressed. otherwise, copy it over
+    if mutate_config.type_config == 'MAF':
+        temp = get_temp_folder(study_config.config_map['output_folder'], 'vcf')
+    else:
+        temp = get_temp_folder(study_config.config_map['output_folder'], mutate_config.type_config.lower())
+
+    working_on(verb, message='Extracting/copying to {}'.format(temp))
+    clean_folder(temp)
+
+    for i in range(len(mutate_config.data_frame['FILE_NAME'])):
+        input_file =  os.path.abspath(os.path.join(mutate_config.config_map['input_folder'],
+                                                   mutate_config.data_frame['FILE_NAME'][i]))
+
+        output_file = os.path.abspath(os.path.join(temp, mutate_config.data_frame['FILE_NAME'][i]))
+
+        if input_file.endswith(".tar.gz"):
+            call_shell("tar -xzf {} -C {}".format(input_file, temp), verb)
+
+            mutate_config.data_frame['FILE_NAME'][i] = mutate_config.data_frame['FILE_NAME'][i].strip('.tar.gz')
+
+        elif input_file.endswith('.gz'):
+            call_shell("zcat {} > {}".format(input_file, output_file.strip('.gz')), verb)
+
+            mutate_config.data_frame['FILE_NAME'][i] = mutate_config.data_frame['FILE_NAME'][i].strip('.gz')
+
+        else:
+            call_shell("cp {} {}".format(input_file, output_file), verb)
+
+    mutate_config.config_map['input_folder'] = temp
