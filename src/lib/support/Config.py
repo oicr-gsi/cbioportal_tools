@@ -1,7 +1,12 @@
-import argparse
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 # Command line imports
 import os
 import typing
+import argparse
 
 import pandas as pd
 
@@ -51,7 +56,7 @@ def get_single_config(file, f_type, verb) -> Config:
         else:
             break
     f.close()
-    data_frame = pd.read_csv(file, delimiter='\t', skiprows=len(file_map), dtype=object)
+    data_frame = pd.read_csv(file, delimiter='\t', skiprows=len(file_map), dtype=str)
 
     config_file = Config(file_map, data_frame, f_type)
     return config_file

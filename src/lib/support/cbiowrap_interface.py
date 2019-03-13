@@ -1,12 +1,18 @@
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 import os
+import typing
 
 import numpy as np
 import pandas as pd
 
-from janus import Information
 from lib.constants import cbiowrap_export
 from lib.support import Config, helper
 
+Information = typing.List[Config.Config]
 
 def generate_cbiowrap_configs(information: Information, study_config: Config.Config, verb):
     # Copy fixed config.

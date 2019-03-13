@@ -1,3 +1,8 @@
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 meta_info_map = {'MAF':                 ['MUTATION_EXTENDED', 'MAF', 'mutations', 'true'],
                  'SEG':                 ['COPY_NUMBER_ALTERATION', 'SEG', 'hg19'],
                  'GEP':                 ['MRNA_EXPRESSION', 'CONTINUOUS'],
