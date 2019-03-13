@@ -1,3 +1,8 @@
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 import os
 
 import numpy as np
@@ -9,8 +14,9 @@ from lib.support import Config, helper
 
 
 def generate_data_type(meta_config: Config.Config, study_config: Config.Config, force, verb):
+    # TODO:: consider not editing here but returning back the edited configs.
+    if   meta_config.type_config == 'MAF':
 
-    if meta_config.type_config == 'MAF':
         helper.working_on(verb, message='Gathering and decompressing mutation files into temporary folder...')
         lib.support.helper.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
@@ -18,23 +24,29 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         convert_vcf_2_maf = True
 
         # If the caller contains .maf inside or does not exist, do not do conversion
+        # Since the caller option in the meta file is optional, try:
         try:
             if '.maf' in meta_config.config_map['caller']:
                 convert_vcf_2_maf = False
+            # Any expansion for pre-processing the .vcf Files should be put here in an 'elif'.
             elif meta_config.config_map['caller'] == 'Strelka':
-                # Do some pre-processing
+
                 print('Something should be done')
+
             elif meta_config.config_map['caller'] == 'Mutect':
+
                 mutation_data.filter_vcf(meta_config, verb)
 
             elif meta_config.config_map['caller'] == 'Mutect2':
+
                 mutation_data.filter_vcf(meta_config, verb)
 
             elif meta_config.config_map['caller'] == 'MutectStrelka':
+
                 mutation_data.filter_vcf(meta_config, verb)
 
             elif meta_config.config_map['caller'] == 'GATKHaplotypeCaller':
-                # Do some other sort of pre-processing
+
                 print('Something else should be done')
             else:
                 helper.stars()
@@ -54,25 +66,33 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         mutation_data.wanted_columns(meta_config, study_config)
         helper.working_on(verb)
 
+        # The meta_config object might not make sense being reassigned to,
+        # but since python does not copy objects this works.
         helper.working_on(verb, message='Re-zipping .mafs for cBioWrap ...')
         meta_config = mutation_data.zip_maf_files(meta_config, force)
         helper.working_on(verb)
 
     elif meta_config.type_config == 'SEG':
+
         helper.working_on(verb, message='Gathering and decompressing SEG files into temporary folder')
         lib.support.helper.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
 
         helper.working_on(verb, 'Caller is {}, beginning pre-processing...'.format(meta_config.config_map['pipeline']))
 
-        if meta_config.config_map['pipeline'] == 'CNVkit':
-            # Do some pre-processing
+        if   meta_config.config_map['pipeline'] == 'CNVkit':
+
             print('Seems nothing should be done')
 
         elif meta_config.config_map['pipeline'] == 'Sequenza':
-
+            # It might be that this is not necessary
             segmented_data.fix_sequenza_chrom(meta_config, study_config, verb)
 
+        elif meta_config.config_map['pipeline'] == 'HMMCopy':
+
+            segmented_data.fix_hmmcopy(meta_config, study_config, verb)
+
+        segmented_data.fix_seg_id(meta_config, study_config, verb)
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')
         colours = cancer_type.get_colours()

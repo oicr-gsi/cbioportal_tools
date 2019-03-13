@@ -1,5 +1,3 @@
-import subprocess
-
 __author__ = "Kunal Chandan"
 __license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
@@ -7,6 +5,7 @@ __status__ = "Pre-Production"
 
 import os
 import shutil
+import subprocess
 
 from lib.support import Config
 

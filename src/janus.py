@@ -1,5 +1,3 @@
-from lib.constants import args2config_map
-
 __author__ = "Kunal Chandan"
 __license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
@@ -12,9 +10,10 @@ import typing
 
 import pandas as pd
 
-from lib.study_generation import data, meta
 # Other Scripts
 from lib.support import Config, cbiowrap_interface, helper
+from lib.constants import args2config_map
+from lib.study_generation import data, meta
 
 Information = typing.List[Config.Config]
 

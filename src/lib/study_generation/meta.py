@@ -1,3 +1,8 @@
+__author__ = "Kunal Chandan"
+__license__ = "MIT"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 import os
 
 from lib.constants import meta_info_map, general_zip, ref_gene_id_zip, config2name_map
