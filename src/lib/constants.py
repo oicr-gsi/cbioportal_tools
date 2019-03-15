@@ -42,3 +42,6 @@ config2name_map = {'MAF':                 'mutations_extended',
                    'CANCER_TYPE':         'cancer_type'}
 # dCNA => discrete Copy Number Variation
 
+
+# TODO:: Supply the BED file with the segmented data.
+bed_file = '/.mounts/labs/gsiprojects/gsi/cBioGSI/kchandan/cBioWrap/testdata/ncbi_genes_hg19_canonical.bed'
