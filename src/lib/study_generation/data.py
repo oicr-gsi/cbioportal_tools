@@ -7,7 +7,6 @@ import os
 
 import numpy as np
 
-import lib.support.helper
 from lib.constants import config2name_map
 from lib.data_type import mutation_data, segmented_data, cancer_type
 from lib.support import Config, helper
@@ -18,7 +17,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
     if   meta_config.type_config == 'MAF':
 
         helper.working_on(verb, message='Gathering and decompressing mutation files into temporary folder...')
-        lib.support.helper.decompress_to_temp(meta_config, study_config, verb)
+        helper.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
 
         convert_vcf_2_maf = True
@@ -28,8 +27,11 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         try:
             if '.maf' in meta_config.config_map['caller']:
                 convert_vcf_2_maf = False
-            # Any expansion for pre-processing the .vcf Files should be put here in an 'elif'.
-            elif meta_config.config_map['caller'] == 'Strelka':
+        except KeyError:
+            convert_vcf_2_maf = False
+
+        if convert_vcf_2_maf:
+            if   meta_config.config_map['caller'] == 'Strelka':
 
                 print('Something should be done')
 
@@ -48,15 +50,13 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
             elif meta_config.config_map['caller'] == 'GATKHaplotypeCaller':
 
                 print('Something else should be done')
+                # Any expansion for pre-processing the .vcf Files should be put here in an 'elif'.
             else:
                 helper.stars()
                 print('WARNING:: Unknown caller, have you spelled it right?')
                 print('See: {}'.format(mutation_data.mutation_callers))
                 helper.stars()
-        except KeyError:
-            convert_vcf_2_maf = False
 
-        if convert_vcf_2_maf:
             helper.working_on(verb, message='Exporting vcf2maf...')
             helper.working_on(verb, message='And deleting .vcf s...')
             meta_config = mutation_data.export2maf(meta_config, study_config, force, verb)
@@ -75,24 +75,31 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
     elif meta_config.type_config == 'SEG':
 
         helper.working_on(verb, message='Gathering and decompressing SEG files into temporary folder')
-        lib.support.helper.decompress_to_temp(meta_config, study_config, verb)
+        helper.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
 
         helper.working_on(verb, 'Caller is {}, beginning pre-processing...'.format(meta_config.config_map['pipeline']))
 
         if   meta_config.config_map['pipeline'] == 'CNVkit':
 
-            print('Seems nothing should be done')
+            print('Seems nothing should be done in pr-processing of segmented?')
 
         elif meta_config.config_map['pipeline'] == 'Sequenza':
             # It might be that this is not necessary
-            segmented_data.fix_sequenza_chrom(meta_config, study_config, verb)
+            segmented_data.fix_chrom(meta_config, study_config, verb)
 
-        elif meta_config.config_map['pipeline'] == 'HMMCopy':
+        elif meta_config.config_map['pipeline'] == 'HMMCopy.seg':
 
-            segmented_data.fix_hmmcopy(meta_config, study_config, verb)
+            segmented_data.fix_hmmcopy_seg(meta_config, study_config, verb)
+            segmented_data.fix_chrom(meta_config, study_config, verb)
+
+        elif meta_config.config_map['pipeline'] == 'HMMCopy.tsv':
+
+            segmented_data.fix_hmmcopy_tsv(meta_config, study_config, verb)
+            segmented_data.fix_chrom(meta_config, study_config, verb)
 
         segmented_data.fix_seg_id(meta_config, study_config, verb)
+
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')
         colours = cancer_type.get_colours()

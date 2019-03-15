@@ -47,6 +47,12 @@ def define_parser() -> argparse.ArgumentParser:
                         help="A description of the study.",
                         metavar='DESCRIPTION')
 
+    parser.add_argument("-m", "--memory",
+                        type=lambda x: int(int(x) * (1000**3)),
+                        help="The amount of virtual memory given to the instance in Gb",
+                        metavar='V_MEM',
+                        default=-1)
+
     parser.add_argument("-k", "--key",
                         type=lambda key: os.path.abspath(key),
                         help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
@@ -116,6 +122,7 @@ def main():
     args = define_parser().parse_args()
     verb = args.verbose
     force = args.force
+    memory = args.memory
 
     # TODO:: Fail gracefully if some arguments are not given
 
