@@ -124,7 +124,7 @@ def main():
     force = args.force
     memory = args.memory
 
-    # TODO:: Fail gracefully if some arguments are not given
+    # TODO:: Fail gracefully something breaks
 
     if args.config:
         study_config = Config.get_single_config(args.config, 'study', verb)

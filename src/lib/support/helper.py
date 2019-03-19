@@ -59,6 +59,10 @@ def call_shell(command: str, verb):
     working_on(verb, message=command)
     subprocess.call(command, shell=True)
 
+def parallel_call(command: str, verb):
+    working_on(verb, message=command)
+    return subprocess.Popen(command, shell=True)
+
 
 def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config, verb):
     # Decompresses each file in the current folder to ../temp_vcf/ if it is compressed. otherwise, copy it over
@@ -73,6 +77,9 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
     for i in range(len(mutate_config.data_frame['FILE_NAME'])):
         input_file =  os.path.abspath(os.path.join(mutate_config.config_map['input_folder'],
                                                    mutate_config.data_frame['FILE_NAME'][i]))
+
+        if not os.path.isfile(input_file):
+            raise FileNotFoundError('The path to the file you have provided is not correct ...\n' + input_file)
 
         output_file = os.path.abspath(os.path.join(temp, mutate_config.data_frame['FILE_NAME'][i]))
 

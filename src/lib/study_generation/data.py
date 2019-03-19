@@ -92,11 +92,13 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
             segmented_data.fix_hmmcopy_seg(meta_config, study_config, verb)
             segmented_data.fix_chrom(meta_config, study_config, verb)
+            segmented_data.fix_hmmcopy_max_chrom(meta_config, study_config, verb)
 
         elif meta_config.config_map['pipeline'] == 'HMMCopy.tsv':
 
             segmented_data.fix_hmmcopy_tsv(meta_config, study_config, verb)
             segmented_data.fix_chrom(meta_config, study_config, verb)
+            segmented_data.fix_hmmcopy_max_chrom(meta_config, study_config, verb)
 
         segmented_data.fix_seg_id(meta_config, study_config, verb)
 
