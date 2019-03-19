@@ -5,15 +5,12 @@ __status__ = "Pre-Production"
 
 import os
 import subprocess
-import multiprocessing
 
 from lib.support import Config, helper
 from lib import constants
 
 # Define important constants
-segmented_pipelines = ['CNVkit', 'Sequenza', 'HMMCopy.tsv', 'HMMCopy.seg']
-
-max_process = 5
+segmented_pipelines = ['CNVkit', 'Sequenza', 'HMMCopy']
 
 
 def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
@@ -94,68 +91,6 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
     # Clean up
     if any(exit_codes):
         raise ValueError('ERROR:: Something went wrong when parsing Sequenza format file? Please resolve the issue')
-    if verb:
-        print(exit_codes)
-
-
-def fix_hmmcopy_seg(exports_config: Config.Config, study_config: Config.Config, verb):
-
-    # Gather ingredients
-    calls = []
-    output_folder = study_config.config_map['output_folder']
-    input_folder = exports_config.config_map['input_folder']
-    export_data = exports_config.data_frame
-    seg_temp = helper.get_temp_folder(output_folder, 'seg')
-
-    bed_filter = subprocess.check_output(['awk "NR>1" {} | '
-                                          'awk -F"\\t" \'{{print $1}}\' | '
-                                          'uniq'.format(exports_config.config_map['bed_file'])],
-                                         shell=True).decode("utf-8")
-
-    bed_filter = bed_filter.strip().split('\n')
-    bed_filter = bed_filter + ['chr' + a for a in bed_filter]
-    bed_filter = ['\\t' + a + '\\t' for a in bed_filter]
-
-    header = 'ID\\tchrom\\tloc.start\\tloc.end\\tnum.mark\\tseg.mean'
-    helper.call_shell('head {}'.format(os.path.join(input_folder, export_data['FILE_NAME'][0])), verb)
-    # Cook
-    for i in range(len(export_data)):
-        input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
-        output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
-
-
-        helper.working_on(verb, 'Refactoring cols: {}'.format(export_data['FILE_NAME'][i]))
-
-        # TODO:: ensure that the num.mark column information is accurate
-
-        if input_file == output_file:
-            output_temp = output_file + '.temp'
-
-            calls.append(helper.parallel_call('echo "{}" > {}; '.format(header, output_temp) +
-                                              'cat  {} | '
-                                              'grep -P "{}" | '
-                                              'awk "NR>1" | '
-                                              'awk -F"\\t" \'{{ OFS="\\t"; print $1, $2, $3, $4, ($4-$3), $5}}\' '
-                                              '>> {}; '.format(input_file, '|'.join(bed_filter), output_temp) +
-                                              'mv {} {}'.format(output_temp, output_file), verb))
-
-        else:
-
-            calls.append(helper.parallel_call('echo "{}" > {}; '.format(header, output_file) +
-                                              'cat  {} | '
-                                              'grep -P "{}" | '
-                                              'awk "NR>1" | '
-                                              'awk -F"\\t" \'{{ OFS="\\t"; print $1, $2, $3, $4, ($4-$3), $5}}\' '
-                                              '>> {} '.format(input_file, '|'.join(bed_filter), output_file), verb))
-
-    exports_config.config_map['input_folder'] = seg_temp
-    # Wait until Baked
-    exit_codes = [p.wait() for p in calls]
-    helper.call_shell('head {}'.format(os.path.join(input_folder, export_data['FILE_NAME'][0])), verb)
-
-    # Clean up
-    if any(exit_codes):
-        raise ValueError('ERROR:: Something went wrong when parsing HMMCopy format file? Please resolve the issue')
     if verb:
         print(exit_codes)
 
