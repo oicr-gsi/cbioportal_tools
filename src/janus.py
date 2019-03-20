@@ -1,5 +1,3 @@
-from lib.constants import args2config_map
-
 __author__ = "Kunal Chandan"
 __license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
@@ -12,16 +10,17 @@ import typing
 
 import pandas as pd
 
-from lib.study_generation import data, meta
 # Other Scripts
 from lib.support import Config, cbiowrap_interface, helper
+from lib.constants import args2config_map
+from lib.study_generation import data, meta
 
 Information = typing.List[Config.Config]
 
 def define_parser() -> argparse.ArgumentParser:
     # Define program arguments
     parser = argparse.ArgumentParser(
-        description="Janus "
+        description="janus "
                     "(https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate an importable study for "
                     "a cBioPortal instance. Recommended usage can be seen in the examples located in ../study_input/ .")
     parser.add_argument("-c", "--config",
@@ -47,6 +46,12 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument("-d", "--description",
                         help="A description of the study.",
                         metavar='DESCRIPTION')
+
+    parser.add_argument("-m", "--memory",
+                        type=lambda x: int(int(x) * (1000**3)),
+                        help="The amount of virtual memory given to the instance in Gb",
+                        metavar='V_MEM',
+                        default=-1)
 
     parser.add_argument("-k", "--key",
                         type=lambda key: os.path.abspath(key),
@@ -117,8 +122,9 @@ def main():
     args = define_parser().parse_args()
     verb = args.verbose
     force = args.force
+    memory = args.memory
 
-    # TODO:: Fail gracefully if some arguments are not given
+    # TODO:: Fail gracefully something breaks
 
     if args.config:
         study_config = Config.get_single_config(args.config, 'study', verb)
