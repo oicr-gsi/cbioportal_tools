@@ -46,7 +46,7 @@ def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
     exit_codes = [p.wait() for p in calls]
     # Clean up
     if any(exit_codes):
-        raise ValueError('ERROR:: Something went wrong when parsing Sequenza format file? Please resolve the issue')
+        raise ValueError('ERROR:: Something went wrong when parsing Segmented format file? Please resolve the issue')
     if verb:
         print(exit_codes)
 
@@ -90,7 +90,7 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
 
     # Clean up
     if any(exit_codes):
-        raise ValueError('ERROR:: Something went wrong when parsing Sequenza format file? Please resolve the issue')
+        raise ValueError('ERROR:: Something went wrong when parsing Segmented format file? Please resolve the issue')
     if verb:
         print(exit_codes)
 

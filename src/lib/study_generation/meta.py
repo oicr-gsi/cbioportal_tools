@@ -12,6 +12,7 @@ from lib.support import Config, helper
 def generate_meta_type(meta_config: Config.Config, study_config: Config.Config, verb):
     # NOTE:: Should be able to generate any from the set of all meta files
     # TODO:: Add functionality for optional fields
+    # TODO:: Potentially redo entire function
 
     helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[meta_config.type_config]))
 
@@ -25,8 +26,7 @@ def generate_meta_type(meta_config: Config.Config, study_config: Config.Config, 
 
     # Write genetic_alteration_type, datatype, stable_id, reference_genome and other values
     if meta_config.type_config == 'MRNA_EXPRESSION':
-        for field, entry in zip(general_zip[:3] + ['source_stable_id'] + general_zip[3:],
-                                meta_info_map[meta_config.type_config]):
+        for field, entry in zip(general_zip, meta_info_map[meta_config.type_config]):
             f.write('{}: {}\n'.format(field, entry))
 
     elif meta_config.type_config in ['SEG', 'GISTIC']:
