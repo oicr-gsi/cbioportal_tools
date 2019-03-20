@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-qsub 	-l h_vmem=32g \
+qsub 	-l h_vmem=64g \
  		-cwd \
  		-b y \
  		-m beas -M kunal.chandan@oicr.on.ca \
- 		-N Janus_DCIS \
+ 		-N janus_DCIS \
  		./runner.sh
 
 # Memory

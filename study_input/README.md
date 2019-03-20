@@ -1,4 +1,4 @@
-#Study Input Specification
+# Study Input Specification
 The required input for the study is outlined here.
 
 The minimum required files are:
@@ -29,6 +29,7 @@ There are a limited number of types. Although no error is currently thrown, it w
 
 As of this commit, the supported types are:
 - `mutation`
+- `segmented`
 - `sample`
 - `patient`
 - `cancer_type`
