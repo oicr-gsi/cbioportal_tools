@@ -98,8 +98,12 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
     elif meta_config.type_config == 'MRNA_EXPRESSION':
 
-        if   meta_config.config_map['pipeline'] == 'CNVkit':
-            print('lel you done goofed')
+        helper.working_on(verb, message='Gathering and decompressing MRNA_EXPRESSION files into temporary folder')
+        helper.decompress_to_temp(meta_config, study_config, verb)
+        helper.working_on(verb)
+
+        if   meta_config.config_map['pipeline'] == 'Cufflinks':
+            mrna_data.hugo_hugo_hugo(meta_config, study_config, verb)
             mrna_data.cufflinks_prep(meta_config, study_config, verb)
 
     elif meta_config.type_config == 'CANCER_TYPE':

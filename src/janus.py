@@ -166,8 +166,10 @@ def main():
         export_study_to_cbioportal(args.key, study_config.config_map['output_folder'], verb)
 
     helper.stars()
-    helper.working_on(verb, message='CONGRATULATIONS! A minimal study is now be complete!')
+    helper.working_on(verb, message='CONGRATULATIONS! Your study should now be imported!')
+    helper.stars()
     helper.working_on(verb, message='Output folder: {}'.format(study_config.config_map['output_folder']))
+    helper.working_on(verb, message='Study Name: {}'.format(study_config.config_map['name']))
     helper.stars()
 
 

@@ -69,7 +69,12 @@ def generate_cbiowrap_configs(information: Information, study_config: Config.Con
     out.write('\noutdir="{}"'.format(study_config.config_map['output_folder']))
     out.write('\nvepkeep="{}"'.format(helper.get_cbiowrap_file(study_config, 'wanted_columns.txt')))
     out.write('\nmapfile="{}"'.format(helper.get_cbiowrap_file(study_config, 'mapping.csv')))
+    if 'SEG' in [each.type_config for each in information]:
+        out.write('\ngenebed="{}"'.format([a for a in information if a.type_config == 'SEG'][0].config_map['bed_file']))
 
+    # TODO:: This Cufflinks mess should be removed if cBioWrap id not needed.
+    if 'Cufflinks' in [a.config_map['pipeline'] for a in information if a.type_config == 'MRNA_EXPRESSION']:
+        out.write('\nenscon="{}"'.format(helper.get_cbiowrap_file(study_config, 'HUGO_HUGO_conversion.txt')))
 
 def run_cbiowrap(study_config: Config.Config, verb):
     helper.call_shell('cd /.mounts/labs/gsiprojects/gsi/cBioGSI/kchandan/cBioWrap/; '
