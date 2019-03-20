@@ -15,7 +15,7 @@ c_choices = [".tar.gz", ".gz", ".zip"]
 
 def stars():
     # Prints a row of stars
-    for a in range(30):
+    for a in range(100):
         print('*', end="")
     print('')
 
