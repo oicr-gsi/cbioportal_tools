@@ -129,7 +129,7 @@ def main():
     if args.config:
         study_config = Config.get_single_config(args.config, 'study', verb)
     else:
-        study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE']), 'study')
+        study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE_NAME']), 'study')
     add_cli_args(study_config, args, verb)
 
     [information, clinic_data, cancer_type] = Config.gather_config_set(study_config, args, verb)

@@ -8,12 +8,12 @@ import os
 import numpy as np
 
 from lib.constants import config2name_map
-from lib.data_type import mutation_data, segmented_data, cancer_type
+from lib.data_type import mutation_data, segmented_data, mrna_data, cancer_type
 from lib.support import Config, helper
 
 
 def generate_data_type(meta_config: Config.Config, study_config: Config.Config, force, verb):
-    # TODO:: consider not editing here but returning back the edited configs.
+    # TODO:: consider not editing in the functions but returning back the edited configs.
     if   meta_config.type_config == 'MAF':
 
         helper.working_on(verb, message='Gathering and decompressing mutation files into temporary folder...')
@@ -95,6 +95,12 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
             segmented_data.fix_hmmcopy_max_chrom(meta_config, study_config, verb)
 
         segmented_data.fix_seg_id(meta_config, study_config, verb)
+
+    elif meta_config.type_config == 'MRNA_EXPRESSION':
+
+        if   meta_config.config_map['pipeline'] == 'CNVkit':
+            print('lel you done goofed')
+            mrna_data.cufflinks_prep(meta_config, study_config, verb)
 
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')

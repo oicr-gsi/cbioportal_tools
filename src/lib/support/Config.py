@@ -89,7 +89,7 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
     # Gather Config files
     for i in range(study_config.data_frame.shape[0]):
         config_file_name = os.path.join(os.path.dirname(os.path.abspath(args.config)),
-                                        study_config.data_frame['FILE'][i])
+                                        str(study_config.data_frame['FILE_NAME'][i]))
 
         config_file_type = study_config.data_frame['TYPE'][i]
 
