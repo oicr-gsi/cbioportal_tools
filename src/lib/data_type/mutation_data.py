@@ -7,6 +7,7 @@ import os
 import subprocess
 
 from lib.support import Config, helper
+from lib.constants import config2name_map
 
 # Define important constants
 mutation_callers = ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller']
@@ -32,7 +33,7 @@ def filter_vcf(mutation_config: Config.Config, verb):
     processes = []
     for file in mutation_config.data_frame['FILE_NAME']:
         file = os.path.join(mutation_config.config_map['input_folder'], file)
-        processes.append(subprocess.Popen("cat {} | grep 'PASS\|#' > {}".format(file, file + 'temp'), shell=True))
+        processes.append(subprocess.Popen("cat {} | grep -E 'PASS|#' > {}".format(file, file + 'temp'), shell=True))
 
     # Wait until Baked
     exit_codes = [p.wait() for p in processes]

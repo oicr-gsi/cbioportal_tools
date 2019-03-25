@@ -82,10 +82,9 @@ def get_config_clinical(file: str, f_type: str, verb) -> ClinicalConfig:
     return config_file
 
 
-def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [Information, Information, Config]:
+def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [Information, Config]:
     information = []
     clinic_data = []
-    cancer_type = []
     # Gather Config files
     for i in range(study_config.data_frame.shape[0]):
         config_file_name = os.path.join(os.path.dirname(os.path.abspath(args.config)),
@@ -97,12 +96,8 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
             clinic_data.append(get_config_clinical(config_file_name,
                                                           config_file_type,
                                                           verb))
-        elif study_config.data_frame.iloc[i][0] in ['CANCER_TYPE']:
-            cancer_type = get_single_config(config_file_name,
-                                                   config_file_type,
-                                                   verb)
         else:
             information.append(get_single_config(config_file_name,
                                                         config_file_type,
                                                         verb))
-    return [information, clinic_data, cancer_type]
+    return [information, clinic_data]

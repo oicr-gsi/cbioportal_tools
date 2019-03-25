@@ -8,6 +8,7 @@ import shutil
 import subprocess
 
 from lib.support import Config
+from lib.constants import config2name_map
 
 extensionChoices = ["vcf", "maf"]
 c_choices = [".tar.gz", ".gz", ".zip"]
@@ -57,7 +58,9 @@ def get_cbiowrap_file(study_config: Config.Config, name: str) -> str:
 
 def call_shell(command: str, verb):
     working_on(verb, message=command)
-    subprocess.call(command, shell=True)
+    output = subprocess.check_output(command, shell=True)
+    working_on(verb, output)
+
 
 def parallel_call(command: str, verb):
     working_on(verb, message=command)
@@ -97,3 +100,13 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
             call_shell("cp {} {}".format(input_file, output_file), verb)
 
     mutate_config.config_map['input_folder'] = temp
+
+
+def concat_files(exports_config:Config.Config, study_config: Config.Config, verb):
+    concated_files = os.path.join(study_config.config_map['output_folder'], config2name_map[exports_config.type_config])
+
+    call_shell('> {}'.format(concated_files), verb)
+    for each in exports_config.data_frame['FILE_NAME']:
+        input_file = os.path.join(exports_config.config_map['input_folder'], each)
+        # Concat all but first line to remove header.
+        call_shell('tail -n +2 {} >> {}'.format(input_file, concated_files), verb)
