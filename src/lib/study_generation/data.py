@@ -62,8 +62,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
             meta_config = mutation_data.export2maf(meta_config, study_config, force, verb)
             helper.working_on(verb)
 
-        helper.working_on(verb, message='Generating wanted_columns.txt file for cBioWrap...')
-        mutation_data.wanted_columns(meta_config, study_config)
+        helper.working_on(verb, message='Cleaning MAF Files ...')
+        mutation_data.clean_head(meta_config, verb)
         helper.working_on(verb)
 
         helper.working_on(verb, message='Concating MAF Files to export folder  ...')
@@ -79,7 +79,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.working_on(verb, 'Caller is {}, beginning pre-processing...'.format(meta_config.config_map['pipeline']))
         if   meta_config.config_map['pipeline'] == 'CNVkit':
 
-            print('Seems nothing should be done in pr-processing of segmented?')
+            print('Seems no prep is needed for CNVkit')
 
         elif meta_config.config_map['pipeline'] == 'Sequenza':
             # It might be that this is not necessary
@@ -106,8 +106,20 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.working_on(verb)
 
         if   meta_config.config_map['pipeline'] == 'Cufflinks':
-            mrna_data.hugo_hugo_hugo(meta_config, study_config, verb)
             mrna_data.cufflinks_prep(meta_config, study_config, verb)
+
+        helper.working_on(verb, message='Alpha sorting each file ...')
+        mrna_data.alpha_sort(meta_config, verb)
+        helper.working_on(verb)
+
+        helper.working_on(verb, message='Generating expression matrix ...')
+        mrna_data.generate_expression_matrix(meta_config, study_config, verb)
+        helper.working_on(verb)
+
+        helper.working_on(verb, message='Generating expression Z-Score Data ...')
+        mrna_data.generate_expression_zscore(meta_config, study_config, verb)
+        helper.working_on(verb)
+        # TODO:: Generate z-zscore data.
 
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')

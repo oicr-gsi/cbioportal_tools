@@ -12,9 +12,9 @@ import subprocess
 import pandas as pd
 
 # Other Scripts
-from lib.support import Config, cbiowrap_interface, helper
-from lib.constants import args2config_map
-from lib.study_generation import data, meta
+from lib.support import Config, helper
+from lib.constants import args2config_map, cbioportal_url, cbioportal_port, cbioportal_folder
+from lib.study_generation import data, meta, case
 
 Information = typing.List[Config.Config]
 
@@ -99,11 +99,11 @@ def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) ->
 def export_study_to_cbioportal(key: str, study_folder: str, verb):
     base_folder = os.path.basename(os.path.abspath(study_folder))
     # Copying folder to cBioPortal
-    helper.working_on(verb, message='Copying folder to cBioPortal instance at 10.30.133.80 ...')
+    helper.working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
 
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+    helper.call_shell("ssh -i {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                       "rm -r ~/oicr_studies/{}; "
-                      "mkdir ~/oicr_studies/{}'".format(key, base_folder, base_folder), verb)
+                      "mkdir ~/oicr_studies/{}'".format(key, cbioportal_url, base_folder, base_folder), verb)
 
     # Copy over
     helper.call_shell('scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies/'.format(key, study_folder), verb)
@@ -113,9 +113,13 @@ def export_study_to_cbioportal(key: str, study_folder: str, verb):
     # Import study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
 
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+    helper.call_shell("ssh -i {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                       "sudo ./metaImport.py -s ~/oicr_studies/{} "
-                      "-u http://10.30.133.80:8080/cbioportal -o'".format(key, base_folder), verb)
+                      "-u http://{}:{}/{} -o'".format(key, cbioportal_url,
+                                                      base_folder,
+                                                      cbioportal_url,
+                                                      cbioportal_port,
+                                                      cbioportal_folder), verb)
 
     helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(key), verb)
     helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl start tomcat'".format(key), verb)
@@ -141,15 +145,15 @@ def validate_study(key, study_folder, verb):
     # Import study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
 
-    validate = subprocess.check_output("ssh -i {} debian@10.30.133.80 "
-                                       "'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                                       "sudo ./validateData.py -s ~/oicr_studies/{} "
-                                       "-u http://10.30.133.80:8080/cbioportal"
-                                       "-v -m'".format(key, base_folder), shell=True)
-
-    print(type(validate))
-    print(validate)
-
+    helper.call_shell("ssh -i {} debian@{} "
+                      "'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+                      "sudo ./validateData.py -s ~/oicr_studies/{} "
+                      "-u http://{}:{}/{} "
+                      "-v -m'".format(key, cbioportal_url,
+                                      base_folder,
+                                      cbioportal_url,
+                                      cbioportal_port,
+                                      cbioportal_folder), verb)
 
     helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(key), verb)
     helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl start tomcat'".format(key), verb)
@@ -179,20 +183,12 @@ def main():
 
     # Clean Output Folder/Initialize it
     helper.clean_folder(study_config.config_map['output_folder'])
-    # TODO:: Fix output location dependant on cBioWrap
-    
-    for each in information:
-        data.generate_data_type(each, study_config, force, verb)
 
-    # Generate Config.ini file, Mapping.csv and wanted_columns.txt
-    cbiowrap_interface.generate_cbiowrap_configs(information, study_config, verb)
-
-    # run cBioWrap.sh
-    cbiowrap_interface.run_cbiowrap(study_config, verb)
-
-    # Overwrite some of the meta files (Optional)
     for each in information:
         meta.generate_meta_type(each, study_config, verb)
+        data.generate_data_type(each, study_config, force, verb)
+        case.generate_case_list(each, study_config)
+
     for each in clinic_data:
         meta.generate_meta_type(each, study_config, verb)
         data.generate_data_clinical(each, study_config, verb)

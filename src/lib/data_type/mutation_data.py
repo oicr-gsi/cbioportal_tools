@@ -4,6 +4,7 @@ __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
 import os
+import time
 import subprocess
 
 from lib.support import Config, helper
@@ -74,7 +75,7 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, force
         # Figure out if the .maf file should be generated
         output_maf = export_data.iloc[i][0]
         output_maf = output_maf.replace('.vcf', '.maf')
-        helper.working_on(verb, 'Output .maf being generated... ' + output_maf)
+        helper.working_on(verb, 'Output .maf being generated... ' + os.path.join(maf_temp, output_maf))
 
         input_vcf = os.path.join(exports_config.config_map['input_folder'], export_data['FILE_NAME'][i])
 
@@ -131,6 +132,17 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, force
     if verb:
         print(exit_codes)
     return exports_config
+
+
+def clean_head(exports_config: Config.Config, verb):
+
+    for file in exports_config.data_frame['FILE_NAME']:
+        file = os.path.join(exports_config.config_map['input_folder'], file)
+        output = open(file + '.temp', 'w')
+        for i, line in enumerate(file):
+            if not line.startswith('#'):
+                output.write(line)
+        os.rename(file + '.temp', file)
 
 
 def zip_maf_files(exports_config: Config.Config, verb) -> Config.Config:

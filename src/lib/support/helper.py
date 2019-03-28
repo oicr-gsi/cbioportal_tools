@@ -58,8 +58,8 @@ def get_cbiowrap_file(study_config: Config.Config, name: str) -> str:
 
 def call_shell(command: str, verb):
     working_on(verb, message=command)
-    output = subprocess.check_output(command, shell=True)
-    working_on(verb, output)
+    output = subprocess.call(command, shell=True)
+    working_on(verb, str(output))
 
 
 def parallel_call(command: str, verb):
@@ -103,10 +103,15 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
 
 
 def concat_files(exports_config:Config.Config, study_config: Config.Config, verb):
-    concated_files = os.path.join(study_config.config_map['output_folder'], config2name_map[exports_config.type_config])
+    concated_files = os.path.join(study_config.config_map['output_folder'],
+                                  'data_{}.txt'.format(config2name_map[exports_config.type_config]))
 
-    call_shell('> {}'.format(concated_files), verb)
+    input_folder = exports_config.config_map['input_folder']
+
+    call_shell('grep -m 1 -v \'#\' {} > {}'.format(os.path.join(input_folder,exports_config.data_frame['FILE_NAME'][0]),
+                                                   concated_files), verb)
+
     for each in exports_config.data_frame['FILE_NAME']:
-        input_file = os.path.join(exports_config.config_map['input_folder'], each)
+        input_file = os.path.join(input_folder, each)
         # Concat all but first line to remove header.
         call_shell('tail -n +2 {} >> {}'.format(input_file, concated_files), verb)
