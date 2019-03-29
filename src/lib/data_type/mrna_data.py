@@ -129,10 +129,6 @@ def generate_expression_matrix(exports_config: Config.Config, study_config: Conf
     result.to_csv(output_file, sep='\t', index=None)
 
 
-def zscore(row: pd.Series, deviation: float, mean: float):
-    return 0 if deviation == 0 else ((row - mean) / deviation)
-
-
 def generate_expression_zscore(exports_config: Config.Config, study_config: Config.Config, verb):
     output_file = os.path.join(study_config.config_map['output_folder'],
                                'data_{}.txt'.format(config2name_map[exports_config.type_config + '_ZSCORES']))
@@ -140,17 +136,6 @@ def generate_expression_zscore(exports_config: Config.Config, study_config: Conf
     input_file = os.path.join(study_config.config_map['output_folder'],
                               'data_{}.txt'.format(config2name_map[exports_config.type_config]))
 
-    data = pd.read_csv(input_file, sep='\t')
-    print(data.dtypes)
-
-    names = data.columns.values.tolist()
-    names = names[1:]
-    deviation = np.std(data[names], axis=1)
-    mean =  np.average(data[names], axis=1)
-    # TODO:: Figure out what zscore is and apply and write it here
-
-    for i in range(data.shape[0]):
-        data.apply(lambda row: zscore(row[names], float(deviation[i]), mean[i]), axis=1)
-
-
-    data.to_csv(output_file, sep='\t', index=None)
+    # Second line removes white space
+    helper.call_shell('./lib/data_type/zscore_expression.awk {} | '
+                      'sed \'s/[[:blank:]]*$//\' > {}'.format(input_file, output_file), verb)

@@ -4,11 +4,9 @@ __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
 import os
-import time
 import subprocess
 
 from lib.support import Config, helper
-from lib.constants import config2name_map
 
 # Define important constants
 mutation_callers = ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller']
@@ -34,7 +32,7 @@ def filter_vcf(mutation_config: Config.Config, verb):
     processes = []
     for file in mutation_config.data_frame['FILE_NAME']:
         file = os.path.join(mutation_config.config_map['input_folder'], file)
-        processes.append(subprocess.Popen("cat {} | grep -E 'PASS|#' > {}".format(file, file + 'temp'), shell=True))
+        processes.append(subprocess.Popen("cat {} | grep -E 'PASS|#' > {}".format(file, file + '.temp'), shell=True))
 
     # Wait until Baked
     exit_codes = [p.wait() for p in processes]
@@ -47,7 +45,7 @@ def filter_vcf(mutation_config: Config.Config, verb):
     processes = []
     for file in mutation_config.data_frame['FILE_NAME']:
         file = os.path.join(mutation_config.config_map['input_folder'], file)
-        processes.append(subprocess.Popen("cat {} > {}".format(file + 'temp', file), shell=True))
+        processes.append(subprocess.Popen("cat {} > {}".format(file + '.temp', file), shell=True))
 
     # Wait until Baked
     exit_codes = [p.wait() for p in processes]
@@ -69,11 +67,10 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, force
     # Prep
     helper.clean_folder(maf_temp)
 
-
     # Cook
     for i in range(len(export_data)):
         # Figure out if the .maf file should be generated
-        output_maf = export_data.iloc[i][0]
+        output_maf = export_data['FILE_NAME'][i]
         output_maf = output_maf.replace('.vcf', '.maf')
         helper.working_on(verb, 'Output .maf being generated... ' + os.path.join(maf_temp, output_maf))
 
@@ -120,8 +117,7 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, force
                                                                                           filter_vcf),
                                               shell=True))
         try:
-            exports_config.data_frame.iloc[i][0] = output_maf
-            os.remove(output_maf)
+            exports_config.data_frame['FILE_NAME'][i] = output_maf
         except (FileExistsError, OSError):
             pass
     exports_config.config_map['input_folder'] = maf_temp
@@ -135,14 +131,18 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, force
 
 
 def clean_head(exports_config: Config.Config, verb):
+    helper.working_on(verb, message='Cleaning head ...')
 
+    processes = []
     for file in exports_config.data_frame['FILE_NAME']:
         file = os.path.join(exports_config.config_map['input_folder'], file)
-        output = open(file + '.temp', 'w')
-        for i, line in enumerate(file):
-            if not line.startswith('#'):
-                output.write(line)
-        os.rename(file + '.temp', file)
+        processes.append(helper.parallel_call('grep -v \'#\' {0} > {0}.temp;'
+                                              'mv {0}.temp {0}'.format(file), verb))
+
+    exit_codes = [p.wait() for p in processes]
+    if verb:
+        print(exit_codes)
+    return exports_config
 
 
 def zip_maf_files(exports_config: Config.Config, verb) -> Config.Config:

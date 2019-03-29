@@ -9,43 +9,57 @@ from lib.constants import meta_info_map, general_zip, ref_gene_id_zip, config2na
 from lib.support import Config, helper
 
 
-def generate_meta_type(meta_config: Config.Config, study_config: Config.Config, verb):
+def generate_meta_type(config_type: str, config_map: dict, study_config: Config.Config, verb):
     # NOTE:: Should be able to generate any from the set of all meta files
     # TODO:: Add functionality for optional fields
     # TODO:: Potentially redo entire function
 
-    helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[meta_config.type_config]))
+    if   config_type == 'MRNA_EXPRESSION':
+        generate_meta_type(config_type + '_ZSCORES', config_map, study_config, verb)
+    elif config_type == 'SEG':
+        generate_meta_type(config_type + '_CNA',
+                           {'profile_description': 'Log2 copy-number values',
+                            'profile_name': 'Log2 copy-number values'},
+                           study_config, verb)
+        generate_meta_type(config_type + '_LOG2CNA',
+                           {'profile_description': 'Putative copy-number calls:  Values: -2=homozygous deletion; '
+                                                   '-1=hemizygous deletion; 0=neutral/no change; 1=gain;'
+                                                   ' 2=high level amplification',
+                            'profile_name': 'Putative copy-number alterations from GISTIC'}
+                           , study_config, verb)
+
+    helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[config_type]))
 
     f_out = os.path.join(study_config.config_map['output_folder'],
-                         'meta_{}.txt'.format(config2name_map[meta_config.type_config]))
+                         'meta_{}.txt'.format(config2name_map[config_type]))
     f = open(f_out, 'w')
 
-    if not meta_config.type_config == 'CANCER_TYPE':
+    if not config_type == 'CANCER_TYPE':
         # CANCER_TYPE meta file is the only one not to contain the identifier with the meta-data
         f.write('cancer_study_identifier: {}\n'.format(study_config.config_map['cancer_study_identifier']))
 
     # Write genetic_alteration_type, datatype, stable_id, reference_genome and other values
-    if meta_config.type_config == 'MRNA_EXPRESSION':
-        for field, entry in zip(general_zip, meta_info_map[meta_config.type_config]):
+    if config_type == 'MRNA_EXPRESSION':
+        for field, entry in zip(general_zip, meta_info_map[config_type]):
             f.write('{}: {}\n'.format(field, entry))
 
-    elif meta_config.type_config in ['SEG', 'GISTIC']:
-        for field, entry in zip(ref_gene_id_zip, meta_info_map[meta_config.type_config]):
+    elif config_type in ['SEG', 'GISTIC']:
+        for field, entry in zip(ref_gene_id_zip, meta_info_map[config_type]):
             f.write('{}: {}\n'.format(field, entry))
-        if meta_config.type_config == 'SEG':
-            f.write('{}: {}\n'.format('description', meta_config.config_map['description']))
+        if config_type == 'SEG':
+            f.write('{}: {}\n'.format('description', config_map['description']))
 
     else:
-        for field, entry in zip(general_zip, meta_info_map[meta_config.type_config]):
+        for field, entry in zip(general_zip, meta_info_map[config_type]):
             f.write('{}: {}\n'.format(field, entry))
 
     # Add profile_name and description, but exclude clinical data
-    if meta_config.type_config not in ['SAMPLE_ATTRIBUTES', 'PATIENT_ATTRIBUTES']:
-        if all([i in meta_config.config_map for i in ['profile_name', 'profile_description']]):
-            f.write('profile_name: {}\n'.format(meta_config.config_map['profile_name']))
-            f.write('profile_description: {}\n'.format(meta_config.config_map['profile_description']))
+    if config_type not in ['SAMPLE_ATTRIBUTES', 'PATIENT_ATTRIBUTES']:
+        if all([i in config_map for i in ['profile_name', 'profile_description']]):
+            f.write('profile_name: {}\n'.format(config_map['profile_name']))
+            f.write('profile_description: {}\n'.format(config_map['profile_description']))
 
-    f.write('data_filename: data_{}.txt\n'.format(config2name_map[meta_config.type_config]))
+    f.write('data_filename: data_{}.txt\n'.format(config2name_map[config_type]))
     f.flush()
     f.close()
     helper.working_on(verb)
