@@ -145,19 +145,28 @@ def validate_study(key, study_folder, verb):
     # Import study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
 
-    helper.call_shell("ssh -i {} debian@{} "
-                      "'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                      "sudo ./validateData.py -s ~/oicr_studies/{} "
-                      "-u http://{}:{}/{} "
-                      "-v -m'".format(key, cbioportal_url,
-                                      base_folder,
-                                      cbioportal_url,
-                                      cbioportal_port,
-                                      cbioportal_folder), verb)
+    valid = helper.call_shell("ssh -i {} debian@{} "
+                              "'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+                              "sudo ./validateData.py -s ~/oicr_studies/{} "
+                              "-u http://{}:{}/{} "
+                              "-v -m'".format(key, cbioportal_url,
+                                              base_folder,
+                                              cbioportal_url,
+                                              cbioportal_port,
+                                              cbioportal_folder), verb)
 
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(key), verb)
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl start tomcat'".format(key), verb)
-
+    if   valid == 1:
+        helper.stars()
+        helper.stars()
+        print('Validation of study failed. There could be something wrong with the data, please analyse cBioPortal\'s '
+              'message above. ')
+        exit(1)
+        helper.stars()
+        helper.stars()
+    elif valid == 3:
+        helper.stars()
+        print('Validation of study succeeded with warnings. Don\'t worry about it')
+        helper.stars()
     helper.working_on(verb)
 
 
@@ -185,12 +194,12 @@ def main():
     helper.clean_folder(study_config.config_map['output_folder'])
 
     for each in information:
-        meta.generate_meta_type(each, study_config, verb)
+        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
         data.generate_data_type(each, study_config, force, verb)
         case.generate_case_list(each, study_config)
 
     for each in clinic_data:
-        meta.generate_meta_type(each, study_config, verb)
+        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
         data.generate_data_clinical(each, study_config, verb)
     meta.generate_meta_study(study_config, verb)
 
