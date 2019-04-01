@@ -5,7 +5,7 @@ __status__ = "Pre-Production"
 
 import os
 
-from lib.constants import case_list_map, config2name_map
+from lib.constants.constants import case_list_map
 from lib.support import Config
 
 

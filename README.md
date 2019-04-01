@@ -27,23 +27,36 @@ Run the importer script with:
 ```
 ./runner.sh
 ```
-Within the runner script you must specify the location of your study configuration files.
+Within the runner script you must simply specify the location of your study configuration files.
 
+You will need a minimum of 16g. i.e. `qrsh -l h_vmem=16g`*
+
+\* I don't actually know the minimum, but this is the most I've seen used.
 
 ### What's in each folder?
 
-_src/_ contains all the Python scripts (as of now).
+`src/` contains all the scripts, with deeper organization as you go
 
-_study_input/_ contains example input configuration files for sample studies.
+`study_input/` contains example input configuration files for sample studies.
 
 ### Dependencies
+You shouldn't need this if you use the runner script.
+
 This tool depends on:
-* pandas
-* numpy
+* `pandas`
+* `numpy`
+* `awk`, `sort`, `uniq`, `grep`
+* `vep/92`
+* `vcf2maf`
+* `python-gsi/3.6.4`
+* `R-gsi/3.5.1`
 
-These both require pip, to install everything mentioned, run:
+Python packages require pip however they are included in `python-gsi`, to install/load everything on OICR nodes, run:
 ```
-sudo apt install python3-pip
-
-pip3 install numpy pandas
+module use /oicr/local/analysis/Modules/modulefiles
+module use /.mounts/labs/PDE/Modules/modulefiles
+module load vep/92
+module load vcf2maf
+module load python-gsi/3.6.4
+module load R-gsi/3.5.1
 ```

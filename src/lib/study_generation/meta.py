@@ -5,7 +5,7 @@ __status__ = "Pre-Production"
 
 import os
 
-from lib.constants import meta_info_map, general_zip, ref_gene_id_zip, config2name_map
+from lib.constants.constants import meta_info_map, general_zip, ref_gene_id_zip, config2name_map
 from lib.support import Config, helper
 
 

@@ -7,7 +7,7 @@ import os
 
 import numpy as np
 
-from lib.constants import config2name_map
+from lib.constants.constants import config2name_map
 from lib.data_type import mutation_data, segmented_data, mrna_data, cancer_type
 from lib.support import Config, helper
 
