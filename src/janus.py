@@ -7,13 +7,12 @@ __status__ = "Pre-Production"
 import argparse
 import os
 import typing
-import subprocess
 
 import pandas as pd
 
 # Other Scripts
 from lib.support import Config, helper
-from lib.constants import args2config_map, cbioportal_url, cbioportal_port, cbioportal_folder
+from lib.constants.constants import args2config_map, cbioportal_url, cbioportal_port, cbioportal_folder
 from lib.study_generation import data, meta, case
 
 Information = typing.List[Config.Config]

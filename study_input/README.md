@@ -28,13 +28,17 @@ sample	sample.txt
 There are a limited number of types. Although no error is currently thrown, it will possibly generate an error during the import step of cBioPortal.
 
 As of this commit, the supported types are:
-- `mutation`
-- `segmented`
-- `sample`
-- `patient`
-- `cancer_type`
+* `MAF`
+* `SEG`
+* `SEG_CNA`
+* `SEG_LOG2CNA`
+* `MRNA_EXPRESSION` 
+* `MRNA_EXPRESSION_ZSCORES`
+* `SAMPLE_ATTRIBUTES`
+* `PATIENT_ATTRIBUTES`
+* `CANCER_TYPE`
 
-Each one of these files can have any name that you desire, they simply need to have their relative path specified.
+Each one of these file types can have any name that you desire, they simply need to have their relative path specified.
 
 
 The breakdown of the form of all files is essentially
@@ -58,7 +62,7 @@ The format of the file will be:
 
 ```
 #input_folder=/folder/
-#caller=[Mutect | Mutect2 | Strelka | GATK]
+#caller= < See constants/constants.py - supported_vcf >
 #profile_name=Mutations (Colorectal)
 #profile_description=Mutation data from whole exome sequencing.
 File_Name	Patient_ID	Normal_col	Tumor_col	(Optional): Normal_ID	(Optional): Tumor_ID
