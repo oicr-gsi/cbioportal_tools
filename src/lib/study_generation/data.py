@@ -7,7 +7,7 @@ import os
 
 import numpy as np
 
-from lib.constants.constants import config2name_map
+from lib.constants.constants import config2name_map, supported_vcf, supported_seg, supported_rna
 from lib.data_type import mutation_data, segmented_data, mrna_data, cancer_type
 from lib.support import Config, helper
 
@@ -22,6 +22,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
         convert_vcf_2_maf = True
 
+        # TODO:: Rename 'caller' to 'pipeline'
         # If the caller contains .maf inside or does not exist, do not do conversion
         # Since the caller option in the meta file is optional, try:
         try:
@@ -31,6 +32,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
             convert_vcf_2_maf = False
 
         if convert_vcf_2_maf:
+            assert meta_config.config_map['caller'] in supported_vcf
+
             if   meta_config.config_map['caller'] == 'Strelka':
 
                 print('Something should be done')
@@ -77,6 +80,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.working_on(verb)
 
         helper.working_on(verb, 'Caller is {}, beginning pre-processing...'.format(meta_config.config_map['pipeline']))
+        assert meta_config.config_map['pipeline'] in supported_seg
+
         if   meta_config.config_map['pipeline'] == 'CNVkit':
 
             print('Seems no prep is needed for CNVkit')
@@ -109,8 +114,12 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
 
+        assert meta_config.config_map['pipeline'] in supported_rna
         if   meta_config.config_map['pipeline'] == 'Cufflinks':
             mrna_data.cufflinks_prep(meta_config, study_config, verb)
+
+        elif meta_config.config_map['pipeline'] == 'RSEM':
+            helper.working_on(verb, message='Nothing really needs to be done')
 
         helper.working_on(verb, message='Alpha sorting each file ...')
         mrna_data.alpha_sort(meta_config, verb)
@@ -123,7 +132,6 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.working_on(verb, message='Generating expression Z-Score Data ...')
         mrna_data.generate_expression_zscore(meta_config, study_config, verb)
         helper.working_on(verb)
-        # TODO:: Generate z-zscore data.
 
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')

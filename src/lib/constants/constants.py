@@ -55,6 +55,10 @@ case_list_map =   {'MAF':               '_sequenced',
                    'SEG':               '_cna',
                    'MRNA_EXPRESSION':   '_rna_seq_mrna'}
 
+supported_vcf = ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller']
+supported_seg = ['CNVkit', 'Sequenza', 'HMMCopy']
+supported_rna = ['Cufflinks', 'RSEM']
+
 # hg_19 chromosome lengths. (for fixing HMMCopy only?)
 # First index of list is chromosome, second is the real value
 hmmcopy_chrom_positions = 'hmmcopy_chrom_positions.txt'
