@@ -35,9 +35,3 @@ df.rs<-df.rs[!duplicated(df.rs),]
 colnames(df.rs)[1]<-"Hugo_Symbol"
 
 write.table(df.rs,file=opts$outputfile, sep="\t", row.names=FALSE, quote=FALSE)
-
-
-
-
-
-

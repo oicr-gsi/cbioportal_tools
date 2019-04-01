@@ -99,6 +99,10 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.concat_files(meta_config, study_config, verb)
         helper.working_on(verb)
 
+        helper.working_on(verb, message='Generating CNA and log2CNA files ...')
+        segmented_data.gen_cna(meta_config, study_config, verb)
+        helper.working_on(verb)
+
     elif meta_config.type_config == 'MRNA_EXPRESSION':
 
         helper.working_on(verb, message='Gathering and decompressing MRNA_EXPRESSION files into temporary folder')

@@ -52,6 +52,7 @@ general_zip =     ['genetic_alteration_type', 'datatype', 'stable_id', 'show_pro
 ref_gene_id_zip = ['genetic_alteration_type', 'datatype', 'reference_genome_id']
 
 case_list_map =   {'MAF':               '_sequenced',
+                   'SEG':               '_cna',
                    'MRNA_EXPRESSION':   '_rna_seq_mrna'}
 
 # hg_19 chromosome lengths. (for fixing HMMCopy only?)

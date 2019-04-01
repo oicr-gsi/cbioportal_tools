@@ -190,3 +190,26 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
         raise ValueError('ERROR:: Something went wrong when parsing HMMCopy format file? Please resolve the issue')
     if verb:
         print(exit_codes)
+
+
+def gen_cna(exports_config: Config.Config, study_config: Config.Config, verb):
+    # TODO:: Run Rscript to generate CNA and log2CNA files from concated SEG file
+
+    helper.working_on(verb, message='Gathering files ...')
+    seg_file = os.path.join(study_config.config_map['output_folder'],
+                            'data_{}.txt'.format(constants.config2name_map[exports_config.type_config]))
+    bed_file = exports_config.config_map['bed_file']
+    l_o_file = os.path.join(study_config.config_map['output_folder'],
+                            'data_{}.txt'.format(constants.config2name_map[exports_config.type_config + '_LOG2CNA']))
+    c_o_file = os.path.join(study_config.config_map['output_folder'],
+                            'data_{}.txt'.format(constants.config2name_map[exports_config.type_config + '_CNA']))
+
+    helper.working_on(verb, message='Generating log2CNA...')
+    helper.call_shell('Rscript lib/data_type/seg2gene.R '
+                      '-s {} '
+                      '-g {} '
+                      '-o {} '.format(seg_file, bed_file, l_o_file), verb)
+
+    helper.working_on(verb, message='Generating CNA...')
+    helper.call_shell('awk -f lib/data_type/log2CNA.awk -v gain=0.3 ampl=0.7 htzd=-0.3 hmzd=-0.7 {} | '
+                      'sed \'s/[[:blank:]]*$//\' > {}'.format(l_o_file, c_o_file), verb)

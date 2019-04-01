@@ -137,5 +137,5 @@ def generate_expression_zscore(exports_config: Config.Config, study_config: Conf
                               'data_{}.txt'.format(config2name_map[exports_config.type_config]))
 
     # Second line removes white space
-    helper.call_shell('./lib/data_type/zscore_expression.awk {} | '
+    helper.call_shell('awk -f lib/data_type/zscore_expression.awk {} | '
                       'sed \'s/[[:blank:]]*$//\' > {}'.format(input_file, output_file), verb)
