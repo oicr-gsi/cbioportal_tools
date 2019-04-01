@@ -8,7 +8,7 @@ import shutil
 import subprocess
 
 from lib.support import Config
-from lib.constants import config2name_map
+from lib.constants.constants import config2name_map
 
 extensionChoices = ["vcf", "maf"]
 c_choices = [".tar.gz", ".gz", ".zip"]
@@ -50,10 +50,6 @@ def working_on(verbosity, message='Success!\n'):
 
 def get_temp_folder(output_folder, ext) -> str:
     return os.path.abspath(os.path.join(output_folder, '../temp/temp_{}/'.format(ext)))
-
-
-def get_cbiowrap_file(study_config: Config.Config, name: str) -> str:
-    return os.path.join(get_temp_folder(study_config.config_map['output_folder'], 'study'), name)
 
 
 def call_shell(command: str, verb):

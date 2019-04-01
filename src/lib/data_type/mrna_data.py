@@ -9,21 +9,9 @@ import pandas as pd
 import numpy as np
 
 from lib.support import Config, helper
-from lib.constants import config2name_map
+from lib.constants.constants import config2name_map
 
 Information = typing.List[pd.DataFrame]
-
-
-def hugo_hugo_hugo(exports_config: Config.Config, study_config: Config.Config, verb):
-    # Silly name for a silly function that takes the HUGO names and makes a map to HUGO names for cBioWrap
-    input_file = os.path.join(exports_config.config_map['input_folder'], exports_config.data_frame['FILE_NAME'][0])
-    helper.call_shell('cat {} | '
-                      'awk -F\'\\t\' \'FNR>1 {{ print $1 }}\' | '
-                      'uniq | '
-                      'awk \'{{ OFS="\\t" }} {{ print $1, $1 }}\' > '
-                      '{}'.format(input_file, helper.get_cbiowrap_file(study_config,
-                                                                       'HUGO_HUGO_conversion.txt')),
-                      verb)
 
 
 def cufflinks_prep(exports_config: Config.Config, study_config: Config.Config, verb):

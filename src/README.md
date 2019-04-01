@@ -1,6 +1,8 @@
 # _src_ folder
 
-Run with ```./runner.sh``` all arguments can be modified:
+Run with `./runner.sh` all arguments can be modified:
+
+To submit a job, run `qsub_Janus.sh` with **your** email.
 
 ### Detailed help:
 
