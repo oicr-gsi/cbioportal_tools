@@ -6,6 +6,7 @@ module use /.mounts/labs/PDE/Modules/modulefiles
 module load vep/92
 module load vcf2maf
 module load python-gsi/3.6.4
+module load R-gsi/3.5.1
 
 # Run main script:
 

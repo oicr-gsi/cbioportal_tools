@@ -47,8 +47,11 @@ def generate_meta_type(config_type: str, config_map: dict, study_config: Config.
         for field, entry in zip(ref_gene_id_zip, meta_info_map[config_type]):
             f.write('{}: {}\n'.format(field, entry))
         if config_type == 'SEG':
-            f.write('{}: {}\n'.format('description', config_map['description']))
-
+            try:
+                f.write('{}: {}\n'.format('description', config_map['description']))
+            except KeyError:
+                print('Using Profile_Description instead of description because it is missing from type_config file.')
+                f.write('{}: {}\n'.format('description', config_map['profile_description']))
     else:
         for field, entry in zip(general_zip, meta_info_map[config_type]):
             f.write('{}: {}\n'.format(field, entry))

@@ -20,8 +20,11 @@ def generate_case_list(meta_config: Config.Config, study_config: Config.Config):
         f.write('cancer_study_identifier: {}\n'.format(study_config.config_map['cancer_study_identifier']))
         f.write('stable_id: {}{}\n'.format(study_config.config_map['cancer_study_identifier'],
                                            case_list_map[meta_config.type_config]))
-        f.write('case_list_name: {}\n'.format(meta_config.config_map['profile_name']))
-        f.write('case_list_description: {}\n'.format(meta_config.config_map['profile_description']))
+        try:
+            f.write('case_list_name: {}\n'.format(meta_config.config_map['profile_name']))
+            f.write('case_list_description: {}\n'.format(meta_config.config_map['profile_description']))
+        except KeyError:
+            raise KeyError('Missing Profile_Name or Profile_Description from {} file'.format(meta_config.type_config))
         f.write('case_list_ids: {}\n'.format('\t'.join(meta_config.data_frame['TUMOR_ID'])))
         f.flush()
         f.close()

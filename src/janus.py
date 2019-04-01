@@ -165,13 +165,14 @@ def validate_study(key, study_folder, verb):
         helper.stars()
     elif valid == 3:
         helper.stars()
-        print('Validation of study succeeded with warnings. Don\'t worry about it')
+        print('Validation of study succeeded with warnings. Don\'t worry about it, unless you think it\'s important.')
         helper.stars()
     helper.working_on(verb)
 
 
 
 def main():
+    # TODO:: Ensure absolute paths for helper program files: ie seg2gene.R
     args = define_parser().parse_args()
     verb = args.verbose
     force = args.force
