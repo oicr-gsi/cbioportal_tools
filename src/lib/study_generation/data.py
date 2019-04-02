@@ -1,5 +1,4 @@
 __author__ = "Kunal Chandan"
-__license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
@@ -12,7 +11,7 @@ from lib.data_type import mutation_data, segmented_data, mrna_data, cancer_type
 from lib.support import Config, helper
 
 
-def generate_data_type(meta_config: Config.Config, study_config: Config.Config, force, verb):
+def generate_data_type(meta_config: Config.Config, study_config: Config.Config, verb):
 
     if   meta_config.type_config == 'MAF':
 
@@ -22,47 +21,46 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
         convert_vcf_2_maf = True
 
-        # TODO:: Rename 'caller' to 'pipeline'
-        # If the caller contains .maf inside or does not exist, do not do conversion
-        # Since the caller option in the meta file is optional, try:
+        # If the pipeline contains .maf inside or does not exist, do not do conversion
+        # Since the pipeline option in the meta file is optional, try:
         try:
-            if '.maf' in meta_config.config_map['caller']:
+            if '.maf' in meta_config.config_map['pipeline']:
                 convert_vcf_2_maf = False
         except KeyError:
             convert_vcf_2_maf = False
 
         if convert_vcf_2_maf:
-            assert meta_config.config_map['caller'] in supported_vcf
+            assert meta_config.config_map['pipeline'] in supported_vcf
 
-            if   meta_config.config_map['caller'] == 'Strelka':
+            if   meta_config.config_map['pipeline'] == 'Strelka':
 
                 print('Something should be done')
 
-            elif meta_config.config_map['caller'] == 'Mutect':
+            elif meta_config.config_map['pipeline'] == 'Mutect':
 
-                mutation_data.filter_vcf(meta_config, verb)
+                mutation_data.filter_vcf_rejects(meta_config, verb)
 
-            elif meta_config.config_map['caller'] == 'Mutect2':
+            elif meta_config.config_map['pipeline'] == 'Mutect2':
 
-                mutation_data.filter_vcf(meta_config, verb)
+                mutation_data.filter_vcf_rejects(meta_config, verb)
 
-            elif meta_config.config_map['caller'] == 'MutectStrelka':
+            elif meta_config.config_map['pipeline'] == 'MutectStrelka':
 
-                mutation_data.filter_vcf(meta_config, verb)
+                mutation_data.filter_vcf_rejects(meta_config, verb)
 
-            elif meta_config.config_map['caller'] == 'GATKHaplotypeCaller':
+            elif meta_config.config_map['pipeline'] == 'GATKHaplotypeCaller':
 
                 print('Something else should be done')
                 # Any expansion for pre-processing the .vcf Files should be put here in an 'elif'.
             else:
                 helper.stars()
-                print('WARNING:: Unknown caller, have you spelled it right?')
-                print('See: {}'.format(mutation_data.mutation_callers))
+                print('WARNING:: Unknown pipeline, have you spelled it right?')
+                print('See: {}'.format(supported_vcf))
                 helper.stars()
 
             helper.working_on(verb, message='Exporting vcf2maf...')
             helper.working_on(verb, message='And deleting .vcf s...')
-            meta_config = mutation_data.export2maf(meta_config, study_config, force, verb)
+            meta_config = mutation_data.export2maf(meta_config, study_config, verb)
             helper.working_on(verb)
 
         helper.working_on(verb, message='Cleaning MAF Files ...')
@@ -79,7 +77,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
 
-        helper.working_on(verb, 'Caller is {}, beginning pre-processing...'.format(meta_config.config_map['pipeline']))
+        helper.working_on(verb, 'pipeline is {}, beginning pre-processing...'.format(meta_config.config_map['pipeline']))
+
         assert meta_config.config_map['pipeline'] in supported_seg
 
         if   meta_config.config_map['pipeline'] == 'CNVkit':
@@ -104,6 +103,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.concat_files(meta_config, study_config, verb)
         helper.working_on(verb)
 
+        # TODO:: Have a flag such that it generates this if a flag is true.
+        # TODO:: Implement CNA and log2CNA
         helper.working_on(verb, message='Generating CNA and log2CNA files ...')
         segmented_data.gen_cna(meta_config, study_config, verb)
         helper.working_on(verb)

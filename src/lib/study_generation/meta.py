@@ -1,5 +1,4 @@
 __author__ = "Kunal Chandan"
-__license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
@@ -11,9 +10,11 @@ from lib.support import Config, helper
 
 def generate_meta_type(config_type: str, config_map: dict, study_config: Config.Config, verb):
     # NOTE:: Should be able to generate any from the set of all meta files
-    # TODO:: Add functionality for optional fields
-    # TODO:: Potentially redo entire function
+    #TODO:: Add functionality for optional fields
+    # Would require list of optional fields that then map onto their names then printed onto the meta file
 
+    # To get a type object to generate many meta_{}.txt files, add it to the elif statements,
+    # ensure the config_type is changed
     if   config_type == 'MRNA_EXPRESSION':
         generate_meta_type(config_type + '_ZSCORES', config_map, study_config, verb)
     elif config_type == 'SEG':

@@ -1,5 +1,4 @@
 __author__ = "Kunal Chandan"
-__license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
@@ -7,8 +6,8 @@ import os
 import shutil
 import subprocess
 
-from lib.support import Config
-from lib.constants.constants import config2name_map
+from ..support import Config
+from ..constants.constants import config2name_map
 
 extensionChoices = ["vcf", "maf"]
 c_choices = [".tar.gz", ".gz", ".zip"]
