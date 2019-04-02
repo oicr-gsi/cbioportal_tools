@@ -1,4 +1,7 @@
 # Study Input Specification
+
+# TODO:: Description of each data type
+# TODO:: Make required patient display name is in patient info
 The required input for the study is outlined here.
 
 The minimum required files are:
@@ -25,7 +28,7 @@ Type	File
 mutation	mutation.txt
 sample	sample.txt
 ```
-There are a limited number of types. Although no error is currently thrown, it will possibly generate an error during the import step of cBioPortal.
+There are a limited number of types.
 
 As of this commit, the supported types are:
 * `MAF`
