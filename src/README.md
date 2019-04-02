@@ -1,6 +1,8 @@
 # _src_ folder
 
-Run with ```./runner.sh``` all arguments can be modified:
+Run with `./runner.sh` all arguments can be modified:
+
+To submit a job, run `qsub_Janus.sh` with **your** email.
 
 ### Detailed help:
 
@@ -8,16 +10,17 @@ Run with ```./runner.sh``` all arguments can be modified:
 usage: janus.py [-h] [-o FOLDER] [-c FILE] [-t TYPE] [-i ID] [-N NAME]
                 [-n NAME] [-d DESCRIPTION] [-k FILE] [-p] [-v] [-f]
 
-Janu (https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to
-generate an importable study for a cBioPortal instance.Recommended usage can
-be seen in the examples located in study_input/ .
+janus (https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate
+an importable study for a cBioPortal instance. Recommended usage can be seen
+in the examples located in ../study_input/ .
 
 optional arguments:
   -h, --help            show this help message and exit
+  -c FILE, --config FILE
+                        The location of the study config file, containing
+                        command line arguments as key/value pairs
   -o FOLDER, --output-folder FOLDER
                         The main folder of the study you want to generate.
-  -c FILE, --config FILE
-                        The location of the study config file.
   -t TYPE, --type-of-cancer TYPE
                         The type of cancer.
   -i ID, --cancer-study-identifier ID
@@ -33,6 +36,21 @@ optional arguments:
   -v, --verbose         Makes program verbose
   -f, --force           Forces overwriting of data_cancer_type.txt file and
                         *.maf files.
+
+OPTIONAL Configuration File Specifiers:
+  --mutation-data MUTATION_DATA
+                        Location of mutation_data configuration file.
+  --segmented-data SEGMENTED_DATA
+                        Location of segmented_data configuration file.
+  --expression-data EXPRESSION_DATA
+                        Location of expression_data configuration file.
+  --sample-info SAMPLE_INFO
+                        Location of sample_info configuration file.
+  --patient-info PATIENT_INFO
+                        Location of patient_info configuration file.
+  --cancer-data CANCER_DATA
+                        Location of cancer_data configuration file.
+
 ```
 ### Examples:
 ```
@@ -48,9 +66,8 @@ python3.6 janus.py \
 			--push \
 			--verbose \
 			--force
-			
-or 
-
+```
+``` 
 python3.6m janus.py 	--config ../study_input/DCIS/study.txt \
 			--output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/  \
 			--key /u/kchandan/cbioportal.pem \

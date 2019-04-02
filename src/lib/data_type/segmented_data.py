@@ -7,7 +7,7 @@ import os
 import subprocess
 
 from lib.support import Config, helper
-from lib import constants
+from lib.constants import constants
 
 # Define important constants
 segmented_pipelines = ['CNVkit', 'Sequenza', 'HMMCopy']
@@ -46,7 +46,7 @@ def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
     exit_codes = [p.wait() for p in calls]
     # Clean up
     if any(exit_codes):
-        raise ValueError('ERROR:: Something went wrong when parsing Sequenza format file? Please resolve the issue')
+        raise ValueError('ERROR:: Something went wrong when parsing Segmented format file? Please resolve the issue')
     if verb:
         print(exit_codes)
 
@@ -90,7 +90,7 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
 
     # Clean up
     if any(exit_codes):
-        raise ValueError('ERROR:: Something went wrong when parsing Sequenza format file? Please resolve the issue')
+        raise ValueError('ERROR:: Something went wrong when parsing Segmented format file? Please resolve the issue')
     if verb:
         print(exit_codes)
 
@@ -165,7 +165,7 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
 
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
-        dictionary = os.path.abspath(os.path.join(os.path.dirname(__file__), '../' + constants.hmmcopy_chrom_positions))
+        dictionary = os.path.abspath(os.path.join(os.path.dirname(__file__), '../constants/' + constants.hmmcopy_chrom_positions))
 
         if  input_file == output_file:
             output_temp = output_file + '.temp'
@@ -190,3 +190,28 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
         raise ValueError('ERROR:: Something went wrong when parsing HMMCopy format file? Please resolve the issue')
     if verb:
         print(exit_codes)
+
+
+def gen_cna(exports_config: Config.Config, study_config: Config.Config, verb):
+    # TODO:: Run Rscript to generate CNA and log2CNA files from concated SEG file
+
+    helper.working_on(verb, message='Gathering files ...')
+    seg_file = os.path.join(study_config.config_map['output_folder'],
+                            'data_{}.txt'.format(constants.config2name_map[exports_config.type_config]))
+    bed_file = exports_config.config_map['bed_file']
+    l_o_file = os.path.join(study_config.config_map['output_folder'],
+                            'data_{}.txt'.format(constants.config2name_map[exports_config.type_config + '_LOG2CNA']))
+    c_o_file = os.path.join(study_config.config_map['output_folder'],
+                            'data_{}.txt'.format(constants.config2name_map[exports_config.type_config + '_CNA']))
+
+    helper.working_on(verb, message='Generating log2CNA...')
+
+    # This may break if after loading the module R-gsi/3.5.1, Rscript is not set as a constant
+    helper.call_shell('Rscript lib/data_type/seg2gene.R '
+                      '-s {} '
+                      '-g {} '
+                      '-o {} '.format(seg_file, bed_file, l_o_file), verb)
+
+    helper.working_on(verb, message='Generating CNA...')
+    helper.call_shell('awk -f lib/data_type/log2CNA.awk -v gain=0.3 ampl=0.7 htzd=-0.3 hmzd=-0.7 {} | '
+                      'sed \'s/[[:blank:]]*$//\' > {}'.format(l_o_file, c_o_file), verb)

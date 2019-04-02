@@ -7,13 +7,14 @@ __status__ = "Pre-Production"
 import argparse
 import os
 import typing
+import subprocess
 
 import pandas as pd
 
 # Other Scripts
-from lib.support import Config, cbiowrap_interface, helper
-from lib.constants import args2config_map
-from lib.study_generation import data, meta
+from lib.support import Config, helper
+from lib.constants import args2config_map, cbioportal_url, cbioportal_port, cbioportal_folder
+from lib.study_generation import data, meta, case
 
 Information = typing.List[Config.Config]
 
@@ -53,6 +54,10 @@ def define_parser() -> argparse.ArgumentParser:
                         metavar='V_MEM',
                         default=-1)
 
+    config_spec = parser.add_argument_group('OPTIONAL Configuration File Specifiers')
+    for each in args2config_map.keys():
+        config_spec.add_argument('--' + each.replace('_', '-'), help='Location of {} configuration file.'.format(each))
+
     parser.add_argument("-k", "--key",
                         type=lambda key: os.path.abspath(key),
                         help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
@@ -91,10 +96,41 @@ def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) ->
     return study_config
 
 
-def export_study_to_cbioportal(key, study_folder, verb):
+def export_study_to_cbioportal(key: str, study_folder: str, verb):
     base_folder = os.path.basename(os.path.abspath(study_folder))
     # Copying folder to cBioPortal
-    helper.working_on(verb, message='Copying folder to cBioPortal instance at 10.30.133.80 ...')
+    helper.working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
+
+    helper.call_shell("ssh -i {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+                      "rm -r ~/oicr_studies/{}; "
+                      "mkdir ~/oicr_studies/{}'".format(key, cbioportal_url, base_folder, base_folder), verb)
+
+    # Copy over
+    helper.call_shell('scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies/'.format(key, study_folder), verb)
+
+    helper.working_on(verb)
+
+    # Import study to cBioPortal
+    helper.working_on(verb, message='Importing study to cBioPortal...')
+
+    helper.call_shell("ssh -i {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+                      "sudo ./metaImport.py -s ~/oicr_studies/{} "
+                      "-u http://{}:{}/{} -o'".format(key, cbioportal_url,
+                                                      base_folder,
+                                                      cbioportal_url,
+                                                      cbioportal_port,
+                                                      cbioportal_folder), verb)
+
+    helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(key), verb)
+    helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl start tomcat'".format(key), verb)
+
+    helper.working_on(verb)
+
+
+def validate_study(key, study_folder, verb):
+    base_folder = os.path.basename(os.path.abspath(study_folder))
+    # Copying folder to cBioPortal
+    helper.working_on(verb, message='Validating study ...')
 
     helper.call_shell("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                       "rm -r ~/oicr_studies/{}; "
@@ -105,69 +141,79 @@ def export_study_to_cbioportal(key, study_folder, verb):
 
     helper.working_on(verb)
 
+
     # Import study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
 
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                      "sudo ./metaImport.py -s ~/oicr_studies/{} "
-                      "-u http://10.30.133.80:8080/cbioportal -o'".format(key, base_folder), verb)
+    valid = helper.call_shell("ssh -i {} debian@{} "
+                              "'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+                              "sudo ./validateData.py -s ~/oicr_studies/{} "
+                              "-u http://{}:{}/{} "
+                              "-v -m'".format(key, cbioportal_url,
+                                              base_folder,
+                                              cbioportal_url,
+                                              cbioportal_port,
+                                              cbioportal_folder), verb)
 
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(key), verb)
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl start tomcat'".format(key), verb)
-
+    if   valid == 1:
+        helper.stars()
+        helper.stars()
+        print('Validation of study failed. There could be something wrong with the data, please analyse cBioPortal\'s '
+              'message above. ')
+        exit(1)
+        helper.stars()
+        helper.stars()
+    elif valid == 3:
+        helper.stars()
+        print('Validation of study succeeded with warnings. Don\'t worry about it, unless you think it\'s important.')
+        helper.stars()
     helper.working_on(verb)
 
 
+
 def main():
+    # TODO:: Ensure absolute paths for helper program files: ie seg2gene.R
     args = define_parser().parse_args()
     verb = args.verbose
     force = args.force
     memory = args.memory
 
-    # TODO:: Fail gracefully something breaks
+    # TODO:: Fail gracefully if something breaks
 
     if args.config:
         study_config = Config.get_single_config(args.config, 'study', verb)
     else:
-        study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE']), 'study')
+        study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE_NAME']), 'study')
     add_cli_args(study_config, args, verb)
 
-    [information, clinic_data, cancer_type] = Config.gather_config_set(study_config, args, verb)
+    [information, clinic_data] = Config.gather_config_set(study_config, args, verb)
 
-    [print('Information File {}:\n{}\n'.format(a.type_config, a)) for a in information] if verb else print(),
-    [print('\nClinical Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
+    [print('Informational Files {}:\n{}\n'.format(a.type_config, a)) for a in information] if verb else print(),
+    [print('Clinical List Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
 
     # Clean Output Folder/Initialize it
     helper.clean_folder(study_config.config_map['output_folder'])
 
     for each in information:
+        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
         data.generate_data_type(each, study_config, force, verb)
+        case.generate_case_list(each, study_config)
 
-    # Generate Config.ini file, Mapping.csv and wanted_columns.txt
-    cbiowrap_interface.generate_cbiowrap_configs(information, study_config, verb)
-
-    # run cBioWrap.sh
-    cbiowrap_interface.run_cbiowrap(study_config, verb)
-
-    # Overwrite some of the meta files (Optional)
-    # Generate CANCER_TYPE
-    if type(cancer_type) == Config.Config:
-        meta.generate_meta_type(cancer_type, study_config, verb)
-        data.generate_data_type(cancer_type, study_config, force, verb)
-    for each in information:
-        meta.generate_meta_type(each, study_config, verb)
     for each in clinic_data:
-        meta.generate_meta_type(each, study_config, verb)
+        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
         data.generate_data_clinical(each, study_config, verb)
     meta.generate_meta_study(study_config, verb)
 
     # export to cbioportal!
     if args.key:
+        validate_study(args.key, study_config.config_map['output_folder'], verb)
         export_study_to_cbioportal(args.key, study_config.config_map['output_folder'], verb)
 
     helper.stars()
-    helper.working_on(verb, message='CONGRATULATIONS! A minimal study is now be complete!')
+    helper.working_on(verb, message='CONGRATULATIONS! Your study should now be imported!')
+    helper.stars()
     helper.working_on(verb, message='Output folder: {}'.format(study_config.config_map['output_folder']))
+    helper.working_on(verb, message='Study Name: {}'.format(study_config.config_map['name']))
     helper.stars()
 
 
