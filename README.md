@@ -43,15 +43,24 @@ You will need a minimum of 16g. i.e. `qrsh -l h_vmem=16g`*
 You shouldn't need this if you use the runner script.
 
 This tool depends on:
-* `pandas`
-* `numpy`
+
+Python libraries required, should be available under:
+* `python-gsi/3.6.4`
+  * `pandas`
+  * `numpy`
+
+Linux command line utilities:
 * `awk`, `sort`, `uniq`, `grep`
+
+OICR Spec
 * `vep/92`
 * `vcf2maf`
 * `python-gsi/3.6.4`
 * `R-gsi/3.5.1`
 
 Python packages require pip however they are included in `python-gsi`, to install/load everything on OICR nodes, run:
+
+Both `module use` statements are required ...
 ```
 module use /oicr/local/analysis/Modules/modulefiles
 module use /.mounts/labs/PDE/Modules/modulefiles
