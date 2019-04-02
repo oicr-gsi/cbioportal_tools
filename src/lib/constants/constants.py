@@ -1,9 +1,9 @@
 __author__ = "Kunal Chandan"
-__license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
 # TODO:: Support all the other data types:
+# TOOD:: Add all the other data_types even if they are not implemented...
 # To support other data_types, they need to be added to
 #       meta_info_map
 #       args2config_map
@@ -27,7 +27,8 @@ args2config_map = {'mutation_data':        'MAF',
                    'expression_data':      'MRNA_EXPRESSION',
                    'sample_info':          'SAMPLE_ATTRIBUTES',
                    'patient_info':         'PATIENT_ATTRIBUTES',
-                   'cancer_data':          'CANCER_TYPE'}
+                   'cancer_type':          'CANCER_TYPE'}
+# TODO:: Cancer_data changed to cancer_type
 
 # config2name_map is used for creating the meta_{name}.txt and data_{name}.txt file names.
 # This is especially useful when overwriting cBioWrap generated files
@@ -63,6 +64,5 @@ supported_rna = ['Cufflinks', 'RSEM']
 # First index of list is chromosome, second is the real value
 hmmcopy_chrom_positions = 'hmmcopy_chrom_positions.txt'
 
-cbioportal_url = '10.30.133.80'
-cbioportal_port = '8080'
-cbioportal_folder = 'cbioportal'
+cbioportal_ip = '10.30.133.80'
+cbioportal_url = 'cbioportal.gsi.oicr.on.ca'
