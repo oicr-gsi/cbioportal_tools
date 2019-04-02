@@ -1,5 +1,4 @@
 __author__ = "Kunal Chandan"
-__license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
@@ -12,7 +11,7 @@ import pandas as pd
 
 # Other Scripts
 from lib.support import Config, helper
-from lib.constants.constants import args2config_map, cbioportal_url, cbioportal_port, cbioportal_folder
+from lib.constants.constants import args2config_map, cbioportal_ip, cbioportal_url
 from lib.study_generation import data, meta, case
 
 Information = typing.List[Config.Config]
@@ -23,8 +22,11 @@ def define_parser() -> argparse.ArgumentParser:
         description="janus "
                     "(https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate an importable study for "
                     "a cBioPortal instance. Recommended usage can be seen in the examples located in ../study_input/ .")
+    # TODO:: Add required option onto arguments that need it
     parser.add_argument("-c", "--config",
-                        help="The location of the study config file, containing command line arguments as key/value pairs",
+                        help="The location of the study config file, in essence a set of command-line arguments. "
+                             "Recommended usage is with configuration file. File data can be overridden by command-line"
+                             " arguments.",
                         metavar='FILE')
     parser.add_argument("-o", "--output-folder",
                         type=lambda folder: os.path.abspath(folder),
@@ -46,16 +48,20 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument("-d", "--description",
                         help="A description of the study.",
                         metavar='DESCRIPTION')
+    # TODO:: Generate a specific case list
 
-    parser.add_argument("-m", "--memory",
-                        type=lambda x: int(int(x) * (1000**3)),
-                        help="The amount of virtual memory given to the instance in Gb",
-                        metavar='V_MEM',
-                        default=-1)
-
+    # TODO:: Change wording of this
+    # TODO:: Remove the data_type files from this and pace them under new header
+    # TODO:: The Patient and Sample info files need higher priority
+    # TODO:: The Segmented Data needs to be specified to say it will generate dCNA and cCNA Data
+    # TODO:: Specify which data_types are noot supported:
+    # dCNA
+    # cCNA
     config_spec = parser.add_argument_group('OPTIONAL Configuration File Specifiers')
     for each in args2config_map.keys():
         config_spec.add_argument('--' + each.replace('_', '-'), help='Location of {} configuration file.'.format(each))
+    # TODO:: This block needs to be updated
+
 
     parser.add_argument("-k", "--key",
                         type=lambda key: os.path.abspath(key),
@@ -68,9 +74,6 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Makes program verbose")
-    parser.add_argument("-f", "--force",
-                        action="store_true",
-                        help="Forces overwriting of data_cancer_type.txt file and *.maf files.")
     return parser
 
 
@@ -96,47 +99,51 @@ def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) ->
 
 
 def export_study_to_cbioportal(key: str, study_folder: str, verb):
+    if not key == '':
+        key = '-i ' + key
     base_folder = os.path.basename(os.path.abspath(study_folder))
     # Copying folder to cBioPortal
     helper.working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
 
-    helper.call_shell("ssh -i {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+    helper.call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                       "rm -r ~/oicr_studies/{}; "
-                      "mkdir ~/oicr_studies/{}'".format(key, cbioportal_url, base_folder, base_folder), verb)
+                      "mkdir ~/oicr_studies/{}'".format(key, cbioportal_ip, base_folder, base_folder), verb)
 
     # Copy over
-    helper.call_shell('scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies/'.format(key, study_folder), verb)
+    helper.call_shell('scp -r {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_folder, cbioportal_ip),
+                      verb)
 
     helper.working_on(verb)
 
     # Import study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
 
-    helper.call_shell("ssh -i {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+    helper.call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                       "sudo ./metaImport.py -s ~/oicr_studies/{} "
-                      "-u http://{}:{}/{} -o'".format(key, cbioportal_url,
-                                                      base_folder,
-                                                      cbioportal_url,
-                                                      cbioportal_port,
-                                                      cbioportal_folder), verb)
+                      "-u http://{} -o'".format(key, cbioportal_ip,
+                                                base_folder,
+                                                cbioportal_url), verb)
 
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(key), verb)
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl start tomcat'".format(key), verb)
+    helper.call_shell("ssh {} debian@{} 'sudo systemctl stop  tomcat'".format(key, cbioportal_ip), verb)
+    helper.call_shell("ssh {} debian@{} 'sudo systemctl start tomcat'".format(key, cbioportal_ip), verb)
 
     helper.working_on(verb)
 
 
 def validate_study(key, study_folder, verb):
+    if not key == '':
+        key = '-i ' + key
     base_folder = os.path.basename(os.path.abspath(study_folder))
     # Copying folder to cBioPortal
     helper.working_on(verb, message='Validating study ...')
 
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+    helper.call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                       "rm -r ~/oicr_studies/{}; "
-                      "mkdir ~/oicr_studies/{}'".format(key, base_folder, base_folder), verb)
+                      "mkdir ~/oicr_studies/{}'".format(key, cbioportal_ip, base_folder, base_folder), verb)
 
     # Copy over
-    helper.call_shell('scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies/'.format(key, study_folder), verb)
+    helper.call_shell('scp -r {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_folder, cbioportal_ip),
+                      verb)
 
     helper.working_on(verb)
 
@@ -144,16 +151,15 @@ def validate_study(key, study_folder, verb):
     # Import study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
 
-    valid = helper.call_shell("ssh -i {} debian@{} "
+    valid = helper.call_shell("ssh {} debian@{} "
                               "'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                               "sudo ./validateData.py -s ~/oicr_studies/{} "
-                              "-u http://{}:{}/{} "
-                              "-v -m'".format(key, cbioportal_url,
+                              "-u http://{} "
+                              "-v -m'".format(key, cbioportal_ip,
                                               base_folder,
-                                              cbioportal_url,
-                                              cbioportal_port,
-                                              cbioportal_folder), verb)
+                                              cbioportal_url), verb)
 
+    # TODO:: Explain what's going on with the exit codes
     if   valid == 1:
         helper.stars()
         helper.stars()
@@ -174,8 +180,7 @@ def main():
     # TODO:: Ensure absolute paths for helper program files: ie seg2gene.R
     args = define_parser().parse_args()
     verb = args.verbose
-    force = args.force
-    memory = args.memory
+    # TODO:: Remove force argument
 
     # TODO:: Fail gracefully if something breaks
 
@@ -191,11 +196,12 @@ def main():
     [print('Clinical List Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
 
     # Clean Output Folder/Initialize it
+    # TODO:: add force argument here
     helper.clean_folder(study_config.config_map['output_folder'])
 
     for each in information:
         meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
-        data.generate_data_type(each, study_config, force, verb)
+        data.generate_data_type(each, study_config, verb)
         case.generate_case_list(each, study_config)
 
     for each in clinic_data:
@@ -204,9 +210,10 @@ def main():
     meta.generate_meta_study(study_config, verb)
 
     # export to cbioportal!
-    if args.key:
+    if args.key or args.push:
         validate_study(args.key, study_config.config_map['output_folder'], verb)
         export_study_to_cbioportal(args.key, study_config.config_map['output_folder'], verb)
+        # TODO:: Ensure that the validation step ensures that it doesn't overwrite an existing study with the same cancer-study-id
 
     helper.stars()
     helper.working_on(verb, message='CONGRATULATIONS! Your study should now be imported!')
