@@ -1,16 +1,13 @@
 __author__ = "Kunal Chandan"
-__license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
 import os
 import subprocess
+import pandas as pd
 
 from lib.support import Config, helper
 from lib.constants import constants
-
-# Define important constants
-segmented_pipelines = ['CNVkit', 'Sequenza', 'HMMCopy']
 
 
 def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
@@ -28,18 +25,12 @@ def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
 
-        if input_file == output_file:
-            output_temp = output_file + '.temp'
+        output_temp = output_file + '.temp'
 
-            calls.append(helper.parallel_call('awk \'NR>1 {{sub(/\\tchr/,"\\t")}} 1\' {} > {}; '.format(input_file,
-                                                                                                        output_temp) +
-                                              'mv {} {}'.format(output_temp, output_file),
-                                              verb))
-        else:
-
-            calls.append(helper.parallel_call('awk \'NR>1 {{sub(/\\tchr/,"\\t")}} 1\' {} > {}'.format(input_file,
-                                                                                                      output_file),
-                                              verb))
+        calls.append(helper.parallel_call('awk \'NR>1 {{sub(/\\tchr/,"\\t")}} 1\' {} > {}; '.format(input_file,
+                                                                                                    output_temp) +
+                                          'mv {} {}'.format(output_temp, output_file),
+                                          verb))
 
     exports_config.config_map['input_folder'] = seg_temp
     # Wait until Baked
@@ -69,21 +60,13 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
         sample_id = export_data['TUMOR_ID'][i]
 
-        if input_file == output_file:
-            output_temp = output_file + '.temp'
+        output_temp = output_file + '.temp'
 
-            calls.append(helper.parallel_call('head -n 1 "{}" > {}; '.format(input_file, output_temp) +
-                                              'cat  {} |'
-                                              'awk -F"\\t" \'NR>1 {{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' '
-                                              '>> {}; '.format(input_file, sample_id, output_temp) +
-                                              'mv {} {}'.format(output_temp, output_file), verb))
-        else:
-
-            calls.append(helper.parallel_call('head -n 1 "{}" > {}; '.format(input_file, output_file) +
-                                              'cat  {} |'
-                                              'awk -F"\\t" \'NR>1 {{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' '
-                                              '>> {}'.format(input_file, sample_id, output_file), verb))
-
+        calls.append(helper.parallel_call('head -n 1 "{}" > {}; '.format(input_file, output_temp) +
+                                          'cat  {} |'
+                                          'awk -F"\\t" \'NR>1 {{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' '
+                                          '>> {}; '.format(input_file, sample_id, output_temp) +
+                                          'mv {} {}'.format(output_temp, output_file), verb))
     exports_config.config_map['input_folder'] = seg_temp
     # Wait until Baked
     exit_codes = [p.wait() for p in calls]
@@ -122,23 +105,15 @@ def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, 
         sample_id = export_data['TUMOR_ID'][i]
 
         helper.working_on(verb, 'Refactoring cols: {}'.format(export_data['FILE_NAME'][i]))
-        if  input_file == output_file:
-            output_temp = output_file + '.temp'
+        output_temp = output_file + '.temp'
 
-            calls.append(helper.parallel_call('echo "{}" > {}; '.format(header, output_temp) +
-                                              'cat  {} | '
-                                              'awk \'BEGIN{{split("{}",t); for (i in t) vals[t[i]]}} ($2 in vals)\' | '
-                                              'awk -F"\\t" \'{{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' >> '
-                                              '{}; '.format(input_file, '|'.join(bed_filter), sample_id, output_temp) +
-                                              'mv {} {}'.format(output_temp, output_file),
-                                              verb))
-        else:
-            calls.append(helper.parallel_call('echo "{}" > {}; '.format(header, output_file) +
-                                              'cat  {} | '
-                                              'awk \'BEGIN{{split("{}",t); for (i in t) vals[t[i]]}} ($2 in vals)\' | '
-                                              'awk -F"\\t" \'{{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' >> '
-                                              '{} '.format(input_file, '|'.join(bed_filter), sample_id, output_file),
-                                              verb))
+        calls.append(helper.parallel_call('echo "{}" > {}; '.format(header, output_temp) +
+                                          'cat  {} | '
+                                          'awk \'BEGIN{{split("{}",t); for (i in t) vals[t[i]]}} ($2 in vals)\' | '
+                                          'awk -F"\\t" \'{{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' >> '
+                                          '{}; '.format(input_file, '|'.join(bed_filter), sample_id, output_temp) +
+                                          'mv {} {}'.format(output_temp, output_file),
+                                          verb))
     exports_config.config_map['input_folder'] = seg_temp
     # Wait until Baked
     exit_codes = [p.wait() for p in calls]
@@ -165,20 +140,15 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
 
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
-        dictionary = os.path.abspath(os.path.join(os.path.dirname(__file__), '../constants/' + constants.hmmcopy_chrom_positions))
+        dictionary = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                                  '../constants/' + constants.hmmcopy_chrom_positions))
 
-        if  input_file == output_file:
-            output_temp = output_file + '.temp'
+        output_temp = output_file + '.temp'
 
-            calls.append(helper.parallel_call("awk -F'\\t' 'BEGIN {{OFS = FS}} FNR==NR {{dict[$1]=$2; next}} "
-                                              "FNR >= 2 {{$4=($4 in dict) ? dict[$4] : $4; $5=int(($4-$3)/1000)}}1' {} {}"
-                                              "> {};".format(dictionary, input_file, output_temp) +
-                                              'mv {} {}'.format(output_temp, output_file), verb))
-
-        else:
-            calls.append(helper.parallel_call("awk -F'\\t' 'BEGIN {{OFS = FS}} FNR==NR {{dict[$1]=$2; next}} "
-                                              "NR >  1 {{$4=($4 in dict) ? dict[$4] : $4; $5=int(($4-$3)/1000)}}1' {} {}"
-                                              "> {} ".format(dictionary, input_file, output_file), verb))
+        calls.append(helper.parallel_call("awk -F'\\t' 'BEGIN {{OFS = FS}} FNR==NR {{dict[$1]=$2; next}} "
+                                          "FNR >= 2 {{$4=($4 in dict) ? dict[$4] : $4; $5=int(($4-$3)/1000)}}1' {} {}"
+                                          "> {};".format(dictionary, input_file, output_temp) +
+                                          'mv {} {}'.format(output_temp, output_file), verb))
 
     exports_config.config_map['input_folder'] = seg_temp
     # Wait until Baked
@@ -192,8 +162,29 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
         print(exit_codes)
 
 
+def collapse(num):
+    ampl = +0.7
+    gain = +0.3
+    htzd = -0.3
+    hmzd = -0.7
+
+    if num > ampl:
+        return +2
+
+    elif num > gain:
+        return +1
+
+    elif num > htzd:
+        return +0
+
+    elif num > hmzd:
+        return -1
+
+    else:
+        return -2
+
+
 def gen_cna(exports_config: Config.Config, study_config: Config.Config, verb):
-    # TODO:: Run Rscript to generate CNA and log2CNA files from concated SEG file
 
     helper.working_on(verb, message='Gathering files ...')
     seg_file = os.path.join(study_config.config_map['output_folder'],
@@ -212,6 +203,10 @@ def gen_cna(exports_config: Config.Config, study_config: Config.Config, verb):
                       '-g {} '
                       '-o {} '.format(seg_file, bed_file, l_o_file), verb)
 
-    helper.working_on(verb, message='Generating CNA...')
-    helper.call_shell('awk -f lib/data_type/log2CNA.awk -v gain=0.3 ampl=0.7 htzd=-0.3 hmzd=-0.7 {} | '
-                      'sed \'s/[[:blank:]]*$//\' > {}'.format(l_o_file, c_o_file), verb)
+    data = pd.read_csv(l_o_file, sep='\t')
+    cols = data.columns.values.tolist()[1:]
+
+    for c in cols:
+        data[c] = data[c].apply(lambda x: collapse(x))
+
+    data.to_csv(c_o_file, sep='\t', index=None)

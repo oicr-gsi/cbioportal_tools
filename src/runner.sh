@@ -14,5 +14,4 @@ python3.6m janus.py 	--config ../study_input/DCIS/study.txt \
 						--output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/  \
 						--key /u/kchandan/cbioportal.pem \
 						--push \
-						--verbose \
-						--force
+						--verbose

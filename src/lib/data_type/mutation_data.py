@@ -1,5 +1,4 @@
 __author__ = "Kunal Chandan"
-__license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
@@ -8,8 +7,6 @@ import subprocess
 
 from lib.support import Config, helper
 
-# Define important constants
-mutation_callers = ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller']
 
 def wanted_columns(mutate_config: Config.Config, study_config: Config.Config):
     f = open(os.path.join(mutate_config.config_map['input_folder'],
@@ -28,7 +25,7 @@ def wanted_columns(mutate_config: Config.Config, study_config: Config.Config):
     o.close()
 
 
-def filter_vcf(mutation_config: Config.Config, verb):
+def filter_vcf_rejects(mutation_config: Config.Config, verb):
     processes = []
     for file in mutation_config.data_frame['FILE_NAME']:
         file = os.path.join(mutation_config.config_map['input_folder'], file)
@@ -56,7 +53,7 @@ def filter_vcf(mutation_config: Config.Config, verb):
         raise ValueError('ERROR:: Temporary Filter VCF file not found?')
 
 
-def export2maf(exports_config: Config.Config, study_config: Config.Config, force, verb):
+def export2maf(exports_config: Config.Config, study_config: Config.Config, verb):
     # Gather ingredients
     processes = []
     output_folder = study_config.config_map['output_folder']
@@ -87,35 +84,29 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, force
             gene_col_normal = normal_id
             gene_col_tumors = tumors_id
         ref_fasta = exports_config.config_map['ref_fasta']
-        filter_vcf = exports_config.config_map['filter_vcf']
-
-        if os.path.isfile(os.path.basename(output_maf) + '.maf') and not force:
-            write = False
-        else:
-            write = True
+        filter_vcf = exports_config.config_map['filter_vcf_rejects']
 
         # Bake in Parallel
-        if write:
-            processes.append(subprocess.Popen('vcf2maf.pl  --input-vcf {}              \
-                                                           --output-maf {}/{}           \
-                                                           --normal-id {}              \
-                                                           --tumor-id {}                \
-                                                           --vcf-normal-id {}          \
-                                                           --vcf-tumor-id {}            \
-                                                           --ref-fasta {}              \
-                                                           --filter-vcf {}              \
-                                                           --vep-path $VEP_PATH        \
-                                                           --vep-data $VEP_DATA         \
-                                                           --species homo_sapiens'.format(input_vcf,
-                                                                                          maf_temp,
-                                                                                          output_maf,
-                                                                                          normal_id,
-                                                                                          tumors_id,
-                                                                                          gene_col_normal,
-                                                                                          gene_col_tumors,
-                                                                                          ref_fasta,
-                                                                                          filter_vcf),
-                                              shell=True))
+        processes.append(subprocess.Popen('vcf2maf.pl  --input-vcf {}              \
+                                                       --output-maf {}/{}           \
+                                                       --normal-id {}              \
+                                                       --tumor-id {}                \
+                                                       --vcf-normal-id {}          \
+                                                       --vcf-tumor-id {}            \
+                                                       --ref-fasta {}              \
+                                                       --filter-vcf {}              \
+                                                       --vep-path $VEP_PATH        \
+                                                       --vep-data $VEP_DATA         \
+                                                       --species homo_sapiens'.format(input_vcf,
+                                                                                      maf_temp,
+                                                                                      output_maf,
+                                                                                      normal_id,
+                                                                                      tumors_id,
+                                                                                      gene_col_normal,
+                                                                                      gene_col_tumors,
+                                                                                      ref_fasta,
+                                                                                      filter_vcf),
+                                          shell=True))
         try:
             exports_config.data_frame['FILE_NAME'][i] = output_maf
         except (FileExistsError, OSError):
