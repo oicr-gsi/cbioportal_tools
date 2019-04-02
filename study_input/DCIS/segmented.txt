@@ -1,9 +1,11 @@
-#input_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/Sequenza
-#pipeline=Sequenza
-#description=Copy Number Variations from whole exome sequencing. (10 Samples)
+#input_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/hmmcOPY/tsv/
+#pipeline=HMMCopy
+#bed_file=/.mounts/labs/gsiprojects/gsi/cBioGSI/kchandan/cBioWrap/testdata/ncbi_genes_hg19_canonical.bed
+#profile_name=CNVs (Ductal Carcinoma)
+#profile_description=Copy Number Variations HMMCopy from whole exome sequencing. (10 Samples)
 FILE_NAME	PATIENT_ID	TUMOR_ID
-DCIS_0001_Br_P_EX.varscanSomatic_Total_CN.seg	DCIS_0001	DCIS_0001_Br_P_EX_1
-DCIS_0002_Br_P_EX.varscanSomatic_Total_CN.seg	DCIS_0002	DCIS_0002_Br_P_EX_1
-DCIS_0003_Br_P_EX.varscanSomatic_Total_CN.seg	DCIS_0003	DCIS_0003_Br_P_EX_1
-DCIS_0004_Br_P_EX.varscanSomatic_Total_CN.seg	DCIS_0004	DCIS_0004_Br_P_EX_1
-DCIS_0005_Br_P_EX.varscanSomatic_Total_CN.seg	DCIS_0005	DCIS_0005_Br_P_EX_1
+hmmcopy_DCIS_0001_Br_R_EX_1.sorted.filter.dedup.vs.DCIS_0001_Br_P_EX_1.sorted.filter.dedup.tsv	TEST_0001	TEST_0001_Br_P_EX_1
+hmmcopy_DCIS_0002_Br_R_EX_1.sorted.filter.dedup.vs.DCIS_0002_Br_P_EX_1.sorted.filter.dedup.tsv	TEST_0002	TEST_0002_Br_P_EX_1
+hmmcopy_DCIS_0003_Br_R_EX_1.sorted.filter.dedup.vs.DCIS_0003_Br_P_EX_1.sorted.filter.dedup.tsv	TEST_0003	TEST_0003_Br_P_EX_1
+hmmcopy_DCIS_0004_Br_R_EX_1.sorted.filter.dedup.vs.DCIS_0004_Br_P_EX_1.sorted.filter.dedup.tsv	TEST_0004	TEST_0004_Br_P_EX_1
+hmmcopy_DCIS_0005_Br_R_EX_1.sorted.filter.dedup.vs.DCIS_0005_Br_P_EX_1.sorted.filter.dedup.tsv	TEST_0005	TEST_0005_Br_P_EX_1
