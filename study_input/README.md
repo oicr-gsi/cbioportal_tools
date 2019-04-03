@@ -1,73 +1,38 @@
 # Study Input Specification
 
-# TODO:: Description of each data type
-# TODO:: Make required patient display name is in patient info
-The required input for the study is outlined here.
+The minimum required files for an importable study in cBioPortal are:
+- `study.txt`
+- `samples.txt`
+- `case_lists/cases_all.txt`
+- `cancer_type.txt` *
 
-The minimum required files are:
-- _study.txt_
-- _samples.txt_
-- _case_lists/cases_all.txt_
-- _cancer_type.txt_ **
+*If the cancer type is not already in the cBioPortal instance database.
 
-** If cancer type is not already in the database
-
-Once they are filled they will produce the minimum required files.
-
-The main study file should be called study.txt and should look like this:
-
-```
-#type_of_cancer=colorectal
-#cancer_study_identifier=gecco_gsi_mutect_2019
-#name=Genetics and Epidemiology of Colorectal Cancer Consortium
-#short_name=GECCO
-#description=GECCO Samples sequenced and analyzed at OICR
-#study_output_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/snv/cbioMutect/
-#cbioportal_key=/u/kchandan/cbioportal.pem
-Type	File
-mutation	mutation.txt
-sample	sample.txt
-```
-There are a limited number of types.
-
-As of this commit, the supported types are:
+As of this commit, the supported importable types are:
+* `SAMPLE_ATTRIBUTES`
+* `PATIENT_ATTRIBUTES`
+* `CANCER_TYPE`
 * `MAF`
 * `SEG`
 * `SEG_CNA`
 * `SEG_LOG2CNA`
 * `MRNA_EXPRESSION` 
 * `MRNA_EXPRESSION_ZSCORES`
-* `SAMPLE_ATTRIBUTES`
-* `PATIENT_ATTRIBUTES`
-* `CANCER_TYPE`
 
-Each one of these file types can have any name that you desire, they simply need to have their relative path specified.
+The following types are stubs and need your help to implement: 
 
+<!--- This is very important!! --->
+<img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Uncle_Sam_%28pointing_finger%29.png" width="100" height="134" />
+<!--- This is very important!! --->
 
-The breakdown of the form of all files is essentially
-~~~
-#Property=value
-#profile_name=Something relavent (Required for)
-#profile_description=Mutation data from whole exome sequencing. (12 Samples)
-...
-Col_Name	Patient_ID	Other_Relavent_Information
-Value_01	GSI_0001	Blah_Blah
-~~~
+* `DISCRETE_COPY_NUMBER`
+* `CONTINUOUS_COPY_NUMBER`
+* `FUSION`
+* `METHYLATION`
+* `PROTEIN`
+* `GISTIC_2.0`
+* `MUTSIG`
+* `GENE_PANEL`
+* `GENE_SET`
 
-Each Data File that is added must also contain a ```Patient_ID``` column
-
-
-## Example: Adding Mutation Data
-
-To add **Mutation Data** you need to add ```mutation:mutation.txt``` to the bottom in TSV format. 
-
-The format of the file will be:
-
-```
-#input_folder=/folder/
-#caller= < See constants/constants.py - supported_vcf >
-#profile_name=Mutations (Colorectal)
-#profile_description=Mutation data from whole exome sequencing.
-File_Name	Patient_ID	Normal_col	Tumor_col	(Optional): Normal_ID	(Optional): Tumor_ID
-File.vcf.gz	GECCO_0001	GECCO_0001_Ly_R_TS	GECCO_0001_Li_P_TS
-```
+Once the configuration files for the datatype are pointed to they will produce the required files for cBioPortal import.

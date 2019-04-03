@@ -65,7 +65,7 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
     helper.clean_folder(maf_temp)
 
     # Cook
-    for i in range(len(export_data)):
+    for i in range(export_data.shape[0]):
         # Figure out if the .maf file should be generated
         output_maf = export_data['FILE_NAME'][i]
         output_maf = output_maf.replace('.vcf', '.maf')
@@ -74,15 +74,22 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
         input_vcf = os.path.join(exports_config.config_map['input_folder'], export_data['FILE_NAME'][i])
 
         normal_id = export_data['NORMAL_ID'][i]
-        tumors_id = export_data['TUMOR_ID'][i]
+        tumors_id = export_data['SAMPLE_ID'][i]
 
         # Since the last 2 columns are optional and represent what's written in the file vs what should be in the output
         if export_data.shape[1] == 6:
             gene_col_normal = export_data['NORMAL_COL'][i]
             gene_col_tumors = export_data['TUMOR_COL'][i]
+        elif exports_config.config_map['pipeline'] in ['Mutect']:
+            gene_col_normal = normal_id
+            gene_col_tumors = tumors_id
+        elif exports_config.config_map['pipeline'] in ['Strelka', 'Mutect2']:
+            gene_col_normal = 'NORMAL'
+            gene_col_tumors = 'TUMOR'
         else:
             gene_col_normal = normal_id
             gene_col_tumors = tumors_id
+
         ref_fasta = exports_config.config_map['ref_fasta']
         filter_vcf = exports_config.config_map['filter_vcf_rejects']
 

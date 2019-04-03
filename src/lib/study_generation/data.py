@@ -130,6 +130,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         mrna_data.generate_expression_matrix(meta_config, study_config, verb)
         helper.working_on(verb)
 
+        # TODO:: Have a flag to ask if this needs to be generated, located inside the actual configuration file
         helper.working_on(verb, message='Generating expression Z-Score Data ...')
         mrna_data.generate_expression_zscore(meta_config, study_config, verb)
         helper.working_on(verb)

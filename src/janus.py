@@ -22,7 +22,6 @@ def define_parser() -> argparse.ArgumentParser:
         description="janus "
                     "(https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate an importable study for "
                     "a cBioPortal instance. Recommended usage can be seen in the examples located in ../study_input/ .")
-    # TODO:: Add required option onto arguments that need it
     parser.add_argument("-c", "--config",
                         help="The location of the study config file, in essence a set of command-line arguments. "
                              "Recommended usage is with configuration file. File data can be overridden by command-line"
@@ -32,7 +31,7 @@ def define_parser() -> argparse.ArgumentParser:
                         type=lambda folder: os.path.abspath(folder),
                         help="The main folder of the study you want to generate.",
                         metavar='FOLDER',
-                        default='new_study/')
+                        required=True)
     parser.add_argument("-t", "--type-of-cancer",
                         help="The type of cancer.",
                         metavar='TYPE')
@@ -50,17 +49,92 @@ def define_parser() -> argparse.ArgumentParser:
                         metavar='DESCRIPTION')
     # TODO:: Generate a specific case list
 
-    # TODO:: Change wording of this
-    # TODO:: Remove the data_type files from this and pace them under new header
-    # TODO:: The Patient and Sample info files need higher priority
-    # TODO:: The Segmented Data needs to be specified to say it will generate dCNA and cCNA Data
-    # TODO:: Specify which data_types are noot supported:
-    # dCNA
-    # cCNA
-    config_spec = parser.add_argument_group('OPTIONAL Configuration File Specifiers')
-    for each in args2config_map.keys():
-        config_spec.add_argument('--' + each.replace('_', '-'), help='Location of {} configuration file.'.format(each))
-    # TODO:: This block needs to be updated
+    # TODO:: Specify which data_types are not supported:
+
+    config_spec = parser.add_argument_group('Overridable Required Configuration File Specifiers')
+
+    config_spec.add_argument('--' + 'sample-info',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. REQUIRED.'.format('sample-info',
+                                                                         args2config_map['sample_info']))
+    config_spec.add_argument('--' + 'patient-info',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. REQUIRED.'.format('patient-info',
+                                                                         args2config_map['patient_info']))
+    config_spec.add_argument('--' + 'cancer-type',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. REQUIRED*'.format('cancer-type',
+                                                                         args2config_map['cancer_type']))
+    config_spec.add_argument('--' + 'timeline-info',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'See the docs        OPTIONAL'.format('timeline-info',
+                                                                        args2config_map['timeline_info']))
+
+
+    config_data = parser.add_argument_group('Overridable Optional Data-type Configuration File Specifiers')
+
+    config_data.add_argument('--' + 'mutation-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. OPTIONAL'.format('mutation-data',
+                                                                        args2config_map['mutation_data']))
+    config_data.add_argument('--' + 'segmented-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. The segmented data file will normally generate _CNA and _log2CNA'
+                                  ' files. See documentation if you do not want this. '
+                                  '                    OPTIONAL'.format('segmented-data',
+                                                                        args2config_map['segmented_data']))
+    config_data.add_argument('--' + 'expression-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. The expression data file will normally generate _zscores'
+                                  ' files. See the documentation if you do not want this.'
+                                  '                    OPTIONAL'.format('expression-data',
+                                                                        args2config_map['expression_data']))
+    config_data.add_argument('--' + 'CNA-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'See the docs        OPTIONAL'.format('CNA-data',
+                                                                        args2config_map['CNA_data']))
+    config_data.add_argument('--' + 'log2CNA-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'See the docs        OPTIONAL'.format('log2CNA-data',
+                                                                        args2config_map['log2CNA_data']))
+    config_data.add_argument('--' + 'fusions-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'See the docs        OPTIONAL'.format('fusions-data',
+                                                                        args2config_map['fusions_data']))
+    config_data.add_argument('--' + 'methylation-hm27-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'See the docs        OPTIONAL'.format('methylation-hm27-data',
+                                                                        args2config_map['methylation_hm27_data']))
+    config_data.add_argument('--' + 'rppa-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'See the docs        OPTIONAL'.format('rppa-data',
+                                                                        args2config_map['rppa_data']))
+    config_data.add_argument('--' + 'gistic-genes-amp-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'See the docs        OPTIONAL'.format('gistic-genes-amp-data',
+                                                                        args2config_map['gistic_genes_amp_data']))
+    config_data.add_argument('--' + 'mutsig-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'See the docs        OPTIONAL'.format('mutsig-data',
+                                                                        args2config_map['mutsig_data']))
+    config_data.add_argument('--' + 'GENE-PANEL-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'See the docs        OPTIONAL'.format('GENE-PANEL-data',
+                                                                        args2config_map['GENE_PANEL_data']))
+    config_data.add_argument('--' + 'gsva-scores-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'See the docs        OPTIONAL'.format('gsva-scores-data',
+                                                                        args2config_map['gsva_scores_data']))
 
 
     parser.add_argument("-k", "--key",
@@ -71,6 +145,7 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument("-p", "--push",
                         action="store_true",
                         help="Push the generated study to the cBioPortal Instance")
+    # TODO:: Consider having multiple levels of verbosity
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Makes program verbose")
@@ -159,7 +234,6 @@ def validate_study(key, study_folder, verb):
                                               base_folder,
                                               cbioportal_url), verb)
 
-    # TODO:: Explain what's going on with the exit codes
     if   valid == 1:
         helper.stars()
         helper.stars()
@@ -172,6 +246,10 @@ def validate_study(key, study_folder, verb):
         helper.stars()
         print('Validation of study succeeded with warnings. Don\'t worry about it, unless you think it\'s important.')
         helper.stars()
+    else:
+        helper.stars()
+        print('Either this validated with 0 warnings or something broke really bad, raise an issue if it\'s the latter')
+        helper.stars()
     helper.working_on(verb)
 
 
@@ -180,8 +258,6 @@ def main():
     # TODO:: Ensure absolute paths for helper program files: ie seg2gene.R
     args = define_parser().parse_args()
     verb = args.verbose
-    # TODO:: Remove force argument
-
     # TODO:: Fail gracefully if something breaks
 
     if args.config:
@@ -198,6 +274,7 @@ def main():
     # Clean Output Folder/Initialize it
     # TODO:: add force argument here
     helper.clean_folder(study_config.config_map['output_folder'])
+    # TODO:: Change TUMOR_ID to SAMPLE_ID
 
     for each in information:
         meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)

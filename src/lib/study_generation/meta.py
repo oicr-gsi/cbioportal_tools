@@ -4,7 +4,7 @@ __status__ = "Pre-Production"
 
 import os
 
-from lib.constants.constants import meta_info_map, general_zip, ref_gene_id_zip, config2name_map
+from lib.constants.constants import meta_info_map, general_zip, ref_gene_id_zip, config2name_map, clinical_type
 from lib.support import Config, helper
 
 
@@ -29,6 +29,7 @@ def generate_meta_type(config_type: str, config_map: dict, study_config: Config.
                             'profile_name': 'Putative copy-number alterations from GISTIC'}
                            , study_config, verb)
 
+    ####################### BEGIN WRITING META_FILES ###########################
     helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[config_type]))
 
     f_out = os.path.join(study_config.config_map['output_folder'],
@@ -44,7 +45,7 @@ def generate_meta_type(config_type: str, config_map: dict, study_config: Config.
         for field, entry in zip(general_zip, meta_info_map[config_type]):
             f.write('{}: {}\n'.format(field, entry))
 
-    elif config_type in ['SEG', 'GISTIC']:
+    elif config_type in ['SEG', 'GISTIC_2.0']:
         for field, entry in zip(ref_gene_id_zip, meta_info_map[config_type]):
             f.write('{}: {}\n'.format(field, entry))
         if config_type == 'SEG':
@@ -58,7 +59,7 @@ def generate_meta_type(config_type: str, config_map: dict, study_config: Config.
             f.write('{}: {}\n'.format(field, entry))
 
     # Add profile_name and description, but exclude clinical data
-    if config_type not in ['SAMPLE_ATTRIBUTES', 'PATIENT_ATTRIBUTES']:
+    if config_type not in clinical_type:
         if all([i in config_map for i in ['profile_name', 'profile_description']]):
             f.write('profile_name: {}\n'.format(config_map['profile_name']))
             f.write('profile_description: {}\n'.format(config_map['profile_description']))

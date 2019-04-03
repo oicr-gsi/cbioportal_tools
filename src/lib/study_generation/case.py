@@ -24,6 +24,6 @@ def generate_case_list(meta_config: Config.Config, study_config: Config.Config):
             f.write('case_list_description: {}\n'.format(meta_config.config_map['profile_description']))
         except KeyError:
             raise KeyError('Missing Profile_Name or Profile_Description from {} file'.format(meta_config.type_config))
-        f.write('case_list_ids: {}\n'.format('\t'.join(meta_config.data_frame['TUMOR_ID'])))
+        f.write('case_list_ids: {}\n'.format('\t'.join(meta_config.data_frame['SAMPLE_ID'])))
         f.flush()
         f.close()

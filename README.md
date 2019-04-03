@@ -31,13 +31,13 @@ Within the runner script you must simply specify the location of your study conf
 
 You will need a minimum of 16g. i.e. `qrsh -l h_vmem=16g`*
 
-\* I don't actually know the minimum, but this is the most I've seen used.
+*I don't actually know the minimum, but this is the most I've seen used.
 
 ### What's in each folder?
 
 `src/` contains all the scripts, with deeper organization as you go
 
-`study_input/` contains example input configuration files for sample studies.
+`study_input/` contains example input configuration files for sample studies, and documentation on making your own input.
 
 ### Dependencies
 You shouldn't need this if you use the runner script.
@@ -60,7 +60,7 @@ OICR Spec
 
 Python packages require pip however they are included in `python-gsi`, to install/load everything on OICR nodes, run:
 
-Both `module use` statements are required ...
+Both `module use ...` statements are required.
 ```
 module use /oicr/local/analysis/Modules/modulefiles
 module use /.mounts/labs/PDE/Modules/modulefiles
