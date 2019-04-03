@@ -98,7 +98,7 @@ def generate_expression_matrix(exports_config: Config.Config, study_config: Conf
                                              exports_config.data_frame['FILE_NAME'][i]),
                                 sep='\t',
                                 usecols=['gene_id',
-                                         'FPKM']).rename(columns={'FPKM': exports_config.data_frame['TUMOR_ID'][i],
+                                         'FPKM']).rename(columns={'FPKM': exports_config.data_frame['SAMPLE_ID'][i],
                                                                   'gene_id': 'Hugo_Symbol'}))
 
     helper.working_on(verb, message='Merging all FPKM data ...')

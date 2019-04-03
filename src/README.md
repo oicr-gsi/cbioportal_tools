@@ -7,12 +7,12 @@ To submit a job, run `qsub_Janus.sh` with **your** email.
 ### Detailed help:
 
 ```
-usage: janus.py [-h] [-c FILE] [-o FOLDER] [-t TYPE] [-i ID] [-N NAME]
-                [-n NAME] [-d DESCRIPTION] [--mutation-data MUTATION_DATA]
+usage: janus.py [-h] [-c FILE] -o FOLDER [-t TYPE] [-i ID] [-N NAME] [-n NAME]
+                [-d DESCRIPTION] [--sample-info SAMPLE_INFO]
+                [--patient-info PATIENT_INFO] [--cancer-type CANCER_TYPE]
+                [--mutation-data MUTATION_DATA]
                 [--segmented-data SEGMENTED_DATA]
-                [--expression-data EXPRESSION_DATA]
-                [--sample-info SAMPLE_INFO] [--patient-info PATIENT_INFO]
-                [--cancer-type CANCER_TYPE] [-k FILE] [-p] [-v]
+                [--expression-data EXPRESSION_DATA] [-k FILE] [-p] [-v]
 
 janus (https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate
 an importable study for a cBioPortal instance. Recommended usage can be seen
@@ -41,20 +41,37 @@ optional arguments:
   -p, --push            Push the generated study to the cBioPortal Instance
   -v, --verbose         Makes program verbose
 
-OPTIONAL Configuration File Specifiers:
-  --mutation-data MUTATION_DATA
-                        Location of mutation_data configuration file.
-  --segmented-data SEGMENTED_DATA
-                        Location of segmented_data configuration file.
-  --expression-data EXPRESSION_DATA
-                        Location of expression_data configuration file.
+Overridable Required Configuration File Specifiers:
   --sample-info SAMPLE_INFO
-                        Location of sample_info configuration file.
+                        Location of sample-info configuration file: will
+                        override SAMPLE_ATTRIBUTES specification in the config
+                        file. REQUIRED.
   --patient-info PATIENT_INFO
-                        Location of patient_info configuration file.
+                        Location of patient-info configuration file: will
+                        override PATIENT_ATTRIBUTES specification in the
+                        config file. REQUIRED.
   --cancer-type CANCER_TYPE
-                        Location of cancer_type configuration file.
+                        Location of cancer-type configuration file: will
+                        override CANCER_TYPE specification in the config file.
+                        REQUIRED*
 
+Overridable Optional Data-type Configuration File Specifiers:
+  --mutation-data MUTATION_DATA
+                        Location of mutation-data configuration file: will
+                        override MAF specification in the config file.
+                        OPTIONAL
+  --segmented-data SEGMENTED_DATA
+                        Location of segmented-data configuration file: will
+                        override SEG specification in the config file. The
+                        segmented data file will normally generate _CNA and
+                        _log2CNA files. See documentation if you do not want
+                        this. OPTIONAL
+  --expression-data EXPRESSION_DATA
+                        Location of expression-data configuration file: will
+                        override MRNA_EXPRESSION specification in the config
+                        file. The expression data file will normally generate
+                        _zscores files. See the documentation if you do not
+                        want this. OPTIONAL
 ```
 ### Examples:
 ```

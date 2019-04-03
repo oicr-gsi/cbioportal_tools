@@ -8,11 +8,12 @@ import typing
 import argparse
 
 import pandas as pd
+from ..constants.constants import clinical_type
 
 
 class Config(object):
     config_map: dict = {}
-    data_frame: pd.DataFrame = pd.DataFrame()
+    data_frame: pd.DataFrame
     type_config: str = ''
 
     def __init__(self, config_map: dict, data_frame: pd.DataFrame, type_config: str):
@@ -38,6 +39,7 @@ class ClinicalConfig(Config):
 
 
 Information = typing.List[Config]
+
 
 def get_single_config(file, f_type, verb) -> Config:
     if os.path.isfile(file):
@@ -91,12 +93,12 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
 
         config_file_type = study_config.data_frame['TYPE'][i]
 
-        if study_config.data_frame.iloc[i][0] in ['SAMPLE_ATTRIBUTES', 'PATIENT_ATTRIBUTES']:
+        if study_config.data_frame['TYPE'][i] in clinical_type:
             clinic_data.append(get_config_clinical(config_file_name,
-                                                          config_file_type,
-                                                          verb))
+                                                   config_file_type,
+                                                   verb))
         else:
             information.append(get_single_config(config_file_name,
-                                                        config_file_type,
-                                                        verb))
+                                                 config_file_type,
+                                                 verb))
     return [information, clinic_data]

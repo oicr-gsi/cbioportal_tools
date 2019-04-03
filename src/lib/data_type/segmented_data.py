@@ -58,7 +58,7 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
 
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
-        sample_id = export_data['TUMOR_ID'][i]
+        sample_id = export_data['SAMPLE_ID'][i]
 
         output_temp = output_file + '.temp'
 
@@ -102,7 +102,7 @@ def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, 
     for i in range(len(export_data)):
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
-        sample_id = export_data['TUMOR_ID'][i]
+        sample_id = export_data['SAMPLE_ID'][i]
 
         helper.working_on(verb, 'Refactoring cols: {}'.format(export_data['FILE_NAME'][i]))
         output_temp = output_file + '.temp'
@@ -206,6 +206,7 @@ def gen_cna(exports_config: Config.Config, study_config: Config.Config, verb):
     data = pd.read_csv(l_o_file, sep='\t')
     cols = data.columns.values.tolist()[1:]
 
+    # This code here had an astonishing 5500x improvement compared to traversal over it as a 2D array, and yes 5500x
     for c in cols:
         data[c] = data[c].apply(lambda x: collapse(x))
 
