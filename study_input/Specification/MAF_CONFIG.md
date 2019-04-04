@@ -1,5 +1,5 @@
 # MAF Config
-This is the specification for the MAF and VCF study config files.
+This is the specification for the `MAF` and `VCF` study config files.
 
 This file follows the [standard format](STUDY_CONFIG.md).
 
@@ -29,7 +29,7 @@ This is because **VCF** files require processing with `vcf2maf.pl` and prep is r
 
 ### Configuring DataFrame
 
-The pandas Dataframe of the MAF Config must contain these columns:
+The DataFrame of the `MAF` Config must contain these columns:
 
 ```
 FILE_NAME	PATIENT_ID	NORMAL_ID	SAMPLE_ID	NORMAL_COL**	TUMOR_COL**
@@ -42,14 +42,14 @@ FILE_NAME	PATIENT_ID	NORMAL_ID	SAMPLE_ID	NORMAL_COL**	TUMOR_COL**
 |Mutect		|YES				|
 |Mutect2	|NO				|
 |Strelka	|YES				|
-|Anything Else	|YES				|
+|Anything Else	|PROBABLY			|
 
 Note that the `PATIENT_ID` and `SAMPLE_ID` will show up in cBioPortal, whereas the `NORMAL_ID` will not as it's only used for conversion.
-Therefore `PATIENT_ID` and `SAMPLE_ID` must match that seen in [SAMPLE_ATTRIBUTES_CONFIG.txt](SAMPLE_ATTRIBUTES_CONFIG.md).
+Therefore `PATIENT_ID` and `SAMPLE_ID` must match that seen in [PATIENT_AND_SAMPLE_CONFIG.txt](PATIENT_AND_SAMPLE_CONFIG.md).
 
 ## Adding Mutation Data
 
-To add **Mutation Data** you need to the key `MAF` with the relative path to the mutation config file to the [STUDY_CONFIG.txt](STUDY_CONFIG.md). 
+To add **Mutation Data** you need to add the key `MAF` with the relative path to the mutation config file to the [STUDY_CONFIG.txt](STUDY_CONFIG.md). 
 
 Like this:
 

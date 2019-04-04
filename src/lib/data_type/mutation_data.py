@@ -91,7 +91,7 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
             gene_col_tumors = tumors_id
 
         ref_fasta = exports_config.config_map['ref_fasta']
-        filter_vcf = exports_config.config_map['filter_vcf_rejects']
+        filter_vcf = exports_config.config_map['filter_vcf']
 
         # Bake in Parallel
         processes.append(subprocess.Popen('vcf2maf.pl  --input-vcf {}              \
