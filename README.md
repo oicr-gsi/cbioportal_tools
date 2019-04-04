@@ -35,9 +35,11 @@ You will need a minimum of 16g. i.e. `qrsh -l h_vmem=16g`*
 
 ### What's in each folder?
 
-`src/` contains all the scripts, with deeper organization as you go
+* [`src/`](src) contains all the scripts, with deeper organization as you go
 
-`study_input/` contains example input configuration files for sample studies, and documentation on making your own input.
+* [`study_input/`](study_input) contains example input configuration files for sample studies.
+
+* [`study_input/Specification/`](study_input/Specification) contains documentation on making your own input.
 
 ### Dependencies
 You shouldn't need this if you use the runner script.
