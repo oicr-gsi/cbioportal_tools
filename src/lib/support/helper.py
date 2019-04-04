@@ -29,6 +29,11 @@ def make_folder(path):
 
 def clean_folder(path):
     print('Please ensure that you are not losing any data in {}'.format(path))
+    import time
+    if os.path.exists(path):
+        for i in range(5, 0, -1):
+            print('You have {} seconds to cancel the operation'.format(i))
+            time.sleep(1)
     make_folder(path)
     for the_file in os.listdir(path):
         file_path = os.path.join(path, the_file)

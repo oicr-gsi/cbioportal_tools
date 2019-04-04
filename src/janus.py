@@ -47,9 +47,7 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument("-d", "--description",
                         help="A description of the study.",
                         metavar='DESCRIPTION')
-    # TODO:: Generate a specific case list
-
-    # TODO:: Specify which data_types are not supported:
+    # TODO:: Add Option to generate a specific case list
 
     config_spec = parser.add_argument_group('Overridable Required Configuration File Specifiers')
 
@@ -169,7 +167,8 @@ def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) ->
 
     # Check to ensure minimum conditions are filled.
     if not set(meta_args).issubset(set(study_config.config_map.keys())):
-        raise IOError('The minimum number of arguments have not been provided. \nSee: {}'.format(meta_args))
+        raise IOError('The minimum number of arguments have not been provided in the file and/or command-line arguments'
+                      '\nSee: {}'.format(meta_args))
     return study_config
 
 
@@ -272,9 +271,7 @@ def main():
     [print('Clinical List Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
 
     # Clean Output Folder/Initialize it
-    # TODO:: add force argument here
     helper.clean_folder(study_config.config_map['output_folder'])
-    # TODO:: Change TUMOR_ID to SAMPLE_ID
 
     for each in information:
         meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
@@ -290,7 +287,7 @@ def main():
     if args.key or args.push:
         validate_study(args.key, study_config.config_map['output_folder'], verb)
         export_study_to_cbioportal(args.key, study_config.config_map['output_folder'], verb)
-        # TODO:: Ensure that the validation step ensures that it doesn't overwrite an existing study with the same cancer-study-id
+        # TODO:: Make the validation step ensure that it doesn't overwrite an existing study
 
     helper.stars()
     helper.working_on(verb, message='CONGRATULATIONS! Your study should now be imported!')

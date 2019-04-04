@@ -16,18 +16,23 @@ def generate_meta_type(config_type: str, config_map: dict, study_config: Config.
     # To get a type object to generate many meta_{}.txt files, add it to the elif statements,
     # ensure the config_type is changed
     if   config_type == 'MRNA_EXPRESSION':
-        generate_meta_type(config_type + '_ZSCORES', config_map, study_config, verb)
+        if 'zscores' in config_map.keys() and config_map['zscores'].lower() == 'true':
+            generate_meta_type(config_type + '_ZSCORES', config_map, study_config, verb)
+
     elif config_type == 'SEG':
-        generate_meta_type(config_type + '_CNA',
-                           {'profile_description': 'Log2 copy-number values',
-                            'profile_name': 'Log2 copy-number values'},
-                           study_config, verb)
-        generate_meta_type(config_type + '_LOG2CNA',
-                           {'profile_description': 'Putative copy-number calls:  Values: -2=homozygous deletion; '
-                                                   '-1=hemizygous deletion; 0=neutral/no change; 1=gain;'
-                                                   ' 2=high level amplification',
-                            'profile_name': 'Putative copy-number alterations from GISTIC'}
-                           , study_config, verb)
+        if 'CNA' in config_map.keys() and config_map['CNA'].lower() == 'true':
+            generate_meta_type(config_type + '_CNA',
+                               {'profile_description': 'Log2 copy-number values',
+                                'profile_name': 'Log2 copy-number values'},
+                               study_config, verb)
+
+        if 'log2CNA' in config_map.keys() and config_map['log2CNA'].lower() == 'true':
+            generate_meta_type(config_type + '_LOG2CNA',
+                               {'profile_description': 'Putative copy-number calls:  Values: -2=homozygous deletion; '
+                                                       '-1=hemizygous deletion; 0=neutral/no change; 1=gain;'
+                                                       ' 2=high level amplification',
+                                'profile_name': 'Putative copy-number alterations from GISTIC'},
+                               study_config, verb)
 
     ####################### BEGIN WRITING META_FILES ###########################
     helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[config_type]))
@@ -77,12 +82,19 @@ def generate_meta_study(study_config: Config.Config, verb):
 
     f = open(output_meta, 'w')
 
-    f.write('type_of_cancer: {}\n'.format(study_config.config_map['type_of_cancer']))
-    f.write('cancer_study_identifier: {}\n'.format(study_config.config_map['cancer_study_identifier']))
-    f.write('name: {}\n'.format(study_config.config_map['name']))
-    f.write('short_name: {}\n'.format(study_config.config_map['short_name']))
-    f.write('description: {}\n'.format(study_config.config_map['description']))
-    f.write('add_global_case_list: true\r')
+    try:
+        f.write('type_of_cancer: {}\n'.format(study_config.config_map['type_of_cancer']))
+        f.write('cancer_study_identifier: {}\n'.format(study_config.config_map['cancer_study_identifier']))
+        f.write('name: {}\n'.format(study_config.config_map['name']))
+        f.write('short_name: {}\n'.format(study_config.config_map['short_name']))
+        f.write('description: {}\n'.format(study_config.config_map['description']))
+        f.write('add_global_case_list: true\r')
+    except KeyError as key:
+        helper.stars()
+        helper.stars()
+        print('The study config is missing a value, please add it. \n{}'.format(key.with_traceback()))
+        helper.stars()
+        helper.stars()
     f.flush()
     f.close()
 

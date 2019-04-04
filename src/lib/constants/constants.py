@@ -2,8 +2,7 @@ __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
-# TODO:: Support all the other data types:
-# TOOD:: Add all the other data_types even if they are not implemented...
+# TODO:: Add all the other data_types even if they are not implemented...
 # To support other data_types, they need to be added to
 #       meta_info_map
 #       args2config_map
