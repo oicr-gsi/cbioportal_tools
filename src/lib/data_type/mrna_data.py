@@ -1,5 +1,5 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
+__author__ = ["Kunal Chandan", "Lawrence Heisler"]
+__email__ = ["kchandan@uwaterloo.ca", "Lawrence.Heisler@oicr.on.ca"]
 __status__ = "Pre-Production"
 
 import os
@@ -29,26 +29,14 @@ def cufflinks_prep(exports_config: Config.Config, study_config: Config.Config, v
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(expression_folder, export_data['FILE_NAME'][i])
 
-        if  input_file == output_file:
-            output_temp = output_file + '.temp'
+        output_temp = output_file + '.temp'
 
-            calls.append(helper.parallel_call("echo \"{}\" > {}; "
-                                              "awk -F'\\t' '{{ OFS=FS }} NR>1 {{ "
-                                              "temp=$10; $10=$7; $7=temp; {{ "
-                                              "for(i = 8; i <= NF; i++) $i=\"\"; print }} }}' {} "
-                                              ">> {};".format(header, output_temp, input_file, output_temp) +
-                                              'sed \'s/[[:blank:]]*$//\' {} > {}'.format(output_temp, output_file), verb))
-
-        else:
-            calls.append(helper.parallel_call("echo \"{}\" > {}; "
-                                              "awk -F'\\t' '{{ OFS=FS }} NR>1 {{ "
-                                              "temp=$10; $10=$7; $7=temp; {{ "
-                                              "for(i = 8; i < NF; i++) $i=\"\"; print }} }}' {} "
-                                              ">> {}; sed -i \'s/[[:blank:]]*$//\' {}".format(header,
-                                                                                              output_file,
-                                                                                              input_file,
-                                                                                              output_file,
-                                                                                              output_file), verb))
+        calls.append(helper.parallel_call("echo \"{}\" > {}; "
+                                          "awk -F'\\t' '{{ OFS=FS }} NR>1 {{ "
+                                          "temp=$10; $10=$7; $7=temp; {{ "
+                                          "for(i = 8; i <= NF; i++) $i=\"\"; print }} }}' {} "
+                                          ">> {};".format(header, output_temp, input_file, output_temp) +
+                                          'sed \'s/[[:blank:]]*$//\' {} > {}'.format(output_temp, output_file), verb))
 
     exports_config.config_map['input_folder'] = expression_folder
     input_folder = exports_config.config_map['input_folder']
@@ -117,12 +105,25 @@ def generate_expression_matrix(exports_config: Config.Config, study_config: Conf
 
 
 def generate_expression_zscore(exports_config: Config.Config, study_config: Config.Config, verb):
-    output_file = os.path.join(study_config.config_map['output_folder'],
-                               'data_{}.txt'.format(config2name_map[exports_config.type_config + '_ZSCORES']))
-
     input_file = os.path.join(study_config.config_map['output_folder'],
                               'data_{}.txt'.format(config2name_map[exports_config.type_config]))
 
-    # Second line removes white space
-    helper.call_shell('awk -f lib/data_type/zscore_expression.awk {} | '
-                      'sed \'s/[[:blank:]]*$//\' > {}'.format(input_file, output_file), verb)
+    output_file = os.path.join(study_config.config_map['output_folder'],
+                               'data_{}.txt'.format(config2name_map[exports_config.type_config + '_ZSCORES']))
+
+    # Z-Scores written by Dr. L Heisler
+    helper.working_on(verb, message='Reading FPKM Matrix ...')
+    raw_data = pd.read_csv(input_file, sep='\t')
+
+    helper.working_on(verb, message='Processing FPKM Matrix ...')
+    raw_scores = raw_data.drop(['Hugo_Symbol'], axis=1)
+    means = raw_scores.mean(axis=1)
+    sds = raw_scores.std(axis=1)
+
+    z_scores = ((raw_scores.transpose() - means) / sds).transpose()
+    z_scores = z_scores.fillna(0)
+    z_scores = z_scores.round(decimals=4)
+    z_scores_data = pd.concat([raw_data['Hugo_Symbol'], z_scores], axis=1)
+
+    helper.working_on(verb, message='Writing FPKM Z-Scores Matrix ...')
+    z_scores_data.to_csv(output_file, sep="\t", index=False)
