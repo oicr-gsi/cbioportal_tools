@@ -22,11 +22,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         convert_vcf_2_maf = True
 
         # If the pipeline contains .maf inside or does not exist, do not do conversion
-        # Since the pipeline option in the meta file is optional, try:
-        try:
-            if '.maf' in meta_config.config_map['pipeline']:
-                convert_vcf_2_maf = False
-        except KeyError:
+        if '.maf' in meta_config.config_map['pipeline']:
             convert_vcf_2_maf = False
 
         if convert_vcf_2_maf:
@@ -103,11 +99,12 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.concat_files(meta_config, study_config, verb)
         helper.working_on(verb)
 
-        # TODO:: Have a flag such that it generates this if a flag is true.
-        # TODO:: Implement CNA and log2CNA
-        helper.working_on(verb, message='Generating CNA and log2CNA files ...')
-        segmented_data.gen_cna(meta_config, study_config, verb)
-        helper.working_on(verb)
+        if 'log2CNA' in meta_config.config_map.keys() and meta_config.config_map['log2CNA'].lower() == 'true':
+            if 'CNA' in meta_config.config_map.keys() and meta_config.config_map['CNA'].lower() == 'true':
+                helper.working_on(verb, message='Generating CNA and log2CNA files ...')
+                segmented_data.gen_cna(meta_config, study_config, verb)
+                helper.working_on(verb)
+
 
     elif meta_config.type_config == 'MRNA_EXPRESSION':
 
@@ -130,10 +127,11 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         mrna_data.generate_expression_matrix(meta_config, study_config, verb)
         helper.working_on(verb)
 
-        # TODO:: Have a flag to ask if this needs to be generated, located inside the actual configuration file
-        helper.working_on(verb, message='Generating expression Z-Score Data ...')
-        mrna_data.generate_expression_zscore(meta_config, study_config, verb)
-        helper.working_on(verb)
+        # This works because short-circuiting
+        if 'zscores' in meta_config.config_map.keys() and meta_config.config_map['zscores'].lower() == 'true':
+            helper.working_on(verb, message='Generating expression Z-Score Data ...')
+            mrna_data.generate_expression_zscore(meta_config, study_config, verb)
+            helper.working_on(verb)
 
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')
