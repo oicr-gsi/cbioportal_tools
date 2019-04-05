@@ -19,21 +19,6 @@ def generate_meta_type(config_type: str, config_map: dict, study_config: Config.
         if 'zscores' in config_map.keys() and config_map['zscores'].lower() == 'true':
             generate_meta_type(config_type + '_ZSCORES', config_map, study_config, verb)
 
-    elif config_type == 'SEG':
-        if 'CNA' in config_map.keys() and config_map['CNA'].lower() == 'true':
-            generate_meta_type(config_type + '_CNA',
-                               {'profile_description': 'Log2 copy-number values',
-                                'profile_name': 'Log2 copy-number values'},
-                               study_config, verb)
-
-        if 'log2CNA' in config_map.keys() and config_map['log2CNA'].lower() == 'true':
-            generate_meta_type(config_type + '_LOG2CNA',
-                               {'profile_description': 'Putative copy-number calls:  Values: -2=homozygous deletion; '
-                                                       '-1=hemizygous deletion; 0=neutral/no change; 1=gain;'
-                                                       ' 2=high level amplification',
-                                'profile_name': 'Putative copy-number alterations from GISTIC'},
-                               study_config, verb)
-
     ####################### BEGIN WRITING META_FILES ###########################
     helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[config_type]))
 

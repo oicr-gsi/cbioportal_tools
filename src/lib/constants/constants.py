@@ -11,7 +11,7 @@ __status__ = "Pre-Production"
 # meta_info_map is an ordered set corresponding to gene_id_zip. This generates the meta files for each data_type
 meta_info_map = {'PATIENT_ATTRIBUTES':      ['CLINICAL', 'PATIENT_ATTRIBUTES'],
                  'SAMPLE_ATTRIBUTES':       ['CLINICAL', 'SAMPLE_ATTRIBUTES'],
-                 ## TODO:: IMPLEMENT TIMELINE
+                 # TODO:: IMPLEMENT TIMELINE
                  'TIMELINE':                ['CLINICAL', 'TIMELINE'],
                  'CANCER_TYPE':             ['CANCER_TYPE', 'CANCER_TYPE'],
                  'MAF':                     ['MUTATION_EXTENDED', 'MAF', 'mutations', 'true'],
@@ -20,9 +20,9 @@ meta_info_map = {'PATIENT_ATTRIBUTES':      ['CLINICAL', 'PATIENT_ATTRIBUTES'],
                  'SEG_LOG2CNA':             ['COPY_NUMBER_ALTERATION', 'LOG2-VALUE', 'log2CNA', 'true'],
                  'MRNA_EXPRESSION':         ['MRNA_EXPRESSION', 'CONTINUOUS', 'rna_seq_mrna', 'true'],
                  'MRNA_EXPRESSION_ZSCORES': ['MRNA_EXPRESSION', 'Z-SCORE', 'rna_seq_mrna_median_Zscores', 'true'],
-                 ## TODO:: IMPLEMENT AND VERIFY AFTER THIS LINE
-                 'DISCRETE_COPY_NUMBER':    ['UNIMPLEMENTED'],
-                 'CONTINUOUS_COPY_NUMBER':  ['UNIMPLEMENTED'],
+                 # TODO:: IMPLEMENT AND VERIFY AFTER THIS LINE
+                 'DISCRETE_COPY_NUMBER':    ['COPY_NUMBER_ALTERATION', 'DISCRETE', 'gistic', 'true'],
+                 'CONTINUOUS_COPY_NUMBER':  ['COPY_NUMBER_ALTERATION', 'LOG2-VALUE', 'log2CNA', 'true'],
                  'FUSION':                  ['FUSION', 'FUSION', 'fusion', 'true'],
                  'METHYLATION':             ['METHYLATION', 'CONTINUOUS', 'methylation_hm27', 'false'],
                  'PROTEIN':                 ['PROTEIN_LEVEL', 'UNIMPLEMENTED', 'UNIMPLEMENTED', 'UNIMPLEMENTED'],
@@ -40,7 +40,7 @@ args2config_map = {'sample_info':           'SAMPLE_ATTRIBUTES',
                    'mutation_data':         'MAF',
                    'segmented_data':        'SEG',
                    'expression_data':       'MRNA_EXPRESSION',
-                   ## TODO:: Not Implemented below this
+                   # TODO:: Not Implemented below this
                    'CNA_data':              'DISCRETE_COPY_NUMBER',
                    'log2CNA_data':          'CONTINUOUS_COPY_NUMBER',
                    'fusions_data':          'FUSION',
@@ -48,7 +48,7 @@ args2config_map = {'sample_info':           'SAMPLE_ATTRIBUTES',
                    'rppa_data':             'PROTEIN',
                    'gistic_genes_amp_data': 'GISTIC_2.0',
                    'mutsig_data':           'MUTSIG',
-                   ## No idea what's going on with these two
+                   # No idea what's going on with these two
                    'GENE_PANEL_data':            'GENE_PANEL',
                    'gsva_scores_data':           'GENE_SET'}
 
@@ -63,7 +63,7 @@ config2name_map = {'SAMPLE_ATTRIBUTES':       'clinical_samples',
                    'SEG_LOG2CNA':             'log2CNA',
                    'MRNA_EXPRESSION':         'expression',
                    'MRNA_EXPRESSION_ZSCORES': 'expression_zscores',
-                   ## TODO:: Not Implemented below this
+                   # TODO:: Not Implemented below this
                    'DISCRETE_COPY_NUMBER':    'CNA',
                    'CONTINUOUS_COPY_NUMBER':  'log2CNA',
                    'FUSION':                  'fusions',
@@ -71,7 +71,7 @@ config2name_map = {'SAMPLE_ATTRIBUTES':       'clinical_samples',
                    'PROTEIN':                 'rppa',
                    'GISTIC_2.0':              'gistic_genes_amp',
                    'MUTSIG':                  'mutsig',
-                   ## No idea what's going on with these two
+                   # No idea what's going on with these two
                    'GENE_PANEL':              'GENE_PANEL',
                    'GENE_SET':                'gsva_scores'}
 
@@ -90,6 +90,8 @@ case_list_map =   {'MAF':               '_sequenced',
                    'MRNA_EXPRESSION':   '_rna_seq_mrna'}
 #TODO:: ensure correct suffixes
 # https://cbioportal.readthedocs.io/en/latest/File-Formats.html#case-list-stable-id-suffixes
+
+priority_queue = {'SEG': 1, 'CONTINUOUS_COPY_NUMBER': 2, 'DISCRETE_COPY_NUMBER': 3}
 
 supported_vcf = ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller']
 supported_seg = ['CNVkit', 'Sequenza', 'HMMCopy']
