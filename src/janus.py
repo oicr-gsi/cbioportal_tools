@@ -11,7 +11,7 @@ import pandas as pd
 
 # Other Scripts
 from lib.support import Config, helper
-from lib.constants.constants import args2config_map, cbioportal_ip, cbioportal_url
+from lib.constants.constants import args2config_map, priority_queue, cbioportal_ip, cbioportal_url
 from lib.study_generation import data, meta, case
 
 Information = typing.List[Config.Config]
@@ -252,7 +252,6 @@ def validate_study(key, study_folder, verb):
     helper.working_on(verb)
 
 
-
 def main():
     # TODO:: Ensure absolute paths for helper program files: ie seg2gene.R
     args = define_parser().parse_args()
@@ -267,11 +266,22 @@ def main():
 
     [information, clinic_data] = Config.gather_config_set(study_config, args, verb)
 
+    priority = [x for x in information if (x.type_config in priority_queue.keys())]
+    information = [x for x in information if x not in priority]
+
+    priority.sort(key=lambda config: priority_queue [config.type_config])
+
+    [print('Priority Info Files {}:\n{}\n'.format(a.type_config, a)) for a in priority] if verb else print(),
     [print('Informational Files {}:\n{}\n'.format(a.type_config, a)) for a in information] if verb else print(),
     [print('Clinical List Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
 
     # Clean Output Folder/Initialize it
     helper.clean_folder(study_config.config_map['output_folder'])
+
+    for each in priority:
+        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
+        data.generate_data_type(each, study_config, verb)
+        case.generate_case_list(each, study_config)
 
     for each in information:
         meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)

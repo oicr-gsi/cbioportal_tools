@@ -4,7 +4,6 @@ __status__ = "Pre-Production"
 
 import os
 import subprocess
-import pandas as pd
 
 from lib.support import Config, helper
 from lib.constants import constants
@@ -161,53 +160,5 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
     if verb:
         print(exit_codes)
 
-
-def collapse(num):
-    ampl = +0.7
-    gain = +0.3
-    htzd = -0.3
-    hmzd = -0.7
-
-    if num > ampl:
-        return +2
-
-    elif num > gain:
-        return +1
-
-    elif num > htzd:
-        return +0
-
-    elif num > hmzd:
-        return -1
-
-    else:
-        return -2
-
-
-def gen_cna(exports_config: Config.Config, study_config: Config.Config, verb):
-
-    helper.working_on(verb, message='Gathering files ...')
-    seg_file = os.path.join(study_config.config_map['output_folder'],
-                            'data_{}.txt'.format(constants.config2name_map[exports_config.type_config]))
-    bed_file = exports_config.config_map['bed_file']
-    l_o_file = os.path.join(study_config.config_map['output_folder'],
-                            'data_{}.txt'.format(constants.config2name_map[exports_config.type_config + '_LOG2CNA']))
-    c_o_file = os.path.join(study_config.config_map['output_folder'],
-                            'data_{}.txt'.format(constants.config2name_map[exports_config.type_config + '_CNA']))
-
-    helper.working_on(verb, message='Generating log2CNA...')
-
-    # This may break if after loading the module R-gsi/3.5.1, Rscript is not set as a constant
-    helper.call_shell('Rscript lib/data_type/seg2gene.R '
-                      '-s {} '
-                      '-g {} '
-                      '-o {} '.format(seg_file, bed_file, l_o_file), verb)
-
-    data = pd.read_csv(l_o_file, sep='\t')
-    cols = data.columns.values.tolist()[1:]
-
-    # This code here had an astonishing 5500x improvement compared to traversal over it as a 2D array, and yes 5500x
-    for c in cols:
-        data[c] = data[c].apply(lambda x: collapse(x))
-
-    data.to_csv(c_o_file, sep='\t', index=None)
+# TODO:: Generate config files for cCNA and dCNA
+# set pipeline to cCNA and or SEG

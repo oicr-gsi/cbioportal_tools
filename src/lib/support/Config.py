@@ -57,8 +57,15 @@ def get_single_config(file, f_type, verb) -> Config:
         else:
             break
     f.close()
-    data_frame = pd.read_csv(file, delimiter='\t', skiprows=len(file_map), dtype=str)
-
+    try:
+        data_frame = pd.read_csv(file, delimiter='\t', skiprows=len(file_map), dtype=str)
+    except pd.errors.EmptyDataError:
+        if f_type in ['CONTINUOUS_COPY_NUMBER', 'DISCRETE_COPY_NUMBER']:
+            print('merp')
+            data_frame = pd.DataFrame()
+        else:
+            print('Your {} file does not have data in it but it probably should, please double check it'.format(f_type))
+            raise pd.errors.EmptyDataError()
     config_file = Config(file_map, data_frame, f_type)
     return config_file
 

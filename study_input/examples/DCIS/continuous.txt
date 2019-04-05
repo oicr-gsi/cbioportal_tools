@@ -1,0 +1,4 @@
+#pipeline=CONTINUOUS
+#thresholds=-0.7,-0.3,0.3,0.7
+#profile_name=Log2 copy-number values
+#profile_description=Log2 copy-number values

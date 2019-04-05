@@ -10,9 +10,9 @@ and [cBioPortal-Tools](https://wiki.oicr.on.ca/display/GSI/cBioPortal-Tools)
 
 ```
    ______            ______   
-  /(@/@@@@\        /@@@@/@)\  
+  /(@/@@@@\        /@@@@\@)\  
  |(@|@@@@@@\__  __/@@@@@@|@)| 
-  \(@\@@@@@@|)\/(|@@@@@@@)/   
+  \(@\@@@@@@|)\/(|@@@@@@/@)/   
      |    @@@|)(|@@@    |     
      /~     @|@@|@    (~\     
     /_     @@|@@|@@     _\    
@@ -50,6 +50,7 @@ Python libraries required, should be available under:
 * `python-gsi/3.6.4`
   * `pandas`
   * `numpy`
+  * `argparse`
 
 Linux command line utilities:
 * `awk`, `sort`, `uniq`, `grep`

@@ -1,3 +1,6 @@
+import lib.data_type.continuous_copy_number_data
+import lib.data_type.discrete_copy_number_data
+
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
@@ -99,12 +102,19 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.concat_files(meta_config, study_config, verb)
         helper.working_on(verb)
 
-        if 'log2CNA' in meta_config.config_map.keys() and meta_config.config_map['log2CNA'].lower() == 'true':
-            if 'CNA' in meta_config.config_map.keys() and meta_config.config_map['CNA'].lower() == 'true':
-                helper.working_on(verb, message='Generating CNA and log2CNA files ...')
-                segmented_data.gen_cna(meta_config, study_config, verb)
-                helper.working_on(verb)
+    elif meta_config.type_config == 'CONTINUOUS_COPY_NUMBER':
 
+        if  meta_config.data_frame.empty:
+            helper.working_on(verb, message='Generating log2CNA files ...')
+            lib.data_type.continuous_copy_number_data.gen_log2cna(meta_config, study_config, verb)
+            helper.working_on(verb)
+
+    elif meta_config.type_config == 'DISCRETE_COPY_NUMBER':
+
+        if  meta_config.data_frame.empty:
+            helper.working_on(verb, message='Generating CNA files ...')
+            lib.data_type.discrete_copy_number_data.gen_dcna(meta_config, study_config, verb)
+            helper.working_on(verb)
 
     elif meta_config.type_config == 'MRNA_EXPRESSION':
 
