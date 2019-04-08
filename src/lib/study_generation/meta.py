@@ -13,12 +13,6 @@ def generate_meta_type(config_type: str, config_map: dict, study_config: Config.
     #TODO:: Add functionality for optional fields
     # Would require list of optional fields that then map onto their names then printed onto the meta file
 
-    # To get a type object to generate many meta_{}.txt files, add it to the elif statements,
-    # ensure the config_type is changed
-    if   config_type == 'MRNA_EXPRESSION':
-        if 'zscores' in config_map.keys() and config_map['zscores'].lower() == 'true':
-            generate_meta_type(config_type + '_ZSCORES', config_map, study_config, verb)
-
     ####################### BEGIN WRITING META_FILES ###########################
     helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[config_type]))
 

@@ -84,20 +84,26 @@ def define_parser() -> argparse.ArgumentParser:
                                                                         args2config_map['segmented_data']))
     config_data.add_argument('--' + 'expression-data',
                              help='Location of {} configuration file: will override {} specification '
-                                  'in the config file. The expression data file will normally generate _zscores'
+                                  'in the config file.'
                                   ' files. See the documentation if you do not want this.'
                                   '                    OPTIONAL'.format('expression-data',
                                                                         args2config_map['expression_data']))
-    config_data.add_argument('--' + 'CNA-data',
+    config_data.add_argument('--' + 'expression-zscores-data',
                              help='Location of {} configuration file: will override {} specification '
-                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
-                                  'See the docs        OPTIONAL'.format('CNA-data',
-                                                                        args2config_map['CNA_data']))
+                                  'in the config file.'
+                                  ' files. See the documentation if you do not want this.'
+                                  '                    OPTIONAL'.format('expression-zscores-data',
+                                                                        args2config_map['expression_zscores_data']))
     config_data.add_argument('--' + 'log2CNA-data',
                              help='Location of {} configuration file: will override {} specification '
-                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'in the config file. THIS HAS BEEN IMPLEMENTED PARTIALLY'
                                   'See the docs        OPTIONAL'.format('log2CNA-data',
                                                                         args2config_map['log2CNA_data']))
+    config_data.add_argument('--' + 'CNA-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS BEEN IMPLEMENTED PARTIALLY'
+                                  'See the docs        OPTIONAL'.format('CNA-data',
+                                                                        args2config_map['CNA_data']))
     config_data.add_argument('--' + 'fusions-data',
                              help='Location of {} configuration file: will override {} specification '
                                   'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
