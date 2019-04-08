@@ -6,7 +6,7 @@ import os
 
 import numpy as np
 
-from lib.constants.constants import config2name_map, supported_vcf, supported_seg, supported_rna
+from lib.constants.constants import config2name_map, supported_pipe
 from lib.data_type import mutation_data, segmented_data, mrna_data, cancer_type
 from lib.data_type import discrete_copy_number_data, continuous_copy_number_data, mrna_zscores_data
 from lib.support import Config, helper
@@ -27,7 +27,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
             convert_vcf_2_maf = False
 
         if convert_vcf_2_maf:
-            assert meta_config.config_map['pipeline'] in supported_vcf
+            assert meta_config.config_map['pipeline'] in supported_pipe[meta_config.type_config]
 
             if   meta_config.config_map['pipeline'] == 'Strelka':
 
@@ -52,7 +52,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
             else:
                 helper.stars()
                 print('WARNING:: Unknown pipeline, have you spelled it right?')
-                print('See: {}'.format(supported_vcf))
+                print('See: {}'.format(supported_pipe[meta_config.type_config]))
                 helper.stars()
 
             helper.working_on(verb, message='Exporting vcf2maf...')
@@ -76,7 +76,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
         helper.working_on(verb, 'Pipeline is {}, beginning preparation...'.format(meta_config.config_map['pipeline']))
 
-        assert meta_config.config_map['pipeline'] in supported_seg
+        assert meta_config.config_map['pipeline'] in supported_pipe[meta_config.type_config]
 
         if   meta_config.config_map['pipeline'] == 'CNVkit':
 
@@ -102,6 +102,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
     elif meta_config.type_config == 'CONTINUOUS_COPY_NUMBER':
 
+        assert meta_config.config_map['pipeline'] in supported_pipe[meta_config.type_config]
+
         if  meta_config.config_map['pipeline'] == 'SEG':
 
             helper.working_on(verb, message='Generating log2CNA files ...')
@@ -110,7 +112,9 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
     elif meta_config.type_config == 'DISCRETE_COPY_NUMBER':
 
-        if  meta_config.config_map['pipeline'] == 'CONTINUOUS':
+        assert meta_config.config_map['pipeline'] in supported_pipe[meta_config.type_config]
+
+        if  meta_config.config_map['pipeline'] == 'CONTINUOUS_COPY_NUMBER':
 
             helper.working_on(verb, message='Generating CNA files ...')
             discrete_copy_number_data.gen_dcna(meta_config, study_config, verb)
@@ -122,7 +126,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
 
-        assert meta_config.config_map['pipeline'] in supported_rna
+        assert meta_config.config_map['pipeline'] in supported_pipe[meta_config.type_config]
+
         if   meta_config.config_map['pipeline'] == 'Cufflinks':
             mrna_data.cufflinks_prep(meta_config, study_config, verb)
 
@@ -138,6 +143,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.working_on(verb)
 
     elif meta_config.type_config == 'MRNA_EXPRESSION_ZSCORES':
+
+        assert meta_config.config_map['pipeline'] in supported_pipe[meta_config.type_config]
 
         if  meta_config.config_map['pipeline'] == 'MRNA_EXPRESSION':
             helper.working_on(verb, message='Generating expression Z-Score Data ...')

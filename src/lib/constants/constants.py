@@ -2,11 +2,14 @@ __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
-# TODO:: Add all the other data_types even if they are not implemented...
 # To support other data_types, they need to be added to
 #       meta_info_map
 #       args2config_map
 #       config2name_map
+# If a set of data_types requires to be processed in an order, add to:
+#       priority_queue
+# If a set of data_types does not require a corresponding dataframe, add to:
+#       no_data_frame
 
 # meta_info_map is an ordered set corresponding to gene_id_zip. This generates the meta files for each data_type
 meta_info_map = {'PATIENT_ATTRIBUTES':      ['CLINICAL', 'PATIENT_ATTRIBUTES'],
@@ -60,8 +63,6 @@ config2name_map = {'SAMPLE_ATTRIBUTES':       'clinical_samples',
                    'CANCER_TYPE':             'cancer_type',
                    'MAF':                     'mutations_extended',
                    'SEG':                     'segments',
-                   'SEG_CNA':                 'CNA',
-                   'SEG_LOG2CNA':             'log2CNA',
                    'MRNA_EXPRESSION':         'expression',
                    'MRNA_EXPRESSION_ZSCORES': 'expression_zscores',
                    # TODO:: Not Implemented below this
@@ -97,9 +98,12 @@ priority_queue = {'SEG': 1, 'CONTINUOUS_COPY_NUMBER': 2, 'DISCRETE_COPY_NUMBER':
 
 no_data_frame = ['CONTINUOUS_COPY_NUMBER', 'DISCRETE_COPY_NUMBER', 'MRNA_EXPRESSION_ZSCORES']
 
-supported_vcf = ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller']
-supported_seg = ['CNVkit', 'Sequenza', 'HMMCopy']
-supported_rna = ['Cufflinks', 'RSEM']
+supported_pipe = {'MAF':                       ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller'],
+                  'SEG':                       ['CNVkit', 'Sequenza', 'HMMCopy'],
+                  'MRNA_EXPRESSION':           ['Cufflinks', 'RSEM'],
+                  'MRNA_EXPRESSION_ZSCORES':   ['MRNA_EXPRESSION', 'FILE'],
+                  'CONTINUOUS_COPY_NUMBER':    ['SEG', 'FILE'],
+                  'DISCRETE_COPY_NUMBER':      ['CONTINUOUS_COPY_NUMBER', 'FILE']}
 clinical_type = ['PATIENT_ATTRIBUTES', 'SAMPLE_ATTRIBUTES', 'TIMELINE']
 
 # hg_19 chromosome lengths. (for fixing HMMCopy only?)
