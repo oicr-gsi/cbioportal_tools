@@ -43,7 +43,7 @@ def generate_meta_type(config_type: str, config_map: dict, study_config: Config.
             f.write('{}: {}\n'.format(field, entry))
 
     # Add profile_name and description, but exclude clinical data
-    if config_type not in clinical_type:
+    if config_type not in [clinical_type, 'SEG']:
         if all([i in config_map for i in ['profile_name', 'profile_description']]):
             f.write('profile_name: {}\n'.format(config_map['profile_name']))
             f.write('profile_description: {}\n'.format(config_map['profile_description']))

@@ -85,9 +85,10 @@ def generate_expression_matrix(exports_config: Config.Config, study_config: Conf
         info.append(pd.read_csv(os.path.join(exports_config.config_map['input_folder'],
                                              exports_config.data_frame['FILE_NAME'][i]),
                                 sep='\t',
-                                usecols=['gene_id',
-                                         'FPKM']).rename(columns={'FPKM': exports_config.data_frame['SAMPLE_ID'][i],
-                                                                  'gene_id': 'Hugo_Symbol'}))
+                                usecols=['gene_id','FPKM'])
+                    .rename(columns={'FPKM': exports_config.data_frame['SAMPLE_ID'][i],
+                                     'gene_id': 'Hugo_Symbol'})
+                    .drop_duplicates(subset='Hugo_Symbol', keep='last', inplace=False))
 
     helper.working_on(verb, message='Merging all FPKM data ...')
     if len(info) == 0:
@@ -98,7 +99,7 @@ def generate_expression_matrix(exports_config: Config.Config, study_config: Conf
         result = info[0]
         for i in range(1, len(info)):
             result: pd.DataFrame = pd.merge(result, info[i], how='outer', on='Hugo_Symbol')
-            result.drop_duplicates(subset=None, keep=False, inplace=True)
+            result.drop_duplicates(subset='Hugo_Symbol', keep='last', inplace=True)
     result.replace(np.nan, 0, inplace=True)
 
     helper.working_on(verb, message='Writing all FPKM data ...')

@@ -159,6 +159,3 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
         raise ValueError('ERROR:: Something went wrong when parsing HMMCopy format file? Please resolve the issue')
     if verb:
         print(exit_codes)
-
-# TODO:: Generate config files for cCNA and dCNA
-# set pipeline to cCNA and or SEG

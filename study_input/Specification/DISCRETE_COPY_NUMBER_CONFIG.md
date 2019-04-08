@@ -11,7 +11,7 @@ You need to generate the discrete copy number data from the [CONTINUOUS_COPY_NUM
 
 The minimal header will look like this:
 ```
-#pipeline=[ CONTINUOUS | FILE ]
+#pipeline=[ CONTINUOUS_COPY_NUMBER | FILE ]
 #thresholds=-0.7,-0.3,0.3,0.7
 #profile_name=Putative copy-number alterations from GISTIC
 #profile_description=Putative copy-number calls:  Values: -2=homozygous deletion; -1=hemizygous deletion; 0=neutral/no change; 1=gain; 2=high level amplification```
@@ -37,7 +37,7 @@ DISCRETE_COPY_NUMBER	discrete.txt
 The file `discrete.txt` could look like:
 
 ```
-#pipeline=CONTINUOUS
+#pipeline=CONTINUOUS_COPY_NUMBER
 #thresholds=-0.7,-0.3,0.3,0.7
 #profile_name=Putative copy-number alterations from GISTIC
 #profile_description=Putative copy-number calls:  Values: -2=homozygous deletion; -1=hemizygous deletion; 0=neutral/no change; 1=gain; 2=high level amplification

@@ -14,8 +14,6 @@ As of this commit, the supported importable types are:
 * `CANCER_TYPE`
 * `MAF`
 * `SEG`
-* `SEG_CNA`
-* `SEG_LOG2CNA`
 * `DISCRETE_COPY_NUMBER`
 * `CONTINUOUS_COPY_NUMBER`
 * `MRNA_EXPRESSION` 
