@@ -20,11 +20,6 @@ The minimal header will look like this:
 ```
 All key-value pairs **above** are **required**.
 
-Below are the **optional** keys for the header. They will produce `data_CNA.txt` and `data_log2CNA.txt` if the keys are respectively `true` (case insensitive).
-```
-#CNA=tRuE
-#log2CNA=TrUe
-```
 ### Configuring DataFrame
 
 The DataFrame of the `SEG` Config must contain these columns:
@@ -52,8 +47,6 @@ The file `segmented.txt` could look like:
 #profile_name=Mutations (Cardiac Cancer)
 #profile_description=Mutation data from whole exome sequencing of cardiac tissue. (XX Samples)
 #bed_file=/.mounts/labs/gsiprojects/gsi/cBioGSI/kchandan/cBioWrap/testdata/ncbi_genes_hg19_canonical.bed
-#CNA=true
-#log2CNA=true
 FILE_NAME	PATIENT_ID	SAMPLE_ID
 TEST_0001.tsv	TEST_0001	TEST_0001_TUMOR
 TEST_0001.tsv	TEST_0002	TEST_0002_TUMOR

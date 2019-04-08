@@ -1,7 +1,6 @@
 #input_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/hmmcOPY/tsv/
 #pipeline=HMMCopy
 #bed_file=/.mounts/labs/gsiprojects/gsi/cBioGSI/kchandan/cBioWrap/testdata/ncbi_genes_hg19_canonical.bed
-#zscores=true
 #profile_name=CNVs (Ductal Carcinoma)
 #profile_description=Copy Number Variations HMMCopy from whole exome sequencing. (10 Samples)
 FILE_NAME	PATIENT_ID	SAMPLE_ID

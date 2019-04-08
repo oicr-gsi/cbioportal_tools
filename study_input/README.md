@@ -16,6 +16,8 @@ As of this commit, the supported importable types are:
 * `SEG`
 * `SEG_CNA`
 * `SEG_LOG2CNA`
+* `DISCRETE_COPY_NUMBER`
+* `CONTINUOUS_COPY_NUMBER`
 * `MRNA_EXPRESSION` 
 * `MRNA_EXPRESSION_ZSCORES`
 
@@ -25,8 +27,6 @@ The following types are stubs and need your help to implement:
 <img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Uncle_Sam_%28pointing_finger%29.png" width="100" height="134" />
 <!--- This is very important!! --->
 
-* `DISCRETE_COPY_NUMBER`
-* `CONTINUOUS_COPY_NUMBER`
 * `FUSION`
 * `METHYLATION`
 * `PROTEIN`

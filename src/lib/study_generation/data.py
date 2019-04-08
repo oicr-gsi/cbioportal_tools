@@ -10,7 +10,7 @@ import os
 import numpy as np
 
 from lib.constants.constants import config2name_map, supported_vcf, supported_seg, supported_rna
-from lib.data_type import mutation_data, segmented_data, mrna_data, cancer_type
+from lib.data_type import mutation_data, segmented_data, mrna_data, cancer_type, discrete_copy_number_data, continuous_copy_number_data
 from lib.support import Config, helper
 
 
@@ -103,17 +103,23 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.working_on(verb)
 
     elif meta_config.type_config == 'CONTINUOUS_COPY_NUMBER':
+        #TODO:: FINISH Domumentation
+        #TODO:: FINISH Domumentation
 
-        if  meta_config.data_frame.empty:
+        if  meta_config.config_map['pipeline'] == 'SEG':
+
             helper.working_on(verb, message='Generating log2CNA files ...')
-            lib.data_type.continuous_copy_number_data.gen_log2cna(meta_config, study_config, verb)
+            continuous_copy_number_data.gen_log2cna(meta_config, study_config, verb)
             helper.working_on(verb)
 
     elif meta_config.type_config == 'DISCRETE_COPY_NUMBER':
+        #TODO:: FINISH Domumentation
+        #TODO:: FINISH Domumentation
 
-        if  meta_config.data_frame.empty:
+        if  meta_config.config_map['pipeline'] == 'CONTINUOUS':
+
             helper.working_on(verb, message='Generating CNA files ...')
-            lib.data_type.discrete_copy_number_data.gen_dcna(meta_config, study_config, verb)
+            discrete_copy_number_data.gen_dcna(meta_config, study_config, verb)
             helper.working_on(verb)
 
     elif meta_config.type_config == 'MRNA_EXPRESSION':
