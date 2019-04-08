@@ -8,7 +8,7 @@ import typing
 import argparse
 
 import pandas as pd
-from ..constants.constants import clinical_type
+from ..constants.constants import clinical_type, no_data_frame
 
 
 class Config(object):
@@ -60,7 +60,7 @@ def get_single_config(file, f_type, verb) -> Config:
     try:
         data_frame = pd.read_csv(file, delimiter='\t', skiprows=len(file_map), dtype=str)
     except pd.errors.EmptyDataError:
-        if f_type in ['CONTINUOUS_COPY_NUMBER', 'DISCRETE_COPY_NUMBER']:
+        if f_type in no_data_frame:
             print('merp')
             data_frame = pd.DataFrame()
         else:

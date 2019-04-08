@@ -33,24 +33,25 @@ meta_info_map = {'PATIENT_ATTRIBUTES':      ['CLINICAL', 'PATIENT_ATTRIBUTES'],
 
 
 # args2config_map is for ensuring that the optional command line inputs for configuration files are imported
-args2config_map = {'sample_info':           'SAMPLE_ATTRIBUTES',
-                   'patient_info':          'PATIENT_ATTRIBUTES',
-                   'timeline_info':         'TIMELINE',
-                   'cancer_type':           'CANCER_TYPE',
-                   'mutation_data':         'MAF',
-                   'segmented_data':        'SEG',
-                   'expression_data':       'MRNA_EXPRESSION',
+args2config_map = {'sample_info':               'SAMPLE_ATTRIBUTES',
+                   'patient_info':              'PATIENT_ATTRIBUTES',
+                   'timeline_info':             'TIMELINE',
+                   'cancer_type':               'CANCER_TYPE',
+                   'mutation_data':             'MAF',
+                   'segmented_data':            'SEG',
+                   'expression_data':           'MRNA_EXPRESSION',
+                   'expression_zscores_data':   'MRNA_EXPRESSION_ZSCORES',
                    # TODO:: Not Implemented below this
-                   'CNA_data':              'DISCRETE_COPY_NUMBER',
-                   'log2CNA_data':          'CONTINUOUS_COPY_NUMBER',
-                   'fusions_data':          'FUSION',
-                   'methylation_hm27_data': 'METHYLATION',
-                   'rppa_data':             'PROTEIN',
-                   'gistic_genes_amp_data': 'GISTIC_2.0',
-                   'mutsig_data':           'MUTSIG',
+                   'log2CNA_data':              'CONTINUOUS_COPY_NUMBER',
+                   'CNA_data':                  'DISCRETE_COPY_NUMBER',
+                   'fusions_data':              'FUSION',
+                   'methylation_hm27_data':     'METHYLATION',
+                   'rppa_data':                 'PROTEIN',
+                   'gistic_genes_amp_data':     'GISTIC_2.0',
+                   'mutsig_data':               'MUTSIG',
                    # No idea what's going on with these two
-                   'GENE_PANEL_data':            'GENE_PANEL',
-                   'gsva_scores_data':           'GENE_SET'}
+                   'GENE_PANEL_data':           'GENE_PANEL',
+                   'gsva_scores_data':          'GENE_SET'}
 
 # config2name_map is used for creating the meta_{name}.txt and data_{name}.txt file names.
 # This is especially useful when overwriting cBioWrap generated files
@@ -91,7 +92,10 @@ case_list_map =   {'MAF':               '_sequenced',
 #TODO:: ensure correct suffixes
 # https://cbioportal.readthedocs.io/en/latest/File-Formats.html#case-list-stable-id-suffixes
 
-priority_queue = {'SEG': 1, 'CONTINUOUS_COPY_NUMBER': 2, 'DISCRETE_COPY_NUMBER': 3}
+priority_queue = {'SEG': 1, 'CONTINUOUS_COPY_NUMBER': 2, 'DISCRETE_COPY_NUMBER': 3,
+                  'MRNA_EXPRESSION': 1, 'MRNA_EXPRESSION_ZSCORES': 2}
+
+no_data_frame = ['CONTINUOUS_COPY_NUMBER', 'DISCRETE_COPY_NUMBER', 'MRNA_EXPRESSION_ZSCORES']
 
 supported_vcf = ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller']
 supported_seg = ['CNVkit', 'Sequenza', 'HMMCopy']
