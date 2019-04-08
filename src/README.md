@@ -10,9 +10,19 @@ To submit a job, run `qsub_Janus.sh` with **your** email.
 usage: janus.py [-h] [-c FILE] -o FOLDER [-t TYPE] [-i ID] [-N NAME] [-n NAME]
                 [-d DESCRIPTION] [--sample-info SAMPLE_INFO]
                 [--patient-info PATIENT_INFO] [--cancer-type CANCER_TYPE]
+                [--timeline-info TIMELINE_INFO]
                 [--mutation-data MUTATION_DATA]
                 [--segmented-data SEGMENTED_DATA]
-                [--expression-data EXPRESSION_DATA] [-k FILE] [-p] [-v]
+                [--expression-data EXPRESSION_DATA]
+                [--expression-zscores-data EXPRESSION_ZSCORES_DATA]
+                [--log2CNA-data LOG2CNA_DATA] [--CNA-data CNA_DATA]
+                [--fusions-data FUSIONS_DATA]
+                [--methylation-hm27-data METHYLATION_HM27_DATA]
+                [--rppa-data RPPA_DATA]
+                [--gistic-genes-amp-data GISTIC_GENES_AMP_DATA]
+                [--mutsig-data MUTSIG_DATA]
+                [--GENE-PANEL-data GENE_PANEL_DATA]
+                [--gsva-scores-data GSVA_SCORES_DATA] [-k FILE] [-p] [-v]
 
 janus (https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate
 an importable study for a cBioPortal instance. Recommended usage can be seen
@@ -54,6 +64,10 @@ Overridable Required Configuration File Specifiers:
                         Location of cancer-type configuration file: will
                         override CANCER_TYPE specification in the config file.
                         REQUIRED*
+  --timeline-info TIMELINE_INFO
+                        Location of timeline-info configuration file: will
+                        override TIMELINE specification in the config file.
+                        THIS HAS NOT BEEN IMPLEMENTED YETSee the docs OPTIONAL
 
 Overridable Optional Data-type Configuration File Specifiers:
   --mutation-data MUTATION_DATA
@@ -69,9 +83,55 @@ Overridable Optional Data-type Configuration File Specifiers:
   --expression-data EXPRESSION_DATA
                         Location of expression-data configuration file: will
                         override MRNA_EXPRESSION specification in the config
-                        file. The expression data file will normally generate
-                        _zscores files. See the documentation if you do not
-                        want this. OPTIONAL
+                        file. files. See the documentation if you do not want
+                        this. OPTIONAL
+  --expression-zscores-data EXPRESSION_ZSCORES_DATA
+                        Location of expression-zscores-data configuration
+                        file: will override MRNA_EXPRESSION_ZSCORES
+                        specification in the config file. files. See the
+                        documentation if you do not want this. OPTIONAL
+  --log2CNA-data LOG2CNA_DATA
+                        Location of log2CNA-data configuration file: will
+                        override CONTINUOUS_COPY_NUMBER specification in the
+                        config file. THIS HAS BEEN IMPLEMENTED PARTIALLY. See
+                        the docs OPTIONAL
+  --CNA-data CNA_DATA   Location of CNA-data configuration file: will override
+                        DISCRETE_COPY_NUMBER specification in the config file.
+                        THIS HAS BEEN IMPLEMENTED PARTIALLY. See the docs
+                        OPTIONAL
+  --fusions-data FUSIONS_DATA
+                        Location of fusions-data configuration file: will
+                        override FUSION specification in the config file. THIS
+                        HAS NOT BEEN IMPLEMENTED YET. See the docs OPTIONAL
+  --methylation-hm27-data METHYLATION_HM27_DATA
+                        Location of methylation-hm27-data configuration file:
+                        will override METHYLATION specification in the config
+                        file. THIS HAS NOT BEEN IMPLEMENTED YET. See the docs
+                        OPTIONAL
+  --rppa-data RPPA_DATA
+                        Location of rppa-data configuration file: will
+                        override PROTEIN specification in the config file.
+                        THIS HAS NOT BEEN IMPLEMENTED YET. See the docs
+                        OPTIONAL
+  --gistic-genes-amp-data GISTIC_GENES_AMP_DATA
+                        Location of gistic-genes-amp-data configuration file:
+                        will override GISTIC_2.0 specification in the config
+                        file. THIS HAS NOT BEEN IMPLEMENTED YET. See the docs
+                        OPTIONAL
+  --mutsig-data MUTSIG_DATA
+                        Location of mutsig-data configuration file: will
+                        override MUTSIG specification in the config file. THIS
+                        HAS NOT BEEN IMPLEMENTED YET. See the docs OPTIONAL
+  --GENE-PANEL-data GENE_PANEL_DATA
+                        Location of GENE-PANEL-data configuration file: will
+                        override GENE_PANEL specification in the config file.
+                        THIS HAS NOT BEEN IMPLEMENTED YET. See the docs
+                        OPTIONAL
+  --gsva-scores-data GSVA_SCORES_DATA
+                        Location of gsva-scores-data configuration file: will
+                        override GENE_SET specification in the config file.
+                        THIS HAS NOT BEEN IMPLEMENTED YET. See the docs
+                        OPTIONAL
 ```
 ### Examples:
 ```

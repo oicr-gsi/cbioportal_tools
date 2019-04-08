@@ -5,7 +5,7 @@ This file may follow the [standard format](STUDY_CONFIG.md).
 
 ### Configuring your data
 
-You need to generate the segmented data from the [SEGMENTED_CONFIG.txt](SEGMENTED_CONFIG.md) pipeline to use the `SEG` pipeline. The definition for the `FILE` pipeline still needs to be figured out.
+You need to generate the continuous copy number data from the [SEGMENTED_CONFIG.txt](SEGMENTED_CONFIG.md) pipeline to use the `SEG` pipeline. The definition for the `FILE` pipeline still needs to be figured out.
 
 ### Configuring your header
 
