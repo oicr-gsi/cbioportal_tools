@@ -8,7 +8,7 @@ from lib.support import Config, helper
 thresholds:list  = []
 
 def collapse(num):
-    [ampl, gain, htzd, hmzd] = thresholds
+    [hmzd, htzd, gain, ampl] = thresholds
 
     if num > ampl:
         return +2
