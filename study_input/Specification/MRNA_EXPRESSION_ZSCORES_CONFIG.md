@@ -11,7 +11,6 @@ You need to generate the expression z-scores data from the [MRNA_EXPRESSION.txt]
 
 The minimal header will look like this:
 ```
-#input_folder=/FOLDER/WITH/DATA/
 #pipeline=[ MRNA_EXPRESSION, FILE]
 #profile_name=mRNA Expression zscores data
 #profile_description=Expression zscores information (XX Samples)
@@ -30,7 +29,6 @@ MRNA_EXPRESSION_ZSCORES	expression_zscores.txt
 The file `expression_zscores.txt` would look like:
 
 ```
-#input_folder=/FOLDER/WITH/DATA/
 #pipeline=MRNA_EXPRESSION
 #profile_name=mRNA Expression zscores data
 #profile_description=Expression zscores information (05 Samples)

@@ -96,47 +96,47 @@ def define_parser() -> argparse.ArgumentParser:
                                                                         args2config_map['expression_zscores_data']))
     config_data.add_argument('--' + 'log2CNA-data',
                              help='Location of {} configuration file: will override {} specification '
-                                  'in the config file. THIS HAS BEEN IMPLEMENTED PARTIALLY'
+                                  'in the config file. THIS HAS BEEN IMPLEMENTED PARTIALLY. '
                                   'See the docs        OPTIONAL'.format('log2CNA-data',
                                                                         args2config_map['log2CNA_data']))
     config_data.add_argument('--' + 'CNA-data',
                              help='Location of {} configuration file: will override {} specification '
-                                  'in the config file. THIS HAS BEEN IMPLEMENTED PARTIALLY'
+                                  'in the config file. THIS HAS BEEN IMPLEMENTED PARTIALLY. '
                                   'See the docs        OPTIONAL'.format('CNA-data',
                                                                         args2config_map['CNA_data']))
     config_data.add_argument('--' + 'fusions-data',
                              help='Location of {} configuration file: will override {} specification '
-                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
                                   'See the docs        OPTIONAL'.format('fusions-data',
                                                                         args2config_map['fusions_data']))
     config_data.add_argument('--' + 'methylation-hm27-data',
                              help='Location of {} configuration file: will override {} specification '
-                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
                                   'See the docs        OPTIONAL'.format('methylation-hm27-data',
                                                                         args2config_map['methylation_hm27_data']))
     config_data.add_argument('--' + 'rppa-data',
                              help='Location of {} configuration file: will override {} specification '
-                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
                                   'See the docs        OPTIONAL'.format('rppa-data',
                                                                         args2config_map['rppa_data']))
     config_data.add_argument('--' + 'gistic-genes-amp-data',
                              help='Location of {} configuration file: will override {} specification '
-                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
                                   'See the docs        OPTIONAL'.format('gistic-genes-amp-data',
                                                                         args2config_map['gistic_genes_amp_data']))
     config_data.add_argument('--' + 'mutsig-data',
                              help='Location of {} configuration file: will override {} specification '
-                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
                                   'See the docs        OPTIONAL'.format('mutsig-data',
                                                                         args2config_map['mutsig_data']))
     config_data.add_argument('--' + 'GENE-PANEL-data',
                              help='Location of {} configuration file: will override {} specification '
-                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
                                   'See the docs        OPTIONAL'.format('GENE-PANEL-data',
                                                                         args2config_map['GENE_PANEL_data']))
     config_data.add_argument('--' + 'gsva-scores-data',
                              help='Location of {} configuration file: will override {} specification '
-                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
                                   'See the docs        OPTIONAL'.format('gsva-scores-data',
                                                                         args2config_map['gsva_scores_data']))
 
