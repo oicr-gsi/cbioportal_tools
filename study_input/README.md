@@ -6,6 +6,11 @@ The minimum required files for an importable study in cBioPortal are:
 - `case_lists/cases_all.txt`
 - `cancer_type.txt` *
 
+To generate this you will need a:
+* [`study.txt`](Specification/STUDY_CONFIG.md)
+* [`samples.txt`](Specification/PATIENT_AND_SAMPLE_CONFIG.md)
+* [`cancer_type.txt`](Specification/CANCER_TYPE_CONFIG.md)*
+
 *If the cancer type is not already in the cBioPortal instance database.
 
 As of this commit, the supported importable types are:

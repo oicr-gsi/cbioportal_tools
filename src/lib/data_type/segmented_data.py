@@ -96,7 +96,6 @@ def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, 
     bed_filter = ['\\t' + a + '\\t' for a in bed_filter]
 
     header = 'ID\\tchrom\\tloc.start\\tloc.end\\tnum.mark\\tseg.mean'
-    helper.call_shell('head {}'.format(os.path.join(input_folder, export_data['FILE_NAME'][0])), verb)
     # Cook
     for i in range(len(export_data)):
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
@@ -116,7 +115,6 @@ def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, 
     exports_config.config_map['input_folder'] = seg_temp
     # Wait until Baked
     exit_codes = [p.wait() for p in calls]
-    helper.call_shell('head {}'.format(os.path.join(input_folder, export_data['FILE_NAME'][0])), verb)
 
     # Clean up
     if any(exit_codes):
@@ -132,7 +130,6 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
     input_folder = exports_config.config_map['input_folder']
     export_data = exports_config.data_frame
     seg_temp = helper.get_temp_folder(output_folder, 'seg')
-    helper.call_shell('head {}'.format(os.path.join(input_folder, export_data['FILE_NAME'][0])), verb)
 
     # Cook
     for i in range(len(export_data)):
@@ -152,7 +149,6 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
     exports_config.config_map['input_folder'] = seg_temp
     # Wait until Baked
     exit_codes = [p.wait() for p in calls]
-    helper.call_shell('head {}'.format(os.path.join(input_folder, export_data['FILE_NAME'][0])), verb)
 
     # Clean up
     if any(exit_codes):

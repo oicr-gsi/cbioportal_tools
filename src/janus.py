@@ -11,7 +11,7 @@ import pandas as pd
 
 # Other Scripts
 from lib.support import Config, helper
-from lib.constants.constants import args2config_map, priority_queue, cbioportal_ip, cbioportal_url
+from lib.constants.constants import args2config_map, meta_info_map, cbioportal_ip, cbioportal_url
 from lib.study_generation import data, meta, case
 
 Information = typing.List[Config.Config]
@@ -258,6 +258,34 @@ def validate_study(key, study_folder, verb):
     helper.working_on(verb)
 
 
+def resolve_priority_queue(information: Information) -> Information:
+    score = {}
+    import time
+    # Initialize scores
+    for each in information:
+        score[each.type_config] = 0
+
+    # Calculate Scores based on directed graph traversal
+    for each in information:
+        if 'pipeline' in each.config_map.keys():
+            type_config = each.config_map['pipeline']
+        else:
+            continue
+        while True:
+            if not (type_config in meta_info_map.keys()):
+                break
+            else:
+                score[type_config] += 1
+            type_config = [x.config_map['pipeline'] for x in information if x.type_config == type_config]
+            if len(type_config) > 1:
+                raise ImportError('ERROR:: 2 or more info objects of the same type???')
+            else:
+                type_config = type_config[0]
+
+    # Sort list based on new scores.
+    information.sort(key=lambda config: score [config.type_config], reverse=True)
+    return information
+
 def main():
     # TODO:: Ensure absolute paths for helper program files: ie seg2gene.R
     args = define_parser().parse_args()
@@ -272,22 +300,13 @@ def main():
 
     [information, clinic_data] = Config.gather_config_set(study_config, args, verb)
 
-    priority = [x for x in information if (x.type_config in priority_queue.keys())]
-    information = [x for x in information if x not in priority]
+    information = resolve_priority_queue(information)
 
-    priority.sort(key=lambda config: priority_queue [config.type_config])
-
-    [print('Priority Info Files {}:\n{}\n'.format(a.type_config, a)) for a in priority] if verb else print(),
     [print('Informational Files {}:\n{}\n'.format(a.type_config, a)) for a in information] if verb else print(),
     [print('Clinical List Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
 
     # Clean Output Folder/Initialize it
     helper.clean_folder(study_config.config_map['output_folder'])
-
-    for each in priority:
-        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
-        data.generate_data_type(each, study_config, verb)
-        case.generate_case_list(each, study_config)
 
     for each in information:
         meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
