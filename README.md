@@ -41,6 +41,8 @@ You will need a minimum of 16g. i.e. `qrsh -l h_vmem=16g`*
 
 * [`study_input/Specification/`](study_input/Specification) contains documentation on making your own input.
 
+* [`src/lib/study_generation/README.md`](src/lib/study_generation/README.md) contains documentation on contributing and expanding `janus.py` functionality.
+
 ### Dependencies
 You shouldn't need this if you use the runner script.
 
