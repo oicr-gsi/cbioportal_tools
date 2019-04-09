@@ -7,7 +7,7 @@ import shutil
 import subprocess
 
 from ..support import Config
-from ..constants.constants import config2name_map
+from ..constants.constants import config2name_map, supported_pipe
 
 extensionChoices = ["vcf", "maf"]
 c_choices = [".tar.gz", ".gz", ".zip"]
@@ -65,6 +65,16 @@ def call_shell(command: str, verb):
 def parallel_call(command: str, verb):
     working_on(verb, message=command)
     return subprocess.Popen(command, shell=True)
+
+def assert_pipeline(type: str, pipeline: str):
+    if not pipeline in supported_pipe[type]:
+        stars()
+        stars()
+        print('ERROR:: The pipeline ({}) you have placed in the {} file is not currently supported. '
+              'Please use one of these {}'.format(pipeline, type, supported_pipe[type]))
+        stars()
+        stars()
+        exit(1)
 
 
 def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config, verb):

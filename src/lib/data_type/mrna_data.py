@@ -20,7 +20,6 @@ def cufflinks_prep(exports_config: Config.Config, study_config: Config.Config, v
     input_folder = exports_config.config_map['input_folder']
     export_data = exports_config.data_frame
     expression_folder = helper.get_temp_folder(output_folder, 'mrna_expression')
-    helper.call_shell('head {}'.format(os.path.join(input_folder, export_data['FILE_NAME'][0])), verb)
 
     header = 'gene_id\\ttranscript_id(s)\\tlength\\teffective_length\\texpected_count\\tTPM\\tFPKM'
     # Cook
@@ -43,7 +42,6 @@ def cufflinks_prep(exports_config: Config.Config, study_config: Config.Config, v
 
     # Wait until Baked
     exit_codes = [p.wait() for p in calls]
-    helper.call_shell('head {}'.format(os.path.join(input_folder, export_data['FILE_NAME'][0])), verb)
 
     # Clean up
     if any(exit_codes):
@@ -55,7 +53,6 @@ def cufflinks_prep(exports_config: Config.Config, study_config: Config.Config, v
 def alpha_sort(exports_config: Config.Config, verb):
     input_folder = exports_config.config_map['input_folder']
     calls = []
-    helper.call_shell('head {}'.format(os.path.join(input_folder, exports_config.data_frame['FILE_NAME'][0])), verb)
 
     for each in exports_config.data_frame['FILE_NAME']:
         output_file = os.path.join(input_folder, each)
@@ -66,7 +63,6 @@ def alpha_sort(exports_config: Config.Config, verb):
 
     # Wait until Baked
     exit_codes = [p.wait() for p in calls]
-    helper.call_shell('head {}'.format(os.path.join(input_folder, exports_config.data_frame['FILE_NAME'][0])), verb)
 
     # Clean up
     if any(exit_codes):

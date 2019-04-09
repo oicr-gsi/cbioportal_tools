@@ -19,13 +19,11 @@ meta_info_map = {'PATIENT_ATTRIBUTES':      ['CLINICAL', 'PATIENT_ATTRIBUTES'],
                  'CANCER_TYPE':             ['CANCER_TYPE', 'CANCER_TYPE'],
                  'MAF':                     ['MUTATION_EXTENDED', 'MAF', 'mutations', 'true'],
                  'SEG':                     ['COPY_NUMBER_ALTERATION', 'SEG', 'hg19'],
-                 'SEG_CNA':                 ['COPY_NUMBER_ALTERATION', 'DISCRETE', 'gistic', 'true'],
-                 'SEG_LOG2CNA':             ['COPY_NUMBER_ALTERATION', 'LOG2-VALUE', 'log2CNA', 'true'],
+                 'DISCRETE_COPY_NUMBER':    ['COPY_NUMBER_ALTERATION', 'DISCRETE', 'gistic', 'true'],
+                 'CONTINUOUS_COPY_NUMBER':  ['COPY_NUMBER_ALTERATION', 'LOG2-VALUE', 'log2CNA', 'true'],
                  'MRNA_EXPRESSION':         ['MRNA_EXPRESSION', 'CONTINUOUS', 'rna_seq_mrna', 'true'],
                  'MRNA_EXPRESSION_ZSCORES': ['MRNA_EXPRESSION', 'Z-SCORE', 'rna_seq_mrna_median_Zscores', 'true'],
                  # TODO:: IMPLEMENT AND VERIFY AFTER THIS LINE
-                 'DISCRETE_COPY_NUMBER':    ['COPY_NUMBER_ALTERATION', 'DISCRETE', 'gistic', 'true'],
-                 'CONTINUOUS_COPY_NUMBER':  ['COPY_NUMBER_ALTERATION', 'LOG2-VALUE', 'log2CNA', 'true'],
                  'FUSION':                  ['FUSION', 'FUSION', 'fusion', 'true'],
                  'METHYLATION':             ['METHYLATION', 'CONTINUOUS', 'methylation_hm27', 'false'],
                  'PROTEIN':                 ['PROTEIN_LEVEL', 'UNIMPLEMENTED', 'UNIMPLEMENTED', 'UNIMPLEMENTED'],
@@ -93,9 +91,6 @@ case_list_map =   {'MAF':               '_sequenced',
 #TODO:: ensure correct suffixes
 # https://cbioportal.readthedocs.io/en/latest/File-Formats.html#case-list-stable-id-suffixes
 
-priority_queue = {'SEG': 1, 'CONTINUOUS_COPY_NUMBER': 2, 'DISCRETE_COPY_NUMBER': 3,
-                  'MRNA_EXPRESSION': 1, 'MRNA_EXPRESSION_ZSCORES': 2}
-
 no_data_frame = ['CONTINUOUS_COPY_NUMBER', 'DISCRETE_COPY_NUMBER', 'MRNA_EXPRESSION_ZSCORES']
 
 supported_pipe = {'MAF':                       ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller'],
@@ -104,6 +99,7 @@ supported_pipe = {'MAF':                       ['Strelka', 'Mutect', 'Mutect2', 
                   'MRNA_EXPRESSION_ZSCORES':   ['MRNA_EXPRESSION', 'FILE'],
                   'CONTINUOUS_COPY_NUMBER':    ['SEG', 'FILE'],
                   'DISCRETE_COPY_NUMBER':      ['CONTINUOUS_COPY_NUMBER', 'FILE']}
+
 clinical_type = ['PATIENT_ATTRIBUTES', 'SAMPLE_ATTRIBUTES', 'TIMELINE']
 
 # hg_19 chromosome lengths. (for fixing HMMCopy only?)
