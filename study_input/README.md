@@ -39,3 +39,7 @@ The following types are stubs and need your help to implement:
 * `GENE_SET`
 
 Once the configuration files for the datatype are pointed to they will produce the required files for cBioPortal import.
+
+## Contributing
+
+To contribute and expand Janus, see [this `README.md`](../src/lib/study_generation/README.md)

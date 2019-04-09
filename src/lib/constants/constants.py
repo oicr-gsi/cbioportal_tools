@@ -6,8 +6,6 @@ __status__ = "Pre-Production"
 #       meta_info_map
 #       args2config_map
 #       config2name_map
-# If a set of data_types requires to be processed in an order, add to:
-#       priority_queue
 # If a set of data_types does not require a corresponding dataframe, add to:
 #       no_data_frame
 
