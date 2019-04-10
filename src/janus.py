@@ -1,5 +1,4 @@
 __author__ = "Kunal Chandan"
-__license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
@@ -7,13 +6,12 @@ __status__ = "Pre-Production"
 import argparse
 import os
 import typing
-import subprocess
 
 import pandas as pd
 
 # Other Scripts
 from lib.support import Config, helper
-from lib.constants import args2config_map, cbioportal_url, cbioportal_port, cbioportal_folder
+from lib.constants.constants import args2config_map, meta_info_map, cbioportal_ip, cbioportal_url
 from lib.study_generation import data, meta, case
 
 Information = typing.List[Config.Config]
@@ -25,13 +23,15 @@ def define_parser() -> argparse.ArgumentParser:
                     "(https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate an importable study for "
                     "a cBioPortal instance. Recommended usage can be seen in the examples located in ../study_input/ .")
     parser.add_argument("-c", "--config",
-                        help="The location of the study config file, containing command line arguments as key/value pairs",
+                        help="The location of the study config file, in essence a set of command-line arguments. "
+                             "Recommended usage is with configuration file. File data can be overridden by command-line"
+                             " arguments.",
                         metavar='FILE')
     parser.add_argument("-o", "--output-folder",
                         type=lambda folder: os.path.abspath(folder),
                         help="The main folder of the study you want to generate.",
                         metavar='FOLDER',
-                        default='new_study/')
+                        required=True)
     parser.add_argument("-t", "--type-of-cancer",
                         help="The type of cancer.",
                         metavar='TYPE')
@@ -47,16 +47,99 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument("-d", "--description",
                         help="A description of the study.",
                         metavar='DESCRIPTION')
+    # TODO:: Add Option to generate a specific case list
 
-    parser.add_argument("-m", "--memory",
-                        type=lambda x: int(int(x) * (1000**3)),
-                        help="The amount of virtual memory given to the instance in Gb",
-                        metavar='V_MEM',
-                        default=-1)
+    config_spec = parser.add_argument_group('Overridable Required Configuration File Specifiers')
 
-    config_spec = parser.add_argument_group('OPTIONAL Configuration File Specifiers')
-    for each in args2config_map.keys():
-        config_spec.add_argument('--' + each.replace('_', '-'), help='Location of {} configuration file.'.format(each))
+    config_spec.add_argument('--' + 'sample-info',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. REQUIRED.'.format('sample-info',
+                                                                         args2config_map['sample_info']))
+    config_spec.add_argument('--' + 'patient-info',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. REQUIRED.'.format('patient-info',
+                                                                         args2config_map['patient_info']))
+    config_spec.add_argument('--' + 'cancer-type',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. REQUIRED*'.format('cancer-type',
+                                                                         args2config_map['cancer_type']))
+    config_spec.add_argument('--' + 'timeline-info',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET'
+                                  'See the docs        OPTIONAL'.format('timeline-info',
+                                                                        args2config_map['timeline_info']))
+
+
+    config_data = parser.add_argument_group('Overridable Optional Data-type Configuration File Specifiers')
+
+    config_data.add_argument('--' + 'mutation-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. OPTIONAL'.format('mutation-data',
+                                                                        args2config_map['mutation_data']))
+    config_data.add_argument('--' + 'segmented-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. The segmented data file will normally generate _CNA and _log2CNA'
+                                  ' files. See documentation if you do not want this. '
+                                  '                    OPTIONAL'.format('segmented-data',
+                                                                        args2config_map['segmented_data']))
+    config_data.add_argument('--' + 'expression-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file.'
+                                  ' files. See the documentation if you do not want this.'
+                                  '                    OPTIONAL'.format('expression-data',
+                                                                        args2config_map['expression_data']))
+    config_data.add_argument('--' + 'expression-zscores-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file.'
+                                  ' files. See the documentation if you do not want this.'
+                                  '                    OPTIONAL'.format('expression-zscores-data',
+                                                                        args2config_map['expression_zscores_data']))
+    config_data.add_argument('--' + 'log2CNA-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS BEEN IMPLEMENTED PARTIALLY. '
+                                  'See the docs        OPTIONAL'.format('log2CNA-data',
+                                                                        args2config_map['log2CNA_data']))
+    config_data.add_argument('--' + 'CNA-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS BEEN IMPLEMENTED PARTIALLY. '
+                                  'See the docs        OPTIONAL'.format('CNA-data',
+                                                                        args2config_map['CNA_data']))
+    config_data.add_argument('--' + 'fusions-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
+                                  'See the docs        OPTIONAL'.format('fusions-data',
+                                                                        args2config_map['fusions_data']))
+    config_data.add_argument('--' + 'methylation-hm27-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
+                                  'See the docs        OPTIONAL'.format('methylation-hm27-data',
+                                                                        args2config_map['methylation_hm27_data']))
+    config_data.add_argument('--' + 'rppa-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
+                                  'See the docs        OPTIONAL'.format('rppa-data',
+                                                                        args2config_map['rppa_data']))
+    config_data.add_argument('--' + 'gistic-genes-amp-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
+                                  'See the docs        OPTIONAL'.format('gistic-genes-amp-data',
+                                                                        args2config_map['gistic_genes_amp_data']))
+    config_data.add_argument('--' + 'mutsig-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
+                                  'See the docs        OPTIONAL'.format('mutsig-data',
+                                                                        args2config_map['mutsig_data']))
+    config_data.add_argument('--' + 'GENE-PANEL-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
+                                  'See the docs        OPTIONAL'.format('GENE-PANEL-data',
+                                                                        args2config_map['GENE_PANEL_data']))
+    config_data.add_argument('--' + 'gsva-scores-data',
+                             help='Location of {} configuration file: will override {} specification '
+                                  'in the config file. THIS HAS NOT BEEN IMPLEMENTED YET. '
+                                  'See the docs        OPTIONAL'.format('gsva-scores-data',
+                                                                        args2config_map['gsva_scores_data']))
+
 
     parser.add_argument("-k", "--key",
                         type=lambda key: os.path.abspath(key),
@@ -66,12 +149,10 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument("-p", "--push",
                         action="store_true",
                         help="Push the generated study to the cBioPortal Instance")
+    # TODO:: Consider having multiple levels of verbosity
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Makes program verbose")
-    parser.add_argument("-f", "--force",
-                        action="store_true",
-                        help="Forces overwriting of data_cancer_type.txt file and *.maf files.")
     return parser
 
 
@@ -92,52 +173,57 @@ def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) ->
 
     # Check to ensure minimum conditions are filled.
     if not set(meta_args).issubset(set(study_config.config_map.keys())):
-        raise IOError('The minimum number of arguments have not been provided. \nSee: {}'.format(meta_args))
+        raise IOError('The minimum number of arguments have not been provided in the file and/or command-line arguments'
+                      '\nSee: {}'.format(meta_args))
     return study_config
 
 
 def export_study_to_cbioportal(key: str, study_folder: str, verb):
+    if not key == '':
+        key = '-i ' + key
     base_folder = os.path.basename(os.path.abspath(study_folder))
     # Copying folder to cBioPortal
     helper.working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
 
-    helper.call_shell("ssh -i {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+    helper.call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                       "rm -r ~/oicr_studies/{}; "
-                      "mkdir ~/oicr_studies/{}'".format(key, cbioportal_url, base_folder, base_folder), verb)
+                      "mkdir ~/oicr_studies/{}'".format(key, cbioportal_ip, base_folder, base_folder), verb)
 
     # Copy over
-    helper.call_shell('scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies/'.format(key, study_folder), verb)
+    helper.call_shell('scp -r {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_folder, cbioportal_ip),
+                      verb)
 
     helper.working_on(verb)
 
     # Import study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
 
-    helper.call_shell("ssh -i {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+    helper.call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                       "sudo ./metaImport.py -s ~/oicr_studies/{} "
-                      "-u http://{}:{}/{} -o'".format(key, cbioportal_url,
-                                                      base_folder,
-                                                      cbioportal_url,
-                                                      cbioportal_port,
-                                                      cbioportal_folder), verb)
+                      "-u http://{} -o'".format(key, cbioportal_ip,
+                                                base_folder,
+                                                cbioportal_url), verb)
 
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl stop  tomcat'".format(key), verb)
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'sudo systemctl start tomcat'".format(key), verb)
+    helper.call_shell("ssh {} debian@{} 'sudo systemctl stop  tomcat'".format(key, cbioportal_ip), verb)
+    helper.call_shell("ssh {} debian@{} 'sudo systemctl start tomcat'".format(key, cbioportal_ip), verb)
 
     helper.working_on(verb)
 
 
 def validate_study(key, study_folder, verb):
+    if not key == '':
+        key = '-i ' + key
     base_folder = os.path.basename(os.path.abspath(study_folder))
     # Copying folder to cBioPortal
     helper.working_on(verb, message='Validating study ...')
 
-    helper.call_shell("ssh -i {} debian@10.30.133.80 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+    helper.call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                       "rm -r ~/oicr_studies/{}; "
-                      "mkdir ~/oicr_studies/{}'".format(key, base_folder, base_folder), verb)
+                      "mkdir ~/oicr_studies/{}'".format(key, cbioportal_ip, base_folder, base_folder), verb)
 
     # Copy over
-    helper.call_shell('scp -r -i {} {} debian@10.30.133.80:/home/debian/oicr_studies/'.format(key, study_folder), verb)
+    helper.call_shell('scp -r {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_folder, cbioportal_ip),
+                      verb)
 
     helper.working_on(verb)
 
@@ -145,15 +231,13 @@ def validate_study(key, study_folder, verb):
     # Import study to cBioPortal
     helper.working_on(verb, message='Importing study to cBioPortal...')
 
-    valid = helper.call_shell("ssh -i {} debian@{} "
+    valid = helper.call_shell("ssh {} debian@{} "
                               "'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                               "sudo ./validateData.py -s ~/oicr_studies/{} "
-                              "-u http://{}:{}/{} "
-                              "-v -m'".format(key, cbioportal_url,
+                              "-u http://{} "
+                              "-v -m'".format(key, cbioportal_ip,
                                               base_folder,
-                                              cbioportal_url,
-                                              cbioportal_port,
-                                              cbioportal_folder), verb)
+                                              cbioportal_url), verb)
 
     if   valid == 1:
         helper.stars()
@@ -167,17 +251,45 @@ def validate_study(key, study_folder, verb):
         helper.stars()
         print('Validation of study succeeded with warnings. Don\'t worry about it, unless you think it\'s important.')
         helper.stars()
+    else:
+        helper.stars()
+        print('Either this validated with 0 warnings or something broke really bad, raise an issue if it\'s the latter')
+        helper.stars()
     helper.working_on(verb)
 
 
+def resolve_priority_queue(information: Information) -> Information:
+    score = {}
+    import time
+    # Initialize scores
+    for each in information:
+        score[each.type_config] = 0
+
+    # Calculate Scores based on directed graph traversal
+    for each in information:
+        if 'pipeline' in each.config_map.keys():
+            type_config = each.config_map['pipeline']
+        else:
+            continue
+        while True:
+            if not (type_config in meta_info_map.keys()):
+                break
+            else:
+                score[type_config] += 1
+            type_config = [x.config_map['pipeline'] for x in information if x.type_config == type_config]
+            if len(type_config) > 1:
+                raise ImportError('ERROR:: 2 or more info objects of the same type???')
+            else:
+                type_config = type_config[0]
+
+    # Sort list based on new scores.
+    information.sort(key=lambda config: score [config.type_config], reverse=True)
+    return information
 
 def main():
     # TODO:: Ensure absolute paths for helper program files: ie seg2gene.R
     args = define_parser().parse_args()
     verb = args.verbose
-    force = args.force
-    memory = args.memory
-
     # TODO:: Fail gracefully if something breaks
 
     if args.config:
@@ -188,6 +300,8 @@ def main():
 
     [information, clinic_data] = Config.gather_config_set(study_config, args, verb)
 
+    information = resolve_priority_queue(information)
+
     [print('Informational Files {}:\n{}\n'.format(a.type_config, a)) for a in information] if verb else print(),
     [print('Clinical List Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
 
@@ -196,7 +310,7 @@ def main():
 
     for each in information:
         meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
-        data.generate_data_type(each, study_config, force, verb)
+        data.generate_data_type(each, study_config, verb)
         case.generate_case_list(each, study_config)
 
     for each in clinic_data:
@@ -205,9 +319,10 @@ def main():
     meta.generate_meta_study(study_config, verb)
 
     # export to cbioportal!
-    if args.key:
+    if args.key or args.push:
         validate_study(args.key, study_config.config_map['output_folder'], verb)
         export_study_to_cbioportal(args.key, study_config.config_map['output_folder'], verb)
+        # TODO:: Make the validation step ensure that it doesn't overwrite an existing study
 
     helper.stars()
     helper.working_on(verb, message='CONGRATULATIONS! Your study should now be imported!')

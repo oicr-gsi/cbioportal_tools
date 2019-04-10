@@ -1,5 +1,4 @@
 __author__ = "Kunal Chandan"
-__license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
@@ -7,12 +6,13 @@ import os
 
 import numpy as np
 
-from lib.constants.constants import config2name_map
+from lib.constants.constants import config2name_map, supported_pipe
 from lib.data_type import mutation_data, segmented_data, mrna_data, cancer_type
+from lib.data_type import discrete_copy_number_data, continuous_copy_number_data, mrna_zscores_data
 from lib.support import Config, helper
 
 
-def generate_data_type(meta_config: Config.Config, study_config: Config.Config, force, verb):
+def generate_data_type(meta_config: Config.Config, study_config: Config.Config, verb):
 
     if   meta_config.type_config == 'MAF':
 
@@ -22,44 +22,42 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
         convert_vcf_2_maf = True
 
-        # If the caller contains .maf inside or does not exist, do not do conversion
-        # Since the caller option in the meta file is optional, try:
-        try:
-            if '.maf' in meta_config.config_map['caller']:
-                convert_vcf_2_maf = False
-        except KeyError:
+        # If the pipeline contains .maf inside or does not exist, do not do conversion
+        if '.maf' in meta_config.config_map['pipeline']:
             convert_vcf_2_maf = False
 
         if convert_vcf_2_maf:
-            if   meta_config.config_map['caller'] == 'Strelka':
+            helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
+
+            if   meta_config.config_map['pipeline'] == 'Strelka':
 
                 print('Something should be done')
 
-            elif meta_config.config_map['caller'] == 'Mutect':
+            elif meta_config.config_map['pipeline'] == 'Mutect':
 
-                mutation_data.filter_vcf(meta_config, verb)
+                mutation_data.filter_vcf_rejects(meta_config, verb)
 
-            elif meta_config.config_map['caller'] == 'Mutect2':
+            elif meta_config.config_map['pipeline'] == 'Mutect2':
 
-                mutation_data.filter_vcf(meta_config, verb)
+                mutation_data.filter_vcf_rejects(meta_config, verb)
 
-            elif meta_config.config_map['caller'] == 'MutectStrelka':
+            elif meta_config.config_map['pipeline'] == 'MutectStrelka':
 
-                mutation_data.filter_vcf(meta_config, verb)
+                mutation_data.filter_vcf_rejects(meta_config, verb)
 
-            elif meta_config.config_map['caller'] == 'GATKHaplotypeCaller':
+            elif meta_config.config_map['pipeline'] == 'GATKHaplotypeCaller':
 
                 print('Something else should be done')
                 # Any expansion for pre-processing the .vcf Files should be put here in an 'elif'.
             else:
                 helper.stars()
-                print('WARNING:: Unknown caller, have you spelled it right?')
-                print('See: {}'.format(mutation_data.mutation_callers))
+                print('WARNING:: Unknown pipeline, have you spelled it right?')
+                print('See: {}'.format(supported_pipe[meta_config.type_config]))
                 helper.stars()
 
             helper.working_on(verb, message='Exporting vcf2maf...')
             helper.working_on(verb, message='And deleting .vcf s...')
-            meta_config = mutation_data.export2maf(meta_config, study_config, force, verb)
+            meta_config = mutation_data.export2maf(meta_config, study_config, verb)
             helper.working_on(verb)
 
         helper.working_on(verb, message='Cleaning MAF Files ...')
@@ -76,7 +74,10 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
 
-        helper.working_on(verb, 'Caller is {}, beginning pre-processing...'.format(meta_config.config_map['pipeline']))
+        helper.working_on(verb, 'Pipeline is {}, beginning preparation...'.format(meta_config.config_map['pipeline']))
+
+        helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
+
         if   meta_config.config_map['pipeline'] == 'CNVkit':
 
             print('Seems no prep is needed for CNVkit')
@@ -99,9 +100,25 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.concat_files(meta_config, study_config, verb)
         helper.working_on(verb)
 
-        helper.working_on(verb, message='Generating CNA and log2CNA files ...')
-        segmented_data.gen_cna(meta_config, study_config, verb)
-        helper.working_on(verb)
+    elif meta_config.type_config == 'CONTINUOUS_COPY_NUMBER':
+
+        helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
+
+        if  meta_config.config_map['pipeline'] == 'SEG':
+
+            helper.working_on(verb, message='Generating log2CNA files ...')
+            continuous_copy_number_data.gen_log2cna(meta_config, study_config, verb)
+            helper.working_on(verb)
+
+    elif meta_config.type_config == 'DISCRETE_COPY_NUMBER':
+
+        helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
+
+        if  meta_config.config_map['pipeline'] == 'CONTINUOUS_COPY_NUMBER':
+
+            helper.working_on(verb, message='Generating CNA files ...')
+            discrete_copy_number_data.gen_dcna(meta_config, study_config, verb)
+            helper.working_on(verb)
 
     elif meta_config.type_config == 'MRNA_EXPRESSION':
 
@@ -109,8 +126,13 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.decompress_to_temp(meta_config, study_config, verb)
         helper.working_on(verb)
 
+        helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
+
         if   meta_config.config_map['pipeline'] == 'Cufflinks':
             mrna_data.cufflinks_prep(meta_config, study_config, verb)
+
+        elif meta_config.config_map['pipeline'] == 'RSEM':
+            helper.working_on(verb, message='Nothing really needs to be done')
 
         helper.working_on(verb, message='Alpha sorting each file ...')
         mrna_data.alpha_sort(meta_config, verb)
@@ -120,10 +142,14 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         mrna_data.generate_expression_matrix(meta_config, study_config, verb)
         helper.working_on(verb)
 
-        helper.working_on(verb, message='Generating expression Z-Score Data ...')
-        mrna_data.generate_expression_zscore(meta_config, study_config, verb)
-        helper.working_on(verb)
-        # TODO:: Generate z-zscore data.
+    elif meta_config.type_config == 'MRNA_EXPRESSION_ZSCORES':
+
+        helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
+
+        if  meta_config.config_map['pipeline'] == 'MRNA_EXPRESSION':
+            helper.working_on(verb, message='Generating expression Z-Score Data ...')
+            mrna_zscores_data.generate_expression_zscore(meta_config, study_config, verb)
+            helper.working_on(verb)
 
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')

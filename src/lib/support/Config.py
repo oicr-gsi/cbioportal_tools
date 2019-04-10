@@ -1,5 +1,4 @@
 __author__ = "Kunal Chandan"
-__license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
@@ -9,11 +8,12 @@ import typing
 import argparse
 
 import pandas as pd
+from ..constants.constants import clinical_type, no_data_frame
 
 
 class Config(object):
     config_map: dict = {}
-    data_frame: pd.DataFrame = pd.DataFrame()
+    data_frame: pd.DataFrame
     type_config: str = ''
 
     def __init__(self, config_map: dict, data_frame: pd.DataFrame, type_config: str):
@@ -40,6 +40,7 @@ class ClinicalConfig(Config):
 
 Information = typing.List[Config]
 
+
 def get_single_config(file, f_type, verb) -> Config:
     if os.path.isfile(file):
         print('File Name: {}'.format(file))
@@ -56,8 +57,15 @@ def get_single_config(file, f_type, verb) -> Config:
         else:
             break
     f.close()
-    data_frame = pd.read_csv(file, delimiter='\t', skiprows=len(file_map), dtype=str)
-
+    try:
+        data_frame = pd.read_csv(file, delimiter='\t', skiprows=len(file_map), dtype=str)
+    except pd.errors.EmptyDataError:
+        if f_type in no_data_frame:
+            print('merp')
+            data_frame = pd.DataFrame()
+        else:
+            print('Your {} file does not have data in it but it probably should, please double check it'.format(f_type))
+            raise pd.errors.EmptyDataError()
     config_file = Config(file_map, data_frame, f_type)
     return config_file
 
@@ -92,12 +100,12 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
 
         config_file_type = study_config.data_frame['TYPE'][i]
 
-        if study_config.data_frame.iloc[i][0] in ['SAMPLE_ATTRIBUTES', 'PATIENT_ATTRIBUTES']:
+        if study_config.data_frame['TYPE'][i] in clinical_type:
             clinic_data.append(get_config_clinical(config_file_name,
-                                                          config_file_type,
-                                                          verb))
+                                                   config_file_type,
+                                                   verb))
         else:
             information.append(get_single_config(config_file_name,
-                                                        config_file_type,
-                                                        verb))
+                                                 config_file_type,
+                                                 verb))
     return [information, clinic_data]

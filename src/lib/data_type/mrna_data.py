@@ -1,6 +1,5 @@
-__author__ = "Kunal Chandan"
-__license__ = "MIT"
-__email__ = "kchandan@uwaterloo.ca"
+__author__ = ["Kunal Chandan", "Lawrence Heisler"]
+__email__ = ["kchandan@uwaterloo.ca", "Lawrence.Heisler@oicr.on.ca"]
 __status__ = "Pre-Production"
 
 import os
@@ -11,7 +10,7 @@ import numpy as np
 from lib.support import Config, helper
 from lib.constants.constants import config2name_map
 
-Information = typing.List[pd.DataFrame]
+DataFrames = typing.List[pd.DataFrame]
 
 
 def cufflinks_prep(exports_config: Config.Config, study_config: Config.Config, verb):
@@ -21,7 +20,6 @@ def cufflinks_prep(exports_config: Config.Config, study_config: Config.Config, v
     input_folder = exports_config.config_map['input_folder']
     export_data = exports_config.data_frame
     expression_folder = helper.get_temp_folder(output_folder, 'mrna_expression')
-    helper.call_shell('head {}'.format(os.path.join(input_folder, export_data['FILE_NAME'][0])), verb)
 
     header = 'gene_id\\ttranscript_id(s)\\tlength\\teffective_length\\texpected_count\\tTPM\\tFPKM'
     # Cook
@@ -30,33 +28,20 @@ def cufflinks_prep(exports_config: Config.Config, study_config: Config.Config, v
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(expression_folder, export_data['FILE_NAME'][i])
 
-        if  input_file == output_file:
-            output_temp = output_file + '.temp'
+        output_temp = output_file + '.temp'
 
-            calls.append(helper.parallel_call("echo \"{}\" > {}; "
-                                              "awk -F'\\t' '{{ OFS=FS }} NR>1 {{ "
-                                              "temp=$10; $10=$7; $7=temp; {{ "
-                                              "for(i = 8; i <= NF; i++) $i=\"\"; print }} }}' {} "
-                                              ">> {};".format(header, output_temp, input_file, output_temp) +
-                                              'sed \'s/[[:blank:]]*$//\' {} > {}'.format(output_temp, output_file), verb))
-
-        else:
-            calls.append(helper.parallel_call("echo \"{}\" > {}; "
-                                              "awk -F'\\t' '{{ OFS=FS }} NR>1 {{ "
-                                              "temp=$10; $10=$7; $7=temp; {{ "
-                                              "for(i = 8; i < NF; i++) $i=\"\"; print }} }}' {} "
-                                              ">> {}; sed -i \'s/[[:blank:]]*$//\' {}".format(header,
-                                                                                              output_file,
-                                                                                              input_file,
-                                                                                              output_file,
-                                                                                              output_file), verb))
+        calls.append(helper.parallel_call("echo \"{}\" > {}; "
+                                          "awk -F'\\t' '{{ OFS=FS }} NR>1 {{ "
+                                          "temp=$10; $10=$7; $7=temp; {{ "
+                                          "for(i = 8; i <= NF; i++) $i=\"\"; print }} }}' {} "
+                                          ">> {};".format(header, output_temp, input_file, output_temp) +
+                                          'sed \'s/[[:blank:]]*$//\' {} > {}'.format(output_temp, output_file), verb))
 
     exports_config.config_map['input_folder'] = expression_folder
     input_folder = exports_config.config_map['input_folder']
 
     # Wait until Baked
     exit_codes = [p.wait() for p in calls]
-    helper.call_shell('head {}'.format(os.path.join(input_folder, export_data['FILE_NAME'][0])), verb)
 
     # Clean up
     if any(exit_codes):
@@ -68,7 +53,6 @@ def cufflinks_prep(exports_config: Config.Config, study_config: Config.Config, v
 def alpha_sort(exports_config: Config.Config, verb):
     input_folder = exports_config.config_map['input_folder']
     calls = []
-    helper.call_shell('head {}'.format(os.path.join(input_folder, exports_config.data_frame['FILE_NAME'][0])), verb)
 
     for each in exports_config.data_frame['FILE_NAME']:
         output_file = os.path.join(input_folder, each)
@@ -79,7 +63,6 @@ def alpha_sort(exports_config: Config.Config, verb):
 
     # Wait until Baked
     exit_codes = [p.wait() for p in calls]
-    helper.call_shell('head {}'.format(os.path.join(input_folder, exports_config.data_frame['FILE_NAME'][0])), verb)
 
     # Clean up
     if any(exit_codes):
@@ -93,14 +76,15 @@ def generate_expression_matrix(exports_config: Config.Config, study_config: Conf
                                'data_{}.txt'.format(config2name_map[exports_config.type_config]))
 
     helper.working_on(verb, message='Reading FPKM data ...')
-    info: Information = []
+    info: DataFrames = []
     for i in range(exports_config.data_frame.shape[0]):
         info.append(pd.read_csv(os.path.join(exports_config.config_map['input_folder'],
                                              exports_config.data_frame['FILE_NAME'][i]),
                                 sep='\t',
-                                usecols=['gene_id',
-                                         'FPKM']).rename(columns={'FPKM': exports_config.data_frame['TUMOR_ID'][i],
-                                                                  'gene_id': 'Hugo_Symbol'}))
+                                usecols=['gene_id','FPKM'])
+                    .rename(columns={'FPKM': exports_config.data_frame['SAMPLE_ID'][i],
+                                     'gene_id': 'Hugo_Symbol'})
+                    .drop_duplicates(subset='Hugo_Symbol', keep='last', inplace=False))
 
     helper.working_on(verb, message='Merging all FPKM data ...')
     if len(info) == 0:
@@ -110,20 +94,9 @@ def generate_expression_matrix(exports_config: Config.Config, study_config: Conf
     else:
         result = info[0]
         for i in range(1, len(info)):
-            result = pd.merge(result, info[i], on='Hugo_Symbol')
+            result: pd.DataFrame = pd.merge(result, info[i], how='outer', on='Hugo_Symbol')
+            result.drop_duplicates(subset='Hugo_Symbol', keep='last', inplace=True)
     result.replace(np.nan, 0, inplace=True)
 
     helper.working_on(verb, message='Writing all FPKM data ...')
     result.to_csv(output_file, sep='\t', index=None)
-
-
-def generate_expression_zscore(exports_config: Config.Config, study_config: Config.Config, verb):
-    output_file = os.path.join(study_config.config_map['output_folder'],
-                               'data_{}.txt'.format(config2name_map[exports_config.type_config + '_ZSCORES']))
-
-    input_file = os.path.join(study_config.config_map['output_folder'],
-                              'data_{}.txt'.format(config2name_map[exports_config.type_config]))
-
-    # Second line removes white space
-    helper.call_shell('awk -f lib/data_type/zscore_expression.awk {} | '
-                      'sed \'s/[[:blank:]]*$//\' > {}'.format(input_file, output_file), verb)
