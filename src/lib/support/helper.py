@@ -1,5 +1,4 @@
 __author__ = "Kunal Chandan"
-__license__ = "MIT"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
@@ -7,8 +6,8 @@ import os
 import shutil
 import subprocess
 
-from lib.support import Config
-from lib.constants.constants import config2name_map
+from ..support import Config
+from ..constants.constants import config2name_map, supported_pipe
 
 extensionChoices = ["vcf", "maf"]
 c_choices = [".tar.gz", ".gz", ".zip"]
@@ -30,6 +29,11 @@ def make_folder(path):
 
 def clean_folder(path):
     print('Please ensure that you are not losing any data in {}'.format(path))
+    import time
+    if os.path.exists(path):
+        for i in range(5, 0, -1):
+            print('You have {} seconds to cancel the operation'.format(i))
+            time.sleep(1)
     make_folder(path)
     for the_file in os.listdir(path):
         file_path = os.path.join(path, the_file)
@@ -61,6 +65,16 @@ def call_shell(command: str, verb):
 def parallel_call(command: str, verb):
     working_on(verb, message=command)
     return subprocess.Popen(command, shell=True)
+
+def assert_pipeline(type: str, pipeline: str):
+    if not pipeline in supported_pipe[type]:
+        stars()
+        stars()
+        print('ERROR:: The pipeline ({}) you have placed in the {} file is not currently supported. '
+              'Please use one of these {}'.format(pipeline, type, supported_pipe[type]))
+        stars()
+        stars()
+        exit(1)
 
 
 def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config, verb):
