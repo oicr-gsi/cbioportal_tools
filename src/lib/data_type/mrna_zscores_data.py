@@ -1,3 +1,7 @@
+__author__ = ["Kunal Chandan", "Lawrence Heisler"]
+__email__ = ["kchandan@uwaterloo.ca", "Lawrence.Heisler@oicr.on.ca"]
+__status__ = "Pre-Production"
+
 import os
 
 import pandas as pd
