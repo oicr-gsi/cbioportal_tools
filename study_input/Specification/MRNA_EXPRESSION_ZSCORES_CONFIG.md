@@ -11,7 +11,7 @@ You need to generate the expression z-scores data from the [MRNA_EXPRESSION.txt]
 
 The minimal header will look like this:
 ```
-#pipeline=[ MRNA_EXPRESSION, FILE]
+#pipeline=[ MRNA_EXPRESSION | FILE]
 #profile_name=mRNA Expression zscores data
 #profile_description=Expression zscores information (XX Samples)
 ```
@@ -33,3 +33,11 @@ The file `expression_zscores.txt` would look like:
 #profile_name=mRNA Expression zscores data
 #profile_description=Expression zscores information (05 Samples)
 ```
+- All `data_` type files can be directly imported into the study folder by:
+  - Adding `#pipeline=FILE` to the header
+  - Having the `dataframe` set as:
+  ```
+  FILE_NAME
+  <LOCATION/OF/FILE.txt>
+  ```
+  Janus will rename it correctly.

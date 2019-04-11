@@ -13,7 +13,7 @@ If your files are compressed with any format, ensure it has the **correct extens
 The minimal header will look like this:
 ```
 #input_folder=/FOLDER/WITH/DATA/
-#pipeline=[ CNVkit | Sequenza | HMMCopy ]
+#pipeline=[ CNVkit | Sequenza | HMMCopy | FILE ]
 #profile_name=Segmentation Mutations (Cardiac Cancer)
 #profile_description=Segmentation data from whole exome sequencing of cardiac tissue. (XX Samples)
 #bed_file=/.mounts/labs/gsiprojects/gsi/cBioGSI/kchandan/cBioWrap/testdata/ncbi_genes_hg19_canonical.bed
@@ -51,3 +51,11 @@ FILE_NAME	PATIENT_ID	SAMPLE_ID
 TEST_0001.tsv	TEST_0001	TEST_0001_TUMOR
 TEST_0001.tsv	TEST_0002	TEST_0002_TUMOR
 ```
+- All `data_` type files can be directly imported into the study folder by:
+  - Adding `#pipeline=FILE` to the header
+  - Having the `dataframe` set as:
+  ```
+  FILE_NAME
+  <LOCATION/OF/FILE.txt>
+  ```
+  Janus will rename it correctly.
