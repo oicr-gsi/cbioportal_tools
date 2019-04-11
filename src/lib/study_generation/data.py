@@ -173,7 +173,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
                         'See these: [ {} ]'.format(' | '.join(config2name_map.keys())))
 
 
-def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: Config.Config, janus_path, verb):
+def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: Config.Config, verb):
     num_header_lines = 4
 
     helper.working_on(verb, message='Writing to data_{}.txt ...'.format(config2name_map[samples_config.type_config]))
