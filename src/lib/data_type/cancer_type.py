@@ -13,7 +13,7 @@ from lib.support import Config
 
 
 def get_colours(janus_path) -> pd.DataFrame:
-    return pd.read_csv(os.path.join(janus_path, 'lib/support/cancer_colours.csv'), header=None, dtype=str)
+    return pd.read_csv(os.path.join(janus_path, 'src/lib/support/cancer_colours.csv'), header=None, dtype=str)
 
 
 def gen_cancer_type_data(cancer_type_config: Config.Config, study_config: Config.Config, colours: pd.DataFrame):
