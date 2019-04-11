@@ -5,6 +5,7 @@ __status__ = "Pre-Production"
 import os
 import shutil
 import subprocess
+import time
 
 from ..support import Config
 from ..constants.constants import config2name_map, supported_pipe
@@ -29,7 +30,6 @@ def make_folder(path):
 
 def clean_folder(path):
     print('Please ensure that you are not losing any data in {}'.format(path))
-    import time
     if os.path.exists(path):
         for i in range(5, 0, -1):
             print('You have {} seconds to cancel the operation'.format(i))
@@ -44,6 +44,10 @@ def clean_folder(path):
                 shutil.rmtree(file_path)
         except Exception as e:
             print(e)
+
+
+def copy_file(input, output, verb):
+    call_shell("cp {} {}".format(input, output), verb)
 
 
 def working_on(verbosity, message='Success!\n'):
@@ -65,6 +69,7 @@ def call_shell(command: str, verb):
 def parallel_call(command: str, verb):
     working_on(verb, message=command)
     return subprocess.Popen(command, shell=True)
+
 
 def assert_pipeline(type: str, pipeline: str):
     if not pipeline in supported_pipe[type]:

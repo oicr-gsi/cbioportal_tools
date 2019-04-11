@@ -1,3 +1,7 @@
+__author__ = "Kunal Chandan"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "1.0"
+
 import os
 import subprocess
 import argparse
@@ -41,6 +45,7 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb
     if not key == '':
         key = '-i ' + key
     base_folder = os.path.basename(os.path.abspath(study_folder))
+    log_file = os.path.join(os.path.abspath(study_folder), 'import_log.txt')
     # Copying folder to cBioPortal
     working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
 
@@ -59,9 +64,11 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb
 
     valid = call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                        "sudo ./metaImport.py -s ~/oicr_studies/{} "
-                       "-u http://{} -o'".format(key, cbioportal_url,
-                                                 base_folder,
-                                                 cbioportal_url), verb)
+                       "-u http://{} -o' | "
+                       "tee {}".format(key, cbioportal_url,
+                                        base_folder,
+                                        cbioportal_url,
+                                        log_file), verb)
 
     if   valid == 1:
         stars()
@@ -92,6 +99,7 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb
 def main():
     args = define_parser().parse_args()
     export_study_to_cbioportal(args.key, args.folder, args.url, True)
+    #TODO:: Log output
 
 
 if __name__ == '__main__':
