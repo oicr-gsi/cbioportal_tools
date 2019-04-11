@@ -155,7 +155,8 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument("-k", "--key",
                         type=lambda key: os.path.abspath(key),
                         help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
-                        metavar='FILE')
+                        metavar='FILE',
+                        default='')
     parser.add_argument("-p", "--push",
                         action="store_true",
                         help="Push the generated study to the cBioPortal Instance")

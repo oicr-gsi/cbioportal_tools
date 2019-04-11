@@ -20,7 +20,8 @@ def define_parser() -> argparse.ArgumentParser:
                         metavar='URL')
     parser.add_argument("-k", "--key",
                         help="The location of the cBioPortal Key.",
-                        metavar='KEY')
+                        metavar='KEY',
+                        default='')
     return parser
 
 def working_on(verbosity, message='Success!\n'):
