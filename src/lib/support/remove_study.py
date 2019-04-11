@@ -1,3 +1,4 @@
+#TODO:: Remove a study given an Identifier...
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "1.0"
@@ -11,9 +12,9 @@ def define_parser() -> argparse.ArgumentParser:
     # Define program arguments
     parser = argparse.ArgumentParser(description="Importer script for cBioPortal.")
 
-    parser.add_argument("-f", "--folder",
-                        help="The location of the study folder.",
-                        metavar='FOLDER')
+    parser.add_argument("-i", "--id",
+                        help="The cancer study ID.",
+                        metavar='ID')
     parser.add_argument("-u", "--url",
                         help="The location of the cBioPortal instance (address).",
                         metavar='URL')
@@ -41,11 +42,11 @@ def call_shell(command: str, verb):
     return output
 
 
-def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb):
+def export_study_to_cbioportal(key: str, study_config: str, cbioportal_url, verb):
     if not key == '':
         key = '-i ' + key
-    base_folder = os.path.basename(os.path.abspath(study_folder))
-    log_file = os.path.join(os.path.abspath(study_folder), 'import_log.txt')
+    base_folder = 'study_removal'
+    log_file = os.path.join(os.path.abspath(study_config), 'import_log.txt')
     # Copying folder to cBioPortal
     working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
 
@@ -55,7 +56,7 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb
                                                                                              base_folder), verb)
 
     # Copy over
-    call_shell('scp -r {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_folder, cbioportal_url),
+    call_shell('scp {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_config, cbioportal_url),
                verb)
 
     working_on(verb)
@@ -101,7 +102,9 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb
 
 def main():
     args = define_parser().parse_args()
-    export_study_to_cbioportal(args.key, args.folder, args.url, True)
+    config = open(args.id+'.txt', 'w+')
+    config.write('')
+    export_study_to_cbioportal(args.key, config, args.url, True)
 
 
 if __name__ == '__main__':

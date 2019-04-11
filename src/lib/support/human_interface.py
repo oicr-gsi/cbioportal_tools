@@ -40,6 +40,10 @@ def define_parser() -> argparse.ArgumentParser:
     config.add_argument("-d", "--description",
                         help="A description of the study.",
                         metavar='DESCRIPTION')
+    config.add_argument("-p", "--path",
+                        help="Path of Janus.py",
+                        metavar='PATH',
+                        required=True)
     # TODO:: Add Option to generate a specific case list
 
     config_spec = parser.add_argument_group('Overridable Required Configuration File Specifiers:')
@@ -151,8 +155,7 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument("-k", "--key",
                         type=lambda key: os.path.abspath(key),
                         help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
-                        metavar='FILE',
-                        default='/u/kchandan/cbioportal.pem')
+                        metavar='FILE')
     parser.add_argument("-p", "--push",
                         action="store_true",
                         help="Push the generated study to the cBioPortal Instance")

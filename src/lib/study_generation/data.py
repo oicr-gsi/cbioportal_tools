@@ -12,7 +12,7 @@ from lib.data_type import discrete_copy_number_data, continuous_copy_number_data
 from lib.support import Config, helper
 
 
-def generate_data_type(meta_config: Config.Config, study_config: Config.Config, verb):
+def generate_data_type(meta_config: Config.Config, study_config: Config.Config, janus_path, verb):
 
     if 'pipeline' in meta_config.config_map.keys() and meta_config.config_map['pipeline'] == 'FILE':
 

@@ -48,6 +48,7 @@ def main():
     # TODO:: Ensure absolute paths for helper program files: ie seg2gene.R
     args = human_interface.define_parser().parse_args()
     verb = args.verbose
+    path = args.path
     # TODO:: Fail gracefully if something breaks
 
     if args.config:
@@ -69,7 +70,7 @@ def main():
 
     for each in information:
         meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
-        data.generate_data_type(each, study_config, verb)
+        data.generate_data_type(each, study_config, path, verb)
         case.generate_case_list(each, study_config)
 
     for each in clinic_data:

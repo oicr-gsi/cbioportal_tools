@@ -11,9 +11,10 @@ def export_study_to_cbioportal(key: str, study_folder: str, verb):
     # Copying folder to cBioPortal
     helper.working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
 
-    helper.call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                      "rm -r ~/oicr_studies/{}; "
-                      "mkdir ~/oicr_studies/{}'".format(key, cbioportal_url, base_folder, base_folder), verb)
+    helper.call_shell("ssh {} debian@{} ' rm -r ~/oicr_studies/{}; mkdir ~/oicr_studies/{}'".format(key,
+                                                                                                    cbioportal_url,
+                                                                                                    base_folder,
+                                                                                                    base_folder), verb)
 
     # Copy over
     helper.call_shell('scp -r {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_folder, cbioportal_url),
@@ -44,9 +45,10 @@ def validate_study(key, study_folder, verb):
     # Copying folder to cBioPortal
     helper.working_on(verb, message='Validating study ...')
 
-    helper.call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                      "rm -r ~/oicr_studies/{}; "
-                      "mkdir ~/oicr_studies/{}'".format(key, cbioportal_url, base_folder, base_folder), verb)
+    helper.call_shell("ssh {} debian@{} ' rm -r ~/oicr_studies/{}; mkdir ~/oicr_studies/{}'".format(key,
+                                                                                                    cbioportal_url,
+                                                                                                    base_folder,
+                                                                                                    base_folder), verb)
 
     # Copy over
     helper.call_shell('scp -r {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_folder, cbioportal_url),
@@ -63,9 +65,9 @@ def validate_study(key, study_folder, verb):
                               "sudo ./metaImport.py -s ~/oicr_studies/{} "
                               "-u http://{} -o' | "
                               "tee {}".format(key, cbioportal_url,
-                                               base_folder,
-                                               cbioportal_url,
-                                               log_file), verb)
+                                              base_folder,
+                                              cbioportal_url,
+                                              log_file), verb)
 
     if   valid == 1:
         helper.stars()
@@ -89,4 +91,3 @@ def validate_study(key, study_folder, verb):
         print('I think something broke really bad, raise an issue about what happened...')
         exit(1)
     helper.working_on(verb)
-    #TODO:: Log output
