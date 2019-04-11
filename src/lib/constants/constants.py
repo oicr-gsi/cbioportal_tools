@@ -110,4 +110,3 @@ clinical_type = ['PATIENT_ATTRIBUTES', 'SAMPLE_ATTRIBUTES', 'TIMELINE']
 hmmcopy_chrom_positions = 'hmmcopy_chrom_positions.txt'
 
 cbioportal_url = 'cbioportal-stage.gsi.oicr.on.ca'
-c

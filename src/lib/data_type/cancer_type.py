@@ -12,8 +12,8 @@ import pandas as pd
 from lib.support import Config
 
 
-def get_colours() -> pd.DataFrame:
-    return pd.read_csv(os.path.abspath('lib/support/cancer_colours.csv'), delimiter=',', header=None, dtype=str)
+def get_colours(janus_path) -> pd.DataFrame:
+    return pd.read_csv(os.path.join(janus_path, 'lib/support/cancer_colours.csv'), header=None, dtype=str)
 
 
 def gen_cancer_type_data(cancer_type_config: Config.Config, study_config: Config.Config, colours: pd.DataFrame):
