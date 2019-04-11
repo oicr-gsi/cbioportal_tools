@@ -123,7 +123,7 @@ def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, 
         print(exit_codes)
 
 
-def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
+def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Config, janus_path, verb):
 
     calls = []
     output_folder = study_config.config_map['output_folder']
@@ -136,8 +136,7 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
 
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
-        dictionary = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                                  '../constants/' + constants.hmmcopy_chrom_positions))
+        dictionary = os.path.join(janus_path, constants.hmmcopy_chrom_positions)
 
         output_temp = output_file + '.temp'
 

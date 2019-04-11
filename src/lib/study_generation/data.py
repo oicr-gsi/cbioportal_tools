@@ -98,7 +98,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
             segmented_data.fix_hmmcopy_tsv(meta_config, study_config, verb)
             segmented_data.fix_chrom(meta_config, study_config, verb)
-            segmented_data.fix_hmmcopy_max_chrom(meta_config, study_config, verb)
+            segmented_data.fix_hmmcopy_max_chrom(meta_config, study_config, janus_path, verb)
 
         helper.working_on(verb, message='Fixing .SEG IDs')
         segmented_data.fix_seg_id(meta_config, study_config, verb)
@@ -115,7 +115,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         if  meta_config.config_map['pipeline'] == 'SEG':
 
             helper.working_on(verb, message='Generating log2CNA files ...')
-            continuous_copy_number_data.gen_log2cna(meta_config, study_config, verb)
+            continuous_copy_number_data.gen_log2cna(meta_config, study_config, janus_path, verb)
             helper.working_on(verb)
 
     elif meta_config.type_config == 'DISCRETE_COPY_NUMBER':
@@ -161,7 +161,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')
-        colours = cancer_type.get_colours()
+        colours = cancer_type.get_colours(janus_path)
         helper.working_on(verb)
 
         helper.working_on(verb, message='Generating CANCER_TYPE records...')
@@ -173,7 +173,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
                         'See these: [ {} ]'.format(' | '.join(config2name_map.keys())))
 
 
-def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: Config.Config, verb):
+def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: Config.Config, janus_path, verb):
     num_header_lines = 4
 
     helper.working_on(verb, message='Writing to data_{}.txt ...'.format(config2name_map[samples_config.type_config]))
