@@ -16,7 +16,7 @@ and [cBioPortal-Tools](https://wiki.oicr.on.ca/display/GSI/cBioPortal-Tools)
      |    @@@|)(|@@@    |     
      /~     @|@@|@    (~\     
     /_     @@|@@|@@     _\    
-      ~    @@@@@@@@    ~     
+      ~    @@@@@@@@    ~      
 @     %@@@@@      @@@@@%     @
  @@@@@@@@@ \______/ @@@@@@@@@ 
 ```
