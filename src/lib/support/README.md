@@ -13,3 +13,6 @@ Because cBioPortal wants colours for cancer types, I use this to generate non-co
 
 ## import_study.py
 Standalone CLI script for importing studies into cBioPortal.
+
+## cbioportal and human interfaces
+2 Scripts containing folders that essentially just interface with their respective names, only contain functions.

@@ -42,3 +42,11 @@ The file `discrete.txt` could look like:
 #profile_name=Putative copy-number alterations from GISTIC
 #profile_description=Putative copy-number calls:  Values: -2=homozygous deletion; -1=hemizygous deletion; 0=neutral/no change; 1=gain; 2=high level amplification
 ```
+- All `data_` type files can be directly imported into the study folder by:
+  - Adding `#pipeline=FILE` to the header
+  - Having the `dataframe` set as:
+  ```
+  FILE_NAME
+  <LOCATION/OF/FILE.txt>
+  ```
+  Janus will rename it correctly.

@@ -13,7 +13,7 @@ If your files are compressed with any format, ensure it has the **correct extens
 The header will look like this:
 ```
 #input_folder=/FOLDER/WITH/DATA/
-#pipeline=[ Strelka | Mutect | Mutect2 | MutectStrelka | GATKHaplotypeCaller ]
+#pipeline=[ Strelka | Mutect | Mutect2 | MutectStrelka | GATKHaplotypeCaller | FILE ]
 #profile_name=Mutations (Cardiac Cancer)
 #profile_description=Mutation data from whole exome sequencing of cardiac tissue. (XX Samples)
 #ref_fasta=/.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa
@@ -69,3 +69,11 @@ FILE_NAME	PATIENT_ID	NORMAL_ID	SAMPLE_ID	NORMAL_COL	TUMOR_COL
 TEST_0001.vcf.gz	TEST_0001	TEST_0001_N	TEST_0001_T	TEST_0001_NORMAL	TEST_0001_TUMOR
 TEST_0002.vcf.gz	TEST_0002	TEST_0002_N	TEST_0002_T	TEST_0002_NORMAL	TEST_0002_TUMOR
 ```
+- All `data_` type files can be directly imported into the study folder by:
+  - Adding `#pipeline=FILE` to the header
+  - Having the `dataframe` set as:
+  ```
+  FILE_NAME
+  <LOCATION/OF/FILE.txt>
+  ```
+  Janus will rename it correctly.

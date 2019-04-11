@@ -18,7 +18,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
         helper.copy_file(os.path.join(meta_config.config_map['input_folder'],
                                       meta_config.data_frame['FILE_NAME'][0]),
-                         study_config.config_map['output_folder'],
+                         os.path.join(study_config.config_map['output_folder'],
+                                      'data_{}.txt'.format(config2name_map[meta_config.type_config])),
                          verb)
 
     elif meta_config.type_config == 'MAF':
