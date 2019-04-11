@@ -13,13 +13,16 @@ def define_parser() -> argparse.ArgumentParser:
 
     parser.add_argument("-f", "--folder",
                         help="The location of the study folder.",
-                        metavar='FOLDER')
+                        metavar='FOLDER',
+                        required=True)
     parser.add_argument("-u", "--url",
                         help="The location of the cBioPortal instance (address).",
-                        metavar='URL')
+                        metavar='URL',
+                        required=True)
     parser.add_argument("-k", "--key",
                         help="The location of the cBioPortal Key.",
-                        metavar='KEY')
+                        metavar='KEY',
+                        default='')
     return parser
 
 def working_on(verbosity, message='Success!\n'):
