@@ -107,6 +107,6 @@ clinical_type = ['PATIENT_ATTRIBUTES', 'SAMPLE_ATTRIBUTES', 'TIMELINE']
 
 # hg_19 chromosome lengths. (for fixing HMMCopy only?)
 # First index of list is chromosome, second is the real value
-hmmcopy_chrom_positions = 'hmmcopy_chrom_positions.txt'
+hmmcopy_chrom_positions = 'src/lib/constants/hmmcopy_chrom_positions.txt'
 
 cbioportal_url = 'cbioportal-stage.gsi.oicr.on.ca'

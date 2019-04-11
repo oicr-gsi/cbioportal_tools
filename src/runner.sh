@@ -14,4 +14,5 @@ python3 janus.py 	--config ../study_input/examples/DCIS/study.txt \
 						--output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/  \
 						--key /u/kchandan/cbioportal.pem \
 						--push \
+						--path /.mounts/labs/gsiprojects/gsi/cBioGSI/Janus/cbioportal_tools/ \
 						--verbose

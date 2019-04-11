@@ -24,4 +24,4 @@ def gen_log2cna(exports_config: Config.Config, study_config: Config.Config, janu
     helper.call_shell('Rscript {}'
                       '-s {} '
                       '-g {} '
-                      '-o {} '.format(os.path.join(janus_path, 'lib/data_type/seg2gene.R '), seg_file, bed_file, l_o_file), verb)
+                      '-o {} '.format(os.path.join(janus_path, 'src/lib/data_type/seg2gene.R '), seg_file, bed_file, l_o_file), verb)

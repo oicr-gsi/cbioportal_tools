@@ -40,7 +40,7 @@ def define_parser() -> argparse.ArgumentParser:
     config.add_argument("-d", "--description",
                         help="A description of the study.",
                         metavar='DESCRIPTION')
-    config.add_argument("-p", "--path",
+    config.add_argument("--path",
                         help="Path of Janus.py",
                         metavar='PATH',
                         required=True)
