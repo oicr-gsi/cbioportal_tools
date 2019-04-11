@@ -4,14 +4,12 @@ __status__ = "Pre-Production"
 
 import os
 
-from lib.constants.constants import meta_info_map, general_zip, ref_gene_id_zip, config2name_map, clinical_type
+from lib.constants.constants import meta_info_map, general_zip, ref_gene_id_zip, config2name_map, clinical_type, optional_fields
 from lib.support import Config, helper
 
 
 def generate_meta_type(config_type: str, config_map: dict, study_config: Config.Config, verb):
     # NOTE:: Should be able to generate any from the set of all meta files
-    #TODO:: Add functionality for optional fields
-    # Would require list of optional fields that then map onto their names then printed onto the meta file
 
     ####################### BEGIN WRITING META_FILES ###########################
     helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[config_type]))
@@ -29,7 +27,7 @@ def generate_meta_type(config_type: str, config_map: dict, study_config: Config.
         for field, entry in zip(general_zip, meta_info_map[config_type]):
             f.write('{}: {}\n'.format(field, entry))
 
-    elif config_type in ['SEG', 'GISTIC_2.0']:
+    elif config_type in ['SEG', 'GISTIC_2']:
         for field, entry in zip(ref_gene_id_zip, meta_info_map[config_type]):
             f.write('{}: {}\n'.format(field, entry))
         if config_type == 'SEG':
@@ -43,10 +41,13 @@ def generate_meta_type(config_type: str, config_map: dict, study_config: Config.
             f.write('{}: {}\n'.format(field, entry))
 
     # Add profile_name and description, but exclude clinical data
-    if config_type not in [clinical_type, 'SEG']:
+    if config_type not in clinical_type and config_type not in ['SEG']:
         if all([i in config_map for i in ['profile_name', 'profile_description']]):
             f.write('profile_name: {}\n'.format(config_map['profile_name']))
             f.write('profile_description: {}\n'.format(config_map['profile_description']))
+
+    for x in (set(config_map.keys()) & set(optional_fields)):
+        f.write('{}: {}\n'.format(x, config_map[x]))
 
     f.write('data_filename: data_{}.txt\n'.format(config2name_map[config_type]))
     f.flush()

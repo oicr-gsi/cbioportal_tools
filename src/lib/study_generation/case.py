@@ -14,11 +14,15 @@ def generate_case_list(meta_config: Config.Config, study_config: Config.Config):
         if not os.path.exists(case_list_folder):
             os.makedirs(case_list_folder)
 
-        f = open(os.path.join(case_list_folder, 'cases{}.txt'.format(case_list_map[meta_config.type_config])), 'w')
+        if 'suffix' in meta_config.config_map.keys():
+            suffix = meta_config.config_map['suffix']
+        else:
+            suffix = case_list_map[meta_config.type_config]
+
+        f = open(os.path.join(case_list_folder, 'cases{}.txt'.format(suffix)), 'w')
 
         f.write('cancer_study_identifier: {}\n'.format(study_config.config_map['cancer_study_identifier']))
-        f.write('stable_id: {}{}\n'.format(study_config.config_map['cancer_study_identifier'],
-                                           case_list_map[meta_config.type_config]))
+        f.write('stable_id: {}{}\n'.format(study_config.config_map['cancer_study_identifier'], suffix))
         try:
             f.write('case_list_name: {}\n'.format(meta_config.config_map['profile_name']))
             f.write('case_list_description: {}\n'.format(meta_config.config_map['profile_description']))
