@@ -14,7 +14,14 @@ from lib.support import Config, helper
 
 def generate_data_type(meta_config: Config.Config, study_config: Config.Config, verb):
 
-    if   meta_config.type_config == 'MAF':
+    if 'pipeline' in meta_config.config_map.keys() and meta_config.config_map['pipeline'] == 'FILE':
+
+        helper.copy_file(os.path.join(meta_config.config_map['input_folder'],
+                                      meta_config.data_frame['FILE_NAME'][0]),
+                         study_config.config_map['output_folder'],
+                         verb)
+
+    elif meta_config.type_config == 'MAF':
 
         helper.working_on(verb, message='Gathering and decompressing mutation files into temporary folder...')
         helper.decompress_to_temp(meta_config, study_config, verb)
@@ -129,7 +136,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
 
         if   meta_config.config_map['pipeline'] == 'Cufflinks':
-            mrna_data.cufflinks_prep(meta_config, study_config, verb)
+            helper.working_on(verb, message='Nothing really needs to be done')
 
         elif meta_config.config_map['pipeline'] == 'RSEM':
             helper.working_on(verb, message='Nothing really needs to be done')
