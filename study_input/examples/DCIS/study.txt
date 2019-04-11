@@ -14,3 +14,4 @@ PATIENT_ATTRIBUTES	patient.txt
 CANCER_TYPE	cancer_type.txt
 DISCRETE_COPY_NUMBER	discrete.txt
 CONTINUOUS_COPY_NUMBER	continuous.txt
+CASE_LIST	case_set.txt

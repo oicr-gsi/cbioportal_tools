@@ -1,0 +1,6 @@
+#suffix=_merp
+#profile_name=ImPoRtAnT SaMpLeS
+#profile_description=A Particular subset of the samples believed to be important
+SAMPLE_ID
+TEST_0002_Br_P_EX_1
+TEST_0004_Br_P_EX_1
