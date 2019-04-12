@@ -7,6 +7,7 @@ import os
 import numpy as np
 
 from lib.constants.constants import config2name_map, supported_pipe
+from lib.study_generation import meta
 from lib.data_type import mutation_data, segmented_data, mrna_data, cancer_type
 from lib.data_type import discrete_copy_number_data, continuous_copy_number_data, mrna_zscores_data
 from lib.support import Config, helper
@@ -153,11 +154,15 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         mrna_data.generate_expression_matrix(meta_config, study_config, verb)
         helper.working_on(verb)
 
-    elif meta_config.type_config == 'MRNA_EXPRESSION_ZSCORES':
+        # Works because shorting ...
+        if  'zscores' in meta_config.config_map.keys() and meta_config.config_map['zscores'].lower() == 'true':
 
-        helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
+            helper.working_on(verb, message='Generating expression Z-Score Meta ...')
+            meta.generate_meta_type(meta_config.type_config + '_ZSCORES',
+                                    {'profile_name': 'mRNA expression z-scores',
+                                     'profile_description': 'Expression level z-scores'}, study_config, verb)
+            helper.working_on(verb)
 
-        if  meta_config.config_map['pipeline'] == 'MRNA_EXPRESSION':
             helper.working_on(verb, message='Generating expression Z-Score Data ...')
             mrna_zscores_data.generate_expression_zscore(meta_config, study_config, verb)
             helper.working_on(verb)

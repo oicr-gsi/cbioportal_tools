@@ -1,5 +1,6 @@
 #input_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/Cufflinks
 #pipeline=Cufflinks
+#zscores=tRue
 #profile_name=mRNA Expression
 #profile_description=Expression information DCIS (5 Samples)
 FILE_NAME	PATIENT_ID	SAMPLE_ID

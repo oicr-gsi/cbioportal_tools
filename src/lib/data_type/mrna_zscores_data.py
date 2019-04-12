@@ -12,10 +12,10 @@ from lib.support import Config, helper
 
 def generate_expression_zscore(exports_config: Config.Config, study_config: Config.Config, verb):
     input_file = os.path.join(study_config.config_map['output_folder'],
-                              'data_{}.txt'.format(config2name_map['MRNA_EXPRESSION']))
+                              'data_{}.txt'.format(config2name_map[exports_config.type_config]))
 
     output_file = os.path.join(study_config.config_map['output_folder'],
-                               'data_{}.txt'.format(config2name_map[exports_config.type_config]))
+                               'data_{}.txt'.format(config2name_map[exports_config.type_config + '_ZSCORES']))
 
     # Z-Scores written by Dr. L Heisler
     helper.working_on(verb, message='Reading FPKM Matrix ...')

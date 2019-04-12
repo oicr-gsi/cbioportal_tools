@@ -19,6 +19,12 @@ The minimal header will look like this:
 ```
 All key-value pairs **above** are **required**.
 
+
+Below is the **optional** key for the header. It will produce the `data_expression_zscores.txt` if the key is `true` (case insensitive).
+```
+#zscores=tRuE
+```
+
 ### Configuring DataFrame
 
 The DataFrame of the `MRNA_EXPRESSION` Config must contain these columns:
@@ -45,6 +51,7 @@ The file `expression.txt` would look like:
 #pipeline=Cufflinks
 #profile_name=mRNA Expression
 #profile_description=Expression information (XX Samples)
+#zscores=true
 FILE_NAME	PATIENT_ID	SAMPLE_ID
 TEST_0001.vcf.gz	TEST_0001	TEST_0001_T
 TEST_0002.vcf.gz	TEST_0002	TEST_0002_N
