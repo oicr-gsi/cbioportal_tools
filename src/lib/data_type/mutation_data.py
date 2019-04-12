@@ -7,29 +7,39 @@ import subprocess
 
 from lib.support import Config, helper
 
+#TODO:: Add an unmatched column for a keyword or something
 
-def wanted_columns(mutate_config: Config.Config, study_config: Config.Config):
-    f = open(os.path.join(mutate_config.config_map['input_folder'],
-                          mutate_config.data_frame['FILE_NAME'][0]), 'r')
-    f.readline()
+def verify_dual_columns(exports_config: Config.Config, verb):
+    processes = []
+    for i in range(exports_config.data_frame.shape[0]):
+        file = os.path.join(exports_config.config_map['input_folder'], exports_config.data_frame['FILE_NAME'][i])
+        # Essentially, print The header,
+        # add an unmatched column to header,
+        # duplicate last column
+        # if the normal_id is UNMATCHED, then do this silly business.
+        if exports_config.data_frame['NORMAL_ID'][i] == 'UNMATCHED':
 
-    wanted = os.path.join(helper.get_temp_folder(study_config.config_map['output_folder'], 'study'),
-                          'wanted_columns.txt')
-
-    # Write Columns of Maf File
-    helper.make_folder(os.path.dirname(wanted))
-    o = open(wanted, 'w+')
-    o.write('\n'.join(f.readline().split('\t')))
-
-    f.close()
-    o.close()
+            processes.append(helper.parallel_call('awk -F\'\\t\' \'{{ OFS = FS }} '
+                                                  '{{   if ($1 ~ "##"){{ print }} '
+                                                  'else if ($1 ~ "#"){{ for(i = 1; i <= NF;i++){{ printf "%s\\t", $i }}'
+                                                  ' print "UNMATCHED" }}'
+                                                  'else {{ for(i = 1; i <= NF; i++) {{ printf "%s\\t", $i}} print $NF }}'
+                                                  '}}\' {0} > {0}.temp;'
+                                                  'mv {0}.temp {0}'.format(file), verb))
+    # Wait until Baked
+    exit_codes = [p.wait() for p in processes]
+    if verb:
+        print('Exit codes for filtered .vcf ...')
+        print(exit_codes)
+    if any(exit_codes):
+        raise ValueError('ERROR:: VCF file not found? or AWK Failed?')
 
 
 def filter_vcf_rejects(mutation_config: Config.Config, verb):
     processes = []
     for file in mutation_config.data_frame['FILE_NAME']:
         file = os.path.join(mutation_config.config_map['input_folder'], file)
-        processes.append(subprocess.Popen("cat {} | grep -E 'PASS|#' > {}".format(file, file + '.temp'), shell=True))
+        processes.append(helper.parallel_call("cat {} | grep -E 'PASS|#' > {}".format(file, file + '.temp'), verb))
 
     # Wait until Baked
     exit_codes = [p.wait() for p in processes]
@@ -42,7 +52,7 @@ def filter_vcf_rejects(mutation_config: Config.Config, verb):
     processes = []
     for file in mutation_config.data_frame['FILE_NAME']:
         file = os.path.join(mutation_config.config_map['input_folder'], file)
-        processes.append(subprocess.Popen("cat {} > {}".format(file + '.temp', file), shell=True))
+        processes.append(helper.parallel_call("cat {} > {}".format(file + '.temp', file), verb))
 
     # Wait until Baked
     exit_codes = [p.wait() for p in processes]

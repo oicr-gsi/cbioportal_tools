@@ -37,6 +37,9 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         if convert_vcf_2_maf:
             helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
 
+            helper.working_on('Ensuring both columns exist, otherwise adding UNMATCHED column ...')
+            mutation_data.verify_dual_columns(meta_config, verb)
+
             if   meta_config.config_map['pipeline'] == 'Strelka':
 
                 print('Something should be done')
