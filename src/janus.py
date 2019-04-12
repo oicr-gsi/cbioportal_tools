@@ -9,7 +9,7 @@ import pandas as pd
 
 # Other Scripts
 from lib.support import Config, helper, cbioportal_interface, human_interface
-from lib.constants.constants import meta_info_map
+from lib.constants import constants
 from lib.study_generation import data, meta, case
 
 Information = typing.List[Config.Config]
@@ -28,7 +28,7 @@ def resolve_priority_queue(information: Information) -> Information:
         else:
             continue
         while True:
-            if not (type_config in meta_info_map.keys()):
+            if not (type_config in constants.meta_info_map.keys()):
                 break
             else:
                 score[type_config] += 1
@@ -45,10 +45,12 @@ def resolve_priority_queue(information: Information) -> Information:
 
 
 def main():
-    # TODO:: Ensure absolute paths for helper program files: ie seg2gene.R
     args = human_interface.define_parser().parse_args()
     verb = args.verbose
     path = args.path
+    url  = args.url
+    constants.cbioportal_url = url
+
     # TODO:: Fail gracefully if something breaks
 
     if args.config:
