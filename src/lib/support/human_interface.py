@@ -46,7 +46,6 @@ def define_parser() -> argparse.ArgumentParser:
                         help="Path of Janus.py",
                         metavar='PATH',
                         required=True)
-    # TODO:: Add Option to generate a specific case list
 
     config_spec = parser.add_argument_group('Overridable Required Configuration File Specifiers:')
 
@@ -92,60 +91,53 @@ def define_parser() -> argparse.ArgumentParser:
                                   ' files. See the documentation if you do not want this.'
                                   '                    OPTIONAL'.format('expression-data',
                                                                         args2config_map['expression_data']))
-    #TODO:: Remove this from here, add it as an option within expression_data
-    config_data.add_argument('--' + 'expression-zscores-data',
-                             help='Location of {} configuration file: will override {} specification '
-                                  'in the config file.'
-                                  ' files. See the documentation if you do not want this.'
-                                  '                    OPTIONAL'.format('expression-zscores-data',
-                                                                        args2config_map['expression_zscores_data']))
     config_data.add_argument('--' + 'fusion-data',
                              help='Location of {} configuration file: will override {} specification '
                                   'in the config file. UNSUPPORTED. See the docs.       '
                                   'OPTIONAL --         UNSUPPORTED'.format('fusion-data',
-                                                                        args2config_map['fusion_data']),
+                                                                           args2config_map['fusion_data']),
                              metavar='UNSUPPORTED')
     config_data.add_argument('--' + 'methylation-data',
                              help='Location of {} configuration file: will override {} specification '
                                   'in the config file. UNSUPPORTED. See the docs.       '
                                   'OPTIONAL --         UNSUPPORTED'.format('methylation-data',
-                                                                        args2config_map['methylation_data']),
+                                                                           args2config_map['methylation_data']),
                              metavar='UNSUPPORTED')
     config_data.add_argument('--' + 'protein-data',
                              help='Location of {} configuration file: will override {} specification '
                                   'in the config file. UNSUPPORTED. See the docs.       '
                                   'OPTIONAL --         UNSUPPORTED'.format('protein-data',
-                                                                        args2config_map['protein_data']),
+                                                                           args2config_map['protein_data']),
                              metavar='UNSUPPORTED')
     config_spec.add_argument('--' + 'timeline-info',
                              help='Location of {} configuration file: will override {} specification '
                                   'in the config file. UNSUPPORTED. See the docs.       '
                                   'OPTIONAL --         UNSUPPORTED'.format('timeline-info',
-                                                                        args2config_map['timeline_info']),
+                                                                           args2config_map['timeline_info']),
                              metavar='UNSUPPORTED')
     config_data.add_argument('--' + 'gistic2-data',
                              help='Location of {} configuration file: will override {} specification '
                                   'in the config file. UNSUPPORTED. See the docs.       '
                                   'OPTIONAL --         UNSUPPORTED'.format('gistic2-data',
-                                                                        args2config_map['gistic2_data']),
+                                                                           args2config_map['gistic2_data']),
                              metavar='UNSUPPORTED')
     config_data.add_argument('--' + 'mutsig-data',
                              help='Location of {} configuration file: will override {} specification '
                                   'in the config file. UNSUPPORTED. See the docs.       '
                                   'OPTIONAL --         UNSUPPORTED'.format('mutsig-data',
-                                                                        args2config_map['mutsig_data']),
+                                                                           args2config_map['mutsig_data']),
                              metavar='UNSUPPORTED')
     config_data.add_argument('--' + 'gene-panel-data',
                              help='Location of {} configuration file: will override {} specification '
                                   'in the config file. UNSUPPORTED. See the docs.       '
                                   'OPTIONAL --         UNSUPPORTED'.format('gene-panel-data',
-                                                                        args2config_map['gene_panel_data']),
+                                                                           args2config_map['gene_panel_data']),
                              metavar='UNSUPPORTED')
     config_data.add_argument('--' + 'gene-set-data',
                              help='Location of {} configuration file: will override {} specification '
                                   'in the config file. UNSUPPORTED. See the docs.       '
                                   'OPTIONAL --         UNSUPPORTED'.format('gene-set-data',
-                                                                        args2config_map['gene_set_data']),
+                                                                           args2config_map['gene_set_data']),
                              metavar='UNSUPPORTED')
     config_data.add_argument('--' + 'custom-case-list',
                              help='Location of {} configuration file: will override {} specification '
