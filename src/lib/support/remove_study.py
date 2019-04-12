@@ -1,9 +1,7 @@
-#TODO:: Remove a study given an Identifier...
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "1.0"
 
-import os
 import subprocess
 import argparse
 
@@ -43,22 +41,20 @@ def call_shell(command: str, verb):
     return output
 
 
-def export_study_to_cbioportal(key: str, study_config: str, cbioportal_url, verb):
+def delete_study(key: str, study_config: str, cbioportal_url, verb):
     if not key == '':
         key = '-i ' + key
     base_folder = 'study_removal'
-    log_file = os.path.join(os.path.abspath(study_config), 'import_log.txt')
     # Copying folder to cBioPortal
     working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
 
-    call_shell("ssh {} debian@{} ' rm -r ~/oicr_studies/{}; mkdir ~/oicr_studies/{}'".format(key,
+    call_shell("ssh {} debian@{} 'rm ~/oicr_studies/{}'".format(key,
                                                                                              cbioportal_url,
                                                                                              base_folder,
                                                                                              base_folder), verb)
 
     # Copy over
-    call_shell('scp {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_config, cbioportal_url),
-               verb)
+    call_shell('scp {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_config, cbioportal_url), verb)
 
     working_on(verb)
 
@@ -66,12 +62,11 @@ def export_study_to_cbioportal(key: str, study_config: str, cbioportal_url, verb
     working_on(verb, message='Importing study to cBioPortal...')
 
     valid = call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                       "sudo ./metaImport.py -s ~/oicr_studies/{} "
-                       "-u http://{} -o' | "
-                       "tee {}".format(key, cbioportal_url,
-                                       base_folder,
-                                       cbioportal_url,
-                                       log_file), verb)
+                       "./cbioportalImporter.py --command remove-study --meta_filename ~/oicr_studies/meta_study.txt; "
+                       "rm ~/oicr_studies/meta_study.txt' ".format(key,
+                                                                   cbioportal_url,
+                                                                   base_folder,
+                                                                   cbioportal_url), verb)
 
     if   valid == 1:
         stars()
@@ -103,9 +98,12 @@ def export_study_to_cbioportal(key: str, study_config: str, cbioportal_url, verb
 
 def main():
     args = define_parser().parse_args()
-    config = open(args.id+'.txt', 'w+')
-    config.write('')
-    export_study_to_cbioportal(args.key, config, args.url, True)
+    study = 'meta_study.txt'
+    config = open(study, 'w+')
+    config.write('cancer_study_identifier:{}\ntype_of_cancer:\nshort_name:\nname:\ndescription:\r'.format(args.id))
+    config.flush()
+    config.close()
+    delete_study(args.key, study, args.url, True)
 
 
 if __name__ == '__main__':

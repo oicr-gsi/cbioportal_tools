@@ -3,8 +3,10 @@ import os
 
 import pandas as pd
 
-from lib.constants.constants import args2config_map
+from lib.constants import constants
 from lib.support import Config, helper
+
+args2config_map = constants.args2config_map
 
 
 def define_parser() -> argparse.ArgumentParser:
@@ -151,7 +153,6 @@ def define_parser() -> argparse.ArgumentParser:
                                   'OPTIONAL --         UNSUPPORTED'.format('custom-case-list',
                                                                            args2config_map['custom_case_list']),
                              metavar='UNSUPPORTED')
-    #TODO:: Support Case Lists...
     parser.add_argument("-k", "--key",
                         type=lambda key: os.path.abspath(key),
                         help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
@@ -160,6 +161,10 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument("-p", "--push",
                         action="store_true",
                         help="Push the generated study to the cBioPortal Instance")
+    parser.add_argument("-u", "--url",
+                        help="Override the url for cBioPortal instance DO NOT include https",
+                        metavar='URL',
+                        default=constants.cbioportal_url)
     # TODO:: Consider having multiple levels of verbosity
     parser.add_argument("-v", "--verbose",
                         action="store_true",
