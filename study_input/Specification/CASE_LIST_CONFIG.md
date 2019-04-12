@@ -49,4 +49,4 @@ TEST_0004_Br_P_EX_1
 
 The case lists will appear here:
 
-<img src="assets/case_list.png" alt="Merp" width="30%" height="30%"/>
+<img src="assets/case_list.png" alt="Merp" width="70%" height="70%"/>

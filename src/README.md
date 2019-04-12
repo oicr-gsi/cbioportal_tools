@@ -8,7 +8,7 @@ To submit a job, run `qsub_Janus.sh` with **your** email.
 
 ```
 usage: janus.py [-h] [-c FILE] -o FOLDER [-t TYPE] [-i ID] [-N NAME] [-n NAME]
-                [-d DESCRIPTION] [--sample-info SAMPLE_INFO]
+                [-d DESCRIPTION] --path PATH [--sample-info SAMPLE_INFO]
                 [--patient-info PATIENT_INFO] [--cancer-type CANCER_TYPE]
                 [--mutation-data MUTATION_DATA]
                 [--segmented-data SEGMENTED_DATA]
@@ -20,7 +20,7 @@ usage: janus.py [-h] [-c FILE] -o FOLDER [-t TYPE] [-i ID] [-N NAME] [-n NAME]
                 [--protein-data UNSUPPORTED] [--timeline-info UNSUPPORTED]
                 [--gistic2-data UNSUPPORTED] [--mutsig-data UNSUPPORTED]
                 [--gene-panel-data UNSUPPORTED] [--gene-set-data UNSUPPORTED]
-                [--custom-case-list UNSUPPORTED] [-k FILE] [-p] [-v]
+                [--custom-case-list UNSUPPORTED] [-k FILE] [-p] [-u URL] [-v]
 
 janus (https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate
 an importable study for a cBioPortal instance. Recommended usage can be seen
@@ -31,6 +31,8 @@ optional arguments:
   -k FILE, --key FILE   The RSA key to cBioPortal. Should have appropriate
                         read write restrictions
   -p, --push            Push the generated study to the cBioPortal Instance
+  -u URL, --url URL     Override the url for cBioPortal instance DO NOT
+                        include https
   -v, --verbose         Makes program verbose
 
 Study Arguments (Required)::
@@ -50,6 +52,7 @@ Study Arguments (Required)::
                         A short name for the study.
   -d DESCRIPTION, --description DESCRIPTION
                         A description of the study.
+  --path PATH           Path of Janus.py
 
 Overridable Required Configuration File Specifiers::
   --sample-info SAMPLE_INFO
