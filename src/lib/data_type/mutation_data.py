@@ -7,7 +7,6 @@ import subprocess
 
 from lib.support import Config, helper
 
-#TODO:: Add an unmatched column for a keyword or something
 
 def verify_dual_columns(exports_config: Config.Config, verb):
     processes = []

@@ -17,6 +17,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
     if 'pipeline' in meta_config.config_map.keys() and meta_config.config_map['pipeline'] == 'FILE':
 
+        #TODO:: Assert correct format ...
+
         helper.copy_file(os.path.join(meta_config.config_map['input_folder'],
                                       meta_config.data_frame['FILE_NAME'][0]),
                          os.path.join(study_config.config_map['output_folder'],
