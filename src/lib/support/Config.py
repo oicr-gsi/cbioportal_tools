@@ -50,18 +50,23 @@ def get_single_config(file, f_type, verb) -> Config:
 
     print('Reading information') if verb else print(),
     file_map = {}
-    for line in f:
-        if line[0] == '#':
-            line = line.strip().replace('#', '').split('=')
-            file_map[line[0]] = line[1]
-        else:
-            break
-    f.close()
+    line = ''
+    try:
+        for line in f:
+            if line[0] == '#':
+                line = line.strip().replace('#', '').split('=')
+                file_map[line[0]] = line[1]
+            else:
+                break
+        f.close()
+    except IndexError:
+        print('ERROR:: there was a syntax error in the header of {}'.format(file))
+        print(line)
+        exit(1)
     try:
         data_frame = pd.read_csv(file, delimiter='\t', skiprows=len(file_map), dtype=str)
     except pd.errors.EmptyDataError:
         if f_type in no_data_frame:
-            print('merp')
             data_frame = pd.DataFrame()
         else:
             print('Your {} file does not have data in it but it probably should, please double check it'.format(f_type))
@@ -90,9 +95,10 @@ def get_config_clinical(file: str, f_type: str, verb) -> ClinicalConfig:
     return config_file
 
 
-def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [Information, Config]:
+def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [Information, Config, Information]:
     information = []
     clinic_data = []
+    custom_list = []
     # Gather Config files
     for i in range(study_config.data_frame.shape[0]):
         config_file_name = os.path.join(os.path.dirname(os.path.abspath(args.config)),
@@ -100,12 +106,17 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
 
         config_file_type = study_config.data_frame['TYPE'][i]
 
-        if study_config.data_frame['TYPE'][i] in clinical_type:
+        if   study_config.data_frame['TYPE'][i] in clinical_type:
             clinic_data.append(get_config_clinical(config_file_name,
                                                    config_file_type,
                                                    verb))
+
+        elif study_config.data_frame['TYPE'][i] == 'CASE_LIST':
+            custom_list.append(get_single_config(config_file_name,
+                                                 config_file_type,
+                                                 verb))
         else:
             information.append(get_single_config(config_file_name,
                                                  config_file_type,
                                                  verb))
-    return [information, clinic_data]
+    return [information, clinic_data, custom_list]

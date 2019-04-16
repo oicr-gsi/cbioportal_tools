@@ -25,7 +25,7 @@ meta_info_map = {'PATIENT_ATTRIBUTES':      ['CLINICAL', 'PATIENT_ATTRIBUTES'],
                  'FUSION':                  ['FUSION', 'FUSION', 'fusion', 'true'],
                  'METHYLATION':             ['METHYLATION', 'CONTINUOUS', 'methylation_hm27', 'false'],
                  'PROTEIN':                 ['PROTEIN_LEVEL', 'UNIMPLEMENTED', 'UNIMPLEMENTED', 'UNIMPLEMENTED'],
-                 'GISTIC_2.0':              ['UNIMPLEMENTED'],
+                 'GISTIC_2':                ['UNIMPLEMENTED'],
                  'MUTSIG':                  ['UNIMPLEMENTED'],
                  'GENE_PANEL':              ['UNIMPLEMENTED'],
                  'GENE_SET':                ['UNIMPLEMENTED']}
@@ -40,20 +40,20 @@ args2config_map = {'sample_info':               'SAMPLE_ATTRIBUTES',
                    'segmented_data':            'SEG',
                    'expression_data':           'MRNA_EXPRESSION',
                    'expression_zscores_data':   'MRNA_EXPRESSION_ZSCORES',
-                   # TODO:: Not Implemented below this
-                   'log2CNA_data':              'CONTINUOUS_COPY_NUMBER',
-                   'CNA_data':                  'DISCRETE_COPY_NUMBER',
-                   'fusions_data':              'FUSION',
-                   'methylation_hm27_data':     'METHYLATION',
-                   'rppa_data':                 'PROTEIN',
-                   'gistic_genes_amp_data':     'GISTIC_2.0',
+                   'custom_case_list':          'CASE_LIST',
+                   # TODO:: IMPLEMENT AND VERIFY AFTER THIS LINE
+                   'continuous_data':           'CONTINUOUS_COPY_NUMBER',
+                   'discrete_data':             'DISCRETE_COPY_NUMBER',
+                   'fusion_data':               'FUSION',
+                   'methylation_data':          'METHYLATION',
+                   'protein_data':              'PROTEIN',
+                   'gistic2_data':              'GISTIC2',
                    'mutsig_data':               'MUTSIG',
                    # No idea what's going on with these two
-                   'GENE_PANEL_data':           'GENE_PANEL',
-                   'gsva_scores_data':          'GENE_SET'}
+                   'gene_panel_data':           'GENE_PANEL',
+                   'gene_set_data':             'GENE_SET'}
 
 # config2name_map is used for creating the meta_{name}.txt and data_{name}.txt file names.
-# This is especially useful when overwriting cBioWrap generated files
 config2name_map = {'SAMPLE_ATTRIBUTES':       'clinical_samples',
                    'PATIENT_ATTRIBUTES':      'clinical_patients',
                    'CANCER_TYPE':             'cancer_type',
@@ -61,13 +61,13 @@ config2name_map = {'SAMPLE_ATTRIBUTES':       'clinical_samples',
                    'SEG':                     'segments',
                    'MRNA_EXPRESSION':         'expression',
                    'MRNA_EXPRESSION_ZSCORES': 'expression_zscores',
-                   # TODO:: Not Implemented below this
+                   # TODO:: IMPLEMENT AND VERIFY AFTER THIS LINE
                    'DISCRETE_COPY_NUMBER':    'CNA',
                    'CONTINUOUS_COPY_NUMBER':  'log2CNA',
-                   'FUSION':                  'fusions',
-                   'METHYLATION':             'methylation_hm27',
+                   'FUSION':                  'fusion',
+                   'METHYLATION':             'methylation',
                    'PROTEIN':                 'rppa',
-                   'GISTIC_2.0':              'gistic_genes_amp',
+                   'GISTIC_2':                'gistic_genes_amp',
                    'MUTSIG':                  'mutsig',
                    # No idea what's going on with these two
                    'GENE_PANEL':              'GENE_PANEL',
@@ -83,9 +83,14 @@ general_zip =     ['genetic_alteration_type', 'datatype', 'stable_id', 'show_pro
 
 ref_gene_id_zip = ['genetic_alteration_type', 'datatype', 'reference_genome_id']
 
+optional_fields = ['groups', 'gene_panel', 'swissprot_identifier', 'variant_classification_filter', 'Protein_position',
+                   'SWISSPROT', 'Fusion_Status', 'citation', 'pmid']
+
 case_list_map =   {'MAF':               '_sequenced',
                    'SEG':               '_cna',
-                   'MRNA_EXPRESSION':   '_rna_seq_mrna'}
+                   'MRNA_EXPRESSION':   '_rna_seq_mrna',
+                   'CASE_LIST':         '_custom'}
+
 #TODO:: ensure correct suffixes
 # https://cbioportal.readthedocs.io/en/latest/File-Formats.html#case-list-stable-id-suffixes
 
@@ -94,15 +99,14 @@ no_data_frame = ['CONTINUOUS_COPY_NUMBER', 'DISCRETE_COPY_NUMBER', 'MRNA_EXPRESS
 supported_pipe = {'MAF':                       ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller'],
                   'SEG':                       ['CNVkit', 'Sequenza', 'HMMCopy'],
                   'MRNA_EXPRESSION':           ['Cufflinks', 'RSEM'],
-                  'MRNA_EXPRESSION_ZSCORES':   ['MRNA_EXPRESSION', 'FILE'],
-                  'CONTINUOUS_COPY_NUMBER':    ['SEG', 'FILE'],
-                  'DISCRETE_COPY_NUMBER':      ['CONTINUOUS_COPY_NUMBER', 'FILE']}
+                  'MRNA_EXPRESSION_ZSCORES':   ['MRNA_EXPRESSION'],
+                  'CONTINUOUS_COPY_NUMBER':    ['SEG'],
+                  'DISCRETE_COPY_NUMBER':      ['CONTINUOUS_COPY_NUMBER']}
 
 clinical_type = ['PATIENT_ATTRIBUTES', 'SAMPLE_ATTRIBUTES', 'TIMELINE']
 
 # hg_19 chromosome lengths. (for fixing HMMCopy only?)
 # First index of list is chromosome, second is the real value
-hmmcopy_chrom_positions = 'hmmcopy_chrom_positions.txt'
+hmmcopy_chrom_positions = 'src/lib/constants/hmmcopy_chrom_positions.txt'
 
-cbioportal_ip = '10.30.133.80'
-cbioportal_url = 'cbioportal.gsi.oicr.on.ca'
+cbioportal_url = 'cbioportal-stage.gsi.oicr.on.ca'

@@ -2,6 +2,7 @@
 
 ## Study Data
 * [STUDY_CONFIG.md](STUDY_CONFIG.md)
+* [CASE_LIST_CONFIG.md](CASE_LIST_CONFIG.md)
 * [GENERAL_CONFIG.md](GENERAL_CONFIG.md)
 
 ### Mutation Data
