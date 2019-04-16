@@ -36,5 +36,11 @@ The file `continuous.txt` could look like:
 #profile_name=Log2 copy-number values
 #profile_description=Log2 copy-number values
 ```
-
-# TODO:: Should there be a dataframe of patient and sample ID to include/not include
+- All `data_` type files can be directly imported into the study folder by:
+  - Adding `#pipeline=FILE` to the header
+  - Having the `dataframe` set as:
+  ```
+  FILE_NAME
+  <LOCATION/OF/FILE.txt>
+  ```
+  Janus will rename it correctly.

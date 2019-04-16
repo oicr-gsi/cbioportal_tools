@@ -1,3 +1,7 @@
+__author__ = "Kunal Chandan"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "Pre-Production"
+
 import os
 
 import pandas as pd

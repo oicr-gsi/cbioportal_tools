@@ -21,9 +21,20 @@ However it still shares a majority of it's attributes with the rest of the confi
 - All files excluding [`DISCRETE_COPY_NUMBER.txt`](DISCRETE_COPY_NUMBER_CONFIG.md), [`CONTINUOUS_COPY_NUMBER.txt`](CONTINUOUS_COPY_NUMBER_CONFIG.md), 
 [`MRNA_EXPRESSION_ZSCORES.txt`](MRNA_EXPRESSION_ZSCORES_CONFIG.md) must have the TSV dataframe
 
+- All `data_` type files can be directly imported into the study folder by:
+  - Adding `#pipeline=FILE` to the header
+  - Having the `dataframe` set as:
+  ```
+  FILE_NAME
+  <LOCATION/OF/FILE.txt>
+  ```
+  Janus will rename it correctly.
+
+  
 Therefore we can generate a general format that looks like this:
 
 The form of all configuration files is essentially
+
 ```
 #property=value
 #other_property=Something relavent
@@ -34,6 +45,7 @@ Val_01.txt	GSI_0001	GSI_0001_TUMOR_01	...
 Val_01.txt	GSI_0001	GSI_0001_NORMAL_01	...
 ...
 ```
+
 This form is absorbed into an object of type `Config` this object has 3 components:
 
 ```
@@ -41,6 +53,3 @@ config_map: dict
 data_frame: pandas.DataFrame
 type_config: str
 ```
-[`DISCRETE_COPY_NUMBER.txt`](DISCRETE_COPY_NUMBER_CONFIG.md)
-[`CONTINUOUS_COPY_NUMBER.txt`](CONTINUOUS_COPY_NUMBER_CONFIG.md)
-[`MRNA_EXPRESSION_ZSCORES.txt`](MRNA_EXPRESSION_ZSCORES_CONFIG.md)

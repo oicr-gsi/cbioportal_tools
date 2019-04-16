@@ -8,21 +8,19 @@ To submit a job, run `qsub_Janus.sh` with **your** email.
 
 ```
 usage: janus.py [-h] [-c FILE] -o FOLDER [-t TYPE] [-i ID] [-N NAME] [-n NAME]
-                [-d DESCRIPTION] [--sample-info SAMPLE_INFO]
+                [-d DESCRIPTION] --path PATH [--sample-info SAMPLE_INFO]
                 [--patient-info PATIENT_INFO] [--cancer-type CANCER_TYPE]
-                [--timeline-info TIMELINE_INFO]
                 [--mutation-data MUTATION_DATA]
                 [--segmented-data SEGMENTED_DATA]
+                [--continuous-data CONTINUOUS_DATA]
+                [--discrete-data DISCRETE_DATA]
                 [--expression-data EXPRESSION_DATA]
                 [--expression-zscores-data EXPRESSION_ZSCORES_DATA]
-                [--log2CNA-data LOG2CNA_DATA] [--CNA-data CNA_DATA]
-                [--fusions-data FUSIONS_DATA]
-                [--methylation-hm27-data METHYLATION_HM27_DATA]
-                [--rppa-data RPPA_DATA]
-                [--gistic-genes-amp-data GISTIC_GENES_AMP_DATA]
-                [--mutsig-data MUTSIG_DATA]
-                [--GENE-PANEL-data GENE_PANEL_DATA]
-                [--gsva-scores-data GSVA_SCORES_DATA] [-k FILE] [-p] [-v]
+                [--fusion-data UNSUPPORTED] [--methylation-data UNSUPPORTED]
+                [--protein-data UNSUPPORTED] [--timeline-info UNSUPPORTED]
+                [--gistic2-data UNSUPPORTED] [--mutsig-data UNSUPPORTED]
+                [--gene-panel-data UNSUPPORTED] [--gene-set-data UNSUPPORTED]
+                [--custom-case-list UNSUPPORTED] [-k FILE] [-p] [-u URL] [-v]
 
 janus (https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate
 an importable study for a cBioPortal instance. Recommended usage can be seen
@@ -30,6 +28,14 @@ in the examples located in ../study_input/ .
 
 optional arguments:
   -h, --help            show this help message and exit
+  -k FILE, --key FILE   The RSA key to cBioPortal. Should have appropriate
+                        read write restrictions
+  -p, --push            Push the generated study to the cBioPortal Instance
+  -u URL, --url URL     Override the url for cBioPortal instance DO NOT
+                        include https
+  -v, --verbose         Makes program verbose
+
+Study Arguments (Required)::
   -c FILE, --config FILE
                         The location of the study config file, in essence a
                         set of command-line arguments. Recommended usage is
@@ -46,12 +52,9 @@ optional arguments:
                         A short name for the study.
   -d DESCRIPTION, --description DESCRIPTION
                         A description of the study.
-  -k FILE, --key FILE   The RSA key to cBioPortal. Should have appropriate
-                        read write restrictions
-  -p, --push            Push the generated study to the cBioPortal Instance
-  -v, --verbose         Makes program verbose
+  --path PATH           Path of Janus.py
 
-Overridable Required Configuration File Specifiers:
+Overridable Required Configuration File Specifiers::
   --sample-info SAMPLE_INFO
                         Location of sample-info configuration file: will
                         override SAMPLE_ATTRIBUTES specification in the config
@@ -64,12 +67,12 @@ Overridable Required Configuration File Specifiers:
                         Location of cancer-type configuration file: will
                         override CANCER_TYPE specification in the config file.
                         REQUIRED*
-  --timeline-info TIMELINE_INFO
+  --timeline-info UNSUPPORTED
                         Location of timeline-info configuration file: will
                         override TIMELINE specification in the config file.
-                        THIS HAS NOT BEEN IMPLEMENTED YETSee the docs OPTIONAL
+                        UNSUPPORTED. See the docs. OPTIONAL -- UNSUPPORTED
 
-Overridable Optional Data-type Configuration File Specifiers:
+Overridable Optional Data-type Configuration File Specifiers::
   --mutation-data MUTATION_DATA
                         Location of mutation-data configuration file: will
                         override MAF specification in the config file.
@@ -80,6 +83,14 @@ Overridable Optional Data-type Configuration File Specifiers:
                         segmented data file will normally generate _CNA and
                         _log2CNA files. See documentation if you do not want
                         this. OPTIONAL
+  --continuous-data CONTINUOUS_DATA
+                        Location of continuous-data configuration file: will
+                        override CONTINUOUS_COPY_NUMBER specification in the
+                        config file.See the docs. OPTIONAL
+  --discrete-data DISCRETE_DATA
+                        Location of discrete-data configuration file: will
+                        override DISCRETE_COPY_NUMBER specification in the
+                        config file. See the docs. OPTIONAL
   --expression-data EXPRESSION_DATA
                         Location of expression-data configuration file: will
                         override MRNA_EXPRESSION specification in the config
@@ -90,48 +101,39 @@ Overridable Optional Data-type Configuration File Specifiers:
                         file: will override MRNA_EXPRESSION_ZSCORES
                         specification in the config file. files. See the
                         documentation if you do not want this. OPTIONAL
-  --log2CNA-data LOG2CNA_DATA
-                        Location of log2CNA-data configuration file: will
-                        override CONTINUOUS_COPY_NUMBER specification in the
-                        config file. THIS HAS BEEN IMPLEMENTED PARTIALLY. See
-                        the docs OPTIONAL
-  --CNA-data CNA_DATA   Location of CNA-data configuration file: will override
-                        DISCRETE_COPY_NUMBER specification in the config file.
-                        THIS HAS BEEN IMPLEMENTED PARTIALLY. See the docs
-                        OPTIONAL
-  --fusions-data FUSIONS_DATA
-                        Location of fusions-data configuration file: will
-                        override FUSION specification in the config file. THIS
-                        HAS NOT BEEN IMPLEMENTED YET. See the docs OPTIONAL
-  --methylation-hm27-data METHYLATION_HM27_DATA
-                        Location of methylation-hm27-data configuration file:
-                        will override METHYLATION specification in the config
-                        file. THIS HAS NOT BEEN IMPLEMENTED YET. See the docs
-                        OPTIONAL
-  --rppa-data RPPA_DATA
-                        Location of rppa-data configuration file: will
+  --fusion-data UNSUPPORTED
+                        Location of fusion-data configuration file: will
+                        override FUSION specification in the config file.
+                        UNSUPPORTED. See the docs. OPTIONAL -- UNSUPPORTED
+  --methylation-data UNSUPPORTED
+                        Location of methylation-data configuration file: will
+                        override METHYLATION specification in the config file.
+                        UNSUPPORTED. See the docs. OPTIONAL -- UNSUPPORTED
+  --protein-data UNSUPPORTED
+                        Location of protein-data configuration file: will
                         override PROTEIN specification in the config file.
-                        THIS HAS NOT BEEN IMPLEMENTED YET. See the docs
-                        OPTIONAL
-  --gistic-genes-amp-data GISTIC_GENES_AMP_DATA
-                        Location of gistic-genes-amp-data configuration file:
-                        will override GISTIC_2.0 specification in the config
-                        file. THIS HAS NOT BEEN IMPLEMENTED YET. See the docs
-                        OPTIONAL
-  --mutsig-data MUTSIG_DATA
+                        UNSUPPORTED. See the docs. OPTIONAL -- UNSUPPORTED
+  --gistic2-data UNSUPPORTED
+                        Location of gistic2-data configuration file: will
+                        override GISTIC2 specification in the config file.
+                        UNSUPPORTED. See the docs. OPTIONAL -- UNSUPPORTED
+  --mutsig-data UNSUPPORTED
                         Location of mutsig-data configuration file: will
-                        override MUTSIG specification in the config file. THIS
-                        HAS NOT BEEN IMPLEMENTED YET. See the docs OPTIONAL
-  --GENE-PANEL-data GENE_PANEL_DATA
-                        Location of GENE-PANEL-data configuration file: will
+                        override MUTSIG specification in the config file.
+                        UNSUPPORTED. See the docs. OPTIONAL -- UNSUPPORTED
+  --gene-panel-data UNSUPPORTED
+                        Location of gene-panel-data configuration file: will
                         override GENE_PANEL specification in the config file.
-                        THIS HAS NOT BEEN IMPLEMENTED YET. See the docs
-                        OPTIONAL
-  --gsva-scores-data GSVA_SCORES_DATA
-                        Location of gsva-scores-data configuration file: will
+                        UNSUPPORTED. See the docs. OPTIONAL -- UNSUPPORTED
+  --gene-set-data UNSUPPORTED
+                        Location of gene-set-data configuration file: will
                         override GENE_SET specification in the config file.
-                        THIS HAS NOT BEEN IMPLEMENTED YET. See the docs
-                        OPTIONAL
+                        UNSUPPORTED. See the docs. OPTIONAL -- UNSUPPORTED
+  --custom-case-list UNSUPPORTED
+                        Location of custom-case-list configuration file: will
+                        override CASE_LIST specification in the config file.
+                        UNSUPPORTED. See the docs. OPTIONAL -- UNSUPPORTED
+
 ```
 ### Examples:
 ```

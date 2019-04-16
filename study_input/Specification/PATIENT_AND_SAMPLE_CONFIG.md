@@ -33,7 +33,7 @@ Each Attributes DataFrame has a 5 line header, where:
 
 #### Patient Attributes
 
-The DataFrame of the `PATIENTS_ATTRIBUTES` Config must contain these columns:
+The DataFrame of the `PATIENTS_ATTRIBUTES` Config must contain at a minimum these columns:
 ```
 Patient Identifier	Patient Name
 Patient Identifier	Patient Name
@@ -56,7 +56,7 @@ More columns can be added easily, the specially handled values for the columns a
 
 #### Sample Attributes
 
-The DataFrame of the `SAMPLE_ATTRIBUTES` Config must contain these columns:
+The DataFrame of the `SAMPLE_ATTRIBUTES` Config must contain at a minimum these columns:
 
 ```
 Patient Identifier	Sample Identifier

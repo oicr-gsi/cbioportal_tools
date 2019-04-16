@@ -7,14 +7,25 @@ import os
 import numpy as np
 
 from lib.constants.constants import config2name_map, supported_pipe
+from lib.study_generation import meta
 from lib.data_type import mutation_data, segmented_data, mrna_data, cancer_type
 from lib.data_type import discrete_copy_number_data, continuous_copy_number_data, mrna_zscores_data
 from lib.support import Config, helper
 
 
-def generate_data_type(meta_config: Config.Config, study_config: Config.Config, verb):
+def generate_data_type(meta_config: Config.Config, study_config: Config.Config, janus_path, verb):
 
-    if   meta_config.type_config == 'MAF':
+    if 'pipeline' in meta_config.config_map.keys() and meta_config.config_map['pipeline'] == 'FILE':
+
+        #TODO:: Assert correct format ...
+
+        helper.copy_file(os.path.join(meta_config.config_map['input_folder'],
+                                      meta_config.data_frame['FILE_NAME'][0]),
+                         os.path.join(study_config.config_map['output_folder'],
+                                      'data_{}.txt'.format(config2name_map[meta_config.type_config])),
+                         verb)
+
+    elif meta_config.type_config == 'MAF':
 
         helper.working_on(verb, message='Gathering and decompressing mutation files into temporary folder...')
         helper.decompress_to_temp(meta_config, study_config, verb)
@@ -28,6 +39,9 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
         if convert_vcf_2_maf:
             helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
+
+            helper.working_on('Ensuring both columns exist, otherwise adding UNMATCHED column ...')
+            mutation_data.verify_dual_columns(meta_config, verb)
 
             if   meta_config.config_map['pipeline'] == 'Strelka':
 
@@ -90,7 +104,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
             segmented_data.fix_hmmcopy_tsv(meta_config, study_config, verb)
             segmented_data.fix_chrom(meta_config, study_config, verb)
-            segmented_data.fix_hmmcopy_max_chrom(meta_config, study_config, verb)
+            segmented_data.fix_hmmcopy_max_chrom(meta_config, study_config, janus_path, verb)
 
         helper.working_on(verb, message='Fixing .SEG IDs')
         segmented_data.fix_seg_id(meta_config, study_config, verb)
@@ -107,7 +121,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         if  meta_config.config_map['pipeline'] == 'SEG':
 
             helper.working_on(verb, message='Generating log2CNA files ...')
-            continuous_copy_number_data.gen_log2cna(meta_config, study_config, verb)
+            continuous_copy_number_data.gen_log2cna(meta_config, study_config, janus_path, verb)
             helper.working_on(verb)
 
     elif meta_config.type_config == 'DISCRETE_COPY_NUMBER':
@@ -129,7 +143,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
 
         if   meta_config.config_map['pipeline'] == 'Cufflinks':
-            mrna_data.cufflinks_prep(meta_config, study_config, verb)
+            helper.working_on(verb, message='Nothing really needs to be done')
 
         elif meta_config.config_map['pipeline'] == 'RSEM':
             helper.working_on(verb, message='Nothing really needs to be done')
@@ -142,18 +156,22 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         mrna_data.generate_expression_matrix(meta_config, study_config, verb)
         helper.working_on(verb)
 
-    elif meta_config.type_config == 'MRNA_EXPRESSION_ZSCORES':
+        # Works because shorting ...
+        if  'zscores' in meta_config.config_map.keys() and meta_config.config_map['zscores'].lower() == 'true':
 
-        helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
+            helper.working_on(verb, message='Generating expression Z-Score Meta ...')
+            meta.generate_meta_type(meta_config.type_config + '_ZSCORES',
+                                    {'profile_name': 'mRNA expression z-scores',
+                                     'profile_description': 'Expression level z-scores'}, study_config, verb)
+            helper.working_on(verb)
 
-        if  meta_config.config_map['pipeline'] == 'MRNA_EXPRESSION':
             helper.working_on(verb, message='Generating expression Z-Score Data ...')
             mrna_zscores_data.generate_expression_zscore(meta_config, study_config, verb)
             helper.working_on(verb)
 
     elif meta_config.type_config == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')
-        colours = cancer_type.get_colours()
+        colours = cancer_type.get_colours(janus_path)
         helper.working_on(verb)
 
         helper.working_on(verb, message='Generating CANCER_TYPE records...')
