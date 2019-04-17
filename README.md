@@ -29,6 +29,8 @@ Run the importer script with:
 ```
 Within the runner script you must simply specify the location of your study configuration files.
 
+Should you be exporting the study to a cBioPortal instance, a log file will be generated of the import process in the study folder.
+
 You will need a minimum of 16g. i.e. `qrsh -l h_vmem=16g`*
 
 *I don't actually know the minimum, but this is the most I've seen used.
@@ -38,6 +40,8 @@ You will need a minimum of 16g. i.e. `qrsh -l h_vmem=16g`*
 * [`src/`](src) contains all the scripts, with deeper organization as you go
 
 * [`study_input/`](study_input) contains example input configuration files for sample studies.
+
+* [`src/lib/support/`](src/lib/support/) standalone import and removal tools for cBioPortal.
 
 * [`study_input/Specification/`](study_input/Specification) contains documentation on making your own input.
 
