@@ -4,6 +4,7 @@ __status__ = "Pre-Production"
 
 import os
 import subprocess
+import pandas as pd
 
 from lib.support import Config, helper
 from lib.constants import constants
@@ -154,3 +155,26 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
         raise ValueError('ERROR:: Something went wrong when parsing HMMCopy format file? Please resolve the issue')
     if verb:
         print(exit_codes)
+
+
+def get_sample_ids(exports_config: Config.Config, verb) -> pd.Series:
+    data = pd.read_csv(os.path.join(exports_config.config_map['input_folder'],
+                                    exports_config.data_frame['FILE_NAME'][0]),
+                       sep='\t', usecols=['ID'])
+
+    helper.working_on(verb, message='Parsing importable {} file ...'.format(exports_config.type_config))
+    return data['ID'].drop_duplicates(keep='first', inplace=False)
+
+
+def verify_final_file(exports_config: Config.Config, verb):
+    seg = open(os.path.join(exports_config.config_map['input_folder'],
+                            exports_config.data_frame['FILE_NAME'][0]), 'w')
+
+    header = seg.readline().strip().split('\t')
+    minimum_header = ['ID', 'chrom', 'loc.start', 'loc.end', 'num.mark', 'seg.mean']
+
+    helper.working_on(verb, message='Asserting minimum header is in SEG file.')
+    if not all([a in header for a in minimum_header]):
+        print([a if a not in header else '' for a in minimum_header])
+        print('Missing headers from SEG file have been printed above, please ensure the data is not missing.')
+        exit(1)

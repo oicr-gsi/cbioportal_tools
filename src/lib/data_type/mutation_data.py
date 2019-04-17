@@ -3,7 +3,7 @@ __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
 import os
-import subprocess
+import pandas as pd
 
 from lib.support import Config, helper
 
@@ -103,7 +103,7 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
         filter_vcf = exports_config.config_map['filter_vcf']
 
         # Bake in Parallel
-        processes.append(subprocess.Popen('vcf2maf.pl  --input-vcf {}              \
+        processes.append(helper.parallel_call('vcf2maf.pl  --input-vcf {}              \
                                                        --output-maf {}/{}           \
                                                        --normal-id {}              \
                                                        --tumor-id {}                \
@@ -122,7 +122,7 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
                                                                                       gene_col_tumors,
                                                                                       ref_fasta,
                                                                                       filter_vcf),
-                                          shell=True))
+                                              verb))
         try:
             exports_config.data_frame['FILE_NAME'][i] = output_maf
         except (FileExistsError, OSError):
@@ -152,24 +152,24 @@ def clean_head(exports_config: Config.Config, verb):
     return exports_config
 
 
-def zip_maf_files(exports_config: Config.Config, verb) -> Config.Config:
-    processes = []
-    for i in range(exports_config.data_frame.shape[0]):
-        file_name = os.path.join(exports_config.config_map['input_folder'], exports_config.data_frame['FILE_NAME'][i])
-        helper.working_on(verb, 'Compressing {} ...'.format(file_name))
+def get_sample_ids(exports_config: Config.Config, verb) -> pd.Series:
+    data = pd.read_csv(os.path.join(exports_config.config_map['input_folder'],
+                                    exports_config.data_frame['FILE_NAME'][0]),
+                       sep='\t', skiprows=1, usecols=['Tumor_Sample_Barcode'])
+    # Skip header #version2.4
+    helper.working_on(verb, message='Parsing importable {} file ...'.format(exports_config.type_config))
+    return data['Tumor_Sample_Barcode'].drop_duplicates(keep='first', inplace=False)
 
-        fin = open(file_name, 'r')
-        data = fin.read().splitlines(True)
-        fout = open(file_name, 'w')
-        fout.writelines(data[1:])
-        fout.flush()
-        fout.close()
 
-        processes.append(subprocess.Popen('gzip {}'.format(file_name),
-                                          shell=True))
-        exports_config.data_frame['FILE_NAME'][i] += '.gz'
+def verify_final_file(exports_config: Config.Config, verb):
+    maf = open(os.path.join(exports_config.config_map['input_folder'],
+                            exports_config.data_frame['FILE_NAME'][0]), 'w')
 
-    exit_codes = [p.wait() for p in processes]
-    if verb:
-        print(exit_codes)
-    return exports_config
+    header = maf.readline().strip().split('\t')
+    minimum_header = ['Hugo_Symbol', 'Tumor_Sample_Barcode', 'Variant_Classification', 'HGVSp_Short']
+
+    helper.working_on(verb, message='Asserting minimum header is in MAF file.')
+    if not all([a in header for a in minimum_header]):
+        print([a if a not in header else '' for a in minimum_header])
+        print('Missing headers from MAF file have been printed above, please ensure the data is not missing.')
+        exit(1)
