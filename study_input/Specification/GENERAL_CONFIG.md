@@ -16,10 +16,10 @@ However it still shares a majority of it's attributes with the rest of the confi
 
 - All files excluding [`CANCER_TYPE.txt`](CANCER_TYPE_CONFIG.md), [`STUDY_CONFIG.txt`](STUDY_CONFIG.md), 
 [`DISCRETE_COPY_NUMBER.txt`](DISCRETE_COPY_NUMBER_CONFIG.md), [`CONTINUOUS_COPY_NUMBER.txt`](CONTINUOUS_COPY_NUMBER_CONFIG.md), 
-[`MRNA_EXPRESSION_ZSCORES.txt`](MRNA_EXPRESSION_ZSCORES_CONFIG.md), have the columns `PATIENT_ID` AND `SAMPLE_ID`
+[`MRNA_EXPRESSION.txt`](MRNA_EXPRESSION_CONFIG.md), have the columns `PATIENT_ID` AND `SAMPLE_ID`
 
 - All files excluding [`DISCRETE_COPY_NUMBER.txt`](DISCRETE_COPY_NUMBER_CONFIG.md), [`CONTINUOUS_COPY_NUMBER.txt`](CONTINUOUS_COPY_NUMBER_CONFIG.md), 
-[`MRNA_EXPRESSION_ZSCORES.txt`](MRNA_EXPRESSION_ZSCORES_CONFIG.md) must have the TSV dataframe
+[`MRNA_EXPRESSION.txt`](MRNA_EXPRESSION_CONFIG.md) must have the TSV dataframe
 
 - All `data_` type files can be directly imported into the study folder by:
   - Adding `#pipeline=FILE` to the header
