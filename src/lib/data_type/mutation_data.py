@@ -103,17 +103,17 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
         filter_vcf = exports_config.config_map['filter_vcf']
 
         # Bake in Parallel
-        processes.append(helper.parallel_call('vcf2maf.pl  --input-vcf {}              \
-                                                       --output-maf {}/{}           \
-                                                       --normal-id {}              \
-                                                       --tumor-id {}                \
-                                                       --vcf-normal-id {}          \
-                                                       --vcf-tumor-id {}            \
-                                                       --ref-fasta {}              \
-                                                       --filter-vcf {}              \
-                                                       --vep-path $VEP_PATH        \
-                                                       --vep-data $VEP_DATA         \
-                                                       --species homo_sapiens'.format(input_vcf,
+        processes.append(helper.parallel_call('vcf2maf.pl  --input-vcf {}    '
+                                                       '--output-maf {}/{}   '
+                                                       '--normal-id {}       '
+                                                       '--tumor-id {}        '
+                                                       '--vcf-normal-id {}   '
+                                                       '--vcf-tumor-id {}    '
+                                                       '--ref-fasta {}       '
+                                                       '--filter-vcf {}      '
+                                                       '--vep-path $VEP_PATH '
+                                                       '--vep-data $VEP_DATA '
+                                                       '--species homo_sapiens'.format(input_vcf,
                                                                                       maf_temp,
                                                                                       output_maf,
                                                                                       normal_id,
