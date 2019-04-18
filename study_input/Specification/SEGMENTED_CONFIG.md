@@ -8,6 +8,8 @@ To add this type of data to the study, gather absolute paths to all your files (
 
 If your files are compressed with any format, ensure it has the **correct extension**, (e.g. `*.tar.gz`, `*.zip`, `*.gz`), otherwise it will break.
 
+Please keep in mind that the `.bed` file you need **must** have its **headers**.
+
 ### Configuring your header
 
 The minimal header will look like this:
