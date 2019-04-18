@@ -56,14 +56,12 @@ def validate_study(key, study_folder, verb):
 
     helper.working_on(verb)
 
-
     # Import study to cBioPortal
-    helper.working_on(verb, message='Importing study to cBioPortal...')
-
+    helper.working_on(verb, message='Validating study via cBioPortal...')
 
     valid = helper.call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                              "sudo ./metaImport.py -s ~/oicr_studies/{} "
-                              "-u http://{} -o' | "
+                              "sudo ./validateData.py -s ~/oicr_studies/{} "
+                              "-u http://{}' | "
                               "tee {}".format(key, cbioportal_url,
                                               base_folder,
                                               cbioportal_url,
@@ -77,13 +75,9 @@ def validate_study(key, study_folder, verb):
         exit(1)
         helper.stars()
         helper.stars()
-    elif valid == 3:
+    elif valid == 3 or valid == 0:
         helper.stars()
         print('Validation of study succeeded with warnings. Don\'t worry about it, unless you think it\'s important.')
-        helper.stars()
-    elif valid == 0:
-        helper.stars()
-        print('This validated with 0 warnings, Congrats!!!')
         helper.stars()
     else:
         helper.stars()
