@@ -14,20 +14,6 @@ from lib.data_type import discrete_copy_number_data, continuous_copy_number_data
 from lib.support import Config, helper
 
 
-def get_sample_ids(meta_config: Config.Config, verb) -> pd.Series:
-    helper.working_on(verb, message='Getting Sample IDs of {} from FILE pipeline...'.format(meta_config.type_config))
-
-    ids = []
-
-    if   meta_config.type_config == 'MAF':
-        ids = mutation_data.get_sample_ids(meta_config, verb)
-
-    elif meta_config.type_config == 'SEG':
-        ids = segmented_data.get_sample_ids(meta_config, verb)
-
-    return ids
-
-
 def assert_format(meta_config: Config.Config, verb):
     helper.working_on(verb, message='Asserting correct file format for {} file ... '.format(meta_config.type_config))
 
@@ -210,6 +196,20 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
     else:
         raise TypeError('ERROR:: A specified config file does not have a supported type_config attribute. \n' +
                         'See these: [ {} ]'.format(' | '.join(config2name_map.keys())))
+
+
+def get_sample_ids(meta_config: Config.Config, verb) -> pd.Series:
+    helper.working_on(verb, message='Getting Sample IDs of {} from FILE pipeline...'.format(meta_config.type_config))
+
+    ids = []
+
+    if   meta_config.type_config == 'MAF':
+        ids = mutation_data.get_sample_ids(meta_config, verb)
+
+    elif meta_config.type_config == 'SEG':
+        ids = segmented_data.get_sample_ids(meta_config, verb)
+
+    return ids
 
 
 def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: Config.Config, verb):
