@@ -5,6 +5,7 @@ __status__ = "Pre-Production"
 import os
 
 import numpy as np
+import pandas as pd
 
 from lib.constants.constants import config2name_map, supported_pipe
 from lib.study_generation import meta
@@ -13,11 +14,25 @@ from lib.data_type import discrete_copy_number_data, continuous_copy_number_data
 from lib.support import Config, helper
 
 
+def assert_format(meta_config: Config.Config, verb):
+    helper.working_on(verb, message='Asserting correct file format for {} file ... '.format(meta_config.type_config))
+
+    if   meta_config.type_config == 'MAF':
+        mutation_data.verify_final_file(meta_config, verb)
+
+    elif meta_config.type_config == 'SEG':
+        segmented_data.verify_final_file(meta_config, verb)
+
+    elif meta_config.type_config == 'CONTINUOUS_COPY_NUMBER':
+        continuous_copy_number_data.verify_final_file(meta_config, verb)
+
+
 def generate_data_type(meta_config: Config.Config, study_config: Config.Config, janus_path, verb):
 
     if 'pipeline' in meta_config.config_map.keys() and meta_config.config_map['pipeline'] == 'FILE':
 
         #TODO:: Assert correct format ...
+        assert_format(meta_config, verb)
 
         helper.copy_file(os.path.join(meta_config.config_map['input_folder'],
                                       meta_config.data_frame['FILE_NAME'][0]),
@@ -94,7 +109,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
         if   meta_config.config_map['pipeline'] == 'CNVkit':
 
-            print('Seems no prep is needed for CNVkit')
+            segmented_data.fix_chrom(meta_config, study_config, verb)
 
         elif meta_config.config_map['pipeline'] == 'Sequenza':
             # It might be that this is not necessary
@@ -181,6 +196,20 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
     else:
         raise TypeError('ERROR:: A specified config file does not have a supported type_config attribute. \n' +
                         'See these: [ {} ]'.format(' | '.join(config2name_map.keys())))
+
+
+def get_sample_ids(meta_config: Config.Config, verb) -> pd.Series:
+    helper.working_on(verb, message='Getting Sample IDs of {} from FILE pipeline...'.format(meta_config.type_config))
+
+    ids = []
+
+    if   meta_config.type_config == 'MAF':
+        ids = mutation_data.get_sample_ids(meta_config, verb)
+
+    elif meta_config.type_config == 'SEG':
+        ids = segmented_data.get_sample_ids(meta_config, verb)
+
+    return ids
 
 
 def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: Config.Config, verb):

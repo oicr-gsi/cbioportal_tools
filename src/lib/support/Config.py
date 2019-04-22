@@ -71,6 +71,10 @@ def get_single_config(file, f_type, verb) -> Config:
         else:
             print('Your {} file does not have data in it but it probably should, please double check it'.format(f_type))
             raise pd.errors.EmptyDataError()
+    if data_frame.isnull().values.any():
+        print('ERROR:: A configuration file is missing some values in the data-frame, this is not right.')
+        print('Check this file {}'.format(file))
+        exit(1)
     config_file = Config(file_map, data_frame, f_type)
     return config_file
 
