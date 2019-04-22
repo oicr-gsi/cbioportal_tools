@@ -1,13 +1,12 @@
-# constants
-
-- Ensure that the appropriate information for the _meta_, _config_, and _case_list_ is in the correct variables in `../constants.py`
+# Constants
+- Ensure that the appropriate information for the _meta_, _config_, and _case_list_ is in the correct variables in [`constants.py`](../constants/constants.py)
   - `meta_info_map`
-    - Writes the generic data in the meta_`type`.txt file
+    - Writes the generic data in the `meta_<type>.txt` file
   - `args2config_map`
-    - If you would like to support the specification of the location of the type_config file in the command line arguments
+    - To support the specification of the location of the type_config file in the command line arguments
   - `config2name_map`
     - Gives the respective name to the `meta_{}.txt` and `data_{}.txt` files for a given type
+    - Can be arbitrary
   - `case_list_map`
-    - Gives correct `case_list` id for given data_type
-  - `case_list_map`
-    - To support more `case_lists` simply add to the map, gives `stable_id`
+    - gives correct `case_list` id for given data_type
+    - Honestly I'm a little lost as to how this affects the actual study since case lists still show up regardless of them existing in this map.

@@ -31,23 +31,37 @@ Within the runner script you must simply specify the location of your study conf
 
 Should you be exporting the study to a cBioPortal instance, a log file will be generated of the import process in the study folder.
 
-You will need a minimum of 16g. i.e. `qrsh -l h_vmem=16g`*
+You will need a minimum of 16g. i.e. `qrsh -l h_vmem=16g`* I recommend having `32g` or more, as more samples can then be processed in parallel.
 
-*I don't actually know the minimum, but this is the most I've seen used.
+\* I don't actually know the minimum, but this is the most I've seen used.
 
-### What's in each folder?
+### Minimal Study:
+
+Refer to [Specification README.md](study_input/Specification/README.md#minimal-study)
+
+
+## Contributing:
+
+Refer to [`EXTENDING.md`](EXTENDING.md)
+
+Lists all steps that should be taken to ensure proper and complete integration of new feature.
+
+
+## What's in each folder?
 
 * [`src/`](src) contains all the scripts, with deeper organization as you go
 
 * [`study_input/`](study_input) contains example input configuration files for sample studies.
 
 * [`src/lib/support/`](src/lib/support/) standalone import and removal tools for cBioPortal.
+  * [`import_study.py`](src/lib/support/import_study.py) -> import a pre-configured study
+  * [`remove_study.py`](src/lib/support/remove_study.py) -> remove a study based on ID
 
-* [`study_input/Specification/`](study_input/Specification) contains documentation on making your own input.
+* [`study_input/Specification/`](study_input/Specification) contains documentation on making your own config files.
 
 * [`src/lib/study_generation/README.md`](src/lib/study_generation/README.md) contains documentation on contributing and expanding `janus.py` functionality.
 
-### Dependencies
+## Dependencies
 You shouldn't need this if you use the runner script.
 
 This tool depends on:
