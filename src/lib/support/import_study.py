@@ -40,8 +40,12 @@ def stars():
 
 def call_shell(command: str, verb):
     working_on(verb, message=command)
-    output = subprocess.call(command, shell=True)
-    return output
+    subprocess.call(command, shell=True)
+
+def get_shell(command: str, verb) -> str:
+    working_on(verb, message=command)
+    output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
+    return output.decode('utf-8')
 
 
 def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb):
@@ -66,14 +70,22 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb
     # Import study to cBioPortal
     working_on(verb, message='Importing study to cBioPortal...')
 
-    valid = call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+    result = get_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                        "sudo ./metaImport.py -s ~/oicr_studies/{} "
-                       "-u http://{} -o' | "
-                       "tee {}".format(key, cbioportal_url,
-                                       base_folder,
-                                       cbioportal_url,
-                                       log_file), verb)
+                       "-u http://{} -o'; "
+                       "echo 'CBIOPORTAL_EXIT_CODE:' $?".format(key, cbioportal_url,
+                                        base_folder,
+                                        cbioportal_url), verb)
+    print(result)
+    valid = int(list(filter(None, [a if a.startswith('CBIOPORTAL_EXIT_CODE: ') else '' for a in result.split('\n')]))[0].strip('CBIOPORTAL_EXIT_CODE: '))
+    print(valid)
 
+    f = open(os.path.abspath(os.path.join(study_folder, 'import_log.txt')), 'w')
+    f.write(result)
+    f.flush()
+    f.close()
+
+    print('cBioPortal exit code: {}'.format(valid))
     if   valid == 1:
         stars()
         stars()
