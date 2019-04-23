@@ -66,6 +66,12 @@ def call_shell(command: str, verb):
     return output
 
 
+def get_shell(command: str, verb) -> str:
+    working_on(verb, message=command)
+    output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
+    return output.decode('utf-8')
+
+
 def parallel_call(command: str, verb):
     working_on(verb, message=command)
     return subprocess.Popen(command, shell=True)
