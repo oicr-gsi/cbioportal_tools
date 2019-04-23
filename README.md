@@ -42,7 +42,7 @@ Refer to [Specification README.md](study_input/Specification/README.md#minimal-s
 
 ## Contributing:
 
-Refer to [`EXTENDING.md`](EXTENDING.md)
+Refer to [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
 Lists all steps that should be taken to ensure proper and complete integration of new feature.
 

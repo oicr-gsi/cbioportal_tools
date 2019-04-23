@@ -228,5 +228,6 @@ def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: 
             f.write('#{}\n'.format('\t'.join(samples_config.data_frame[i])))
         else:
             f.write('{}\n'.format('\t'.join(samples_config.data_frame[i])))
+    f.flush()
     f.close()
     helper.working_on(verb)

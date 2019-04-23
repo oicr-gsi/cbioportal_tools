@@ -13,8 +13,5 @@ This contains some basic functions as well as a few functions that are used acro
 
 This script will need to be modified as new data-types are added.
 
-## cancer_colours.csv
-Because cBioPortal wants colours for cancer types, I use this to generate non-conflicting cancer colours, that are also reproducible.
-
 ## [import_study.py](import_study.py) & [remove_study.py](remove_study.py)
 Standalone CLI scripts for importing and deporting studies in cBioPortal.
