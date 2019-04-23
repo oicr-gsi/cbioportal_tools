@@ -58,6 +58,7 @@ def get_single_config(file, f_type, verb) -> Config:
                 file_map[line[0]] = line[1]
             else:
                 break
+        f.flush()
         f.close()
     except IndexError:
         print('ERROR:: there was a syntax error in the header of {}'.format(file))
