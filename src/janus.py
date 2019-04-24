@@ -93,10 +93,11 @@ def main():
 
     helper.stars()
     helper.stars()
-    helper.working_on(verb, message='CONGRATULATIONS! Your study should now be imported!')
+    helper.working_on(True, message='CONGRATULATIONS! Your study should now be imported!')
     helper.stars()
-    helper.working_on(verb, message='Output folder: {}'.format(study_config.config_map['output_folder']))
-    helper.working_on(verb, message='Study Name: {}'.format(study_config.config_map['name']))
+    helper.working_on(True, message='Output folder: {}'.format(study_config.config_map['output_folder']))
+    helper.working_on(True, message='Study Name: {}'.format(study_config.config_map['name']))
+    helper.working_on(True, message='Study ID: {}'.format(study_config.config_map['cancer_study_identifier']))
     helper.stars()
     helper.stars()
 
