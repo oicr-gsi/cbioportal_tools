@@ -30,7 +30,6 @@ def export_study_to_cbioportal(key: str, study_folder: str, verb):
                       "-u http://{} -o'".format(key, cbioportal_url,
                                                 base_folder,
                                                 cbioportal_url), verb)
-    helper.restart_tomcat(cbioportal_url, key, verb)
     helper.working_on(verb)
 
 
