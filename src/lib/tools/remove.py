@@ -4,7 +4,7 @@ __status__ = "1.0"
 
 import argparse
 
-from ..support.helper import stars, working_on, call_shell
+from ..support.helper import stars, working_on, call_shell, restart_tomcat
 
 
 def define_parser() -> argparse.ArgumentParser:
@@ -32,9 +32,9 @@ def delete_study(key: str, study_config: str, cbioportal_url, verb):
     working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
 
     call_shell("ssh {} debian@{} 'rm ~/oicr_studies/{}'".format(key,
-                                                                                             cbioportal_url,
-                                                                                             base_folder,
-                                                                                             base_folder), verb)
+                                                                cbioportal_url,
+                                                                base_folder,
+                                                                base_folder), verb)
 
     # Copy over
     call_shell('scp {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_config, cbioportal_url), verb)
@@ -73,10 +73,6 @@ def delete_study(key: str, study_config: str, cbioportal_url, verb):
         stars()
         stars()
         exit(1)
-
-    call_shell("ssh {} debian@{} 'sudo systemctl stop  tomcat'".format(key, cbioportal_url), verb)
-    call_shell("ssh {} debian@{} 'sudo systemctl start tomcat'".format(key, cbioportal_url), verb)
-
     working_on(verb)
 
 
@@ -87,3 +83,4 @@ def main(args):
     config.flush()
     config.close()
     delete_study(args.key, study, args.url, True)
+    restart_tomcat(args.url, args.key, True)

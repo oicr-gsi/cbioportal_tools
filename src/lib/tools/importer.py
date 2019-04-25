@@ -1,3 +1,5 @@
+from lib.support.helper import restart_tomcat
+
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "1.0"
@@ -33,7 +35,6 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb
     if not key == '':
         key = '-i ' + key
     base_folder = os.path.basename(os.path.abspath(study_folder))
-    log_file = os.path.join(os.path.abspath(study_folder), 'import_log.txt')
     # Copying folder to cBioPortal
     working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
 
@@ -55,8 +56,8 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb
                        "sudo ./metaImport.py -s ~/oicr_studies/{} "
                        "-u http://{} -o'; "
                        "echo 'CBIOPORTAL_EXIT_CODE:' $?".format(key, cbioportal_url,
-                                        base_folder,
-                                        cbioportal_url), verb)
+                                                                base_folder,
+                                                                cbioportal_url), verb)
     print(result)
     valid = int(list(filter(None, [a if a.startswith('CBIOPORTAL_EXIT_CODE: ') else '' for a in result.split('\n')]))[0].strip('CBIOPORTAL_EXIT_CODE: '))
     print(valid)
@@ -115,11 +116,6 @@ def import_portal(key: str, cbioportal_url: str, gene_panel, verb):
         exit(1)
 
     working_on(verb)
-
-
-def restart_tomcat(cbioportal_url, key, verb):
-    call_shell("ssh {} debian@{} 'sudo systemctl stop  tomcat'".format(key, cbioportal_url), verb)
-    call_shell("ssh {} debian@{} 'sudo systemctl start tomcat'".format(key, cbioportal_url), verb)
 
 
 def main(args):

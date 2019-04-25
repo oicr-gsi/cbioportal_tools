@@ -4,27 +4,59 @@ Run with `./runner.sh` all arguments can be modified:
 
 To submit a job, run `qsub_Janus.sh` with **your** email.
 
-### Detailed help:
+## Detailed help:
 
 ```
-usage: janus.py [-h] [-c FILE] -o FOLDER [-t TYPE] [-i ID] [-N NAME] [-n NAME]
-                [-d DESCRIPTION] --path PATH [--sample-info SAMPLE_INFO]
-                [--patient-info PATIENT_INFO] [--cancer-type CANCER_TYPE]
-                [--mutation-data MUTATION_DATA]
-                [--segmented-data SEGMENTED_DATA]
-                [--continuous-data CONTINUOUS_DATA]
-                [--discrete-data DISCRETE_DATA]
-                [--expression-data EXPRESSION_DATA]
-                [--expression-zscores-data EXPRESSION_ZSCORES_DATA]
-                [--fusion-data UNSUPPORTED] [--methylation-data UNSUPPORTED]
-                [--protein-data UNSUPPORTED] [--timeline-info UNSUPPORTED]
-                [--gistic2-data UNSUPPORTED] [--mutsig-data UNSUPPORTED]
-                [--gene-panel-data UNSUPPORTED] [--gene-set-data UNSUPPORTED]
-                [--custom-case-list UNSUPPORTED] [-k FILE] [-p] [-u URL] [-v]
+>>> python3 janus.py -h
 
-janus (https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate
-an importable study for a cBioPortal instance. Recommended usage can be seen
-in the examples located in ../study_input/ .
+usage: janus.py [-h] {generator,import,remove,query} ...
+
+janus.py a set of cBioPortal interaction tools. Janus is a wrapper-like
+utility for managing cBioPortal studies and your instance, each sub-tool
+functions on it's own. For more usage, examples and documentation see
+https://github.com/oicr-gsi/cbioportal_tools
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Janus a set of cBioPortal Tools:
+  Current set of tools
+
+  {generator,import,remove,query}
+    generator           Generator Functions for generating whole studies from
+                        data pipelines. Will require configuration of study
+                        configuration files
+    import              Importer for complete studies or gene_panels. Requires
+                        a cBioPortal ready study or a complete gene_panel
+    remove              Removal tool for studies. Requires study_id of
+                        particular study
+    query               Query tool for gene_panels and cancer_type. Requires
+                        password to root MySQL user
+```
+## Generator
+```
+>>> python3 janus.py generator -h
+
+usage: janus.py generator [-h] [-c FILE] -o FOLDER [-t TYPE] [-i ID] [-N NAME]
+                          [-n NAME] [-d DESCRIPTION] --path PATH
+                          [--sample-info SAMPLE_INFO]
+                          [--patient-info PATIENT_INFO]
+                          [--cancer-type CANCER_TYPE]
+                          [--mutation-data MUTATION_DATA]
+                          [--segmented-data SEGMENTED_DATA]
+                          [--continuous-data CONTINUOUS_DATA]
+                          [--discrete-data DISCRETE_DATA]
+                          [--expression-data EXPRESSION_DATA]
+                          [--fusion-data UNSUPPORTED]
+                          [--methylation-data UNSUPPORTED]
+                          [--protein-data UNSUPPORTED]
+                          [--timeline-info UNSUPPORTED]
+                          [--gistic2-data UNSUPPORTED]
+                          [--mutsig-data UNSUPPORTED]
+                          [--gene-panel-data UNSUPPORTED]
+                          [--gene-set-data UNSUPPORTED]
+                          [--custom-case-list UNSUPPORTED] [-k FILE] [-p]
+                          [-u URL] [-v]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -96,11 +128,6 @@ Overridable Optional Data-type Configuration File Specifiers::
                         override MRNA_EXPRESSION specification in the config
                         file. files. See the documentation if you do not want
                         this. OPTIONAL
-  --expression-zscores-data EXPRESSION_ZSCORES_DATA
-                        Location of expression-zscores-data configuration
-                        file: will override MRNA_EXPRESSION_ZSCORES
-                        specification in the config file. files. See the
-                        documentation if you do not want this. OPTIONAL
   --fusion-data UNSUPPORTED
                         Location of fusion-data configuration file: will
                         override FUSION specification in the config file.
@@ -135,7 +162,59 @@ Overridable Optional Data-type Configuration File Specifiers::
                         UNSUPPORTED. See the docs. OPTIONAL -- UNSUPPORTED
 
 ```
-#TODO: Update Documentation
+
+## Import
+
+```
+>>> python3 janus.py import -h
+
+usage: janus.py import [-h] [-f FOLDER] [-g PANEL] -u URL [-k KEY]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f FOLDER, --folder FOLDER
+                        The location of the study folder.
+  -g PANEL, --gene-panel PANEL
+                        A formatted gene-panel you would like to upload.
+  -u URL, --url URL     The location of the cBioPortal instance (address).
+  -k KEY, --key KEY     The location of the cBioPortal Key.
+```
+
+## Remove
+
+```
+>>> python3 janus.py remove -h
+
+usage: janus.py remove [-h] [-i ID] [-u URL] [-k KEY]
+
+optional arguments:
+  -h, --help         show this help message and exit
+  -i ID, --id ID     The cancer study ID.
+  -u URL, --url URL  The location of the cBioPortal instance (address).
+  -k KEY, --key KEY  The location of the cBioPortal Key.
+
+```
+
+## Query
+
+```
+>>> python3 janus.py query -h
+
+usage: janus.py query [-h] [-u URL] [-p PASSWORD] [-k KEY] [-t] [-g] [-b]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -u URL, --url URL     The location of the cBioPortal instance (address).
+  -p PASSWORD, --password PASSWORD
+                        mySQL Password.
+  -k KEY, --key KEY     The location of the cBioPortal Key.
+  -t, --type-of-cancer  Query the types of cancer in the cBioPortal Database
+  -g, --query-gene-panel
+                        Query the gene-panels in the cBioPortal Database
+  -b, --border          Disables borders around the query.
+
+```
+
 ### Examples:
 ```
 python3 janus.py generator \
