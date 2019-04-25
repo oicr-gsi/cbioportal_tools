@@ -53,10 +53,6 @@ Lists all steps that should be taken to ensure proper and complete integration o
 
 * [`study_input/`](study_input) contains example input configuration files for sample studies.
 
-* [`src/lib/support/`](src/lib/support/) standalone import and removal tools for cBioPortal.
-  * [`import_study.py`](src/lib/support/import_study.py) -> import a pre-configured study
-  * [`remove_study.py`](src/lib/support/remove_study.py) -> remove a study based on ID
-
 * [`study_input/Specification/`](study_input/Specification) contains documentation on making your own config files.
 
 * [`src/lib/study_generation/README.md`](src/lib/study_generation/README.md) contains documentation on contributing and expanding `janus.py` functionality.

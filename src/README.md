@@ -135,9 +135,10 @@ Overridable Optional Data-type Configuration File Specifiers::
                         UNSUPPORTED. See the docs. OPTIONAL -- UNSUPPORTED
 
 ```
+#TODO: Update Documentation
 ### Examples:
 ```
-python3 janus.py \
+python3 janus.py generator \
 			--output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/ \
 			--config ../study_input/DCIS/study.txt \
 			--type-of-cancer 'ductal carcinoma' \
@@ -150,7 +151,8 @@ python3 janus.py \
 			--verbose \
 ```
 ``` 
-python3 janus.py 	--config ../study_input/DCIS/study.txt \
+python3 janus.py generator \
+			--config ../study_input/DCIS/study.txt \
 			--output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/  \
 			--key /u/kchandan/cbioportal.pem \
 			--push \

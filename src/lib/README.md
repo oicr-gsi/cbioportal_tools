@@ -6,5 +6,5 @@ This folder should contain nothing but this and other folders.
 - [`constants`](constants/) & [`support`](support/): Other functions and data used by above 2
 
 #### Standalone scripts:
-* [`import_study.py`](support/import_study.py) -> import a pre-configured study
-* [`remove_study.py`](support/remove_study.py) -> remove a study based on ID
+* [`importer.py`](tools/importer.py) -> import a pre-configured study
+* [`remove.py`](tools/remove.py) -> remove a study based on ID
