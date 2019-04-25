@@ -4,6 +4,7 @@ __status__ = "Pre-Production"
 
 # Command Line Imports
 import argparse
+import sys
 
 # Other Scripts
 from lib.tools import remove, importer, query, generator
@@ -27,7 +28,8 @@ def super_parser() -> argparse.ArgumentParser:
     subparsers.add_parser('import',
                           add_help=False,
                           parents=[importer.define_parser()],
-                          help='Importer for complete studies. Requires a cBioPortal ready study')
+                          help='Importer for complete studies or gene_panels. Requires a cBioPortal '
+                               'ready study or a complete gene_panel')
     subparsers.add_parser('remove',
                           add_help=False,
                           parents=[remove.define_parser()],
@@ -41,7 +43,11 @@ def super_parser() -> argparse.ArgumentParser:
 
 
 def main():
-    args = super_parser().parse_args()
+    parser = super_parser()
+    args = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help()
+
     if   args.which == 'generator':
         generator.main(args)
     elif args.which == 'import':
