@@ -1,6 +1,7 @@
 __author__ = ["Kunal Chandan", "Lawrence Heisler"]
 __email__ = ["kchandan@uwaterloo.ca", "Lawrence.Heisler@oicr.on.ca"]
-__status__ = "Pre-Production"
+__version__ = "1.0"
+__status__ = "Production"
 
 import os
 

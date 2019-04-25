@@ -1,6 +1,7 @@
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
-__status__ = "Pre-Production"
+__version__ = "1.0"
+__status__ = "Production"
 
 # To support other data_types, they need to be added to
 #       meta_info_map
