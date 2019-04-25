@@ -266,6 +266,7 @@ def main(args):
     if args.key or args.push:
         cbioportal_interface.validate_study(args.key, study_config.config_map['output_folder'], verb)
         cbioportal_interface.export_study_to_cbioportal(args.key, study_config.config_map['output_folder'], verb)
+        helper.restart_tomcat(constants.cbioportal_url, args.key, verb)
         # TODO:: Make the validation step ensure that it doesn't overwrite an existing study
 
     helper.stars()

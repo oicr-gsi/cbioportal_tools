@@ -1,5 +1,3 @@
-from lib.support.helper import restart_tomcat
-
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "1.0"
@@ -7,7 +5,7 @@ __status__ = "1.0"
 import os
 import argparse
 
-from ..support.helper import stars, working_on, call_shell, get_shell
+from ..support.helper import stars, working_on, call_shell, get_shell, restart_tomcat
 
 
 def define_parser() -> argparse.ArgumentParser:
