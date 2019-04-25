@@ -1,6 +1,7 @@
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
-__status__ = "1.0"
+__version__ = "1.0"
+__status__ = "Production"
 
 import pandas as pd
 import argparse

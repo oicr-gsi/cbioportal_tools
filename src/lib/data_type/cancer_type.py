@@ -1,6 +1,7 @@
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
-__status__ = "Pre-Production"
+__version__ = "1.0"
+__status__ = "Production"
 
 # Command Line Imports
 import os
