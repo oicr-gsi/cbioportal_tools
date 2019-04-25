@@ -8,10 +8,6 @@ It also contains a few functions for retrieval of said objects.
 ## helper.py
 This contains some basic functions as well as a few functions that are used across `data_types`. This might change a little?
 
-## cbioportal and human interfaces
-2 Scripts containing folders that essentially just interface with their respective names, only contain functions.
-
+## cbioportal interface
+Interfaces with cBioPortal. 
 This script will need to be modified as new data-types are added.
-
-## [import_study.py](import_study.py) & [remove_study.py](remove_study.py)
-Standalone CLI scripts for importing and deporting studies in cBioPortal.

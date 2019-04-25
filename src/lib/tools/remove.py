@@ -2,8 +2,9 @@ __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
 __status__ = "1.0"
 
-import subprocess
 import argparse
+
+from ..support.helper import stars, working_on, call_shell
 
 
 def define_parser() -> argparse.ArgumentParser:
@@ -21,24 +22,6 @@ def define_parser() -> argparse.ArgumentParser:
                         metavar='KEY',
                         default='')
     return parser
-
-def working_on(verbosity, message='Success!\n'):
-    # Method is for verbose option. Prints Success if no parameter specified
-    if verbosity:
-        print(message)
-
-
-def stars():
-    # Prints a row of stars
-    for a in range(100):
-        print('*', end="")
-    print('')
-
-
-def call_shell(command: str, verb):
-    working_on(verb, message=command)
-    output = subprocess.call(command, shell=True)
-    return output
 
 
 def delete_study(key: str, study_config: str, cbioportal_url, verb):
@@ -96,15 +79,11 @@ def delete_study(key: str, study_config: str, cbioportal_url, verb):
 
     working_on(verb)
 
-def main():
-    args = define_parser().parse_args()
+
+def main(args):
     study = 'meta_study.txt'
     config = open(study, 'w+')
     config.write('cancer_study_identifier:{}\ntype_of_cancer:\nshort_name:\nname:\ndescription:\r'.format(args.id))
     config.flush()
     config.close()
     delete_study(args.key, study, args.url, True)
-
-
-if __name__ == '__main__':
-    main()

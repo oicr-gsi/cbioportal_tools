@@ -46,7 +46,7 @@ The 2 large features that can be implemented are:
    
    * `clinical_type` -> **IF** the data is of clinical type, add it to this list.
 
-6. Update help in [`src/lib/support/human_interface.py`](src/lib/support/human_interface.py)
+6. Update help in [`src/lib/support/generator.py`](src/lib/tools/generator.py)
    * Stub should already exist, simply alter the help.
 
 

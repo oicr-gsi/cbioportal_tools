@@ -1,12 +1,19 @@
-import argparse
-import os
+__author__ = "Kunal Chandan"
+__email__ = "kchandan@uwaterloo.ca"
+__status__ = "1.0"
 
 import pandas as pd
+import argparse
+import typing
+import os
 
 from lib.constants import constants
-from lib.support import Config, helper
+from lib.study_generation import data, meta, case
+from lib.support import Config, helper, cbioportal_interface
 
 args2config_map = constants.args2config_map
+
+Information = typing.List[Config.Config]
 
 
 def define_parser() -> argparse.ArgumentParser:
@@ -164,6 +171,36 @@ def define_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def resolve_priority_queue(information: Information) -> Information:
+    score = {}
+    # Initialize scores
+    for each in information:
+        score[each.type_config] = 0
+
+    # Calculate Scores based on directed graph traversal
+    for each in information:
+        if 'pipeline' in each.config_map.keys():
+            type_config = each.config_map['pipeline']
+        else:
+            continue
+        while True:
+            if not (type_config in constants.meta_info_map.keys()):
+                break
+            else:
+                score[type_config] += 1
+            type_config = [x.config_map['pipeline'] for x in information if x.type_config == type_config]
+            if len(type_config) > 1:
+                # This really only works if there is one config of each type
+                # Right now this is not a problem, could this be one day?
+                raise ImportError('ERROR:: 2 or more info objects of the same type???')
+            else:
+                type_config = type_config[0]
+
+    # Sort list based on new scores.
+    information.sort(key=lambda config: score [config.type_config], reverse=True)
+    return information
+
+
 def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) -> Config.Config:
     meta_args = ['type_of_cancer', 'cancer_study_identifier', 'name', 'short_name', 'description', 'output_folder']
 
@@ -184,3 +221,59 @@ def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) ->
         raise IOError('The minimum number of arguments have not been provided in the file and/or command-line arguments'
                       '\nSee: {}'.format(meta_args))
     return study_config
+
+
+def main(args):
+    verb = args.verbose
+    path = args.path
+    constants.cbioportal_url = args.url
+
+    # TODO:: Fail gracefully if something breaks
+
+    if args.config:
+        study_config = Config.get_single_config(args.config, 'study', verb)
+    else:
+        study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE_NAME']), 'study')
+    add_cli_args(study_config, args, verb)
+
+    [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
+
+    information = resolve_priority_queue(information)
+
+    [print('Informational Files {}:\n{}\n'.format(a.type_config, a)) for a in information] if verb else print(),
+    [print('Clinical List Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
+    [print('Customized Case Set {}:\n{}\n'.format(a.type_config, a)) for a in custom_list] if verb else print(),
+
+    # Clean Output Folder/Initialize it
+    helper.clean_folder(study_config.config_map['output_folder'])
+
+    for each in information:
+        print(each.type_config)
+        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
+        data.generate_data_type(each, study_config, path, verb)
+        case.generate_case_list(each, study_config, verb)
+
+    for each in clinic_data:
+        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
+        data.generate_data_clinical(each, study_config, verb)
+
+    for each in custom_list:
+        case.generate_case_list(each, study_config, verb)
+
+    meta.generate_meta_study(study_config, verb)
+
+    # export to cbioportal!
+    if args.key or args.push:
+        cbioportal_interface.validate_study(args.key, study_config.config_map['output_folder'], verb)
+        cbioportal_interface.export_study_to_cbioportal(args.key, study_config.config_map['output_folder'], verb)
+        # TODO:: Make the validation step ensure that it doesn't overwrite an existing study
+
+    helper.stars()
+    helper.stars()
+    helper.working_on(True, message='CONGRATULATIONS! Your study should now be imported!')
+    helper.stars()
+    helper.working_on(True, message='Output folder: {}'.format(study_config.config_map['output_folder']))
+    helper.working_on(True, message='Study Name: {}'.format(study_config.config_map['name']))
+    helper.working_on(True, message='Study ID: {}'.format(study_config.config_map['cancer_study_identifier']))
+    helper.stars()
+    helper.stars()

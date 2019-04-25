@@ -3,104 +3,53 @@ __email__ = "kchandan@uwaterloo.ca"
 __status__ = "Pre-Production"
 
 # Command Line Imports
-import typing
-
-import pandas as pd
+import argparse
 
 # Other Scripts
-from lib.support import Config, helper, cbioportal_interface, human_interface
-from lib.constants import constants
-from lib.study_generation import data, meta, case
-
-Information = typing.List[Config.Config]
+from lib.tools import remove, importer, query, generator
 
 
-def resolve_priority_queue(information: Information) -> Information:
-    score = {}
-    # Initialize scores
-    for each in information:
-        score[each.type_config] = 0
+def super_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description='janus.py a set of cBioPortal interaction tools. '
+                    'Janus is a wrapper-like utility for managing cBioPortal studies and your instance, each sub-tool '
+                    'functions on it\'s own. '
+                    'For more usage, examples and documentation see https://github.com/oicr-gsi/cbioportal_tools')
+    subparsers = parser.add_subparsers(title='Janus a set of cBioPortal Tools',
+                                       description='Current set of tools',
+                                       dest='which')
 
-    # Calculate Scores based on directed graph traversal
-    for each in information:
-        if 'pipeline' in each.config_map.keys():
-            type_config = each.config_map['pipeline']
-        else:
-            continue
-        while True:
-            if not (type_config in constants.meta_info_map.keys()):
-                break
-            else:
-                score[type_config] += 1
-            type_config = [x.config_map['pipeline'] for x in information if x.type_config == type_config]
-            if len(type_config) > 1:
-                # This really only works if there is one config of each type
-                # Right now this is not a problem, could this be one day?
-                raise ImportError('ERROR:: 2 or more info objects of the same type???')
-            else:
-                type_config = type_config[0]
+    subparsers.add_parser('generator',
+                          add_help=False,
+                          parents=[generator.define_parser()],
+                          help='Generator Functions for generating whole studies from data pipelines. '
+                               'Will require configuration of study configuration files')
+    subparsers.add_parser('import',
+                          add_help=False,
+                          parents=[importer.define_parser()],
+                          help='Importer for complete studies. Requires a cBioPortal ready study')
+    subparsers.add_parser('remove',
+                          add_help=False,
+                          parents=[remove.define_parser()],
+                          help='Removal tool for studies. Requires study_id of particular study')
+    subparsers.add_parser('query',
+                          add_help=False,
+                          parents=[query.define_parser()],
+                          help='Query tool for gene_panels and cancer_type. Requires password to root MySQL user')
 
-    # Sort list based on new scores.
-    information.sort(key=lambda config: score [config.type_config], reverse=True)
-    return information
+    return parser
 
 
 def main():
-    args = human_interface.define_parser().parse_args()
-    verb = args.verbose
-    path = args.path
-    constants.cbioportal_url = args.url
-
-    # TODO:: Fail gracefully if something breaks
-
-    if args.config:
-        study_config = Config.get_single_config(args.config, 'study', verb)
-    else:
-        study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE_NAME']), 'study')
-    human_interface.add_cli_args(study_config, args, verb)
-
-    [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
-
-    information = resolve_priority_queue(information)
-
-    [print('Informational Files {}:\n{}\n'.format(a.type_config, a)) for a in information] if verb else print(),
-    [print('Clinical List Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
-    [print('Customized Case Set {}:\n{}\n'.format(a.type_config, a)) for a in custom_list] if verb else print(),
-
-    # Clean Output Folder/Initialize it
-    helper.clean_folder(study_config.config_map['output_folder'])
-
-    for each in information:
-        print(each.type_config)
-        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
-        data.generate_data_type(each, study_config, path, verb)
-        case.generate_case_list(each, study_config, verb)
-
-    for each in clinic_data:
-        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
-        data.generate_data_clinical(each, study_config, verb)
-
-    for each in custom_list:
-        case.generate_case_list(each, study_config, verb)
-
-    meta.generate_meta_study(study_config, verb)
-
-    # export to cbioportal!
-    if args.key or args.push:
-        cbioportal_interface.validate_study(args.key, study_config.config_map['output_folder'], verb)
-        cbioportal_interface.export_study_to_cbioportal(args.key, study_config.config_map['output_folder'], verb)
-        # TODO:: Make the validation step ensure that it doesn't overwrite an existing study
-
-    helper.stars()
-    helper.stars()
-    helper.working_on(True, message='CONGRATULATIONS! Your study should now be imported!')
-    helper.stars()
-    helper.working_on(True, message='Output folder: {}'.format(study_config.config_map['output_folder']))
-    helper.working_on(True, message='Study Name: {}'.format(study_config.config_map['name']))
-    helper.working_on(True, message='Study ID: {}'.format(study_config.config_map['cancer_study_identifier']))
-    helper.stars()
-    helper.stars()
-
+    args = super_parser().parse_args()
+    if   args.which == 'generator':
+        generator.main(args)
+    elif args.which == 'import':
+        importer.main(args)
+    elif args.which == 'remove':
+        remove.main(args)
+    elif args.which == 'query':
+        query.main(args)
 
 if __name__ == '__main__':
     main()

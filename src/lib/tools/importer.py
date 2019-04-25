@@ -3,18 +3,21 @@ __email__ = "kchandan@uwaterloo.ca"
 __status__ = "1.0"
 
 import os
-import subprocess
 import argparse
+
+from ..support.helper import stars, working_on, call_shell, get_shell
 
 
 def define_parser() -> argparse.ArgumentParser:
     # Define program arguments
-    parser = argparse.ArgumentParser(description="Importer script for cBioPortal.")
+    parser = argparse.ArgumentParser(description="Importer script for cBioPortal. Import data_panel, study or both.")
 
     parser.add_argument("-f", "--folder",
                         help="The location of the study folder.",
-                        metavar='FOLDER',
-                        required=True)
+                        metavar='FOLDER')
+    parser.add_argument("-g", "--gene-panel",
+                        help="A formatted gene-panel you would like to upload.",
+                        metavar='PANEL')
     parser.add_argument("-u", "--url",
                         help="The location of the cBioPortal instance (address).",
                         metavar='URL',
@@ -24,28 +27,6 @@ def define_parser() -> argparse.ArgumentParser:
                         metavar='KEY',
                         default='')
     return parser
-
-def working_on(verbosity, message='Success!\n'):
-    # Method is for verbose option. Prints Success if no parameter specified
-    if verbosity:
-        print(message)
-
-
-def stars():
-    # Prints a row of stars
-    for a in range(100):
-        print('*', end="")
-    print('')
-
-
-def call_shell(command: str, verb):
-    working_on(verb, message=command)
-    subprocess.call(command, shell=True)
-
-def get_shell(command: str, verb) -> str:
-    working_on(verb, message=command)
-    output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
-    return output.decode('utf-8')
 
 
 def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb):
@@ -109,15 +90,41 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb
         stars()
         exit(1)
 
-    call_shell("ssh {} debian@{} 'sudo systemctl stop  tomcat'".format(key, cbioportal_url), verb)
-    call_shell("ssh {} debian@{} 'sudo systemctl start tomcat'".format(key, cbioportal_url), verb)
+    working_on(verb)
+
+
+def import_portal(key: str, cbioportal_url: str, gene_panel, verb):
+    if not key == '':
+        key = '-i ' + key
+
+    gene_panel = os.path.abspath(gene_panel)
+
+    stars()
+    get_shell("scp {} {} debian@{}:/home/debian/gene_panels/{}".format(key, gene_panel, cbioportal_url, os.path.basename(gene_panel)), verb)
+
+    out = get_shell("ssh {} debian@{} '"
+                    "source /etc/profile; "
+                    "cd ~/cbioportal/core/src/main/scripts; "
+                    "./importGenePanel.pl --data ~/gene_panels/{}'".format(key, cbioportal_url, os.path.basename(gene_panel)), verb)
+    print('importing cancer type')
+    stars()
+    if 'exit status 70.' in out:
+        print('There is a missing Identifier/Keyword in the gene_panel file. Or it has been mistyped')
+        print(out)
+        stars()
+        exit(1)
 
     working_on(verb)
 
-def main():
-    args = define_parser().parse_args()
-    export_study_to_cbioportal(args.key, args.folder, args.url, True)
+
+def restart_tomcat(cbioportal_url, key, verb):
+    call_shell("ssh {} debian@{} 'sudo systemctl stop  tomcat'".format(key, cbioportal_url), verb)
+    call_shell("ssh {} debian@{} 'sudo systemctl start tomcat'".format(key, cbioportal_url), verb)
 
 
-if __name__ == '__main__':
-    main()
+def main(args):
+    if args.folder:
+        export_study_to_cbioportal(args.key, args.folder, args.url, True)
+    elif args.gene_panel:
+        import_portal(args.key, args.url, args.gene_panel, True)
+    restart_tomcat(args.url, args.key, True)
