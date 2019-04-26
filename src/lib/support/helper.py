@@ -1,6 +1,7 @@
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
-__status__ = "Pre-Production"
+__version__ = "1.0"
+__status__ = "Production"
 
 import os
 import shutil
@@ -66,6 +67,12 @@ def call_shell(command: str, verb):
     return output
 
 
+def get_shell(command: str, verb) -> str:
+    working_on(verb, message=command)
+    output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
+    return output.decode('utf-8')
+
+
 def parallel_call(command: str, verb):
     working_on(verb, message=command)
     return subprocess.Popen(command, shell=True)
@@ -119,14 +126,21 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
 
 def concat_files(exports_config:Config.Config, study_config: Config.Config, verb):
     concated_file = os.path.join(study_config.config_map['output_folder'],
-                                  'data_{}.txt'.format(config2name_map[exports_config.type_config]))
+                                 'data_{}.txt'.format(config2name_map[exports_config.type_config]))
 
     input_folder = exports_config.config_map['input_folder']
 
     call_shell('head -n 1 {} > {}'.format(os.path.join(input_folder,exports_config.data_frame['FILE_NAME'][0]),
-                                                   concated_file), verb)
+                                          concated_file), verb)
 
     for each in exports_config.data_frame['FILE_NAME']:
         input_file = os.path.join(input_folder, each)
         # Concat all but first line to remove header.
         call_shell('tail -n +2 {} >> {}'.format(input_file, concated_file), verb)
+
+
+def restart_tomcat(cbioportal_url, key, verb):
+    if not key == '':
+        key = '-i ' + key
+    call_shell("ssh {} debian@{} 'sudo systemctl stop  tomcat'".format(key, cbioportal_url), verb)
+    call_shell("ssh {} debian@{} 'sudo systemctl start tomcat'".format(key, cbioportal_url), verb)

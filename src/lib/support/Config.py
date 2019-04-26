@@ -1,6 +1,7 @@
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
-__status__ = "Pre-Production"
+__version__ = "1.0"
+__status__ = "Production"
 
 # Command line imports
 import os
@@ -58,6 +59,7 @@ def get_single_config(file, f_type, verb) -> Config:
                 file_map[line[0]] = line[1]
             else:
                 break
+        f.flush()
         f.close()
     except IndexError:
         print('ERROR:: there was a syntax error in the header of {}'.format(file))

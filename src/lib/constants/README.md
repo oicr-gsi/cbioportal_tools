@@ -10,3 +10,9 @@
   - `case_list_map`
     - gives correct `case_list` id for given data_type
     - Honestly I'm a little lost as to how this affects the actual study since case lists still show up regardless of them existing in this map.
+
+### cancer_colours.csv
+Because cBioPortal wants colours for cancer types, I use this to generate non-conflicting cancer colours, that are also reproducible.
+
+### hmmcopy_chrom_positions.txt
+maps wrong HMMCopy chromosome positions to the correct ones.

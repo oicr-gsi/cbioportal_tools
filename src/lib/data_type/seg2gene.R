@@ -4,10 +4,10 @@ if(!(require(optparse) && require(CNTools))){
 
 tryCatch({
   option_list = list(
-    make_option(c("-s", "--segfile"), type="character", default=NULL, help="concatenated seg file"),
-    make_option(c("-g", "--genebed"), type="character", default=NULL, help="gene bed for segmentation"),
-    make_option(c("-l", "--genelist"), type="character", default=NULL, help="subset to these genes"),
-    make_option(c("-o","--outputfile"), type="character",default=NULL,help="file to output data matrix")
+    make_option(c("-s", "--segfile"),   type="character", default=NULL, help="concatenated seg file"),
+    make_option(c("-g", "--genebed"),   type="character", default=NULL, help="gene bed for segmentation"),
+    make_option(c("-l", "--genelist"),  type="character", default=NULL, help="subset to these genes"),
+    make_option(c("-o", "--outputfile"),type="character", default=NULL, help="file to output data matrix")
   )
   opt_parser <- OptionParser(option_list=option_list);
   opts <- parse_args(opt_parser);
@@ -37,8 +37,8 @@ tryCatch({
   colnames(df.rs)[1]<-"Hugo_Symbol"
 
   write.table(df.rs,file=opts$outputfile, sep="\t", row.names=FALSE, quote=FALSE)
+  print("seg2gene.R ran successfully, congrats.")
 }, error = function(err) {
   print(paste("ERROR:: ", err))
   quit(status=2)
 })
-print("seg2gene.R ran successfully, congrats.")

@@ -1,6 +1,7 @@
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
-__status__ = "Pre-Production"
+__version__ = "1.0"
+__status__ = "Production"
 
 import os
 import subprocess
@@ -11,6 +12,7 @@ from lib.constants import constants
 
 
 def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
+    # Append 'chr' to chromosome if needed
     # Gather ingredients
     calls = []
     output_folder = study_config.config_map['output_folder']
@@ -27,10 +29,8 @@ def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
 
         output_temp = output_file + '.temp'
 
-        calls.append(helper.parallel_call('awk \'NR>1 {{sub(/\\tchr/,"\\t")}} 1\' {} > {}; '.format(input_file,
-                                                                                                    output_temp) +
-                                          'mv {} {}'.format(output_temp, output_file),
-                                          verb))
+        calls.append(helper.parallel_call('awk \'NR>1 {{sub(/\\tchr/,"\\t")}} 1\' {} > {}; '
+                                          'mv {} {}'.format(input_file, output_temp, output_temp, output_file), verb))
 
     exports_config.config_map['input_folder'] = seg_temp
     # Wait until Baked
@@ -43,7 +43,7 @@ def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
 
 
 def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb):
-
+    # Replace whatever ID is there with the Sample_ID
     # Gather ingredients
     calls = []
     output_folder = study_config.config_map['output_folder']
@@ -54,7 +54,7 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
 
     # Cook
     for i in range(len(export_data)):
-        helper.working_on(verb, 'Removing chr from {}'.format(export_data['FILE_NAME'][i]))
+        helper.working_on(verb, 'Resolving Sample_ID {}'.format(export_data['FILE_NAME'][i]))
 
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
@@ -64,9 +64,9 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
 
         calls.append(helper.parallel_call('head -n 1 "{}" > {}; '.format(input_file, output_temp) +
                                           'cat  {} |'
-                                          'awk -F"\\t" \'NR>1 {{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' '
-                                          '>> {}; '.format(input_file, sample_id, output_temp) +
-                                          'mv {} {}'.format(output_temp, output_file), verb))
+                                          'awk -F"\\t" \'NR>1 {{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' >> {}; '
+                                          'mv {} {}'.format(input_file, sample_id, output_temp,
+                                                            output_temp, output_file), verb))
     exports_config.config_map['input_folder'] = seg_temp
     # Wait until Baked
     exit_codes = [p.wait() for p in calls]
@@ -79,7 +79,7 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
 
 
 def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, verb):
-
+    # Fix the header
     # Gather ingredients
     calls = []
     output_folder = study_config.config_map['output_folder']
@@ -105,7 +105,9 @@ def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, 
 
         helper.working_on(verb, 'Refactoring cols: {}'.format(export_data['FILE_NAME'][i]))
         output_temp = output_file + '.temp'
-
+        # Get all the genes in the .bed,
+        # Save each line with a matching gene
+        # Rename the Sample_ID
         calls.append(helper.parallel_call('echo "{}" > {}; '.format(header, output_temp) +
                                           'cat  {} | '
                                           'awk \'BEGIN{{split("{}",t); for (i in t) vals[t[i]]}} ($2 in vals)\' | '
@@ -125,7 +127,8 @@ def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, 
 
 
 def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Config, janus_path, verb):
-
+    # Replace chromosome numbers that exceed chromosome length with chromosome length
+    # Write num.mark as a n arbitrary operation
     calls = []
     output_folder = study_config.config_map['output_folder']
     input_folder = exports_config.config_map['input_folder']

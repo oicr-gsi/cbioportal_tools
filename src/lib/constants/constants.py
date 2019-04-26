@@ -1,6 +1,7 @@
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
-__status__ = "Pre-Production"
+__version__ = "1.0"
+__status__ = "Production"
 
 # To support other data_types, they need to be added to
 #       meta_info_map
@@ -109,6 +110,6 @@ clinical_type = ['PATIENT_ATTRIBUTES', 'SAMPLE_ATTRIBUTES', 'TIMELINE']
 # First index of list is chromosome, second is the real value
 hmmcopy_chrom_positions = 'src/lib/constants/hmmcopy_chrom_positions.txt'
 seg2gene = 'src/lib/data_type/seg2gene.R'
-colours = 'src/lib/support/cancer_colours.csv'
+colours = 'src/lib/constants/cancer_colours.csv'
 
 cbioportal_url = 'cbioportal-stage.gsi.oicr.on.ca'
