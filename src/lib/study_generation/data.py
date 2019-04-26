@@ -1,6 +1,7 @@
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
-__status__ = "Pre-Production"
+__version__ = "1.0"
+__status__ = "Production"
 
 import os
 
@@ -228,5 +229,6 @@ def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: 
             f.write('#{}\n'.format('\t'.join(samples_config.data_frame[i])))
         else:
             f.write('{}\n'.format('\t'.join(samples_config.data_frame[i])))
+    f.flush()
     f.close()
     helper.working_on(verb)

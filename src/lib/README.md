@@ -4,7 +4,4 @@ This folder should contain nothing but this and other folders.
 - [`study_generation`](study_generation/): High level of each type of file and each pipeline it can process.
 - [`data_type`](data_type/): Actual processing of each piece of data
 - [`constants`](constants/) & [`support`](support/): Other functions and data used by above 2
-
-#### Standalone scripts:
-* [`import_study.py`](support/import_study.py) -> import a pre-configured study
-* [`remove_study.py`](support/remove_study.py) -> remove a study based on ID
+- [`tools`](tools/): Folder holding the `main` programs for all 4 of Janus' faces

@@ -1,6 +1,7 @@
 __author__ = "Kunal Chandan"
 __email__ = "kchandan@uwaterloo.ca"
-__status__ = "Pre-Production"
+__version__ = "1.0"
+__status__ = "Production"
 
 # Command Line Imports
 import os
@@ -41,4 +42,5 @@ def gen_cancer_type_data(cancer_type_config: Config.Config, study_config: Config
                                                        colour,
                                                        parent_type_of_cancer))
     f.write('\n'.join(write_str))
+    f.flush()
     f.close()

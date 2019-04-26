@@ -1,7 +1,7 @@
 #  janus
 janus is a tool for the import of data and administration of the GSI cBioPortal instance. 
 
-This will generate meta and data files for cBioPortal, then import to the cBioPortal instance.
+Janus has multiple faces, as of now, just 4. Each one defines a set of functions that are described more accurately [here.](src/README.md)
 
 More information on the file types from cBioPortal is [Data Loading](https://cbioportal.readthedocs.io/en/latest/Data-Loading.html),
 and [File Formats](https://cbioportal.readthedocs.io/en/latest/File-Formats.html). 
@@ -23,11 +23,11 @@ and [cBioPortal-Tools](https://wiki.oicr.on.ca/display/GSI/cBioPortal-Tools)
 
 ## Usage
 
-Run the importer script with:
-```
-./runner.sh
-```
-Within the runner script you must simply specify the location of your study configuration files.
+### `janus.py generator`
+
+For each face of janus there is help, however the heaviest face `generator` creates and uploads a study from raw data to your cBioPortal instance.
+
+If you are using the runner script you must simply specify the location of your study configuration files.
 
 Should you be exporting the study to a cBioPortal instance, a log file will be generated of the import process in the study folder.
 
@@ -35,14 +35,17 @@ You will need a minimum of 16g. i.e. `qrsh -l h_vmem=16g`* I recommend having `3
 
 \* I don't actually know the minimum, but this is the most I've seen used.
 
-### Minimal Study:
+#### Minimal Study:
 
 Refer to [Specification README.md](study_input/Specification/README.md#minimal-study)
 
+### `janus.py import`
+
+This face will take either a complete study or a 
 
 ## Contributing:
 
-Refer to [`EXTENDING.md`](EXTENDING.md)
+Refer to [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
 Lists all steps that should be taken to ensure proper and complete integration of new feature.
 
@@ -52,10 +55,6 @@ Lists all steps that should be taken to ensure proper and complete integration o
 * [`src/`](src) contains all the scripts, with deeper organization as you go
 
 * [`study_input/`](study_input) contains example input configuration files for sample studies.
-
-* [`src/lib/support/`](src/lib/support/) standalone import and removal tools for cBioPortal.
-  * [`import_study.py`](src/lib/support/import_study.py) -> import a pre-configured study
-  * [`remove_study.py`](src/lib/support/remove_study.py) -> remove a study based on ID
 
 * [`study_input/Specification/`](study_input/Specification) contains documentation on making your own config files.
 
