@@ -7,8 +7,14 @@ def main():
     global janus_path
     global verb
 
-    helper.working_on(verb, message='Fixing Chromosome numbering ...')
+    helper.working_on(verb, message='Gathering and decompressing SEG files into temporary folder')
+    helper.decompress_to_temp(meta_config, study_config, verb)
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Fixing HMMCopy formatting, chromosome, and chromosome max-length ...')
+    segmented_data.fix_hmmcopy_tsv(meta_config, study_config, verb)
     segmented_data.fix_chrom(meta_config, study_config, verb)
+    segmented_data.fix_hmmcopy_max_chrom(meta_config, study_config, janus_path, verb)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Fixing .SEG IDs')
