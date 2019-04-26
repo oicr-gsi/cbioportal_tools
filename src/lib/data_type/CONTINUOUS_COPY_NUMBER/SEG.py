@@ -1,5 +1,5 @@
 from lib.support import helper
-from lib.data_type.SEG import segmented_data
+from lib.data_type.CONTINUOUS_COPY_NUMBER import continuous_copy_number_data
 
 
 def main():
@@ -8,16 +8,8 @@ def main():
     global janus_path
     global verb
 
-    helper.working_on(verb, message='Fixing Chromosome numbering ...')
-    segmented_data.fix_chrom(meta_config, study_config, verb)
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Fixing .SEG IDs')
-    segmented_data.fix_seg_id(meta_config, study_config, verb)
-    helper.working_on(verb)
-
-    helper.working_on(verb, message='Concating SEG Files to export folder')
-    helper.concat_files(meta_config, study_config, verb)
+    helper.working_on(verb, message='Generating log2CNA files ...')
+    continuous_copy_number_data.gen_log2cna(meta_config, study_config, janus_path, verb)
     helper.working_on(verb)
 
 
