@@ -97,7 +97,8 @@ case_list_map =   {'MAF':               '_sequenced',
 
 no_data_frame = ['CONTINUOUS_COPY_NUMBER', 'DISCRETE_COPY_NUMBER', 'MRNA_EXPRESSION_ZSCORES']
 
-supported_pipe = {'MAF':                       ['Strelka', 'Mutect', 'Mutect2', 'MutectStrelka', 'GATKHaplotypeCaller'],
+supported_pipe = {'MAF':                       ['MAF', 'Strelka', 'Mutect', 'Mutect2',
+                                                'MutectStrelka', 'GATKHaplotypeCaller'],
                   'SEG':                       ['CNVkit', 'Sequenza', 'HMMCopy'],
                   'MRNA_EXPRESSION':           ['Cufflinks', 'RSEM'],
                   'MRNA_EXPRESSION_ZSCORES':   ['MRNA_EXPRESSION'],
