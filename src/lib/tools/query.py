@@ -14,10 +14,12 @@ def define_parser() -> argparse.ArgumentParser:
     # INTERACTION
     parser.add_argument("-u", "--url",
                         help="The location of the cBioPortal instance (address).",
-                        metavar='URL')
+                        metavar='URL',
+                        required=True)
     parser.add_argument("-p", "--password",
                         help="mySQL Password.",
-                        metavar='PASSWORD')
+                        metavar='PASSWORD',
+                        required=True)
     parser.add_argument("-k", "--key",
                         help="The location of the cBioPortal Key.",
                         metavar='KEY',
@@ -27,7 +29,7 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument("-t", "--type-of-cancer",
                         help="Query the types of cancer in the cBioPortal Database",
                         action='store_true')
-    parser.add_argument("-g", "--query-gene-panel",
+    parser.add_argument("-g", "--gene-panel",
                         help="Query the gene-panels in the cBioPortal Database",
                         action='store_true')
     parser.add_argument("-b", "--border",
@@ -79,5 +81,7 @@ def query_portal(key: str, cbioportal_url: str, password: str, query_toc: bool, 
 
 
 def main(args):
-    if args.query_gene_panel or args.type_of_cancer:
-        query_portal(args.key, args.url, args.password, args.type_of_cancer, args.query_gene_panel, args.border, True)
+    if args.gene_panel or args.type_of_cancer:
+        query_portal(args.key, args.url, args.password, args.type_of_cancer, args.gene_panel, args.border, True)
+    else:
+        print('ERROR:: Arguments -g/--gene-panel and/or -t/--type-of-cancer are required.')

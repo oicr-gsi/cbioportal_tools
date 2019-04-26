@@ -13,17 +13,17 @@ def verify_dual_columns(exports_config: Config.Config, verb):
     processes = []
     for i in range(exports_config.data_frame.shape[0]):
         file = os.path.join(exports_config.config_map['input_folder'], exports_config.data_frame['FILE_NAME'][i])
-        # Essentially, print The header,
-        # add an unmatched column to header,
-        # duplicate last column
         # if the normal_id is UNMATCHED, then do this silly business.
         if exports_config.data_frame['NORMAL_ID'][i] == 'UNMATCHED':
 
+            # Essentially, print the header,
+            # add an unmatched column to header,
+            # duplicate last column
             processes.append(helper.parallel_call('awk -F\'\\t\' \'{{ OFS = FS }} '
                                                   '{{   if ($1 ~ "##"){{ print }} '
                                                   'else if ($1 ~ "#"){{ for(i = 1; i <= NF;i++){{ printf "%s\\t", $i }}'
                                                   ' print "UNMATCHED" }}'
-                                                  'else {{ for(i = 1; i <= NF; i++) {{ printf "%s\\t", $i}} print $NF }}'
+                                                  'else {{ for(i = 1; i <= NF; i++){{ printf "%s\\t", $i}} print $NF }}'
                                                   '}}\' {0} > {0}.temp;'
                                                   'mv {0}.temp {0}'.format(file), verb))
     # Wait until Baked
@@ -36,6 +36,7 @@ def verify_dual_columns(exports_config: Config.Config, verb):
 
 
 def filter_vcf_rejects(mutation_config: Config.Config, verb):
+    # Filter for only PASS
     processes = []
     for file in mutation_config.data_frame['FILE_NAME']:
         file = os.path.join(mutation_config.config_map['input_folder'], file)
@@ -139,6 +140,7 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
 
 
 def clean_head(exports_config: Config.Config, verb):
+    # Remove excess header from top of MAF files
     helper.working_on(verb, message='Cleaning head ...')
 
     processes = []
