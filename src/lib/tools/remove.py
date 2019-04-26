@@ -14,14 +14,15 @@ def define_parser() -> argparse.ArgumentParser:
 
     parser.add_argument("-i", "--id",
                         help="The cancer study ID.",
-                        metavar='ID')
+                        metavar='ID',
+                        required=True)
     parser.add_argument("-u", "--url",
                         help="The location of the cBioPortal instance (address).",
-                        metavar='URL')
+                        metavar='URL',
+                        required=True)
     parser.add_argument("-k", "--key",
                         help="The location of the cBioPortal Key.",
-                        metavar='KEY',
-                        default='')
+                        metavar='KEY')
     return parser
 
 

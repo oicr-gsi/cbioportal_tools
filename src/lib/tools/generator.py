@@ -19,11 +19,13 @@ Information = typing.List[Config.Config]
 
 def define_parser() -> argparse.ArgumentParser:
     # Define program arguments
-    parser = argparse.ArgumentParser(
+    generator = argparse.ArgumentParser(
         description="janus "
                     "(https://github.com/oicr-gsi/cbioportal_tools) is a CLI tool to generate an importable study for "
                     "a cBioPortal instance. Recommended usage can be seen in the examples located in ../study_input/ .")
-    config = parser.add_argument_group('Study Arguments (Required):')
+    generator.register('action', 'pipes', DocstringAction)
+    config = generator.add_argument_group('Study Arguments (Required):')
+
 
     config.add_argument("-c", "--config",
                         help="The location of the study config file, in essence a set of command-line arguments. "
@@ -55,7 +57,7 @@ def define_parser() -> argparse.ArgumentParser:
                         metavar='PATH',
                         required=True)
 
-    config_spec = parser.add_argument_group('Overridable Required Configuration File Specifiers:')
+    config_spec = generator.add_argument_group('Overridable Required Configuration File Specifiers:')
 
     config_spec.add_argument('--' + 'sample-info',
                              help='Location of {} configuration file: will override {} specification '
@@ -71,7 +73,7 @@ def define_parser() -> argparse.ArgumentParser:
                                                                          args2config_map['cancer_type']))
 
 
-    config_data = parser.add_argument_group('Overridable Optional Data-type Configuration File Specifiers:')
+    config_data = generator.add_argument_group('Overridable Optional Data-type Configuration File Specifiers:')
 
     config_data.add_argument('--' + 'mutation-data',
                              help='Location of {} configuration file: will override {} specification '
@@ -153,23 +155,35 @@ def define_parser() -> argparse.ArgumentParser:
                                   'OPTIONAL --         UNSUPPORTED'.format('custom-case-list',
                                                                            args2config_map['custom_case_list']),
                              metavar='UNSUPPORTED')
-    parser.add_argument("-k", "--key",
-                        type=lambda key: os.path.abspath(key),
-                        help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
-                        metavar='FILE',
-                        default='')
-    parser.add_argument("-p", "--push",
-                        action="store_true",
-                        help="Push the generated study to the cBioPortal Instance")
-    parser.add_argument("-u", "--url",
-                        help="Override the url for cBioPortal instance DO NOT include https",
-                        metavar='URL',
-                        default=constants.cbioportal_url)
+
+    pipeline = generator.add_argument_group('Pipelines', 'Pipelines printing')
+    pipeline.add_argument("-P", "--pipelines",
+                          choices=constants.supported_pipe.keys(),
+                          metavar='TYPE',
+                          nargs='?',
+                          action='pipes',
+                          help="Query which pipelines are supported and exit. "
+                               "Types are: {}".format(constants.supported_pipe.keys()))
+
+    options = generator.add_argument_group('Other Supporting Optional Arguments:')
+    options.add_argument("-k", "--key",
+                         type=lambda key: os.path.abspath(key),
+                         help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
+                         metavar='FILE',
+                         default='')
+    options.add_argument("-p", "--push",
+                         action="store_true",
+                         help="Push the generated study to the cBioPortal Instance")
+    options.add_argument("-u", "--url",
+                         help="Override the url for cBioPortal instance DO NOT include https",
+                         metavar='URL',
+                         default=constants.cbioportal_url)
+
     # TODO:: Consider having multiple levels of verbosity
-    parser.add_argument("-v", "--verbose",
-                        action="store_true",
-                        help="Makes program verbose")
-    return parser
+    options.add_argument("-v", "--verbose",
+                         action="store_true",
+                         help="Makes program verbose")
+    return generator
 
 
 def resolve_priority_queue(information: Information) -> Information:
@@ -222,6 +236,14 @@ def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) ->
         raise IOError('The minimum number of arguments have not been provided in the file and/or command-line arguments'
                       '\nSee: {}'.format(meta_args))
     return study_config
+
+
+class DocstringAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        output_set = constants.supported_pipe[values]
+        output_set.append('FILE')
+        print('The supported formats are {}'.format(output_set))
+        parser.exit()
 
 
 def main(args):

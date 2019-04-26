@@ -118,8 +118,10 @@ def import_portal(key: str, cbioportal_url: str, gene_panel, verb):
 
 
 def main(args):
+    if not args.gene_panel or args.folder:
+        print('ERROR:: Arguments -g/--gene-panel and/or -f/--folder are required.')
     if args.folder:
         export_study_to_cbioportal(args.key, args.folder, args.url, True)
-    elif args.gene_panel:
+    if args.gene_panel:
         import_portal(args.key, args.url, args.gene_panel, True)
     restart_tomcat(args.url, args.key, True)

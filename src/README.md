@@ -55,17 +55,11 @@ usage: janus.py generator [-h] [-c FILE] -o FOLDER [-t TYPE] [-i ID] [-N NAME]
                           [--mutsig-data UNSUPPORTED]
                           [--gene-panel-data UNSUPPORTED]
                           [--gene-set-data UNSUPPORTED]
-                          [--custom-case-list UNSUPPORTED] [-k FILE] [-p]
-                          [-u URL] [-v]
+                          [--custom-case-list UNSUPPORTED] [-P [TYPE]]
+                          [-k FILE] [-p] [-u URL] [-v]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -k FILE, --key FILE   The RSA key to cBioPortal. Should have appropriate
-                        read write restrictions
-  -p, --push            Push the generated study to the cBioPortal Instance
-  -u URL, --url URL     Override the url for cBioPortal instance DO NOT
-                        include https
-  -v, --verbose         Makes program verbose
 
 Study Arguments (Required)::
   -c FILE, --config FILE
@@ -161,6 +155,23 @@ Overridable Optional Data-type Configuration File Specifiers::
                         override CASE_LIST specification in the config file.
                         UNSUPPORTED. See the docs. OPTIONAL -- UNSUPPORTED
 
+Pipelines:
+  Pipelines printing
+
+  -P [TYPE], --pipelines [TYPE]
+                        Query which pipelines are supported and exit. Types
+                        are: dict_keys(['MAF', 'SEG', 'MRNA_EXPRESSION',
+                        'MRNA_EXPRESSION_ZSCORES', 'CONTINUOUS_COPY_NUMBER',
+                        'DISCRETE_COPY_NUMBER'])
+
+Other Supporting Optional Arguments::
+  -k FILE, --key FILE   The RSA key to cBioPortal. Should have appropriate
+                        read write restrictions
+  -p, --push            Push the generated study to the cBioPortal Instance
+  -u URL, --url URL     Override the url for cBioPortal instance DO NOT
+                        include https
+  -v, --verbose         Makes program verbose
+
 ```
 
 ## Import
@@ -209,13 +220,14 @@ optional arguments:
                         mySQL Password.
   -k KEY, --key KEY     The location of the cBioPortal Key.
   -t, --type-of-cancer  Query the types of cancer in the cBioPortal Database
-  -g, --query-gene-panel
+  -g, --gene-panel
                         Query the gene-panels in the cBioPortal Database
   -b, --border          Disables borders around the query.
 
 ```
 
 ### Examples:
+Generating and importing a sample study, while overriding some values in a configuration file:
 ```
 python3 janus.py generator \
 			--output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/ \
@@ -229,11 +241,35 @@ python3 janus.py generator \
 			--push \
 			--verbose \
 ```
-``` 
+Generating and importing a sample study:
+```
 python3 janus.py generator \
 			--config ../study_input/DCIS/study.txt \
 			--output-folder /.mounts/labs/gsiprojects/gsi/cBioGSI/data/project_TEST/cbio_DCIS/  \
 			--key /u/kchandan/cbioportal.pem \
 			--push \
 			--verbose \
+```
+Querying the supported pipelines for study generation:
+```
+python3 janus.py generator -P SEG
+```
+Importing a gene-panel and a cBioPortal ready study:
+```
+python3 src/janus.py import 	--url cbioportal-stage.gsi.oicr.on.ca \
+				--key /u/kchandan \
+				--folder /home/debian/Documents/output/ \
+				--gene-panel ../../genepanel.txt \
+```
+Removing a study by the `study_id: gsi_gecco_2019`:
+```
+python3 src/janus.py remove 	--id gsi_gecco_2019 \
+				--url cboportal.gsi.oicr.on.ca \
+```
+Querying the cBioPortal database for `gene-panels` and `type-of-cancer`
+```
+python3 src/janus.py query 	--url cbioportal.gsi.oicr.on.ca \
+				--password VERY_SECURE_PASSWORD123 \
+				--gene-panel \
+				--type-of-cancer \
 ```
