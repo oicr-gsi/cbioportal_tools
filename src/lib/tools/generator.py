@@ -182,6 +182,7 @@ def define_parser() -> argparse.ArgumentParser:
     # TODO:: Consider having multiple levels of verbosity
     options.add_argument("-v", "--verbose",
                          action="store_true",
+                         default=False,
                          help="Makes program verbose")
     return generator
 
