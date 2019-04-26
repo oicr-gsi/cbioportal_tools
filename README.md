@@ -41,7 +41,15 @@ Refer to [Specification README.md](study_input/Specification/README.md#minimal-s
 
 ### `janus.py import`
 
-This face will take either a complete study or a 
+This face will take either a complete study or a `gene-panel` file and will upload them to a target cBioPortal instance and restart it.
+
+### `janus.py remove`
+
+This face will remove a study from a target instance given a `cancer_study_id`, and will automatically restart the instance.
+
+### `janus.py query`
+
+This face will query an instance for `cancer-type`s and `gene-panel`s. It should grow to query more properties.
 
 ## Contributing:
 
