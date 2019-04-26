@@ -8,6 +8,14 @@ def main():
     global janus_path
     global verb
 
+    helper.working_on(verb, message='Gathering and decompressing VCF files into temporary folder')
+    helper.decompress_to_temp(meta_config, study_config, verb)
+    helper.working_on(verb)
+
+    helper.working_on('Ensuring both columns exist, otherwise adding UNMATCHED column ...')
+    mutation_data.verify_dual_columns(meta_config, verb)
+    helper.working_on(verb)
+
     helper.working_on(verb, message='Filtering for only PASS ...')
     mutation_data.filter_vcf_rejects(meta_config, verb)
     helper.working_on(verb)

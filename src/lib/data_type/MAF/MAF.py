@@ -8,9 +8,8 @@ def main():
     global janus_path
     global verb
 
-    helper.working_on(verb, message='Exporting vcf2maf...')
-    helper.working_on(verb, message='And deleting .vcf s...')
-    meta_config = mutation_data.export2maf(meta_config, study_config, verb)
+    helper.working_on(verb, message='Gathering and decompressing MAF files into temporary folder')
+    helper.decompress_to_temp(meta_config, study_config, verb)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Cleaning MAF Files ...')

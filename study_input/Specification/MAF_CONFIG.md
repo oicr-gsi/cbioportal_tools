@@ -13,7 +13,7 @@ If your files are compressed with any format, ensure it has the **correct extens
 The header will look like this:
 ```
 #input_folder=/FOLDER/WITH/DATA/
-#pipeline=[ Strelka | Mutect | Mutect2 | MutectStrelka | GATKHaplotypeCaller | FILE ]
+#pipeline=[ Strelka | Mutect | Mutect2 | MutectStrelka | GATKHaplotypeCaller | MAF | FILE ]
 #profile_name=Mutations (Cardiac Cancer)
 #profile_description=Mutation data from whole exome sequencing of cardiac tissue. (XX Samples)
 #ref_fasta=/.mounts/labs/PDE/data/gatkAnnotationResources/hg19_random.fa
@@ -21,8 +21,7 @@ The header will look like this:
 ```
 All key-value pairs are required. 
 
-The program by **default** expects **VCF** format files, should you have already generated the **MAF** files and you want to import them without vcf2maf, you **MUST** append `.maf` to the pipeline.
-(E.g `Mutect.maf`,`UNKNOWN.maf`)
+The program by **default** expects **VCF** format files, should you have already generated the **MAF** files and you want to import them without vcf2maf, you **MUST** make `MAF` the pipeline.
 
 It is fine if the pipeline is unknown if files are of the format **MAF** however, it is required for **VCF**.
 This is because **VCF** files require processing with `vcf2maf.pl` and prep is required for the different formats.
