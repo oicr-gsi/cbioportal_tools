@@ -4,6 +4,8 @@ Run with `./runner.sh` all arguments can be modified:
 
 To submit a job, run `qsub_Janus.sh` with **your** email.
 
+To see examples of usage, [scroll down.](README.md#examples)
+
 ## Detailed help:
 
 ```
@@ -211,22 +213,22 @@ optional arguments:
 ```
 >>> python3 janus.py query -h
 
-usage: janus.py query [-h] [-u URL] [-p PASSWORD] [-k KEY] [-t] [-g] [-b]
+usage: janus.py query [-h] -u URL [-p PATH] [-k KEY] [-t] [-g] [-b]
 
 optional arguments:
   -h, --help            show this help message and exit
   -u URL, --url URL     The location of the cBioPortal instance (address).
-  -p PASSWORD, --password PASSWORD
-                        mySQL Password.
+  -p PATH, --properties PATH
+                        portal.properties file path. Default
+                        ~/cbioportal/portal.properties
   -k KEY, --key KEY     The location of the cBioPortal Key.
   -t, --type-of-cancer  Query the types of cancer in the cBioPortal Database
-  -g, --gene-panel
-                        Query the gene-panels in the cBioPortal Database
+  -g, --gene-panel      Query the gene-panels in the cBioPortal Database
   -b, --border          Disables borders around the query.
 
 ```
 
-### Examples:
+# Examples:
 Generating and importing a sample study, while overriding some values in a configuration file:
 ```
 python3 janus.py generator \
@@ -269,7 +271,7 @@ python3 src/janus.py remove 	--id gsi_gecco_2019 \
 Querying the cBioPortal database for `gene-panels` and `type-of-cancer`
 ```
 python3 src/janus.py query 	--url cbioportal.gsi.oicr.on.ca \
-				--password VERY_SECURE_PASSWORD123 \
+				--properties /home/debian/cbioportal/portal.properties \
 				--gene-panel \
 				--type-of-cancer \
 ```
