@@ -89,6 +89,27 @@ def assert_pipeline(type: str, pipeline: str):
         exit(1)
 
 
+def assert_type(type: str):
+    if not type in supported_pipe.keys():
+        stars()
+        stars()
+        print('ERROR:: The type ({}) you are attempting to use is not currently supported. '
+              'Please use one of these {}'.format(type, supported_pipe.keys()))
+        stars()
+        stars()
+        exit(1)
+
+
+def execfile(filepath, globals=None, locals=None):
+    if globals is None:
+        globals = {}
+    globals.update({
+        "__name__": "__main__",
+    })
+    with open(filepath, 'rb') as file:
+        exec(compile(file.read(), filepath, 'exec'), globals, locals)
+
+
 def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config, verb):
     # Decompresses each file in the current folder to ../temp_vcf/ if it is compressed. otherwise, copy it over
     if mutate_config.type_config == 'MAF':
