@@ -58,3 +58,18 @@ def gen_dcna(exports_config: Config.Config, study_config: Config.Config, verb):
         helper.stars()
         helper.stars()
         exit(1)
+
+
+def verify_final_file(exports_config: Config.Config, verb):
+    data = open(os.path.join(exports_config.config_map['input_folder'],
+                             exports_config.data_frame['FILE_NAME'][0]), 'w')
+
+    t_config = exports_config.type_config
+    header = data.readline().strip().split('\t')
+    minimum_header = ['Entrez_Gene_Id', 'Hugo_Symbol']
+
+    helper.working_on(verb, message='Asserting minimum header is in {} file.'.format(t_config))
+    if not any([a in header for a in minimum_header]):
+        print([a if a not in header else '' for a in minimum_header])
+        print('Missing header(s) from {} file have been printed above, ensure data isn\'t missing.'.format(t_config))
+        exit(1)
