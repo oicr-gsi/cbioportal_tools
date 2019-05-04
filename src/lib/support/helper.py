@@ -22,6 +22,11 @@ def stars():
     print('')
 
 
+def exit_program(message='', code=1):
+    print(message)
+    exit(code)
+
+
 def make_folder(path):
     try:
         os.stat(path)
