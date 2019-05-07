@@ -256,6 +256,8 @@ def main(args):
     path = args.path
     constants.cbioportal_url = args.url
 
+
+
     # TODO:: Fail gracefully if something breaks
     ### study_config defines the study, arguments and files to use for the data
     if args.config:
@@ -270,9 +272,8 @@ def main(args):
 
 
     [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
-    print("leaving early")
-    exit()
     information = resolve_priority_queue(information)
+
 
     [print('Informational Files {}:\n{}\n'.format(a.type_config, a)) for a in information] if verb else print(),
     [print('Clinical List Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
@@ -282,8 +283,6 @@ def main(args):
     helper.clean_folder(study_config.config_map['output_folder'])
 
     for each in information:
-        print(each)
-
         meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
         data.generate_data_type(each, study_config, path, verb)
         case.generate_case_list(each, study_config, verb)

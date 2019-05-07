@@ -95,8 +95,6 @@ def assert_pipeline(type: str, pipeline: str):
 
 
 def assert_type(type: str):
-    print(type)
-    exit()
     if not type in supported_pipe.keys():
         stars()
         stars()
