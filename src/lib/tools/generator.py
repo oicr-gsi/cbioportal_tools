@@ -3,6 +3,9 @@ __email__ = "kchandan@uwaterloo.ca"
 __version__ = "1.0"
 __status__ = "Production"
 
+
+### this script is for generation of an import folder
+
 import pandas as pd
 import argparse
 import typing
@@ -12,6 +15,8 @@ from lib.constants import constants
 from lib.study_generation import data, meta, case
 from lib.support import Config, helper, cbioportal_interface
 
+
+## a map of command line arguments to internal terms
 args2config_map = constants.args2config_map
 
 Information = typing.List[Config.Config]
@@ -253,15 +258,21 @@ def main(args):
     constants.cbioportal_url = args.url
 
     # TODO:: Fail gracefully if something breaks
-
+    ### study_config defines the study, arguments and files to use for the data
     if args.config:
-        study_config = Config.get_single_config(args.config, 'study', verb)
+        ### load from file
+        study_config = Config.get_single_config(args.config, 'study', 'study',verb)
     else:
-        study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE_NAME']), 'study')
+        ### create an empty dataframe
+        study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE_NAME']), 'study','study')
+
+    ### command line argument can be provided that will overide what is in the configuation files
     add_cli_args(study_config, args, verb)
 
-    [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
 
+    [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
+    print("leaving early")
+    exit()
     information = resolve_priority_queue(information)
 
     [print('Informational Files {}:\n{}\n'.format(a.type_config, a)) for a in information] if verb else print(),
@@ -272,7 +283,8 @@ def main(args):
     helper.clean_folder(study_config.config_map['output_folder'])
 
     for each in information:
-        print(each.type_config)
+        print(each)
+
         meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
         data.generate_data_type(each, study_config, path, verb)
         case.generate_case_list(each, study_config, verb)
