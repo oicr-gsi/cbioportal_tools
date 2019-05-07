@@ -54,7 +54,8 @@ args2config_map = {'sample_info':               'SAMPLE_ATTRIBUTES',
                    'gene_panel_data':           'GENE_PANEL',
                    'gene_set_data':             'GENE_SET'}
 
-# config2name_map is used for creating the meta_{name}.txt and data_{name}.txt file names.
+#config2name_map is used for creating the meta_{name}.txt and data_{name}.txt file names.
+
 config2name_map = {'SAMPLE_ATTRIBUTES':       'clinical_samples',
                    'PATIENT_ATTRIBUTES':      'clinical_patients',
                    'CANCER_TYPE':             'cancer_type',

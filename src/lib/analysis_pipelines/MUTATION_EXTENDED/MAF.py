@@ -1,5 +1,5 @@
 from lib.support import helper
-from lib.data_type.MAF import mutation_data
+from lib.analysis_pipelines.MUTATION_EXTENDED import support_functions
 
 
 def main():
@@ -13,7 +13,7 @@ def main():
     helper.working_on(verb)
 
     helper.working_on(verb, message='Cleaning MAF Files ...')
-    mutation_data.clean_head(meta_config, verb)
+    support_functions.clean_head(meta_config, verb)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Concating MAF Files to export folder  ...')
