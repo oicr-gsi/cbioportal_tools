@@ -170,8 +170,8 @@ def define_parser() -> argparse.ArgumentParser:
 
     options = generator.add_argument_group('Other Supporting Optional Arguments:')
     options.add_argument("-k", "--key",
-                         type=lambda key: os.path.abspath(key) if not key == '' else
-                         helper.exit_program('Appropriate key for cBioPortal instance was not provided', 1),
+                         type=lambda key: os.path.abspath(key),
+                         #if not key == '' else helper.exit_program('Appropriate key for cBioPortal instance was not provided', 1),
                          help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
                          metavar='FILE',
                          default='')
