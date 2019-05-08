@@ -171,8 +171,7 @@ def define_parser() -> argparse.ArgumentParser:
 
     options = generator.add_argument_group('Other Supporting Optional Arguments:')
     options.add_argument("-k", "--key",
-                         type=lambda key: os.path.abspath(key),
-                         #if not key == '' else helper.exit_program('Appropriate key for cBioPortal instance was not provided', 1),
+                         type=lambda key: os.path.abspath(key) if key else '',  # else helper.exit_program('Appropriate key for cBioPortal instance was not provided', 1),
                          help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
                          metavar='FILE',
                          default='')
@@ -261,8 +260,6 @@ def main(args):
     verb = args.verbose
     path = args.path
     constants.cbioportal_url = args.url
-
-
 
     # TODO:: Fail gracefully if something breaks
     ### study_config defines the study, arguments and files to use for the data
