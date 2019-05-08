@@ -34,24 +34,29 @@ def make_folder(path):
         os.makedirs(path)
 
 
-def clean_folder(path):
+def clean_folder(path,force):
     if os.path.exists(path):
-        print('The following path will be removed and overwritten : {}'.format(path))
-        ## ask for a response, get the first character in lowercase
-        response=input("Press y to continue, any other key to exit:").lower().strip()[:1]
-        try:
-            if response == 'y':
-                shutil.rmtree(path)
-                make_folder(path)
-            else:
+        if force:
+            shutil.rmtree(path)
+            make_folder(path)
+        else:
+            print('The following path will be removed and overwritten : {}'.format(path))
+            ## ask for a response, get the first character in lowercase
+            response=input("Press y to continue, any other key to exit:").lower().strip()[:1]
+            try:
+                if response == 'y':
+                    shutil.rmtree(path)
+                    make_folder(path)
+                else:
+                    print('Exiting Janus')
+                    exit()
+                    ### trying to handle ctrl-c butthis doesnt seem to be working
+            except KeyboardInterrupt:
                 print('Exiting Janus')
                 exit()
-                ### trying to handle ctrl-c butthis doesnt seem to be working
-        except KeyboardInterrupt:
-            print('Exiting Janus')
-            exit()
     else:
         make_folder(path)
+
 
 def copy_file(input, output, verb):
     call_shell("cp {} {}".format(input, output), verb)
@@ -124,7 +129,7 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
         temp = get_temp_folder(study_config.config_map['output_folder'], mutate_config.type_config.lower())
 
     working_on(verb, message='Extracting/copying to {}'.format(temp))
-    clean_folder(temp)
+    clean_folder(temp,True)
 
     for i in range(len(mutate_config.data_frame['FILE_NAME'])):
         input_file =  os.path.abspath(os.path.join(mutate_config.config_map['input_folder'],

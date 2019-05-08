@@ -61,6 +61,7 @@ def define_parser() -> argparse.ArgumentParser:
                         metavar='PATH',
                         required=True)
 
+
     config_spec = generator.add_argument_group('Overridable Required Configuration File Specifiers:')
 
     config_spec.add_argument('--' + 'sample-info',
@@ -182,12 +183,17 @@ def define_parser() -> argparse.ArgumentParser:
                          help="Override the url for cBioPortal instance DO NOT include https",
                          metavar='URL',
                          default=constants.cbioportal_url)
+    options.add_argument("-f", "--force",
+                        action="store_true",
+                        help="Force overwrite of output and temp folders; do not ask for permission")
+
 
     # TODO:: Consider having multiple levels of verbosity
     options.add_argument("-v", "--verbose",
                          action="store_true",
                          default=False,
                          help="Makes program verbose")
+
     return generator
 
 
@@ -270,7 +276,6 @@ def main(args):
     ### command line argument can be provided that will overide what is in the configuation files
     add_cli_args(study_config, args, verb)
 
-
     [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
     information = resolve_priority_queue(information)
 
@@ -280,7 +285,7 @@ def main(args):
     [print('Customized Case Set {}:\n{}\n'.format(a.type_config, a)) for a in custom_list] if verb else print(),
 
     # Clean Output Folder/Initialize it
-    helper.clean_folder(study_config.config_map['output_folder'])
+    helper.clean_folder(study_config.config_map['output_folder'],args.force)
 
     for each in information:
         meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
