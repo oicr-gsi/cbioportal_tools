@@ -134,7 +134,7 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
     for i in range(len(mutate_config.data_frame['FILE_NAME'])):
         input_file =  os.path.abspath(os.path.join(mutate_config.config_map['input_folder'],
                                                    mutate_config.data_frame['FILE_NAME'][i]))
-
+        print(input_file)
         if not os.path.isfile(input_file):
             raise FileNotFoundError('The path to the file you have provided is not correct ...\n' + input_file)
 
