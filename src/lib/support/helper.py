@@ -69,8 +69,7 @@ def working_on(verbosity, message='Success!\n'):
 
 
 def get_temp_folder(output_folder, ext) -> str:
-    return os.path.abspath(os.path.join(output_folder, '../temp/temp_{}/'.format(ext)))
-
+    return os.path.abspath(os.path.join(output_folder, 'temp/temp_{}/'.format(ext)))
 
 def call_shell(command: str, verb):
     working_on(verb, message=command)
