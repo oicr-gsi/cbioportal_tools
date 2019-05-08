@@ -35,22 +35,23 @@ def make_folder(path):
 
 
 def clean_folder(path):
-    print('Please ensure that you are not losing any data in {}'.format(path))
     if os.path.exists(path):
-        for i in range(5, 0, -1):
-            print('You have {} seconds to cancel the operation'.format(i))
-            time.sleep(1)
-    make_folder(path)
-    for the_file in os.listdir(path):
-        file_path = os.path.join(path, the_file)
+        print('The following path will be removed and overwritten : {}'.format(path))
+        ## ask for a response, get the first character in lowercase
+        response=input("Press y to continue, any other key to exit:").lower().strip()[:1]
         try:
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print(e)
-
+            if response == 'y':
+                shutil.rmtree(path)
+                make_folder(path)
+            else:
+                print('Exiting Janus')
+                exit()
+                ### trying to handle ctrl-c butthis doesnt seem to be working
+        except KeyboardInterrupt:
+            print('Exiting Janus')
+            exit()
+    else:
+        make_folder(path)
 
 def copy_file(input, output, verb):
     call_shell("cp {} {}".format(input, output), verb)
