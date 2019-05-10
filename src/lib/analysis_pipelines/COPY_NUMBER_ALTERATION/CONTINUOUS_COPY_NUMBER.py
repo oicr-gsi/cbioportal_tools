@@ -1,6 +1,5 @@
 from lib.support import helper
-from lib.data_type.DISCRETE_COPY_NUMBER import discrete_copy_number_data
-
+from lib.analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import discrete_copy_number_data
 
 def main():
     global meta_config
