@@ -1,5 +1,5 @@
 from lib.support import helper
-from lib.data_type.SEG import segmented_data
+from lib.analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id
 
 
 def main():
@@ -13,11 +13,11 @@ def main():
     helper.working_on(verb)
 
     helper.working_on(verb, message='Fixing Chromosome numbering ...')
-    segmented_data.fix_chrom(meta_config, study_config, verb)
+    fix_chrom(meta_config, study_config, verb)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Fixing .SEG IDs')
-    segmented_data.fix_seg_id(meta_config, study_config, verb)
+    fix_seg_id(meta_config, study_config, verb)
     helper.working_on(verb)
 
     helper.working_on(verb, message='Concating SEG Files to export folder')
