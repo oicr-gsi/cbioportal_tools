@@ -9,12 +9,20 @@ import numpy as np
 import pandas as pd
 
 from lib.constants.constants import config2name_map
-from lib.data_type import cancer_type
-from lib.data_type.SEG import segmented_data
-from lib.data_type.MAF import mutation_data
-from lib.data_type.CONTINUOUS_COPY_NUMBER import continuous_copy_number_data
-from lib.data_type.DISCRETE_COPY_NUMBER import discrete_copy_number_data
+#from lib.data_type import cancer_type
+#from lib.data_type.SEG import segmented_data
+#from lib.data_type.MAF import mutation_data
+#from lib.data_type.CONTINUOUS_COPY_NUMBER import continuous_copy_number_data
+#from lib.data_type.DISCRETE_COPY_NUMBER import discrete_copy_number_data
 from lib.support import Config, helper
+
+from lib.analysis_pipelines import cancer_type
+from lib.analysis_pipelines.COPY_NUMBER_ALTERATION import support_functions
+from lib.analysis_pipelines.MUTATION_EXTENDED import support_functions
+from lib.analysis_pipelines.MRNA_EXPRESSION import support_functions
+
+from lib.support import Config, helper
+
 
 
 def assert_format(meta_config: Config.Config, verb):
@@ -35,6 +43,7 @@ def assert_format(meta_config: Config.Config, verb):
 
 def generate_data_type(meta_config: Config.Config, study_config: Config.Config, janus_path, verb):
 
+    ### READ DIRECTLY FROM THE FILE, NO OTHER ACTION
     if 'pipeline' in meta_config.config_map.keys() and meta_config.config_map['pipeline'] == 'FILE':
 
         #TODO:: Assert correct format for all data types...
@@ -46,7 +55,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
                                       'data_{}.txt'.format(config2name_map[meta_config.type_config])),
                          verb)
 
-    elif meta_config.type_config == 'CANCER_TYPE':
+    elif meta_config.datatype == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')
         colours = cancer_type.get_colours(janus_path)
         helper.working_on(verb)
@@ -56,15 +65,12 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.working_on(verb)
 
     else:
-        helper.assert_type(meta_config.type_config)
-
+        helper.assert_type(meta_config.alterationtype)
         helper.working_on(verb, 'Pipeline is {}, beginning preparation...'.format(meta_config.config_map['pipeline']))
-        helper.assert_pipeline(meta_config.type_config, meta_config.config_map['pipeline'])
-
+        helper.assert_pipeline(meta_config.alterationtype, meta_config.config_map['pipeline'])
         pipeline = os.path.abspath(os.path.join(janus_path,
-                                                'src/lib/data_type/{}/{}.py'.format(meta_config.type_config,
+                                                'src/lib/analysis_pipelines/{}/{}.py'.format(meta_config.alterationtype,
                                                                                     meta_config.config_map['pipeline'])))
-
         helper.execfile(pipeline,
                         {'meta_config':meta_config,
                          'study_config':study_config,
@@ -89,12 +95,12 @@ def get_sample_ids(meta_config: Config.Config, verb) -> pd.Series:
 
 
 def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: Config.Config, verb):
+    print(samples_config)
     num_header_lines = 4
-
-    helper.working_on(verb, message='Writing to data_{}.txt ...'.format(config2name_map[samples_config.type_config]))
+    helper.working_on(verb, message='Writing to data_{}.txt ...'.format(config2name_map[samples_config.alterationtype + ":" + samples_config.datatype]))
 
     output_file = os.path.join(os.path.abspath(study_config.config_map['output_folder']),
-                               'data_{}.txt'.format(config2name_map[samples_config.type_config]))
+                               'data_{}.txt'.format(config2name_map[samples_config.alterationtype + ":" + samples_config.datatype]))
 
     array = np.array(samples_config.data_frame)
 

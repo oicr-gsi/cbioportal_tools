@@ -22,6 +22,11 @@ def stars():
     print('')
 
 
+def exit_program(message='', code=1):
+    print(message)
+    exit(code)
+
+
 def make_folder(path):
     try:
         os.stat(path)
@@ -29,22 +34,28 @@ def make_folder(path):
         os.makedirs(path)
 
 
-def clean_folder(path):
-    print('Please ensure that you are not losing any data in {}'.format(path))
+def clean_folder(path,force):
     if os.path.exists(path):
-        for i in range(5, 0, -1):
-            print('You have {} seconds to cancel the operation'.format(i))
-            time.sleep(1)
-    make_folder(path)
-    for the_file in os.listdir(path):
-        file_path = os.path.join(path, the_file)
-        try:
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print(e)
+        if force:
+            shutil.rmtree(path)
+            make_folder(path)
+        else:
+            print('The following path will be removed and overwritten : {}'.format(path))
+            ## ask for a response, get the first character in lowercase
+            response=input("Press y to continue, any other key to exit:").lower().strip()[:1]
+            try:
+                if response == 'y':
+                    shutil.rmtree(path)
+                    make_folder(path)
+                else:
+                    print('Exiting Janus')
+                    exit()
+                    ### trying to handle ctrl-c butthis doesnt seem to be working
+            except KeyboardInterrupt:
+                print('Exiting Janus')
+                exit()
+    else:
+        make_folder(path)
 
 
 def copy_file(input, output, verb):
@@ -58,8 +69,7 @@ def working_on(verbosity, message='Success!\n'):
 
 
 def get_temp_folder(output_folder, ext) -> str:
-    return os.path.abspath(os.path.join(output_folder, '../temp/temp_{}/'.format(ext)))
-
+    return os.path.abspath(os.path.join(output_folder, 'temp/temp_{}/'.format(ext)))
 
 def call_shell(command: str, verb):
     working_on(verb, message=command)
@@ -88,7 +98,7 @@ def assert_pipeline(type: str, pipeline: str):
         stars()
         exit(1)
 
-
+### checking that the pipe
 def assert_type(type: str):
     if not type in supported_pipe.keys():
         stars()
@@ -115,15 +125,15 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
     if mutate_config.type_config == 'MAF':
         temp = get_temp_folder(study_config.config_map['output_folder'], 'vcf')
     else:
-        temp = get_temp_folder(study_config.config_map['output_folder'], mutate_config.type_config.lower())
+        temp = get_temp_folder(study_config.config_map['output_folder'], mutate_config.datatype.lower())
 
     working_on(verb, message='Extracting/copying to {}'.format(temp))
-    clean_folder(temp)
+    clean_folder(temp,True)
 
     for i in range(len(mutate_config.data_frame['FILE_NAME'])):
         input_file =  os.path.abspath(os.path.join(mutate_config.config_map['input_folder'],
                                                    mutate_config.data_frame['FILE_NAME'][i]))
-
+        print(input_file)
         if not os.path.isfile(input_file):
             raise FileNotFoundError('The path to the file you have provided is not correct ...\n' + input_file)
 
@@ -147,7 +157,7 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
 
 def concat_files(exports_config:Config.Config, study_config: Config.Config, verb):
     concated_file = os.path.join(study_config.config_map['output_folder'],
-                                 'data_{}.txt'.format(config2name_map[exports_config.type_config]))
+                                 'data_{}.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datatype]))
 
     input_folder = exports_config.config_map['input_folder']
 
@@ -165,3 +175,6 @@ def restart_tomcat(cbioportal_url, key, verb):
         key = '-i ' + key
     call_shell("ssh {} debian@{} 'sudo systemctl stop  tomcat'".format(key, cbioportal_url), verb)
     call_shell("ssh {} debian@{} 'sudo systemctl start tomcat'".format(key, cbioportal_url), verb)
+
+def load_pipelines():
+    return 1

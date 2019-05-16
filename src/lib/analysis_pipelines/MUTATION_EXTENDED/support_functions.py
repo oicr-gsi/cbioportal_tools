@@ -72,8 +72,8 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
 
     maf_temp = helper.get_temp_folder(output_folder, 'maf')
 
-    # Prep
-    helper.clean_folder(maf_temp)
+    # Prep  ### LEH : not clear why this temp folder was being cleared output
+    #helper.clean_folder(maf_temp,True)
 
     # Cook
     for i in range(export_data.shape[0]):

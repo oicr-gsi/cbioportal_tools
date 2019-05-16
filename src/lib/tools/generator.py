@@ -3,6 +3,9 @@ __email__ = "kchandan@uwaterloo.ca"
 __version__ = "1.0"
 __status__ = "Production"
 
+
+### this script is for generation of an import folder
+
 import pandas as pd
 import argparse
 import typing
@@ -12,6 +15,8 @@ from lib.constants import constants
 from lib.study_generation import data, meta, case
 from lib.support import Config, helper, cbioportal_interface
 
+
+## a map of command line arguments to internal terms
 args2config_map = constants.args2config_map
 
 Information = typing.List[Config.Config]
@@ -25,7 +30,6 @@ def define_parser() -> argparse.ArgumentParser:
                     "a cBioPortal instance. Recommended usage can be seen in the examples located in ../study_input/ .")
     generator.register('action', 'pipes', DocstringAction)
     config = generator.add_argument_group('Study Arguments (Required):')
-
 
     config.add_argument("-c", "--config",
                         help="The location of the study config file, in essence a set of command-line arguments. "
@@ -57,6 +61,7 @@ def define_parser() -> argparse.ArgumentParser:
                         metavar='PATH',
                         required=True)
 
+
     config_spec = generator.add_argument_group('Overridable Required Configuration File Specifiers:')
 
     config_spec.add_argument('--' + 'sample-info',
@@ -71,7 +76,6 @@ def define_parser() -> argparse.ArgumentParser:
                              help='Location of {} configuration file: will override {} specification '
                                   'in the config file. REQUIRED*'.format('cancer-type',
                                                                          args2config_map['cancer_type']))
-
 
     config_data = generator.add_argument_group('Overridable Optional Data-type Configuration File Specifiers:')
 
@@ -167,7 +171,7 @@ def define_parser() -> argparse.ArgumentParser:
 
     options = generator.add_argument_group('Other Supporting Optional Arguments:')
     options.add_argument("-k", "--key",
-                         type=lambda key: os.path.abspath(key),
+                         type=lambda key: os.path.abspath(key) if key else '',  # else helper.exit_program('Appropriate key for cBioPortal instance was not provided', 1),
                          help="The RSA key to cBioPortal. Should have appropriate read write restrictions",
                          metavar='FILE',
                          default='')
@@ -178,12 +182,17 @@ def define_parser() -> argparse.ArgumentParser:
                          help="Override the url for cBioPortal instance DO NOT include https",
                          metavar='URL',
                          default=constants.cbioportal_url)
+    options.add_argument("-f", "--force",
+                        action="store_true",
+                        help="Force overwrite of output and temp folders; do not ask for permission")
+
 
     # TODO:: Consider having multiple levels of verbosity
     options.add_argument("-v", "--verbose",
                          action="store_true",
                          default=False,
                          help="Makes program verbose")
+
     return generator
 
 
@@ -252,33 +261,41 @@ def main(args):
     path = args.path
     constants.cbioportal_url = args.url
 
+    from lib import analysis_pipelines
+    import pkgutil
+
+
     # TODO:: Fail gracefully if something breaks
-
+    ### study_config defines the study, arguments and files to use for the data
     if args.config:
-        study_config = Config.get_single_config(args.config, 'study', verb)
+        ### load from file
+        study_config = Config.get_single_config(args.config, 'study', 'study',verb)
     else:
-        study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE_NAME']), 'study')
+        ### create an empty dataframe
+        study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE_NAME']), 'study','study')
+
+    ### command line argument can be provided that will overide what is in the configuation files
     add_cli_args(study_config, args, verb)
+    ### study config collects all the command line and configuraiot Arguments
 
+    ##separate out to 3 variables, inforamtion, clinic_data, custom_case_list
     [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
-
     information = resolve_priority_queue(information)
-
-    [print('Informational Files {}:\n{}\n'.format(a.type_config, a)) for a in information] if verb else print(),
-    [print('Clinical List Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
-    [print('Customized Case Set {}:\n{}\n'.format(a.type_config, a)) for a in custom_list] if verb else print(),
-
+    [print('Informational Files {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in information] if verb else print(),
+    [print('Clinical List Files {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in clinic_data] if verb else print(),
+    [print('Customized Case Set {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in custom_list] if verb else print(),
     # Clean Output Folder/Initialize it
-    helper.clean_folder(study_config.config_map['output_folder'])
+    helper.clean_folder(study_config.config_map['output_folder'],args.force)
 
     for each in information:
-        print(each.type_config)
-        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
+        #meta.generate_meta_type(each.datatype, each.config_map, study_config, verb)
+        meta.generate_meta_type(each, study_config, verb)
         data.generate_data_type(each, study_config, path, verb)
         case.generate_case_list(each, study_config, verb)
 
     for each in clinic_data:
-        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
+        #meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
+        meta.generate_meta_type(each, study_config, verb)
         data.generate_data_clinical(each, study_config, verb)
 
     for each in custom_list:
