@@ -18,27 +18,28 @@ class Config(object):
     type_config: str = ''
     analysis: str = ''
 
-    def __init__(self, config_map: dict, data_frame: pd.DataFrame, type_config: str, analysis: str):
+    def __init__(self, config_map: dict, data_frame: pd.DataFrame, datatype: str, alterationtype: str):
         self.config_map = config_map.copy()
         self.data_frame = data_frame.copy()
-        self.type_config = type_config
-        self.analysis = analysis
+        self.datatype = datatype
+        self.alterationtype = alterationtype
 
     @classmethod
     def from_config(cls, config):
-        return cls(config.config_map, config.data_frame, config.type_config, config.analysis)
+        return cls(config.config_map, config.data_frame, config.datatype, config.alterationtype)
 
     def __str__(self):
-        return str([self.config_map, self.data_frame, self.type_config, self.analysis])
+        return str([self.config_map, self.data_frame, self.datatype, self.alterationtype])
 
 
 class ClinicalConfig(Config):
     data_frame: list
 
-    def __init__(self, config_map: dict, array, type_config: str):
+    def __init__(self, config_map: dict, array, datatype: str):
         self.config_map = config_map
         self.data_frame = array
-        self.type_config = type_config
+        self.datatype = datatype
+        self.alterationtype = "CLINICAL"
 
 
 Information = typing.List[Config]
@@ -126,16 +127,16 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
         config_file_name = os.path.join(os.path.dirname(os.path.abspath(args.config)),
                                         str(study_config.data_frame['FILE_NAME'][i]))
 
-        config_file_type = study_config.data_frame['TYPE'][i]
-        config_analysis = study_config.data_frame['ANALYSIS'][i]
+        config_file_type = study_config.data_frame['DATATYPE'][i]
+        config_analysis = study_config.data_frame['ALTERATIONTYPE'][i]
 
         #### is the type one of the clinical types?
-        if   study_config.data_frame['TYPE'][i] in clinical_type:
+        if   study_config.data_frame['DATATYPE'][i] in clinical_type:
             clinic_data.append(get_config_clinical(config_file_name,
                                                    config_file_type,
                                                    verb))
         ### is it a case list
-        elif study_config.data_frame['TYPE'][i] == 'CASE_LIST':
+        elif study_config.data_frame['DATATYPE'][i] == 'CASE_LIST':
             custom_list.append(get_single_config(config_file_name,
                                                  config_file_type,
                                                  verb))

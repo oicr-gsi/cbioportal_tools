@@ -98,7 +98,7 @@ def assert_pipeline(type: str, pipeline: str):
         stars()
         exit(1)
 
-
+### checking that the pipe
 def assert_type(type: str):
     if not type in supported_pipe.keys():
         stars()
@@ -125,7 +125,7 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
     if mutate_config.type_config == 'MAF':
         temp = get_temp_folder(study_config.config_map['output_folder'], 'vcf')
     else:
-        temp = get_temp_folder(study_config.config_map['output_folder'], mutate_config.type_config.lower())
+        temp = get_temp_folder(study_config.config_map['output_folder'], mutate_config.datatype.lower())
 
     working_on(verb, message='Extracting/copying to {}'.format(temp))
     clean_folder(temp,True)
@@ -157,7 +157,7 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
 
 def concat_files(exports_config:Config.Config, study_config: Config.Config, verb):
     concated_file = os.path.join(study_config.config_map['output_folder'],
-                                 'data_{}.txt'.format(config2name_map[exports_config.type_config]))
+                                 'data_{}.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datatype]))
 
     input_folder = exports_config.config_map['input_folder']
 
@@ -175,3 +175,6 @@ def restart_tomcat(cbioportal_url, key, verb):
         key = '-i ' + key
     call_shell("ssh {} debian@{} 'sudo systemctl stop  tomcat'".format(key, cbioportal_url), verb)
     call_shell("ssh {} debian@{} 'sudo systemctl start tomcat'".format(key, cbioportal_url), verb)
+
+def load_pipelines():
+    return 1

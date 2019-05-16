@@ -261,6 +261,10 @@ def main(args):
     path = args.path
     constants.cbioportal_url = args.url
 
+    from lib import analysis_pipelines
+    import pkgutil
+
+
     # TODO:: Fail gracefully if something breaks
     ### study_config defines the study, arguments and files to use for the data
     if args.config:
@@ -272,25 +276,26 @@ def main(args):
 
     ### command line argument can be provided that will overide what is in the configuation files
     add_cli_args(study_config, args, verb)
+    ### study config collects all the command line and configuraiot Arguments
 
+    ##separate out to 3 variables, inforamtion, clinic_data, custom_case_list
     [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
     information = resolve_priority_queue(information)
-
-
-    [print('Informational Files {}:\n{}\n'.format(a.type_config, a)) for a in information] if verb else print(),
-    [print('Clinical List Files {}:\n{}\n'.format(a.type_config, a)) for a in clinic_data] if verb else print(),
-    [print('Customized Case Set {}:\n{}\n'.format(a.type_config, a)) for a in custom_list] if verb else print(),
-
+    [print('Informational Files {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in information] if verb else print(),
+    [print('Clinical List Files {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in clinic_data] if verb else print(),
+    [print('Customized Case Set {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in custom_list] if verb else print(),
     # Clean Output Folder/Initialize it
     helper.clean_folder(study_config.config_map['output_folder'],args.force)
 
     for each in information:
-        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
+        #meta.generate_meta_type(each.datatype, each.config_map, study_config, verb)
+        meta.generate_meta_type(each, study_config, verb)
         data.generate_data_type(each, study_config, path, verb)
         case.generate_case_list(each, study_config, verb)
 
     for each in clinic_data:
-        meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
+        #meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
+        meta.generate_meta_type(each, study_config, verb)
         data.generate_data_clinical(each, study_config, verb)
 
     for each in custom_list:

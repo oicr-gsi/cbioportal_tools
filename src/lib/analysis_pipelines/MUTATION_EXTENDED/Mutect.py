@@ -24,7 +24,7 @@ def main():
     helper.working_on(verb, message='And deleting .vcf s...')
     meta_config = support_functions.export2maf(meta_config, study_config, verb)
     helper.working_on(verb)
-
+    
     helper.working_on(verb, message='Cleaning MAF Files ...')
     support_functions.clean_head(meta_config, verb)
     helper.working_on(verb)
