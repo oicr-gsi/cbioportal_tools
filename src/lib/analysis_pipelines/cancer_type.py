@@ -44,6 +44,6 @@ def gen_cancer_type_data(cancer_type_config: Config.Config, study_config: Config
                                                        parent_type_of_cancer))
 
 
-    f.write('\t'.join(write_str))
+    f.write('\n'.join(write_str) + "\n")
     f.flush()
     f.close()
