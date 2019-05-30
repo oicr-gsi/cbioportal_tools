@@ -34,6 +34,7 @@ def generate_meta_type(meta_config: Config.Config, study_config: Config.Config, 
                 print('Using Profile_Description instead of description because it is missing from type_config file.')
                 output_set.append(('description', meta_config.config_map['profile_description']))
     else:
+
         for field, entry in zip(general_zip, meta_info_map[meta_config.alterationtype + ":" + meta_config.datatype]):
             output_set.append((field, entry))
 
