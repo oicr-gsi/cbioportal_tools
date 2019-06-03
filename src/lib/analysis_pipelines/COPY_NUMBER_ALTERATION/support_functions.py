@@ -88,16 +88,18 @@ def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, 
     output_folder = study_config.config_map['output_folder']
     input_folder = exports_config.config_map['input_folder']
     export_data = exports_config.data_frame
+    #input(export_data)
     seg_temp = helper.get_temp_folder(output_folder, 'seg')
 
     bed_filter = subprocess.check_output(['awk "NR>1" {} | '
                                           'awk -F"\\t" \'{{print $1}}\' | '
                                           'uniq'.format(exports_config.config_map['bed_file'])],
                                          shell=True).decode("utf-8")
-
+    #input(bed_filter)
     bed_filter = bed_filter.strip().split('\n')
     bed_filter = bed_filter + ['chr' + a for a in bed_filter]
     bed_filter = ['\\t' + a + '\\t' for a in bed_filter]
+    #input(bed_filter)
 
     header = 'ID\\tchrom\\tloc.start\\tloc.end\\tnum.mark\\tseg.mean'
     # Cook
@@ -107,21 +109,36 @@ def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, 
         sample_id = export_data['SAMPLE_ID'][i]
 
         helper.working_on(verb, 'Refactoring cols: {}'.format(export_data['FILE_NAME'][i]))
+        #input("here")
         output_temp = output_file + '.temp'
         # Get all the genes in the .bed,
         # Save each line with a matching gene
         # Rename the Sample_ID
+        #### LEH : this is a difficult to read call to a bash Script
+        ###  LEH : it should be rewritten in a python way
+        ### replacing the original line with the line below, original maintained.  1 is a placeholder for num.mark columns
         calls.append(helper.parallel_call('echo "{}" > {}; '.format(header, output_temp) +
                                           'cat  {} | '
                                           'awk \'BEGIN{{split("{}",t); for (i in t) vals[t[i]]}} ($2 in vals)\' | '
-                                          'awk -F"\\t" \'{{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' >> '
+                                          'awk -F"\\t" \'{{ OFS="\\t"; print "{}", $2, $3, $4, 1, $5}}\' >> '
                                           '{}; '.format(input_file, '|'.join(bed_filter), sample_id, output_temp) +
                                           'mv {} {}'.format(output_temp, output_file),
                                           verb))
+
+        #calls.append(helper.parallel_call('echo "{}" > {}; '.format(header, output_temp) +
+        #                                  'cat  {} | '
+        #                                  'awk \'BEGIN{{split("{}",t); for (i in t) vals[t[i]]}} ($2 in vals)\' | '
+        #                                  'awk -F"\\t" \'{{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' >> '
+        #                                  '{}; '.format(input_file, '|'.join(bed_filter), sample_id, output_temp) +
+        #                                  'mv {} {}'.format(output_temp, output_file),
+        #                                  verb))
+
+
+    #exit()
     exports_config.config_map['input_folder'] = seg_temp
     # Wait until Baked
     exit_codes = [p.wait() for p in calls]
-
+    #input("here")
     # Clean up
     if any(exit_codes):
         raise ValueError('ERROR:: Something went wrong when parsing HMMCopy format file? Please resolve the issue')
