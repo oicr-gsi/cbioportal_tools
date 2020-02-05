@@ -101,11 +101,14 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
             gene_col_normal = normal_id
             gene_col_tumors = tumors_id
 
+        # ORIGINAL -- 
         ref_fasta = exports_config.config_map['ref_fasta']
+        # TESTING --
+        #ref_fasta = exports_config.config_map['$HG19_ROOT/hg19_random.fa']
         filter_vcf = exports_config.config_map['filter_vcf']
 
         # Bake in Parallel
-        processes.append(helper.parallel_call('vcf2maf.pl  --input-vcf {}    '
+        processes.append(helper.parallel_call('vcf2maf  --input-vcf {}    '
                                                        '--output-maf {}/{}   '
                                                        '--normal-id {}       '
                                                        '--tumor-id {}        '
