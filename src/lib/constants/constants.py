@@ -4,7 +4,7 @@ __version__ = "1.0"
 __status__ = "Production"
 
 import os
-
+# HI RISHI
 # To support other data_types, they need to be added to
 #       meta_info_map
 #       args2config_map
@@ -76,7 +76,8 @@ args2config_map = {'sample_info':               'SAMPLE_ATTRIBUTES',
                    'gene_set_data':             'GENE_SET'}
 
 #config2name_map is used for creating the meta_{name}.txt and data_{name}.txt file names
-## key for this should be the alterationtype:datatype
+## key for this should be the alterationtype:datatype 
+
 config2name_map = {'CLINICAL:SAMPLE_ATTRIBUTES':        'clinical_samples',
                    'CLINICAL:PATIENT_ATTRIBUTES':       'clinical_patients',
                    'CANCER_TYPE:CANCER_TYPE':           'cancer_type',
@@ -150,9 +151,9 @@ no_data_frame = ['CONTINUOUS_COPY_NUMBER', 'DISCRETE_COPY_NUMBER', 'MRNA_EXPRESS
 
 ### this hash should be generated from the file hiearchy or from the import packages
 supported_pipe = {'MUTATION_EXTENDED':            ['MAF', 'Strelka', 'Mutect', 'Mutect2',
-                                                    'MutectStrelka', 'GATKHaplotypeCaller'],
-                  'COPY_NUMBER_ALTERATION':       ['CNVkit', 'Sequenza', 'HMMCopy'],
-                  'MRNA_EXPRESSION':              ['Cufflinks', 'RSEM']}
+                                                    'MutectStrelka', 'GATKHaplotypeCaller', 'CAP_mutation'],
+                  'COPY_NUMBER_ALTERATION':       ['CNVkit', 'Sequenza', 'HMMCopy', 'CAP_CNA'],
+                  'MRNA_EXPRESSION':              ['Cufflinks', 'RSEM', 'CAP_expression']}
 #                  'MRNA_EXPRESSION_ZSCORES':   ['MRNA_EXPRESSION'],
 #                  'CONTINUOUS_COPY_NUMBER':    ['SEG'],
 #                  'DISCRETE_COPY_NUMBER':      ['CONTINUOUS_COPY_NUMBER']}
