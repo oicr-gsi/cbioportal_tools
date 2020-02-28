@@ -8,10 +8,16 @@ import pandas as pd
 
 from lib.support import Config, helper
 
-def maf_filter(maf, t_depth, t_alt_count, TGL_Freq, gnomAD_AF, mutation_type, filter_exception, output_folder):
+def maf_filter(maf, Minimum_Tumour_Depth, Minimum_Tumour_AF, Maximum_gnomAD_AF, Maximum_Local_Freq, mutation_type, filter_exception, output_folder):
+    # This function replaces the 'awk' function below
     #(($42/$40)>=0.05) && ($133<=0.1) && ( (($124<0.001) && ($17=="unmatched")) || ($17!="unmatched") )
     maf_dataframe = pd.read_csv(maf, sep='\t')
-    maf_dataframe = maf_dataframe[maf_dataframe.t_depth.isin(t_depth) & ]
+    maf_dataframe = maf_dataframe[maf_dataframe['t_depth'] >= Minimum_Tumour_Depth and (maf_dataframe['t_depth'] / maf_dataframe['t_alt_count'])\
+                                  >= Minimum_Tumour_AF and maf_dataframe['TGL_Freq'] <= Maximum_Local_Freq and ((maf_dataframe['gnomAD_AF'] < 0.001 \
+                                  and maf_dataframe['Tumor_Sample_UUID'] == 'unmatched') or (maf_dataframe['Tumor_Sample_UUID'] != 'unmatched'))]
+    maf_dataframe = maf_dataframe[maf_dataframe.Variant_Classification.isin(mutation_type)]
+    maf_dataframe = maf_dataframe[~maf_dataframe.FILTER.isin(filter_exception)]
+    return maf_dataframe
 
 def verify_dual_columns(exports_config: Config.Config, verb):
     processes = []
