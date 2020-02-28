@@ -45,7 +45,7 @@ class ClinicalConfig(Config):
 Information = typing.List[Config]
 
 ### loads the study configuration from a file
-def get_single_config(file, f_type, analysis,verb) -> Config:
+def get_single_config(file, f_type, analysis, verb) -> Config:
 
     ### verify that the file exists
     if os.path.isfile(file):
@@ -61,7 +61,7 @@ def get_single_config(file, f_type, analysis,verb) -> Config:
 
     ### commented out header lines are key value pairs, these are stored in the file_map
     try:
-        for line in f:
+        for line in f:#TypeError: get_single_config() missing 1 required positional argument: 'verb'
             if line[0] == '#':
                 line = line.strip().replace('#', '').split('=')
                 file_map[line[0]] = line[1]
@@ -135,11 +135,14 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
             clinic_data.append(get_config_clinical(config_file_name,
                                                    config_file_type,
                                                    verb))
+
         ### is it a case list
         elif study_config.data_frame['DATATYPE'][i] == 'CASE_LIST':
             custom_list.append(get_single_config(config_file_name,
                                                  config_file_type,
+                                                 config_analysis,
                                                  verb))
+            print("MAKE CUSTOM_LIST WITHIN CONFIG.PY MAKE CUSTOM_LIST WITHIN CONFIG.PY MAKE CUSTOM_LIST WITHIN CONFIG.PY MAKE CUSTOM_LIST WITHIN CONFIG.PY MAKE CUSTOM_LIST WITHIN CONFIG.PY")
         else:
             information.append(get_single_config(config_file_name,
                                                  config_file_type,

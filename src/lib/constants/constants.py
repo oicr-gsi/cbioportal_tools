@@ -4,7 +4,7 @@ __version__ = "1.0"
 __status__ = "Production"
 
 import os
-# HI RISHI
+
 # To support other data_types, they need to be added to
 #       meta_info_map
 #       args2config_map

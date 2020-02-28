@@ -270,10 +270,10 @@ def main(args):
     if args.config:
         ### load from file
         study_config = Config.get_single_config(args.config, 'study', 'study',verb)
+
     else:
         ### create an empty dataframe
         study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE_NAME']), 'study','study')
-
     ### command line argument can be provided that will overide what is in the configuation files
     add_cli_args(study_config, args, verb)
     ### study config collects all the command line and configuraiot Arguments
@@ -292,6 +292,9 @@ def main(args):
         meta.generate_meta_type(each, study_config, verb)
         data.generate_data_type(each, study_config, path, verb)
         case.generate_case_list(each, study_config, verb)
+        ### TESTING TESTING TESTING TESTING TESTING ###
+        print("MAKE CUSTOM LISTS IN GENERATOR for each in information!")
+        ### TESTING TESTING TESTING TESTING TESTING ###
 
     for each in clinic_data:
         #meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
@@ -299,6 +302,11 @@ def main(args):
         data.generate_data_clinical(each, study_config, verb)
 
     for each in custom_list:
+        ### TESTING TESTING TESTING TESTING TESTING ###
+        print("MAKE CUSTOM LISTS IN GENERATOR!")
+        ### TESTING TESTING TESTING TESTING TESTING ###
+        print(each.datatype)
+        ### TESTING TESTING TESTING TESTING TESTING ###
         case.generate_case_list(each, study_config, verb)
 
     meta.generate_meta_study(study_config, verb)
