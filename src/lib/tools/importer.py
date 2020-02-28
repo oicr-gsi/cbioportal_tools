@@ -88,6 +88,14 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, user
     # No portal checks and override warnings when running metaImport
     elif study_import == "metaImport":
         get_shell("ssh {} -t {}@{} ' /home/ubuntu/metaImport.py -s {} -n -o'".format(key, user, cbioportal_url, new_dir), verb)
+
+    ##### TEST #####
+    elif study_import == "test":
+        get_shell("ssh {} -t {}@{} ' /home/ubuntu/janus_dev/test_direct.mutation.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
+
+    elif study_import == "CNA":
+        get_shell("ssh {} -t {}@{} ' /home/ubuntu/janus_dev/test_direct.CNA.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
+    ##### TEST #####
     
     
     # Old code
@@ -167,4 +175,5 @@ def main(args):
     #UNCOMMENT TO TEST IMPORTING TO PORTAL
     #if args.gene_panel:
     #    import_portal(args.key, args.url, args.gene_panel, True)get_shell("ssh {} -t {}@{} ' /home/ubuntu/import_study.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
-    get_shell("ssh {} -t {}@{} ' /home/ubuntu/import_study.sh {}'".format(key, user, cbioportal_url, new_dir), verb)restart_tomcat(args.url, args.key, True)
+    #get_shell("ssh {} -t {}@{} ' /home/ubuntu/import_study.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
+    restart_tomcat(args.url, args.key, True)

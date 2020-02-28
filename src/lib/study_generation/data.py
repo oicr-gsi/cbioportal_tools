@@ -45,6 +45,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
     ### READ DIRECTLY FROM THE FILE, NO OTHER ACTION
     if 'pipeline' in meta_config.config_map.keys() and meta_config.config_map['pipeline'] == 'FILE':
+        ####################################### TESTING ########################################
+        print("if if if if if if if if if if if if if if if if if if if if if if if if if if if if")
 
         #TODO:: Assert correct format for all data types...
         assert_format(meta_config, verb)
@@ -56,6 +58,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
                          verb)
 
     elif meta_config.datatype == 'CANCER_TYPE':
+        ####################################### TESTING ########################################
+        print("elif elif elif elif elif elif elif elif elif elif elif elif elif elif elif")
         helper.working_on(verb, message='Reading colours...')
         colours = cancer_type.get_colours(janus_path)
         helper.working_on(verb)
@@ -65,6 +69,9 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         helper.working_on(verb)
 
     else:
+        ####################################### TESTING ########################################
+        print("else else else else else else else else else ele else else else else else")
+        print(meta_config.datatype)
         helper.assert_type(meta_config.alterationtype)
         helper.working_on(verb, 'Pipeline is {}, beginning preparation...'.format(meta_config.config_map['pipeline']))
         helper.assert_pipeline(meta_config.alterationtype, meta_config.config_map['pipeline'])
