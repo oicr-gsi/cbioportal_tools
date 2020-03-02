@@ -278,7 +278,7 @@ def main(args):
     add_cli_args(study_config, args, verb)
     ### study config collects all the command line and configuraiot Arguments
 
-    ##separate out to 3 variables, inforamtion, clinic_data, custom_case_list
+    ##separate out to 3 variables, information, clinic_data, custom_case_list
     [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
     information = resolve_priority_queue(information)
     [print('Informational Files {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in information] if verb else print(),
