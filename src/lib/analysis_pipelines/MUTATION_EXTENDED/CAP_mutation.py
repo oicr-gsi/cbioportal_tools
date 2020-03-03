@@ -19,6 +19,9 @@ def main():
     helper.working_on(verb, message='Concating MAF Files to export folder  ...')
     helper.concat_files(meta_config, study_config, verb)
     helper.working_on(verb)
+    
+    #Filtering MAF Files
+    support_functions.maf_filter(meta_config, study_config, meta_config.config_map['Minimum_Tumour_Depth'], meta_config.config_map['Minimum_Tumour_AF'], meta_config.config_map['Maximum_Local_Freq'], meta_config.config_map['Maximum_gnomAD_AF'], meta_config.config_map['Mutation_Type'], meta_config.config_map['Filter_Exception'])
 
 
 if __name__ == '__main__':
