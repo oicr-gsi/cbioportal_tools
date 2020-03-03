@@ -6,18 +6,23 @@ __status__ = "Production"
 import os
 import pandas as pd
 
+from ..constants.constants import config2name_map
 from lib.support import Config, helper
 
-def maf_filter(maf, Minimum_Tumour_Depth, Minimum_Tumour_AF, Maximum_gnomAD_AF, Maximum_Local_Freq, mutation_type, filter_exception, output_folder):
+def maf_filter(meta_config, study_config, Minimum_Tumour_Depth, Minimum_Tumour_AF, Maximum_gnomAD_AF, Maximum_Local_Freq, mutation_type, filter_exception):
     # This function replaces the 'awk' function below
     #(($42/$40)>=0.05) && ($133<=0.1) && ( (($124<0.001) && ($17=="unmatched")) || ($17!="unmatched") )
-    maf_dataframe = pd.read_csv(maf, sep='\t')
+    
+    maf_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datahandler]))
+    maf_dataframe = pd.read_csv(maf_path, sep='\t')
+    os.remove(maf)
+
     maf_dataframe = maf_dataframe[maf_dataframe['t_depth'] >= Minimum_Tumour_Depth and (maf_dataframe['t_depth'] / maf_dataframe['t_alt_count'])\
-                                  >= Minimum_Tumour_AF and maf_dataframe['TGL_Freq'] <= Maximum_Local_Freq and ((maf_dataframe['gnomAD_AF'] < 0.001 \
+                                  >= Minimum_Tumour_AF and maf_dataframe['TGL_Freq'] <= Maximum_Local_Freq and ((maf_dataframe['gnomAD_AF'] <  Maximum_gnomAD_AF \
                                   and maf_dataframe['Tumor_Sample_UUID'] == 'unmatched') or (maf_dataframe['Tumor_Sample_UUID'] != 'unmatched'))]
-    maf_dataframe = maf_dataframe[maf_dataframe.Variant_Classification.isin(mutation_type)]
-    maf_dataframe = maf_dataframe[~maf_dataframe.FILTER.isin(filter_exception)]
-    return maf_dataframe
+    maf_dataframe = maf_dataframe[maf_dataframe.Variant_Classification.isin(mutation_type.split(','))]
+    maf_dataframe = maf_dataframe[~maf_dataframe.FILTER.isin(filter_exception.split(','))]
+    maf_dataframe.to_csv(maf_path, sep='\t')
 
 def verify_dual_columns(exports_config: Config.Config, verb):
     processes = []
