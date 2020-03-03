@@ -159,7 +159,7 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
                 for line in f:  # TypeError: get_single_config() missing 1 required positional argument: 'verb'
                     if line[0] == '#':
                         line = line.strip().replace('#', '').split('=')
-                        file_map[line[0]] = line[1]
+                        study_input[line[0]] = line[1]
                     else:
                         ### break if not a comment line, the rest is a data table.  should not be any more comment lines
                         break

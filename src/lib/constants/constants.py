@@ -119,14 +119,14 @@ config2name_map = {'CLINICAL:SAMPLE_ATTRIBUTES':        'clinical_samples',
 #                   'GENE_SET':                'gsva_scores'}
 
 
-# Keep note that a datatype will always have either:
-# genetic_alteration_type & datatype; or
-# genetic_alteration_type, datatype, stable_id & show_profile_in_analysis_tab:
+# Keep note that a datahandler will always have either:
+# genetic_alteration_type & datahandler; or
+# genetic_alteration_type, datahandler, stable_id & show_profile_in_analysis_tab:
 # The exception is Expression Data which also has source_stable_id on top of the other 4
 # A set of default ordered values all meta files have to a certain extent
-general_zip =     ['genetic_alteration_type', 'datatype', 'stable_id', 'show_profile_in_analysis_tab']
+general_zip =     ['genetic_alteration_type', 'datahandler', 'stable_id', 'show_profile_in_analysis_tab']
 
-ref_gene_id_zip = ['genetic_alteration_type', 'datatype', 'reference_genome_id']
+ref_gene_id_zip = ['genetic_alteration_type', 'datahandler', 'reference_genome_id']
 
 optional_fields = ['groups', 'gene_panel', 'swissprot_identifier', 'variant_classification_filter', 'Protein_position',
                    'SWISSPROT', 'Fusion_Status', 'citation', 'pmid']
