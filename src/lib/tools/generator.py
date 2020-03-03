@@ -281,14 +281,14 @@ def main(args):
     ##separate out to 3 variables, information, clinic_data, custom_case_list
     [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
     information = resolve_priority_queue(information)
-    [print('Informational Files {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in information] if verb else print(),
-    [print('Clinical List Files {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in clinic_data] if verb else print(),
-    [print('Customized Case Set {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in custom_list] if verb else print(),
+    [print('Informational Files {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in information] if verb else print(),
+    [print('Clinical List Files {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in clinic_data] if verb else print(),
+    [print('Customized Case Set {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in custom_list] if verb else print(),
     # Clean Output Folder/Initialize it
     helper.clean_folder(study_config.config_map['output_folder'],args.force)
 
     for each in information:
-        #meta.generate_meta_type(each.datatype, each.config_map, study_config, verb)
+        #meta.generate_meta_type(each.datahandler, each.config_map, study_config, verb)
         meta.generate_meta_type(each, study_config, verb)
         data.generate_data_type(each, study_config, path, verb)
         case.generate_case_list(each, study_config, verb)

@@ -22,7 +22,7 @@ def gen_cancer_type_data(cancer_type_config: Config.Config, study_config: Config
 
 
     f = open('{}/data_{}.txt'.format(os.path.abspath(study_config.config_map['output_folder']),
-                                     cancer_type_config.datatype.lower()), 'w+')
+                                     cancer_type_config.datahandler.lower()), 'w+')
     write_str = []
     for i in range(cancer_type_config.data_frame.shape[0]):
         type_of_cancer = cancer_type_config.data_frame['NAME'][i]

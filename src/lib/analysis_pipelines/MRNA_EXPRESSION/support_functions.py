@@ -37,7 +37,7 @@ def alpha_sort(exports_config: Config.Config, verb):
 
 def generate_expression_matrix(exports_config: Config.Config, study_config: Config.Config, verb):
     output_file = os.path.join(study_config.config_map['output_folder'],
-                               'data_{}.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datatype]))
+                               'data_{}.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datahandler]))
 
     helper.working_on(verb, message='Reading FPKM data ...')
     info: DataFrames = []
@@ -68,7 +68,7 @@ def generate_expression_matrix(exports_config: Config.Config, study_config: Conf
 
 def generate_expression_zscore(exports_config: Config.Config, study_config: Config.Config, verb):
     input_file = os.path.join(study_config.config_map['output_folder'],
-                              'data_{}.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datatype]))
+                              'data_{}.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datahandler]))
 
     output_file = os.path.join(study_config.config_map['output_folder'],
                                'data_{}.txt'.format(config2name_map[exports_config.alterationtype + ":Z-SCORE"]))

@@ -57,7 +57,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
                                       'data_{}.txt'.format(config2name_map[meta_config.type_config])),
                          verb)
 
-    elif meta_config.datatype == 'CANCER_TYPE':
+    elif meta_config.datahandler == 'CANCER_TYPE':
         ####################################### TESTING ########################################
         print("elif elif elif elif elif elif elif elif elif elif elif elif elif elif elif")
         helper.working_on(verb, message='Reading colours...')
@@ -71,7 +71,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
     else:
         ####################################### TESTING ########################################
         print("else else else else else else else else else ele else else else else else")
-        print(meta_config.datatype)
+        print(meta_config.datahandler)
         helper.assert_type(meta_config.alterationtype)
         helper.working_on(verb, 'Pipeline is {}, beginning preparation...'.format(meta_config.config_map['pipeline']))
         helper.assert_pipeline(meta_config.alterationtype, meta_config.config_map['pipeline'])
@@ -104,10 +104,10 @@ def get_sample_ids(meta_config: Config.Config, verb) -> pd.Series:
 def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: Config.Config, verb):
     print(samples_config)
     num_header_lines = 4
-    helper.working_on(verb, message='Writing to data_{}.txt ...'.format(config2name_map[samples_config.alterationtype + ":" + samples_config.datatype]))
+    helper.working_on(verb, message='Writing to data_{}.txt ...'.format(config2name_map[samples_config.alterationtype + ":" + samples_config.datahandler]))
 
     output_file = os.path.join(os.path.abspath(study_config.config_map['output_folder']),
-                               'data_{}.txt'.format(config2name_map[samples_config.alterationtype + ":" + samples_config.datatype]))
+                               'data_{}.txt'.format(config2name_map[samples_config.alterationtype + ":" + samples_config.datahandler]))
 
     array = np.array(samples_config.data_frame)
 
