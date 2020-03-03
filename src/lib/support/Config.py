@@ -187,6 +187,9 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
                 print("There is no supported datatype for the alteration type " + config_analysis)
                 break
 
+            # Add the pipeline into the information config_map
+            information[-1].config_map['pipeline'] = config_file_type
+
         else:
             information.append(get_single_config(config_file_name,
                                                  config_file_type,

@@ -305,7 +305,7 @@ def main(args):
         ### TESTING TESTING TESTING TESTING TESTING ###
         print("MAKE CUSTOM LISTS IN GENERATOR!")
         ### TESTING TESTING TESTING TESTING TESTING ###
-        print(each.datatype)
+        print(each.datahandler)
         ### TESTING TESTING TESTING TESTING TESTING ###
         case.generate_case_list(each, study_config, verb)
 
