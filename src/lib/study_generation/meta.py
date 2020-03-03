@@ -17,7 +17,7 @@ def generate_meta_type(meta_config: Config.Config, study_config: Config.Config, 
     output_set = []
 
     ####################### BEGIN WRITING META_FILES ###########################
-    helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datatype]))
+    helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
 
     if not meta_config.datahandler == 'CANCER_TYPE':
         # CANCER_TYPE meta file is the only one not to contain the identifier with the meta-data

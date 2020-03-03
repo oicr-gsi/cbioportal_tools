@@ -71,6 +71,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
     else:
         ####################################### TESTING ########################################
         print("else else else else else else else else else ele else else else else else")
+        print(meta_config.config_map['pipeline'])
         print(meta_config.datahandler)
         helper.assert_type(meta_config.alterationtype)
         helper.working_on(verb, 'Pipeline is {}, beginning preparation...'.format(meta_config.config_map['pipeline']))
