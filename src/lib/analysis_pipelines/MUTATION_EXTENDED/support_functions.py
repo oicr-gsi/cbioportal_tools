@@ -23,7 +23,17 @@ def maf_filter(meta_config, study_config, Minimum_Tumour_Depth, Minimum_Tumour_A
     maf_dataframe = maf_dataframe[(((maf_dataframe['gnomAD_AF'] <  float(Maximum_gnomAD_AF)) & (maf_dataframe['Tumor_Sample_UUID'] == 'unmatched')) | (maf_dataframe['Tumor_Sample_UUID'] != 'unmatched'))]
     maf_dataframe = maf_dataframe[maf_dataframe.Variant_Classification.isin(mutation_type.split(','))]
     maf_dataframe = maf_dataframe[~maf_dataframe.FILTER.isin(filter_exception.split(','))]
-    maf_dataframe.to_csv(maf_path, sep='\t')
+    maf_temp = os.path.join(study_config.config_map['output_folder'], 'data_{}_temp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    maf_dataframe.to_csv(maf_temp, sep='\t')
+
+def oncokb_annotation(meta_config, study_config, verb):
+    input_path = os.path.join(study_config.config_map['output_folder'], 'data_{}_temp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    output_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    #MafAnnotator -h
+    #helper.call_shell("module use /.mounts/labs/gsi/modulator/modulefiles/Ubuntu18.04", verb)
+    #helper.call_shell("module load oncokb-annotator/2.0", verb)
+    helper.call_shell("MafAnnotator.py -i {} -o {}".format(input_path, output_path), verb)
+    #helper.call_shell("MafAnnotator.py -h", verb)
 
 def verify_dual_columns(exports_config: Config.Config, verb):
     processes = []
