@@ -142,8 +142,6 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
                                                  config_file_type,
                                                  config_analysis,
                                                  verb))
-            ############################# TESTING #################################
-            print("MAKE CUSTOM_LIST WITHIN CONFIG.PY MAKE CUSTOM_LIST WITHIN CONFIG.PY MAKE CUSTOM_LIST WITHIN CONFIG.PY MAKE CUSTOM_LIST WITHIN CONFIG.PY MAKE CUSTOM_LIST WITHIN CONFIG.PY")
         elif config_analysis in supported_pipe:
             if os.path.isfile(config_file_name):
                 print('File Name: {}'.format(config_file_name))
@@ -184,7 +182,7 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
                                                          config_analysis,
                                                          verb))
             else:
-                print("There is no supported datatype for the alteration type " + config_analysis)
+                print("There is no supported datatype of " + study_input.get('DATATYPE') + " for the alteration type " + config_analysis)
                 break
 
             # Add the pipeline into the information config_map
