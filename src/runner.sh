@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
 # Load required modules
+module use /.mounts/labs/gsi/modulator/modulefiles/Ubuntu18.04
 module use /oicr/local/analysis/Modules/modulefiles
 module use /.mounts/labs/PDE/Modules/modulefiles
+module load oncokb-annotator/2.0
 module load vep/92
 module load vcf2maf
 module load python-gsi/3.6.4
