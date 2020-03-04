@@ -6,20 +6,21 @@ __status__ = "Production"
 import os
 import pandas as pd
 
-from ..constants.constants import config2name_map
+from lib.constants.constants import config2name_map
 from lib.support import Config, helper
 
 def maf_filter(meta_config, study_config, Minimum_Tumour_Depth, Minimum_Tumour_AF, Maximum_gnomAD_AF, Maximum_Local_Freq, mutation_type, filter_exception):
     # This function replaces the 'awk' function below
     #(($42/$40)>=0.05) && ($133<=0.1) && ( (($124<0.001) && ($17=="unmatched")) || ($17!="unmatched") )
     
-    maf_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datahandler]))
+    maf_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     maf_dataframe = pd.read_csv(maf_path, sep='\t')
-    os.remove(maf)
+    os.remove(maf_path)
 
-    maf_dataframe = maf_dataframe[maf_dataframe['t_depth'] >= Minimum_Tumour_Depth and (maf_dataframe['t_depth'] / maf_dataframe['t_alt_count'])\
-                                  >= Minimum_Tumour_AF and maf_dataframe['TGL_Freq'] <= Maximum_Local_Freq and ((maf_dataframe['gnomAD_AF'] <  Maximum_gnomAD_AF \
-                                  and maf_dataframe['Tumor_Sample_UUID'] == 'unmatched') or (maf_dataframe['Tumor_Sample_UUID'] != 'unmatched'))]
+    maf_dataframe = maf_dataframe[maf_dataframe['t_depth'] >= float(Minimum_Tumour_Depth)] 
+    maf_dataframe = maf_dataframe[(maf_dataframe['t_depth'] / maf_dataframe['t_alt_count']) >= float(Minimum_Tumour_AF)]
+    maf_dataframe = maf_dataframe[maf_dataframe['TGL_Freq'] <= float(Maximum_Local_Freq)]
+    maf_dataframe = maf_dataframe[(((maf_dataframe['gnomAD_AF'] <  float(Maximum_gnomAD_AF)) & (maf_dataframe['Tumor_Sample_UUID'] == 'unmatched')) | (maf_dataframe['Tumor_Sample_UUID'] != 'unmatched'))]
     maf_dataframe = maf_dataframe[maf_dataframe.Variant_Classification.isin(mutation_type.split(','))]
     maf_dataframe = maf_dataframe[~maf_dataframe.FILTER.isin(filter_exception.split(','))]
     maf_dataframe.to_csv(maf_path, sep='\t')
