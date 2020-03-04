@@ -152,8 +152,8 @@ no_data_frame = ['CONTINUOUS_COPY_NUMBER', 'DISCRETE_COPY_NUMBER', 'MRNA_EXPRESS
 ### this hash should be generated from the file hiearchy or from the import packages
 supported_pipe = {'MUTATION_EXTENDED':            ['MAF', 'Strelka', 'Mutect', 'Mutect2',
                                                     'MutectStrelka', 'GATKHaplotypeCaller', 'CAP_mutation'],
-                  'COPY_NUMBER_ALTERATION':       ['CNVkit', 'Sequenza', 'HMMCopy', 'CAP_CNA'],
-                  'MRNA_EXPRESSION':              ['Cufflinks', 'RSEM', 'CAP_expression']}
+                  'COPY_NUMBER_ALTERATION':       ['CNVkit', 'Sequenza', 'HMMCopy', 'CAP_CNA', 'SEG'],
+                  'MRNA_EXPRESSION':              ['Cufflinks', 'RSEM', 'CAP_expression', 'CONTINUOUS']}
 #                  'MRNA_EXPRESSION_ZSCORES':   ['MRNA_EXPRESSION'],
 #                  'CONTINUOUS_COPY_NUMBER':    ['SEG'],
 #                  'DISCRETE_COPY_NUMBER':      ['CONTINUOUS_COPY_NUMBER']}
