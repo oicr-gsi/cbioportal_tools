@@ -17,16 +17,22 @@ def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minim
     # grep -w -f $muttype
     # grep -v -f $filtexc > body
         
-    maf_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    maf_path = os.path.join(study_config.config_map['output_folder'], 'data_{}_concat.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     maf_dataframe = pd.read_csv(maf_path, sep='\t')
     os.remove(maf_path)
 
-    maf_dataframe = maf_dataframe[maf_dataframe['t_depth'] >= float(Minimum_Tumour_Depth)] 
-    maf_dataframe = maf_dataframe[((maf_dataframe['t_depth'] / maf_dataframe['t_alt_count']) >= float(Minimum_Tumour_AF)) \
+    maf_dataframe = maf_dataframe[maf_dataframe['t_depth'] >= float(Minimum_Tumour_Depth)]
+
+    maf_dataframe = maf_dataframe[((maf_dataframe['t_alt_count'] / maf_dataframe['t_depth']) >= float(Minimum_Tumour_AF)) \
             & (maf_dataframe['TGL_Freq'] <= float(Maximum_Local_Freq)) \
             & (((maf_dataframe['gnomAD_AF'] <  float(Maximum_gnomAD_AF)) & (maf_dataframe['Matched_Norm_Sample_Barcode'] == 'unmatched')) | (maf_dataframe['Matched_Norm_Sample_Barcode'] != 'unmatched'))]
+
     maf_dataframe = maf_dataframe[maf_dataframe.Variant_Classification.isin(mutation_type.split(','))]
-    maf_dataframe = maf_dataframe[~maf_dataframe.FILTER.isin(filter_exception.split(','))]
+    
+    filter_list = filter_exception.split(',')
+    for j in range(len(filter_list)):
+        maf_dataframe = maf_dataframe[~maf_dataframe.FILTER.str.split(';').astype('str').str.contains(filter_list[j])]
+
     maf_temp = os.path.join(study_config.config_map['output_folder'], 'data_{}_temp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     maf_dataframe.to_csv(maf_temp, sep='\t')
 

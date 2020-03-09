@@ -157,7 +157,7 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
 
 def concat_files(exports_config:Config.Config, study_config: Config.Config, verb):
     concated_file = os.path.join(study_config.config_map['output_folder'],
-                                 'data_{}.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datahandler]))
+                                 'data_{}_concat.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datahandler]))
 
     input_folder = exports_config.config_map['input_folder']
 
