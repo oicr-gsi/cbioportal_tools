@@ -21,10 +21,10 @@ def main():
     helper.working_on(verb)
     
     #Filtering MAF Files
-    support_functions.maf_filter(meta_config, study_config, meta_config.config_map['Mutation_Type'], meta_config.config_map['Filter_Exception'], meta_config.config_map['Minimum_Tumour_Depth'], meta_config.config_map['Minimum_Tumour_AF'], meta_config.config_map['Maximum_Local_Freq'], meta_config.config_map['Maximum_gnomAD_AF'])
+    support_functions.maf_filter(meta_config, study_config, meta_config.config_map['Mutation_Type'], meta_config.config_map['Filter_Exception'], meta_config.config_map['Minimum_Tumour_Depth'], meta_config.config_map['Minimum_Tumour_AF'], meta_config.config_map['Maximum_gnomAD_AF'], meta_config.config_map['Maximum_Local_Freq'])
 
     #oncokb-annotation
-    support_functions.oncokb_annotation(meta_config, study_config, meta_config.config_map['oncokb_api_token'], verb)
+    #support_functions.oncokb_annotation(meta_config, study_config, meta_config.config_map['oncokb_api_token'], verb)
 
 if __name__ == '__main__':
     main()
