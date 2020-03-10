@@ -54,9 +54,7 @@ def TGL_filter(meta_config, study_config):
         print('vepkeep filter...')
         maf_dataframe = maf_dataframe[maf_dataframe['vepkeep'] != '']
 
-    #Adding columns tumor_vaf and normal_vaf
-    #Alternate solution ????? maf_dataframe['tumor_vaf'] = np.where(maf_dataframe['t_depth'])
-   
+    #Adding columns tumor_vaf and normal_vaf   
     #tumor_vaf column is the result of dividing t_alt_count by t_depth
     maf_dataframe['tumor_vaf'] = maf_dataframe['t_alt_count'].div(maf_dataframe['t_depth'], fill_value = 0)
     maf_dataframe['tumor_vaf'].replace([np.inf, -np.inf], 0)
@@ -77,7 +75,7 @@ def TGL_filter(meta_config, study_config):
 
     #Create oncogenic_binary column based on oncogenic column
     if 'oncogenic' in maf_dataframe.columns:
-        maf_dataframe['oncogenic_binary'] = np.where(maf_dataframe['oncogenic'] == 'Oncogenic' or maf_dataframe['oncogenic'] == 'Likely Oncogenic', 'YES', 'NO')
+        maf_dataframe['oncogenic_binary'] = np.where((maf_dataframe['oncogenic'] == 'Oncogenic') | (maf_dataframe['oncogenic'] == 'Likely Oncogenic'), 'YES', 'NO')
         print('Inserting oncogenic_binary...')
 
     #Create ExAC_common column based on FILTER column
