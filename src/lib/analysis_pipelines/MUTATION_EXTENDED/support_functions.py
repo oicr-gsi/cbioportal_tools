@@ -5,6 +5,7 @@ __status__ = "Production"
 
 import os
 import pandas as pd
+import numpy as np
 
 from lib.constants.constants import config2name_map
 from lib.support import Config, helper
@@ -34,12 +35,62 @@ def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minim
         maf_dataframe = maf_dataframe[~maf_dataframe.FILTER.str.split(';').astype('str').str.contains(filter_list[j])]
 
     maf_temp = os.path.join(study_config.config_map['output_folder'], 'data_{}_temp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    ############ TESTING ##############
+    #maf_temp = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     maf_dataframe.to_csv(maf_temp, sep='\t')
 
 def oncokb_annotation(meta_config, study_config, oncokb_api_token, verb):
     input_path = os.path.join(study_config.config_map['output_folder'], 'data_{}_temp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     output_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     helper.call_shell("MafAnnotator.py -i {} -o {} -b {}".format(input_path, output_path, oncokb_api_token), verb)
+    os.remove(input_path)
+
+def TGL_filter(meta_config, study_config):
+    data_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    maf_dataframe = pd.read_csv(data_path, sep='\t')
+    os.remove(data_path)
+    #Columns are restricted to only those in 'vepkeep' if this is available
+    if 'vepkeep' in maf_dataframe.columns:
+        print('vepkeep filter...')
+        maf_dataframe = maf_dataframe[maf_dataframe['vepkeep'] != '']
+
+    #Adding columns tumor_vaf and normal_vaf
+    #Alternate solution ????? maf_dataframe['tumor_vaf'] = np.where(maf_dataframe['t_depth'])
+   
+    #tumor_vaf column is the result of dividing t_alt_count by t_depth
+    maf_dataframe['tumor_vaf'] = maf_dataframe['t_alt_count'].div(maf_dataframe['t_depth'], fill_value = 0)
+    maf_dataframe['tumor_vaf'].replace([np.inf, -np.inf], 0)
+    #Rearramge tumor_vaf column to be after t_alt_count
+    cols = maf_dataframe.columns.tolist()
+    cols.insert(maf_dataframe.columns.get_loc('t_alt_count') + 1, cols.pop(cols.index('tumor_vaf')))
+    maf_dataframe = maf_dataframe.ix[:, cols]
+    print('Inserting tumor_vaf...')
+
+    #tumor_vaf column is the result of dividing n_alt_count by n_depth
+    maf_dataframe['normal_vaf'] = maf_dataframe['n_alt_count'].div(maf_dataframe['n_depth'], fill_value = 0)
+    maf_dataframe['normal_vaf'].replace([np.inf, -np.inf], 0)
+    #Rearramge tumor_vaf_column to be after n_alt_count
+    cols = maf_dataframe.columns.tolist()
+    cols.insert(maf_dataframe.columns.get_loc('n_alt_count') + 1, cols.pop(cols.index('normal_vaf')))
+    maf_dataframe = maf_dataframe.ix[:, cols]
+    print('Inserting normal_vaf...')
+
+    #Create oncogenic_binary column based on oncogenic column
+    if 'oncogenic' in maf_dataframe.columns:
+        maf_dataframe['oncogenic_binary'] = np.where(maf_dataframe['oncogenic'] == 'Oncogenic' or maf_dataframe['oncogenic'] == 'Likely Oncogenic', 'YES', 'NO')
+        print('Inserting oncogenic_binary...')
+
+    #Create ExAC_common column based on FILTER column
+    if 'FILTER' in maf_dataframe.columns:
+        maf_dataframe['ExAC_common'] = np.where(maf_dataframe['FILTER'].str.contains('common_variant'), 'YES', 'NO')
+        print('Inserting ExAC_common...')
+
+    #Create gnom_AD_AF_POPMAX column using the other gnomAD columns
+    maf_dataframe['gnomAD_AF_POPMAX'] = maf_dataframe[['gnomAD_AFR_AF', 'gnomAD_AMR_AF', 'gnomAD_ASJ_AF', 'gnomAD_EAS_AF', 'gnomAD_FIN_AF', "gnomAD_NFE_AF", 'gnomAD_OTH_AF', 'gnomAD_SAS_AF']].max(axis=1)
+    print('Inserting gnomAD_AF_POPMAX...')
+
+    data_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    maf_dataframe.to_csv(data_path, sep='\t')
 
 def verify_dual_columns(exports_config: Config.Config, verb):
     processes = []
