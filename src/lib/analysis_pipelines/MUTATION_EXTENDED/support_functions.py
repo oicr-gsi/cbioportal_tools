@@ -49,10 +49,11 @@ def TGL_filter(meta_config, study_config):
     data_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     maf_dataframe = pd.read_csv(data_path, sep='\t')
     os.remove(data_path)
-    #Columns are restricted to only those in 'vepkeep' if this is available
-    if 'vepkeep' in maf_dataframe.columns:
-        print('vepkeep filter...')
-        maf_dataframe = maf_dataframe[maf_dataframe['vepkeep'] != '']
+    
+    #Only keep the columns that are given in vep_keep_columns.txt within accessory_files
+    vepkeep_file = open(meta_config.config_map['vepkeep'], 'r+')
+    vepkeep = [line.rstrip('\n') for line in vepkeep_file.readlines()]
+    maf_dataframe = maf_dataframe[vepkeep]
 
     #Adding columns tumor_vaf and normal_vaf   
     #tumor_vaf column is the result of dividing t_alt_count by t_depth
@@ -86,6 +87,32 @@ def TGL_filter(meta_config, study_config):
     #Create gnom_AD_AF_POPMAX column using the other gnomAD columns
     maf_dataframe['gnomAD_AF_POPMAX'] = maf_dataframe[['gnomAD_AFR_AF', 'gnomAD_AMR_AF', 'gnomAD_ASJ_AF', 'gnomAD_EAS_AF', 'gnomAD_FIN_AF', "gnomAD_NFE_AF", 'gnomAD_OTH_AF', 'gnomAD_SAS_AF']].max(axis=1)
     print('Inserting gnomAD_AF_POPMAX...')
+
+    #caller artifact filters
+    maf_dataframe = maf_dataframe.replace(regex = [r'^clustered_events$', r'^common_variant$', r'^.$'], value = 'PASS')
+
+    # some specific filter flags should be rescued if oncogenic (ie. EGFR had issues here)
+    maf_dataframe['FILTER'] = np.where( ( (maf_dataframe['oncogenic_binary'] == 'YES') & ( (maf_dataframe['FILTER'] == 'triallelic_site') | (maf_dataframe['FILTER'] == 'clustered_events;triallelic_site') \
+            | (maf_dataframe['FILTER'] == 'clustered_events;homologous_mapping_event') ) ), 'PASS', maf_dataframe['FILTER'])
+
+    # Artifact Filter
+    maf_dataframe['TGL_FILTER_ARTIFACT'] = np.where( (maf_dataframe['FILTER'] == 'PASS'), 'PASS', 'Artifact')
+
+    # ExAC Filter
+    maf_dataframe['TGL_FILTER_ExAC'] = np.where( ( (maf_dataframe['ExAC_common'] == 'YES') & (maf_dataframe['Matched_Norm_Sample_Barcode'] == 'unmatched') ), 'ExAC_common', 'PASS')
+
+    # gnomAD_AF_POPMAX Filter
+    maf_dataframe['TGL_FILTER_gnomAD'] = np.where( ( (maf_dataframe['gnomAD_AF_POPMAX'] > 0.001) & (maf_dataframe['Matched_Norm_Sample_Barcode'] == 'unmatched') ), 'gnomAD_common', 'PASS')
+
+    # VAF Filter
+    #maf_dataframe['TGL_FILTER_VAF'] = np.where( ( (maf_dataframe['tumor_vaf'] >= 0.1) | ( (maf_dataframe['tumor_vaf'] < 0.1) & (maf_dataframe['oncogenic_binary'] == 'YES' ) & ) ), )
+    maf_dataframe['TGL_FILTER_VAF'] = np.where( ( (maf_dataframe['tumor_vaf'] >= 0.1) | ( (maf_dataframe['tumor_vaf'] < 0.1) & (maf_dataframe['oncogenic_binary'] == 'YES' ) \
+            & ( ( (maf_dataframe['Variant_Classification'] == 'In_Frame_Del') | (maf_dataframe['Variant_Classification'] == 'In_Frame_Ins') ) | (maf_dataframe['Variant_Type'] == 'SNP') ) ) ), 'PASS', 'low_VAF')
+
+    # Mark filters
+    maf_dataframe['TGL_FILTER_VERDICT'] = np.where( ( (maf_dataframe['TGL_FILTER_ARTIFACT'] == 'PASS') & (maf_dataframe['TGL_FILTER_ExAC'] == 'PASS') & (maf_dataframe['TGL_FILTER_gnomAD'] == 'PASS') \
+            & (maf_dataframe['TGL_FILTER_VAF'] == 'PASS') ), 'PASS', (maf_dataframe['TGL_FILTER_ARTIFACT'] + ';' + maf_dataframe['TGL_FILTER_ExAC'] + ';' + maf_dataframe['TGL_FILTER_gnomAD'] + ';' \
+            + maf_dataframe['TGL_FILTER_VAF']) )
 
     data_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     maf_dataframe.to_csv(data_path, sep='\t')
