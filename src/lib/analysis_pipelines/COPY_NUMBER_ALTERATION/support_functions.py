@@ -13,6 +13,15 @@ from lib.constants import constants
 ## this is for discrete data
 thresholds:list  = []
 
+def preProcRNA(segfile, genebed, gain, ampl, htzd, hmzd, genelist):
+    gain = float(gain)
+    ampl = float(ampl)
+    htzd = float(htzd)
+    hmzd = float(hmzd)
+
+    geneInfo = pd.read_csv(genelist, sep='\t')
+
+    #Need packages from CNTools
 
 def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
     # Append 'chr' to chromosome if needed
