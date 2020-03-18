@@ -6,22 +6,53 @@ __status__ = "Production"
 import os
 import subprocess
 import pandas as pd
+#import rpy2.objects.packages as robjects
+#import rpy2.robjects as rpy
+#import rpy2.objects.packages as robjects
 
+#from rpy2 import importr
 from lib.support import Config, helper
 from lib.constants import constants
 
 ## this is for discrete data
 thresholds:list  = []
 
-def preProcRNA(segfile, genebed, gain, ampl, htzd, hmzd, genelist):
+def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, genelist):
+    # import R packages
+    #base = importr('base')
+    #base.source("http://www.bioconductor.org/biocLite.R")
+    #biocinstaller = importr("BiocInstaller")
+    #biocinstaller.biocLite("GenomeInfoDb")
+
+    ##Load the installed package "seqLogo"
+    #seqlogo = importr("seqLogo")
+   
+    segData = os.path.join(study_config.config_map['output_folder'],
+                            'data_{}.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    
+    #command = 'Rscript'
+    command = '/.mounts/labs/gsi/modulator/sw/Ubuntu18.04/rstats-3.6/bin/Rscript'
+    path2script = '/.mounts/labs/gsiprojects/gsi/cBioGSI/aliang/cbioportal_tools/src/lib/analysis_pipelines/COPY_NUMBER_ALTERATION/preProcCNA.r'
+    rscriptpath = '/.mounts/labs/gsi/modulator/sw/Ubuntu18.04/rstats-3.6/bin/Rscript'
+    args = [segData, genebed, genelist]
+    cmd = [command, rscriptpath] + args
+    subprocess.call(cmd)
+    
+    #TESTING 
+    print("!@#$%^&*()(*&^%$#@#$%^&*(*&^%$#@#$%^&*(*&^%$#@#$%^&*(*&^%$#@#$%^&*(")
+    print("!@#$%^&*()(*&^%$#@#$%^&*(*&^%$#@#$%^&*(*&^%$#@#$%^&*(*&^%$#@#$%^&*(")
+    print("!@#$%^&*()(*&^%$#@#$%^&*(*&^%$#@#$%^&*(*&^%$#@#$%^&*(*&^%$#@#$%^&*(")
+    print("!@#$%^&*()(*&^%$#@#$%^&*(*&^%$#@#$%^&*(*&^%$#@#$%^&*(*&^%$#@#$%^&*(")
+
+def ProcCNA(segfile, genebed, gain, ampl, htzd, hmzd, genelist):
     gain = float(gain)
     ampl = float(ampl)
     htzd = float(htzd)
     hmzd = float(hmzd)
-
+    
+    reducedSeg = pd.read_csv(segfile.replace(".txt", "/temp.txt"), sep='\t')
     geneInfo = pd.read_csv(genelist, sep='\t')
 
-    #Need packages from CNTools
 
 def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
     # Append 'chr' to chromosome if needed
