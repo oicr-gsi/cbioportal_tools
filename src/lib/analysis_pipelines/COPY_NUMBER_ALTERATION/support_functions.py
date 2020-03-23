@@ -5,7 +5,9 @@ __status__ = "Production"
 
 import os
 import subprocess
+import math
 import pandas as pd
+import numpy as np
 #import rpy2.objects.packages as robjects
 #import rpy2.robjects as rpy
 #import rpy2.objects.packages as robjects
@@ -35,14 +37,105 @@ def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed,
     print("!@#$%^&*()(*&^%$#@#$%^&*(*&^%$#@#$%^&*(*&^%$#@#$%^&*(*&^%$#@#$%^&*(")
     print("!@#$%^&*()(*&^%$#@#$%^&*(*&^%$#@#$%^&*(*&^%$#@#$%^&*(*&^%$#@#$%^&*(")
 
-def ProcCNA(segfile, genebed, gain, ampl, htzd, hmzd, genelist):
+def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, genelist, gain, amp, htz, hmz):
     gain = float(gain)
-    ampl = float(ampl)
-    htzd = float(htzd)
-    hmzd = float(hmzd)
+    amp = float(amp)
+    htz = float(htz)
+    hmz = float(hmz)
     
-    reducedSeg = pd.read_csv(segfile.replace(".txt", "_temp.txt"), sep='\t')
-    geneInfo = pd.read_csv(genelist, sep='\t')
+    #RETRIEVE REDUCED SEG
+    outputPath = study_config.config_map['output_folder']
+    reducedSeg = pd.read_csv(outputPath + "/data_reducedseg.txt", sep='\t')
+    
+    #REMOVE DUPLICATES FROM COLUMN 4-END
+    newColumns = reducedSeg.columns[5:]
+    df_cna = reducedSeg.drop_duplicates(subset = newColumns)
+    newColumns = list(newColumns)
+    print(newColumns)
+    #newColumns[0] = 'Hugo_Symbol'
+    #df_cna.rename(columns={newColumns[0]:'Hugo_Symbol'}, inplace=True)
+    
+    #newColumns = list(df_cna.columns)
+    df_cna = df_cna[newColumns]
+    newColumns = list(df_cna.columns)
+    #df_cna = df_cna.rename(columns = {subsetColumns[0]:'Hugo_Symbol'})
+    df_cna.rename(columns={newColumns[0]:'Hugo_Symbol'}, inplace=True)
+    #ROUNDING DOES NOT GET SIG FIGS TO 4
+    #df_cna[newColumns[1:]] = df_cna[newColumns[1:]].round(4)
+    #df_cna[newColumns[1:]] = df_cna[newColumns[1:]].apply(lambda x: round(x, 4 - int(math.floor(math.log10(abs(x))))))
+    
+    #df_cna[newColumns[1:]] = df_cna[newColumns[1:]].apply(lambda x: round(x, 4 - np.floor(np.log10(abs(x)))))
+
+    keep_genes_file = open(genelist, 'r+')
+    keep_genes = [line.rstrip('\n') for line in keep_genes_file.readlines()]
+
+    df_cna = df_cna[df_cna.Hugo_Symbol.isin(keep_genes)]
+    df_cna.to_csv(outputPath + '/cna.txt', sep='\t', index=False)
+
+    print("Thresholding CNAs")
+    df_cna_thresh = df_cna
+    #subsetColumns = list(subsetColumns)
+    #subsetColumns[0] = 'Hugo_Symbol'
+    
+    #for i in subsetColumns:
+    #    print(i)
+    #    df_cna_thresh[i] = pd.to_numeric(df_cna_thresh[i])
+    #print(subsetColumns)
+    
+    #df_cna_thresh[newColumns[1:]] = df_cna_thresh[newColumns[1:]].apply(pd.to_numeric, errors = 'coerce')
+    print(newColumns[1:])
+    thresholdColumns = newColumns
+    df_cna_thresh[thresholdColumns[1:]] = df_cna_thresh[thresholdColumns[1:]].astype(float)
+
+    #TESTING TESTING TESTING TESTING
+    df_cna.to_csv(outputPath + '/testcna2.txt', sep='\t', index=False)
+    ##############################################################
+    
+    #Thresholding data
+    print("Thresholding data")
+    for i in thresholdColumns:
+        if i == thresholdColumns[0]:
+            continue
+        print(i)
+        ampfilter = (df_cna_thresh[i] > amp)
+        hmzfilter = (df_cna_thresh[i] < hmz)
+        gainfilter = (df_cna_thresh[i] > gain) & (df_cna_thresh[i] <= amp)
+        htzfilter = (df_cna_thresh[i] < htz) & (df_cna_thresh[i] >= hmz)
+        newVals = [2, -2, 1, -1]
+        
+        df_cna_thresh[i] = np.select([ampfilter, hmzfilter, gainfilter, htzfilter], newVals, default=0)
+
+        #df_cna_thresh[i] = np.where(df_cn_thresh[i] > amp, 2, (np.where(  ) ) )
+    
+        #Filter out rows by comparing them with genelist
+
+    #TESTING TESTING TESTING TESTING
+    df_cna.to_csv(outputPath + '/testcna.txt', sep='\t', index=False)
+    ##############################################################
+        
+        #####################################             RECOVER               ##############################################
+    #keep_genes_file = open(genelist, 'r+')
+    #keep_genes = [line.rstrip('\n') for line in keep_genes_file.readlines()]
+        
+    #df_cna = df_cna[df_cna.Hugo_Symbol.isin(keep_genes)]
+    df_cna_thresh = df_cna_thresh[df_cna_thresh.Hugo_Symbol.isin(keep_genes)]
+        #####################################################################################
+
+
+        #df_cna = df_cna[df_cna.apply(lambda x: x in keep_genes.any() if x.name == 'genename' else x)]
+
+        #df_cna = df_cna[df_cna['genename'].apply(in(keep_genes))]
+
+        #genefilter = (df_cna['genename'])
+        
+        #for j in keep_genes:
+        #    df_cna = df_cna[df_cna['genename'] == j]
+        
+        #df_cna = df_cna[df_cna['genename'].eq('any').any()]
+
+    df_cna_thresh.to_csv(outputPath + '/cna_thresh.txt', sep='\t', index=False)
+
+
 
 
 def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):

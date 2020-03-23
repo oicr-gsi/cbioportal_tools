@@ -29,15 +29,33 @@ reducedseg <- rs(rdByGene)
 #tempsave = gsub(".txt", "_temp.txt", args[1])
 #write.table(tempsave, sep="\t")
 #print("TESTING")
+write.table(data.frame("Hugo_Symbol"=rownames(reducedseg), reducedseg, check.names=FALSE),
+            file=paste0(args[7], "/data_reducedseg.txt"), sep="\t", row.names=FALSE, quote=FALSE)
 
 # some reformatting and return log2cna data
 df_cna <- subset(reducedseg[,c(5, 6:ncol(reducedseg))], !duplicated(reducedseg[,c(5, 6:ncol(reducedseg))][,1]))
+
+#TESTING
+print('################################33')
+print(colnames(df_cna))
+print('################################33')
+#TESTING
+
 colnames(df_cna) <- c("Hugo_Symbol", colnames(df_cna)[2:ncol(df_cna)])
+
+#TESTING#
+print('$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+print(colnames(df_cna))
+print('$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+#TESTING#
 
 # set thresholds and return 5-state matrix
 print("thresholding cnas")
 df_cna_thresh <- df_cna
 df_cna_thresh[,c(2:ncol(df_cna))] <- sapply(df_cna_thresh[,c(2:ncol(df_cna))], as.numeric)
+
+write.table(data.frame("Hugo_Symbol"=rownames(df_cna_thresh), df_cna_thresh, check.names=FALSE),
+            file=paste0(args[7], "/cna_threshold_final.txt"), sep="\t", row.names=FALSE, quote=FALSE)
 
 # threshold data
 for (i in 2:ncol(df_cna_thresh))
