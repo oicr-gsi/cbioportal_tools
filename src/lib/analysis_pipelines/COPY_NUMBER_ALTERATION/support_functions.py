@@ -27,7 +27,7 @@ def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed,
 
     subprocess.call(cmd)
      
-def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, genelist, gain, amp, htz, hmz):
+def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, genelist, gain, amp, htz, hmz, oncokb_api_token, verb):
     gain = float(gain)
     amp = float(amp)
     htz = float(htz)
@@ -90,6 +90,47 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
     data_path = os.path.join(outputPath, 'supplementary_data', 'data_CNA_short.txt')
     df_cna_thresh.to_csv(data_path, sep='\t', index=False)
     
+    # if TYPEC is 'mixed'
+    if (meta_config.config_map['typec'] != "mixed"):
+        # Create oncokb_clinical_info
+        f_out = os.path.join(outputPath, 'supplementary_data', 'oncokb_clinical_info.txt')
+        f = open(f_out, 'w')
+        f.write('SAMPLE_ID\tONCOTREE_CODE')
+        f.flush()
+        f.close()
+    else:
+        f_out = os.path.join(outputPath, 'supplementary_data', 'data_CNA_oncoKB.txt')
+        helper.call_shell("CnaAnnotator.py -i {} -o {} -b {}".format(data_path, f_out, oncokb_api_token), verb)
+
+def get_metadata(meta_config: Config.Config, study_config: Config.Config):
+    outputPath = study_config.config_map['output_folder']
+    f_CNA_out = os.path.join(outputPath, 'meta_CNA.txt')
+    f = open(f_CNA_out, 'w')
+    meta_CNA = 'cancer_study_identifier: ' + meta_config.config_map['study']
+    meta_CNA = meta_CNA + "\ngenetic_alteration_type: COPY_NUMBER_ALTERATION"
+    meta_CNA = meta_CNA + "\ndatatype: DISCRETE"
+    meta_CNA = meta_CNA + "\nstable_id: gistic"
+    meta_CNA = meta_CNA + "\nshow_profile_in_analysis_tab: true"
+    meta_CNA = meta_CNA + "\nprofile_description: Putative copy-number calls:  Values: -2=homozygous deletion; -1=hemizygous deletion; 0=neutral/no change; 1=gain; 2=high level amplification"
+    meta_CNA = meta_CNA + "\nprofile_name: Putative copy-number alterations from GISTIC"
+    meta_CNA = meta_CNA + "\ndata_filename: data_CNA.txt"
+    f.writelines(meta_CNA)
+    f.flush()
+    f.close()
+
+    f_log2CNA_out = os.path.join(outputPath, 'meta_log2CNA.txt')
+    f = open(f_log2CNA_out, 'w')
+    meta_log2CNA = "cancer_study_identifier: " + meta_config.config_map['study']
+    meta_log2CNA = meta_log2CNA + "\ndatatype: LOG2-VALUE"
+    meta_log2CNA = meta_log2CNA + "\ngenetic_alteration_type: COPY_NUMBER_ALTERATION"
+    meta_log2CNA = meta_log2CNA + "\nprofile_description: Log2 copy-number values"
+    meta_log2CNA = meta_log2CNA + "\n profile_name: Log2 copy-number values"
+    meta_log2CNA = meta_log2CNA + "\nshow_profile_in_analysis_tab: true"
+    meta_log2CNA = meta_log2CNA + "\nstable_id: log2CNA"
+    meta_log2CNA = meta_log2CNA + "\ndata_filename: data_log2CNA.txt"
+    f.writelines(meta_log2CNA)
+    f.flush()
+    f.close()
 
 def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
     # Append 'chr' to chromosome if needed
