@@ -1,6 +1,6 @@
 from lib.support import helper
 from lib.study_generation import meta
-from lib.analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_zscore
+from lib.analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_zscore, get_metadata, preProcRNA
 
 def main():
     global meta_config
@@ -31,7 +31,11 @@ def main():
         helper.working_on(verb, message='Generating expression Z-Score Data ...')
         generate_expression_zscore(meta_config, study_config, verb)
         helper.working_on(verb)
-
+    
+    preProcRNA(meta_config, study_config, meta_config.config_map['enscon'], meta_config.config_map['genelist'])
+    
+    # get meta_expression.txt and meta_expression_zscores.txt
+    #get_metadata(meta_config, study_config)
 
 if __name__ == '__main__':
     main()
