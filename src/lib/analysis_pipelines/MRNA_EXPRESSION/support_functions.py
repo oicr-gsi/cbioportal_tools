@@ -13,6 +13,28 @@ from lib.constants.constants import config2name_map
 
 DataFrames = typing.List[pd.DataFrame]
 
+def preProcRNA(meta_config: Config.Config, study_config: Config.Config, enscon, genelist):
+    # read in data
+    outputPath = study_config.config_map['output_folder']
+    gepData = pd.read_csv(outputPath + '/data_expression_continous.txt')
+    ensConv = pd.read_csv(enscon)
+
+    # rename columns
+    ensConv.rename(index={0: 'gene_id', 1: 'Hugo_Symbol'})
+
+    # merge in Hugo's, re-order columns, deduplicate
+    df = pd.merge(gepData, ensConv, on = 'gene_id', how = 'left')
+    newColumns = df.columns[1:]
+    df = df.drop_duplicates(subset = newColumns)
+    #Modify row names? 
+    #row.names(df) <- df[,1]
+    #df <- df[,-1]
+
+    # subset with given genelist
+    #df = df[df.]
+
+def get_metadata():
+    pass
 
 def alpha_sort(exports_config: Config.Config, verb):
     input_folder = exports_config.config_map['input_folder']
