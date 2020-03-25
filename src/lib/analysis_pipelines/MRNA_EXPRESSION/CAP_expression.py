@@ -31,11 +31,11 @@ def main():
         helper.working_on(verb, message='Generating expression Z-Score Data ...')
         generate_expression_zscore(meta_config, study_config, verb)
         helper.working_on(verb)
+
+    #get meta_expression.txt and meta_expression_zscores.txt
+    get_metadata(meta_config, study_config)
     
     preProcRNA(meta_config, study_config, meta_config.config_map['enscon'], meta_config.config_map['genelist'])
-    
-    # get meta_expression.txt and meta_expression_zscores.txt
-    #get_metadata(meta_config, study_config)
 
 if __name__ == '__main__':
     main()
