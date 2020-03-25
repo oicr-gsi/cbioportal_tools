@@ -47,13 +47,14 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
     newColumns = list(df_cna.columns)
     df_cna.rename(columns={newColumns[0]:'Hugo_Symbol'}, inplace=True)
 
-    #ROUNDING DOES NOT GET SIG FIGS TO 4
-    #df_cna[newColumns[1:]] = df_cna[newColumns[1:]].round(4)
+    #ROUNDING DOES NOT GET SIG FIGS TO 4, but this was how it was done in this code previously
+    df_cna[newColumns[1:]] = df_cna[newColumns[1:]].round(4)
     #df_cna[newColumns[1:]] = df_cna[newColumns[1:]].apply(lambda x: round(x, 4 - int(math.floor(math.log10(abs(x))))))    
     #df_cna[newColumns[1:]] = df_cna[newColumns[1:]].apply(lambda x: round(x, 4 - np.floor(np.log10(abs(x)))))
 
     keep_genes_file = open(genelist, 'r+')
     keep_genes = [line.rstrip('\n') for line in keep_genes_file.readlines()]
+    keep_genes_file.close()
 
     df_cna = df_cna[df_cna.Hugo_Symbol.isin(keep_genes)]
     df_cna.to_csv(outputPath + '/data_log2CNA.txt', sep='\t', index=False)

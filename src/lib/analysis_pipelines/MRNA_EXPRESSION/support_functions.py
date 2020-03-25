@@ -16,25 +16,101 @@ DataFrames = typing.List[pd.DataFrame]
 def preProcRNA(meta_config: Config.Config, study_config: Config.Config, enscon, genelist):
     # read in data
     outputPath = study_config.config_map['output_folder']
-    gepData = pd.read_csv(outputPath + '/data_expression_continous.txt')
-    ensConv = pd.read_csv(enscon)
+    gepData = pd.read_csv(outputPath + '/data_expression_continous.txt', sep='\t')
+    ensConv = pd.read_csv(enscon, sep='\t')
+    ensConv.to_csv(outputPath + '/ensConv.txt', sep='\t', index=False)
 
     # rename columns
-    ensConv.rename(index={0: 'gene_id', 1: 'Hugo_Symbol'})
+    ensConv.columns = ['gene_id', 'Hugo_Symbol']
+    gepData.rename(columns={'Hugo_Symbol':'gene_id'}, inplace=True)
 
-    # merge in Hugo's, re-order columns, deduplicate
+    #ensConv_colnames = ensConv.columns
+
+    #ensConv_colnames[0] = 'gene_id'
+    #ensConv_colnames[1] = 'Hugo_Symbol'
+    #ensConv.columns = ensConv_colnames
+
+    # merge in Hugo's
     df = pd.merge(gepData, ensConv, on = 'gene_id', how = 'left')
-    newColumns = df.columns[1:]
+    
+    # re-order columns
+    newColumns = df.columns.tolist()
+    newColumns = newColumns[-1:] + newColumns[1:-1]
+    df = df[newColumns]
+    ############## TEST 3 ################
+    df.to_csv(outputPath + '/test3.txt', sep="\t", index=False)
+    ############## TEST 3 ################
+
+    # TODO deduplicate columns
+    newColumns = df.columns[0]
+    #newColumns = df.columns[1:]
     df = df.drop_duplicates(subset = newColumns)
-    #Modify row names? 
-    #row.names(df) <- df[,1]
-    #df <- df[,-1]
+    
+    ############## TEST 2 ################
+    df.to_csv(outputPath + '/test2.txt', sep="\t", index=False)
+    ############## TEST 2 ################
 
     # subset with given genelist
-    #df = df[df.]
+    keep_genes_file = open(genelist, 'r+')
+    keep_genes = [line.rstrip('\n') for line in keep_genes_file.readlines()]
+    keep_genes_file.close()
+    df = df[df.Hugo_Symbol.isin(keep_genes)]
+    
+    df.to_csv(outputPath + '/new_expression.txt', sep="\t", index=False)
 
-def get_metadata():
-    pass
+    #generating zscores
+    raw_scores = df.drop(['Hugo_Symbol'], axis=1)
+    means = raw_scores.mean(axis=1)
+    sds = raw_scores.std(axis=1)
+
+    z_scores = ((raw_scores.transpose() - means) / sds).transpose()
+    z_scores = z_scores.fillna(0)
+    z_scores = z_scores.round(decimals=4)
+    z_scores_data = pd.concat([df['Hugo_Symbol'], z_scores], axis=1)
+
+    z_scores_data.to_csv(outputPath + '/new_zscores.txt', sep="\t", index=False)
+
+    # TODO Percentile STUDY
+    # pnorm in R??
+
+    # get TCGA comparitor
+    tcga_path = meta_config.config_map['tcgadata'] + '/' + meta_config.config_map['tcgacode'] + ".PANCAN.matrix.rdf"
+    #df_tcga = pd.read_csv(tcga_path, sep='')
+    #print(df_tcga.columns)
+
+    # equalize and merge dfs (get common genes)
+    #df_stud_tcga = pd.merge(df, df_tcga, how = 'inner', on = )
+
+def get_metadata(meta_config: Config.Config, study_config: Config.Config):
+    outputPath = study_config.config_map['output_folder']
+    
+    meta_expression_path = os.path.join(outputPath, 'new_meta_expression.txt')
+    f = open(meta_expression_path, 'w')
+    meta_expression = "cancer_study_identifier: " + meta_config.config_map['studyid']
+    meta_expression = meta_expression + "\ngenetic_alteration_type: MRNA_EXPRESSION"
+    meta_expression = meta_expression + "\ndatatype: CONTINUOUS"
+    meta_expression = meta_expression + "\nstable_id: rna_seq_mrna"
+    meta_expression = meta_expression + "\nprofile_description: Expression levels RNA-Seq"
+    meta_expression = meta_expression + "\nshow_profile_in_analysis_tab: true"
+    meta_expression = meta_expression + "\nprofile_name: mRNA expression RNA-Seq"
+    meta_expression = meta_expression + "\ndata_filename: data_expression.txt"
+    f.writelines(meta_expression)
+    f.flush()
+    f.close()
+    
+    meta_zscore_path = os.path.join(outputPath, "new_meta_zscore.txt")
+    f = open(meta_zscore_path, 'w')
+    meta_zscore = "cancer_study_identifier: " + meta_config.config_map['studyid']
+    meta_zscore = meta_zscore + "\ngenetic_alteration_type: MRNA_EXPRESSION"
+    meta_zscore = meta_zscore + "\ndatatype: Z-SCORE"
+    meta_zscore = meta_zscore + "\nstable_id: rna_seq_mrna_median_Zscores"
+    meta_zscore = meta_zscore + "\nshow_profile_in_analysis_tab: true"
+    meta_zscore = meta_zscore + "\nprofile_name: mRNA expression z-scores"
+    meta_zscore = meta_zscore + "\nprofile_description: Expression levels z-scores"
+    meta_zscore = meta_zscore + "\ndata_filename: data_expression_zscores.txt"
+    f.writelines(meta_zscore)
+    f.flush()
+    f.close()
 
 def alpha_sort(exports_config: Config.Config, verb):
     input_folder = exports_config.config_map['input_folder']
