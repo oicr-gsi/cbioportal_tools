@@ -134,7 +134,8 @@ optional_fields = ['groups', 'gene_panel', 'swissprot_identifier', 'variant_clas
 case_list_map =   {'MAF':               '_sequenced',
                    'SEG':               '_cna',
                    'MRNA_EXPRESSION':   '_rna_seq_mrna',
-                   'CASE_LIST':         '_custom'}
+                   'CASE_LIST':         '_custom',
+                   'CONTINUOUS': '_rna_seq_mrna'}
 
 #TODO:: ensure correct suffixes
 # https://cbioportal.readthedocs.io/en/latest/File-Formats.html#case-list-stable-id-suffixes
