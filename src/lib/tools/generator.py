@@ -287,6 +287,10 @@ def main(args):
     # Clean Output Folder/Initialize it
     helper.clean_folder(study_config.config_map['output_folder'],args.force)
 
+    # CAP_CASE_LISTS - generate case lists for CAP
+    # TODO --> change the way CAP_case_list.case_list_handler is being called - right now this handles ALL cases for generating case lists
+    CAP_case_lists.case_list_handler(information, custom_list, study_config, verb)
+    
     for each in information:
         #meta.generate_meta_type(each.datahandler, each.config_map, study_config, verb)
         meta.generate_meta_type(each, study_config, verb)
@@ -294,10 +298,6 @@ def main(args):
         
         # This line has been replaced with the CAP case list handler
         #case.generate_case_list(each, study_config, verb)
-    
-    # CAP_CASE_LISTS - generate case lists for CAP
-    # TODO --> change the way CAP_case_list.case_list_handler is being called - right now this handles ALL cases for generating case lists
-    CAP_case_lists.case_list_handler(information, custom_list, study_config, verb)
 
     for each in clinic_data:
         #meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
