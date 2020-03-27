@@ -12,7 +12,7 @@ import typing
 import os
 
 from lib.constants import constants
-from lib.study_generation import data, meta, case
+from lib.study_generation import data, meta, case, CAP_case_lists
 from lib.support import Config, helper, cbioportal_interface
 
 
@@ -291,23 +291,22 @@ def main(args):
         #meta.generate_meta_type(each.datahandler, each.config_map, study_config, verb)
         meta.generate_meta_type(each, study_config, verb)
         data.generate_data_type(each, study_config, path, verb)
-        case.generate_case_list(each, study_config, verb)
-        ### TESTING TESTING TESTING TESTING TESTING ###
-        print("MAKE CUSTOM LISTS IN GENERATOR for each in information!")
-        ### TESTING TESTING TESTING TESTING TESTING ###
+        
+        # This line has been replaced with the CAP case list handler
+        #case.generate_case_list(each, study_config, verb)
+    
+    # CAP_CASE_LISTS - generate case lists for CAP
+    # TODO --> change the way CAP_case_list.case_list_handler is being called - right now this handles ALL cases for generating case lists
+    CAP_case_lists.case_list_handler(information, custom_list, study_config, verb)
 
     for each in clinic_data:
         #meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
         meta.generate_meta_type(each, study_config, verb)
         data.generate_data_clinical(each, study_config, verb)
-
-    for each in custom_list:
-        ### TESTING TESTING TESTING TESTING TESTING ###
-        print("MAKE CUSTOM LISTS IN GENERATOR!")
-        ### TESTING TESTING TESTING TESTING TESTING ###
-        print(each.datahandler)
-        ### TESTING TESTING TESTING TESTING TESTING ###
-        case.generate_case_list(each, study_config, verb)
+    
+    # These two lines of code have been replaced with the CAP case list handler
+    #for each in custom_list:
+    #    case.generate_case_list(each, study_config, verb)
 
     meta.generate_meta_study(study_config, verb)
 
