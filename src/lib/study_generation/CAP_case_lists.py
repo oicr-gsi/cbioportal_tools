@@ -23,7 +23,7 @@ def case_list_handler(information, custom_list, study_config: Config.Config, ver
         generate_multi_case_lists(information, study_config, case_list_folder, suffix, datahandler_suffixes, verb)
     
     # Generate 3way_complete case list if there is already cases_sequences (mutation data) cases_cna (cna data) and cases_rna_seq_mrna (expression data)
-    if os.path.isfile(os.path.join(case_list_folder, 'cases_cna.txt')) and os.path.isfile(os.path.join(case_list_folder, 'cases_sequenced.txt')):
+    if os.path.isfile(os.path.join(case_list_folder, 'cases_cna.txt')) and os.path.isfile(os.path.join(case_list_folder, 'cases_sequenced.txt')) and os.path.isfile(os.path.join(case_list_folder, 'cases_rna_seq_mrna.txt')):
         suffix = '_3way_complete'
         datahandler_suffixes = ['_sequenced', '_cna', '_rna_seq_mrna']
         generate_multi_case_lists(information, study_config, case_list_folder, suffix, datahandler_suffixes, verb)
@@ -58,7 +58,7 @@ def generate_case_lists(information, study_config, case_list_folder, verb):
             f.close()
     
 def generate_multi_case_lists(information, study_config, case_list_folder, suffix, datahandler_suffixes, verb):
-        f = open(os.path.join(case_list_folder, 'cases_cnaseq.txt'.format(suffix)), 'w')
+        f = open(os.path.join(case_list_folder, 'cases{}.txt'.format(suffix)), 'w')
         
         f.write('cancer_study_identifier: {}\n'.format(study_config.config_map['cancer_study_identifier']))
         f.write('stable_id: {}{}\n'.format(study_config.config_map['cancer_study_identifier'], suffix))        
@@ -68,10 +68,13 @@ def generate_multi_case_lists(information, study_config, case_list_folder, suffi
         
         all_ids = ''
         for meta_config in information:
-            if case_list_map[meta_config.datahandler] in datahandler_suffixes:
-                ids = meta_config.data_frame['SAMPLE_ID']
-                all_ids = all_ids + '\t'.join(ids)
-        
+            if meta_config.datahandler in case_list_map.keys():
+                if case_list_map[meta_config.datahandler] in datahandler_suffixes:
+                    ids = meta_config.data_frame['SAMPLE_ID']
+                    compare = all_ids.split(sep='\t')
+                    ids = ids[~ids.isin(compare)]
+                    all_ids = all_ids + '\t'.join(ids)
+
         f.write('case_list_ids: {}\n'.format(all_ids))
         f.flush()
         f.close()
