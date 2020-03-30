@@ -7,9 +7,12 @@ import os
 import typing
 import pandas as pd
 import numpy as np
+import scipy as sp
 
 from lib.support import Config, helper
 from lib.constants.constants import config2name_map
+from numpy import *
+from scipy.stats import norm
 
 DataFrames = typing.List[pd.DataFrame]
 
@@ -70,14 +73,23 @@ def preProcRNA(meta_config: Config.Config, study_config: Config.Config, enscon, 
 
     z_scores_data.to_csv(outputPath + '/new_zscores.txt', sep="\t", index=False)
 
-    # TODO Percentile STUDY
-    # pnorm in R??
+    # Percentile STUDY
+    newColumns = z_scores_data.columns
+    z_scores_data[newColumns[1:]] = z_scores_data[newColumns[1:]].astype(float)
+    newColumns = z_scores_data.columns
+    
+    # Getting ECD - using scipy
+    z_scores_data[newColumns[1:]] = z_scores_data[newColumns[1:]].apply(lambda x: norm.cdf(x))
+    z_scores_data[newColumns[1:]] = z_scores_data[newColumns[1:]].round(4)
+
+    # Testing ECDF
+    z_scores_data.to_csv(outputPath + '/probability_zscores.txt', sep="\t", index=False)
 
     # get TCGA comparitor
     tcga_path = meta_config.config_map['tcgadata'] + '/' + meta_config.config_map['tcgacode'] + ".PANCAN.matrix.rdf"
     #df_tcga = pd.read_csv(tcga_path, sep='')
     #print(df_tcga.columns)
-
+    
     # equalize and merge dfs (get common genes)
     #df_stud_tcga = pd.merge(df, df_tcga, how = 'inner', on = )
 
