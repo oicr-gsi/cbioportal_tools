@@ -114,6 +114,11 @@ def TGL_filter(meta_config, study_config):
             & (maf_dataframe['TGL_FILTER_VAF'] == 'PASS') ), 'PASS', (maf_dataframe['TGL_FILTER_ARTIFACT'] + ';' + maf_dataframe['TGL_FILTER_ExAC'] + ';' + maf_dataframe['TGL_FILTER_gnomAD'] + ';' \
             + maf_dataframe['TGL_FILTER_VAF']) )
 
+    # unfiltered data
+    os.makedirs(os.path.join(study_config.config_map['output_folder'], 'supplementary_data'), exist_ok=True)
+    data_path = os.path.join(study_config.config_map['output_folder'], 'supplementary_data','unfiltered_data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    maf_dataframe.to_csv(data_path, sep='\t', index=False)
+
     # Filter data if TGL_FILTER_VERDICT has a value of "PASS"
     #maf_dataframe['Matched_Norm_Sample_Barcode'] == 'unmatched'
     maf_dataframe = maf_dataframe[maf_dataframe['TGL_FILTER_VERDICT'] == 'PASS']
@@ -123,11 +128,6 @@ def TGL_filter(meta_config, study_config):
 
     # get snvs for dcsigs
     maf_dataframe = maf_dataframe[maf_dataframe['Variant_Type'] == 'SNP']
-    
-    # unfiltered data
-    os.makedirs(os.path.join(study_config.config_map['output_folder'], 'supplementary_data'), exist_ok=True)
-    data_path = os.path.join(study_config.config_map['output_folder'], 'supplementary_data','unfiltered_data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
-    maf_dataframe.to_csv(data_path, sep='\t', index=False)
 
 def verify_dual_columns(exports_config: Config.Config, verb):
     processes = []
