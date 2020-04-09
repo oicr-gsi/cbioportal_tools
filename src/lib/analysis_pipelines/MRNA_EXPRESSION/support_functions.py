@@ -90,8 +90,8 @@ def generate_TCGA_data(meta_config: Config.Config, study_config: Config.Config):
 
     z_scores = ((raw_scores.transpose() - means) / sds).transpose()
     z_scores = z_scores.fillna(0)
-    z_scores = z_scores.round(decimals=4)
-    z_scores_data = pd.concat([df_stud_tcga['Hugo_Symbol'], z_scores], axis=1)
+    z_scores_data = z_scores.round(decimals=4)
+    z_scores_data = pd.concat([df_stud_tcga['Hugo_Symbol'], z_scores_data], axis=1)
     z_scores_data.to_csv(outputPath + '/data_expression_zscores_tcga2.txt', sep="\t", index=False)
     
     z_scores_data = z_scores_data[df_stud_common.columns.tolist()]
@@ -249,8 +249,8 @@ def generate_expression_zscore(meta_config: Config.Config, input_file, outputPat
 
     z_scores = ((raw_scores.transpose() - means) / sds).transpose()
     z_scores = z_scores.fillna(0)
-    z_scores = z_scores.round(decimals=4)
-    z_scores_data = pd.concat([raw_data['Hugo_Symbol'], z_scores], axis=1)
+    z_scores_data = z_scores.round(decimals=4)
+    z_scores_data = pd.concat([raw_data['Hugo_Symbol'], z_scores_data], axis=1)
 
     helper.working_on(verb, message='Writing FPKM Z-Scores Matrix ...')
     
