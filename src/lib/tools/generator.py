@@ -293,7 +293,9 @@ def main(args):
     
     for each in information:
         #meta.generate_meta_type(each.datahandler, each.config_map, study_config, verb)
-        meta.generate_meta_type(each, study_config, verb)
+        
+        #The bottom line have been called within the handlers instead of in generator.py
+        #meta.generate_meta_type(each, study_config, verb)
         data.generate_data_type(each, study_config, path, verb)
         
         # This line has been replaced with the CAP case list handler

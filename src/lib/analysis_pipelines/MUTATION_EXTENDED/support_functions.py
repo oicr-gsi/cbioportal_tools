@@ -35,8 +35,6 @@ def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minim
         maf_dataframe = maf_dataframe[~maf_dataframe.FILTER.str.split(';').astype('str').str.contains(filter_list[j])]
 
     maf_temp = os.path.join(study_config.config_map['output_folder'], 'data_{}_temp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
-    ############ TESTING ##############
-    #maf_temp = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     maf_dataframe.to_csv(maf_temp, sep='\t', index=False)
 
 def oncokb_annotation(meta_config, study_config, oncokb_api_token, verb):
