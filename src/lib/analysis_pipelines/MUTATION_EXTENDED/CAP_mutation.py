@@ -1,5 +1,6 @@
 from lib.support import helper
 from lib.analysis_pipelines.MUTATION_EXTENDED import support_functions
+from lib.study_generation import meta
 
 
 def main():
@@ -18,6 +19,10 @@ def main():
 
     helper.working_on(verb, message='Concating MAF Files to export folder  ...')
     helper.concat_files(meta_config, study_config, verb)
+    helper.working_on(verb)
+
+    helper.working_on(verb, message='Generating MUTATION_EXTENDED Meta ...')
+    meta.generate_meta_type(meta_config,study_config,verb)
     helper.working_on(verb)
     
     #Filtering MAF Files
