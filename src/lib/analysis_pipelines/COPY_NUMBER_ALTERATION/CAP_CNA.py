@@ -25,10 +25,13 @@ def main():
     helper.working_on(verb)
     
     #Call preProcCNA.r to generate reduced seg files
-    #subprocess.call(['/usr/bin/Rscript', '--vanilla', '/.mounts/labs/gsiprojects/gsi/cBioGSI/aliang/cbioportal_tools/src/lib/analysis_pipelines/COPY_NUMBER_ALTERATION/preProcCNA.r'])
+    helper.working_on(verb, message='Generating reduced SEG files ...')
     preProcCNA(meta_config, study_config, meta_config.config_map['genebed'], meta_config.config_map['genelist'], meta_config.config_map['gain'], meta_config.config_map['ampl'], meta_config.config_map['htzd'], meta_config.config_map['hmzd'])
+    helper.working_on(verb)
 
+    helper.working_on(verb, message='Generating CNA and log2CNA files ...')
     ProcCNA(meta_config, study_config, meta_config.config_map['genebed'], meta_config.config_map['genelist'], meta_config.config_map['gain'], meta_config.config_map['ampl'], meta_config.config_map['htzd'], meta_config.config_map['hmzd'], meta_config.config_map['oncokb_api_token'], verb)
+    helper.working_on(verb)
 
     #TODO include all the meta data and case list generation calls into the CAP handler instead of the generator
     # Generate meta data within the handler and not in generator.py
