@@ -11,7 +11,7 @@ from lib.constants.constants import config2name_map
 from lib.support import Config, helper
 
 def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minimum_Tumour_Depth = 14, Minimum_Tumour_AF = 0.05, Maximum_gnomAD_AF = 0.001, Maximum_Local_Freq = 0.1):
-    # This function replaces the functions below
+    # This function replaces the cbiowrap function below
     # awk -F "\t" 'NR>1' $maf
     # awk -F "\t" '($40>=14)'
     # awk -F "\t" '(($42/$40)>=0.05) && ($133<=0.1) && ( (($124<0.001) && ($17=="unmatched")) || ($17!="unmatched") )'
@@ -23,13 +23,16 @@ def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minim
     os.remove(maf_path)
 
     maf_dataframe = maf_dataframe[maf_dataframe['t_depth'] >= float(Minimum_Tumour_Depth)]
-
+    
+    # Filter the MAF file
     maf_dataframe = maf_dataframe[((maf_dataframe['t_alt_count'] / maf_dataframe['t_depth']) >= float(Minimum_Tumour_AF)) \
             & (maf_dataframe['TGL_Freq'] <= float(Maximum_Local_Freq)) \
             & (((maf_dataframe['gnomAD_AF'] <  float(Maximum_gnomAD_AF)) & (maf_dataframe['Matched_Norm_Sample_Barcode'] == 'unmatched')) | (maf_dataframe['Matched_Norm_Sample_Barcode'] != 'unmatched'))]
 
+    # Keep the rows where they have Variant_Classification containing the given Mutation_Type
     maf_dataframe = maf_dataframe[maf_dataframe.Variant_Classification.isin(mutation_type.split(','))]
-    
+   
+    # Filter out the rows that contain values from the given filter_list in the FILTER column
     filter_list = filter_exception.split(',')
     for j in range(len(filter_list)):
         maf_dataframe = maf_dataframe[~maf_dataframe.FILTER.str.split(';').astype('str').str.contains(filter_list[j])]
@@ -37,12 +40,15 @@ def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minim
     maf_temp = os.path.join(study_config.config_map['output_folder'], 'data_{}_temp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     maf_dataframe.to_csv(maf_temp, sep='\t', index=False)
 
+# oncokb annotation of the maf file
 def oncokb_annotation(meta_config, study_config, oncokb_api_token, verb):
     input_path = os.path.join(study_config.config_map['output_folder'], 'data_{}_temp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     output_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    # Uses bash command to call MafAnnotator of oncokb_annotator using Jon's oncokb_api_token
     helper.call_shell("MafAnnotator.py -i {} -o {} -b {}".format(input_path, output_path, oncokb_api_token), verb)
     os.remove(input_path)
 
+# TGL filter for the maf data which always happens for CAP_mutation data
 def TGL_filter(meta_config, study_config):
     data_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     maf_dataframe = pd.read_csv(data_path, sep='\t')
@@ -103,7 +109,6 @@ def TGL_filter(meta_config, study_config):
     maf_dataframe['TGL_FILTER_gnomAD'] = np.where( ( (maf_dataframe['gnomAD_AF_POPMAX'] > 0.001) & (maf_dataframe['Matched_Norm_Sample_Barcode'] == 'unmatched') ), 'gnomAD_common', 'PASS')
 
     # VAF Filter
-    #maf_dataframe['TGL_FILTER_VAF'] = np.where( ( (maf_dataframe['tumor_vaf'] >= 0.1) | ( (maf_dataframe['tumor_vaf'] < 0.1) & (maf_dataframe['oncogenic_binary'] == 'YES' ) & ) ), )
     maf_dataframe['TGL_FILTER_VAF'] = np.where( ( (maf_dataframe['tumor_vaf'] >= 0.1) | ( (maf_dataframe['tumor_vaf'] < 0.1) & (maf_dataframe['oncogenic_binary'] == 'YES' ) \
             & ( ( (maf_dataframe['Variant_Classification'] == 'In_Frame_Del') | (maf_dataframe['Variant_Classification'] == 'In_Frame_Ins') ) | (maf_dataframe['Variant_Type'] == 'SNP') ) ) ), 'PASS', 'low_VAF')
 
@@ -118,7 +123,6 @@ def TGL_filter(meta_config, study_config):
     maf_dataframe.to_csv(data_path, sep='\t', index=False)
 
     # Filter data if TGL_FILTER_VERDICT has a value of "PASS"
-    #maf_dataframe['Matched_Norm_Sample_Barcode'] == 'unmatched'
     maf_dataframe = maf_dataframe[maf_dataframe['TGL_FILTER_VERDICT'] == 'PASS']
             
     data_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))

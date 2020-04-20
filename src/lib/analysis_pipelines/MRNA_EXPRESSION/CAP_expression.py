@@ -54,7 +54,7 @@ def main():
 
     # Works because shorting ...
     if 'zscores' in meta_config.config_map.keys() and meta_config.config_map['zscores'].lower() == 'true':
-        helper.working_on(verb, message='Generating expression Z-Score Meta ...')
+
         
         #####################meta.generate_meta_type(meta_config,study_config,verb)
         #####################meta.generate_meta_type(meta_config.alterationtype + '_ZSCORES',
