@@ -255,7 +255,7 @@ def generate_expression_zscore(meta_config: Config.Config, input_file, outputPat
         
     else:
         # Output study Z scores
-        z_scores_data.to_csv(outputPath + zscoreFile, sep="\t", index=False)
+        z_scores_data.to_csv(os.path.join(outputPath, zscoreFile), sep="\t", index=False)
 
         # Create directory if it doesn't exist
         if not os.path.exists(os.path.join(outputPath, 'supplementary_data')):
