@@ -1,3 +1,8 @@
+__author__ = "Allan Liang"
+__email__ = "a33liang@uwaterloo.ca"
+__version__ = "1.0"
+__status__ = "Production"
+
 from lib.support import helper
 from lib.analysis_pipelines.MUTATION_EXTENDED import support_functions
 from lib.study_generation import meta
@@ -9,18 +14,22 @@ def main():
     global janus_path
     global verb
 
+    # Decompress MAF files to temp folder
     helper.working_on(verb, message='Gathering and decompressing MAF files into temporary folder')
     helper.decompress_to_temp(meta_config, study_config, verb)
     helper.working_on(verb)
 
+    # Clean MAF files
     helper.working_on(verb, message='Cleaning MAF Files ...')
     support_functions.clean_head(meta_config, verb)
     helper.working_on(verb)
 
+    # Concatenate MAF files
     helper.working_on(verb, message='Concating MAF Files to export folder  ...')
     helper.concat_files(meta_config, study_config, verb)
     helper.working_on(verb)
 
+    # Genearte the meta data files for mutation extended data
     helper.working_on(verb, message='Generating MUTATION_EXTENDED Meta ...')
     meta.generate_meta_type(meta_config,study_config,verb)
     helper.working_on(verb)

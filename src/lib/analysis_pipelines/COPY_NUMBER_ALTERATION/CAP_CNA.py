@@ -1,3 +1,8 @@
+__author__ = "Allan Liang"
+__email__ = "a33liang@uwaterloo.ca"
+__version__ = "1.0"
+__status__ = "Production"
+
 from lib.support import helper
 from lib.analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id, preProcCNA, ProcCNA
 from lib.study_generation import meta
@@ -16,6 +21,7 @@ def main():
     fix_chrom(meta_config, study_config, verb)
     helper.working_on(verb)
 
+    
     helper.working_on(verb, message='Fixing .SEG IDs')
     fix_seg_id(meta_config, study_config, verb)
     helper.working_on(verb)
@@ -33,9 +39,7 @@ def main():
     ProcCNA(meta_config, study_config, meta_config.config_map['genebed'], meta_config.config_map['genelist'], meta_config.config_map['gain'], meta_config.config_map['ampl'], meta_config.config_map['htzd'], meta_config.config_map['hmzd'], meta_config.config_map['oncokb_api_token'], verb)
     helper.working_on(verb)
 
-    #TODO include all the meta data and case list generation calls into the CAP handler instead of the generator
-    # Generate meta data within the handler and not in generator.py
-    
+    # Generate meta data within the handler and not in generator.py    
     helper.working_on(verb, message='Generating segments Meta ...')
     meta.generate_meta_type(meta_config,study_config,verb)
     helper.working_on(verb)
