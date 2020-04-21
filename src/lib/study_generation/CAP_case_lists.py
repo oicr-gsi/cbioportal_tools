@@ -1,3 +1,8 @@
+__author__ = "Allan Liang"
+__email__ = "a33liang@uwaterloo.ca"
+__version__ = "1.0"
+__status__ = "Production"
+
 import os
 
 from lib.constants.constants import case_list_map
@@ -56,7 +61,8 @@ def generate_case_lists(information, study_config, case_list_folder, verb):
             f.write('case_list_ids: {}\n'.format('\t'.join(ids)))
             f.flush()
             f.close()
-    
+
+# Generate case lists when there are multiple studies being generated
 def generate_multi_case_lists(information, study_config, case_list_folder, suffix, datahandler_suffixes, verb):
         f = open(os.path.join(case_list_folder, 'cases{}.txt'.format(suffix)), 'w')
         
@@ -66,6 +72,7 @@ def generate_multi_case_lists(information, study_config, case_list_folder, suffi
         f.write('case_list_name: {}\n'.format('Samples profiled for cnas and sequencing'))
         f.write('case_list_description: {}\n'.format('This is this case list that contains all samples that are profiled for mutations and cnas.'))
         
+        # Get all the Sample IDs from the samples used in the different studies that are related to the multi case list being generated
         all_ids = ''
         for meta_config in information:
             if meta_config.datahandler in case_list_map.keys():

@@ -1,5 +1,5 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
+__author__ = "Allan Liang"
+__email__ = "Allan@uwaterloo.ca"
 __version__ = "1.0"
 __status__ = "Production"
 
@@ -19,12 +19,15 @@ def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed,
     segData = os.path.join(study_config.config_map['output_folder'],
                             'data_{}_concat.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     
+    # Set up call to preProcCNA.r script because it needs to use the bioconductor libraries which is in R and not in Python
+    # TODO Instead of having to run the processes in R, change it all into python
     command = '/.mounts/labs/gsi/modulator/sw/Ubuntu18.04/rstats-3.6/bin/Rscript'
     path2script = '/.mounts/labs/gsiprojects/gsi/cBioGSI/aliang/cbioportal_tools/src/lib/analysis_pipelines/COPY_NUMBER_ALTERATION/preProcCNA.r'
     outputPath = study_config.config_map['output_folder']
     args = [segData, genebed, gain, amp, htz, hmz, outputPath, genelist]
     cmd = [command, path2script] + args
-
+    
+    # Call the R script
     subprocess.call(cmd)
      
 def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, genelist, gain, amp, htz, hmz, oncokb_api_token, verb):
@@ -37,7 +40,7 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
     outputPath = study_config.config_map['output_folder']
     reducedSeg = pd.read_csv(outputPath + "/data_reducedseg.txt", sep='\t')
     
-    #REMOVE DUPLICATES FROM COLUMN 4-END
+    #REMOVE DUPLICATES FROM COLUMN 4 TO LAST COLUMN
     newColumns = reducedSeg.columns[5:]
     df_cna = reducedSeg.drop_duplicates(subset = newColumns)
     newColumns = list(newColumns)
@@ -48,11 +51,10 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
     df_cna.rename(columns={newColumns[0]:'Hugo_Symbol'}, inplace=True)
 
     #ROUNDING DOES NOT GET SIG FIGS TO 4, but this was how it was done in this code previously
-    df_cna[newColumns[1:]] = df_cna[newColumns[1:]].round(4)
-    #df_cna[newColumns[1:]] = df_cna[newColumns[1:]].apply(lambda x: round(x, 4 - int(math.floor(math.log10(abs(x))))))    
-    #df_cna[newColumns[1:]] = df_cna[newColumns[1:]].apply(lambda x: round(x, 4 - np.floor(np.log10(abs(x)))))
+    df_cna[newColumns[1:]] = df_cna[newColumns[1:]].round(4) 
 
-    keep_genes_file = open(genelist, 'r+')
+    # Only keep the genes in the input list genelist
+    keep_genes_file = open(genelist, 'r')
     keep_genes = [line.rstrip('\n') for line in keep_genes_file.readlines()]
     keep_genes_file.close()
 
@@ -62,16 +64,14 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
     print("Thresholding CNAs")
     df_cna_thresh = df_cna
 
-    print(newColumns[1:])
     thresholdColumns = newColumns
     df_cna_thresh[thresholdColumns[1:]] = df_cna_thresh[thresholdColumns[1:]].astype(float)
  
-    #Thresholding data
+    #Thresholding data using the threholds from meta_config.config_map which are set in the headers of the configuration file segmentation.txt
     print("Thresholding data")
     for i in thresholdColumns:
         if i == thresholdColumns[0]:
             continue
-        print(i)
         ampfilter = (df_cna_thresh[i] > amp)
         hmzfilter = (df_cna_thresh[i] < hmz)
         gainfilter = (df_cna_thresh[i] > gain) & (df_cna_thresh[i] <= amp)
@@ -84,7 +84,6 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
     df_cna_thresh.to_csv(outputPath + '/data_CNA.txt', sep='\t', index=False)
 
     # Truncate data_CNA
-    #df_cna_thresh = df_cna_thresh[~df_cna_thresh[newColumns[1:] == 0]]
     trunc_filter = [0]
     df_cna_thresh = df_cna_thresh[~df_cna_thresh[newColumns[1:]].isin(trunc_filter).all(axis=1)]
     os.makedirs(os.path.join(outputPath, 'supplementary_data'), exist_ok=True)
@@ -100,6 +99,7 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
         f.flush()
         f.close()
     else:
+        # call CNA annotator
         f_out = os.path.join(outputPath, 'supplementary_data', 'data_CNA_oncoKB.txt')
         helper.call_shell("CnaAnnotator.py -i {} -o {} -b {}".format(data_path, f_out, oncokb_api_token), verb)
 

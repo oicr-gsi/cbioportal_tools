@@ -1,5 +1,5 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
+__author__ = "Kunal Chandan and Allan Liang"
+__email__ = "kchandan@uwaterloo.ca and a33liang@uwaterloo.ca"
 __version__ = "1.0"
 __status__ = "Production"
 
