@@ -17,7 +17,7 @@ from scipy.stats import norm
 
 DataFrames = typing.List[pd.DataFrame]
 
-def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile, enscon, genelist, gepcomp):
+def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile, enscon, genelist, gepcomp, tcga):
     # read in data
     outputPath = study_config.config_map['output_folder']
     gepData = pd.read_csv(outputPath + datafile, sep='\t')
@@ -44,55 +44,33 @@ def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile
     keep_genes_file.close()
     df = df[df.Hugo_Symbol.isin(keep_genes)]
    
+    # output comparison data
     if gepcomp:
         df.to_csv(outputPath + '/data_{}_gepcomp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep="\t", index=False)
 
+    # output study expression continuous data
     else:
         df.to_csv(outputPath + '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep="\t", index=False)
 
-def generate_TCGA_data(meta_config: Config.Config, study_config: Config.Config):
-    outputPath = study_config.config_map['output_folder']
+    # output tcga data using the study expression data
+    if tcga:
+        #equalize samples 
+        tcga_comp = pd.read_csv(meta_config.config_map['tcgadata'], sep='\t')
+        df = pd.read_csv(outputPath + '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep='\t')
 
-    #equalize samples 
-    tcga_comp = pd.read_csv(meta_config.config_map['tcgadata'], sep='\t')
-    df = pd.read_csv(outputPath + '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep='\t')
-     
-    intersected_Hugo_Symbols = set(tcga_comp['Hugo_Symbol']).intersection(df['Hugo_Symbol'].tolist())
+        intersected_Hugo_Symbols = set(tcga_comp['Hugo_Symbol']).intersection(df['Hugo_Symbol'].tolist())
 
-    df_tcga_common = tcga_comp[tcga_comp.Hugo_Symbol.isin(intersected_Hugo_Symbols)]
-    df_stud_common = df[df.Hugo_Symbol.isin(intersected_Hugo_Symbols)]
-    
-    # Reindex TCGA dataframe
-    df_tcga_common.reindex(df_stud_common['Hugo_Symbol'].tolist())
+        df_tcga_common = tcga_comp[tcga_comp.Hugo_Symbol.isin(intersected_Hugo_Symbols)]
+        df_stud_common = df[df.Hugo_Symbol.isin(intersected_Hugo_Symbols)]
 
-    # merge samples
-    df_stud_tcga = pd.merge(df_stud_common, df_tcga_common, on = 'Hugo_Symbol', how = 'inner')
-     
-    #generating zscores
-    raw_scores = df_stud_tcga.drop(['Hugo_Symbol'], axis=1)
-    means = raw_scores.mean(axis=1)
-    sds = raw_scores.std(axis=1)
+        # Reindex TCGA dataframe
+        df_tcga_common.reindex(df_stud_common['Hugo_Symbol'].tolist())
 
-    z_scores = ((raw_scores.transpose() - means) / sds).transpose()
-    z_scores = z_scores.fillna(0)
-    z_scores_data = z_scores.round(decimals=4)
-    z_scores_data = pd.concat([df_stud_tcga['Hugo_Symbol'], z_scores_data], axis=1)
-    
-    z_scores_data = z_scores_data[df_stud_common.columns.tolist()]
-    z_scores_data.to_csv(os.path.join(outputPath, 'supplementary_data', 'data_expression_zscores_tcga.txt'), sep="\t", index=False)
-
-    # Percentile STUDY
-    newColumns = z_scores_data.columns
-    z_scores_data[newColumns[1:]] = z_scores_data[newColumns[1:]].astype(float)
-    newColumns = z_scores_data.columns
-
-    # Getting ECD - using scipy
-    z_scores_data[newColumns[1:]] = z_scores_data[newColumns[1:]].apply(lambda x: norm.cdf(x))
-    z_scores_data[newColumns[1:]] = z_scores_data[newColumns[1:]].round(4)
-    
-    # Generate TCGA percentile data
-    z_scores_data.to_csv(os.path.join(outputPath, 'supplementary_data', 'data_expression_percentile_tcga.txt'), sep="\t", index=False)
-
+        # merge samples
+        df_stud_tcga = pd.merge(df_stud_common, df_tcga_common, on = 'Hugo_Symbol', how = 'inner')
+        
+        # output merged samples
+        df_stud_tcga.to_csv(outputPath + '/data_{}_tcga.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep="\t", index=False)
 
 def alpha_sort(exports_config: Config.Config, verb):
     input_folder = exports_config.config_map['input_folder']
@@ -187,7 +165,7 @@ def generate_expression_matrix(exports_config: Config.Config, study_config: Conf
                 'data_{}_gepcomp.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datahandler]))
         result.to_csv(output_file_comp, sep='\t', index=None)
 
-def generate_expression_zscore(meta_config: Config.Config, input_file, outputPath, gepcomp, verb):
+def generate_expression_zscore(meta_config: Config.Config, input_file, outputPath, gepcomp, tcga, verb):
     # Z-Scores written by Dr. L Heisler
     helper.working_on(verb, message='Reading FPKM Matrix ...')
     raw_data = pd.read_csv(input_file, sep='\t')
@@ -204,22 +182,32 @@ def generate_expression_zscore(meta_config: Config.Config, input_file, outputPat
 
     helper.working_on(verb, message='Writing FPKM Z-Scores Matrix ...')
 
-    if gepcomp:
+    # Reformat the columns for comparison and TCGA data to keep only the columns used in the study mRNA expression continuous data
+    if gepcomp or tcga:
         study_columns = []
         for k in range(meta_config.data_frame.shape[0]):
             study_columns.append(meta_config.data_frame['SAMPLE_ID'][k])
         study_columns.insert(0,'Hugo_Symbol')
         z_scores_data = z_scores_data[study_columns]
         
-        # Create directory if it doesn't exist
+        # Create the supplementary_data directory if it doesn't exist
         if not os.path.exists(os.path.join(outputPath, 'supplementary_data')):
             os.makedirs(os.path.join(outputPath, 'supplementary_data'), exist_ok=True)
-        
+    
+    if gepcomp:
         # Output comparison Z scores
         output_file_z_scores = os.path.join(outputPath, 'supplementary_data', 'data_{}_comparison.txt'.format(config2name_map[meta_config.alterationtype + ":" + 'Z-SCORE']))
         z_scores_data.to_csv(output_file_z_scores, sep="\t", index=False)
 
         # Delete all gepcomp files that are not in the supplementary folder
+        os.remove(input_file)
+
+    elif tcga:
+        # Output TCGA Z scores
+        output_file_z_scores = os.path.join(outputPath, 'supplementary_data', 'data_{}_tcga.txt'.format(config2name_map[meta_config.alterationtype + ":" + 'Z-SCORE']))
+        z_scores_data.to_csv(output_file_z_scores, sep="\t", index=False)
+        
+        # Delete all TCGA files that are not in the supplementary folder
         os.remove(input_file)
         
     else:
@@ -228,7 +216,7 @@ def generate_expression_zscore(meta_config: Config.Config, input_file, outputPat
         z_scores_data.to_csv(output_file_z_scores, sep="\t", index=False)
 
 # Input for this function should be a mRNA expression z-score file
-def generate_expression_percentile(meta_config: Config.Config, input_file, outputPath, gepcomp, verb):
+def generate_expression_percentile(meta_config: Config.Config, input_file, outputPath, gepcomp, tcga, verb):
     # Load in z-score file
     z_scores_data = pd.read_csv(input_file, sep='\t')
     
@@ -257,6 +245,16 @@ def generate_expression_percentile(meta_config: Config.Config, input_file, outpu
         output_file_percentile = os.path.join(outputPath, 'supplementary_data', 'data_{}_comparison.txt'.format(config2name_map[meta_config.alterationtype + ":" + 'PERCENTILE']))
         percentile_data.to_csv(output_file_percentile, sep="\t", index=False)
    
+    # Handle for TCGA percentile data
+    elif tcga:
+        # Create directory if it doesn't exist
+        if not os.path.exists(os.path.join(outputPath, 'supplementary_data')):
+            os.makedirs(os.path.join(outputPath, 'supplementary_data'), exist_ok=True)
+        # Output comparison ECDF
+        output_file_percentile = os.path.join(outputPath, 'supplementary_data', 'data_{}_tcga.txt'.format(config2name_map[meta_config.alterationtype + ":" + 'PERCENTILE']))
+        percentile_data.to_csv(output_file_percentile, sep="\t", index=False)
+
+
     # Handle for mRNA expression continuous percentile data
     else:
         # Create directory if it doesn't exist

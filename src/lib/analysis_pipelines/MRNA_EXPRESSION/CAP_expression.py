@@ -7,7 +7,7 @@ import os
 
 from lib.support import helper
 from lib.study_generation import meta
-from lib.analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_percentile, generate_expression_zscore, preProcRNA, generate_TCGA_data
+from lib.analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_percentile, generate_expression_zscore, preProcRNA
 from lib.constants.constants import config2name_map
 
 def main():
@@ -28,41 +28,57 @@ def main():
     generate_expression_matrix(meta_config, study_config, verb)
     helper.working_on(verb)
     
-    #preProcRNA - generate processed continuous data using the generated expression matrix - one for study and one for study comparison
-    preProcRNA(meta_config, study_config, '/data_{}_gepcomp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), meta_config.config_map['enscon'], meta_config.config_map['genelist'], True)
-    preProcRNA(meta_config, study_config, '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), meta_config.config_map['enscon'], meta_config.config_map['genelist'], False)
+    #preProcRNA - generate processed continuous data using the generated expression matrix - one for study and one for study comparison and one for TCGA data
+    preProcRNA(meta_config, study_config, '/data_{}_gepcomp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), meta_config.config_map['enscon'], meta_config.config_map['genelist'], True, False)
+    preProcRNA(meta_config, study_config, '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), meta_config.config_map['enscon'], meta_config.config_map['genelist'], False, True)
 
-    # Generate Z-scores for mRNA expression data and mRNA expression comparison data (works because of shorting)
     if 'zscores' in meta_config.config_map.keys() and meta_config.config_map['zscores'].lower() == 'true':
+        # Generate the z-scores for mRNA expression data
         helper.working_on(verb, message='Generating expression Z-Score Data ...')
         generate_expression_zscore(meta_config, os.path.join(study_config.config_map['output_folder'],
             'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler])),
             study_config.config_map['output_folder']
-            , False, verb)
+            , False, False, verb)
         helper.working_on(verb)
 
+        # Generate the mRNA expression percentile data
         helper.working_on(verb, message='Generating expression Percentile Data ...')
         generate_expression_percentile(meta_config, os.path.join(study_config.config_map['output_folder'],
             'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + 'Z-SCORE'])),
             study_config.config_map['output_folder']
-            , False, verb)
+            , False, False, verb)
         helper.working_on(verb)
 
+        # Generate the z-score sfor mRNA expression comparison data
         helper.working_on(verb, message='Generating expression Z-Score comparison Data ...')
         generate_expression_zscore(meta_config, os.path.join(study_config.config_map['output_folder'],
             'data_{}_gepcomp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler])),
             study_config.config_map['output_folder']
-            , True, verb)
+            , True, False, verb)
         helper.working_on(verb)
 
+        # Generate the mRNA expression comparison percentile data
         helper.working_on(verb, message='Generating expression Percentile comparison Data ...')
         generate_expression_percentile(meta_config, os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + 'Z-SCORE'])),
             study_config.config_map['output_folder']
-            , True, verb)
+            , True, False, verb)
         helper.working_on(verb)
 
-    # Generate TCGA Z score and Percentile data
-    generate_TCGA_data(meta_config, study_config)
+        # Generate the z-scores for mRNA expression TCGA data
+        helper.working_on(verb, message='Generating expression TCGA Z-Score Data ...')
+        generate_expression_zscore(meta_config, os.path.join(study_config.config_map['output_folder'],
+            'data_{}_tcga.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler])),
+            study_config.config_map['output_folder']
+            , False, True, verb)
+        helper.working_on(verb)
+
+        # Generate the TCGA mRNA expression percentile data
+        helper.working_on(verb, message='Generating expression TCGA Percentile Data ...')
+        generate_expression_percentile(meta_config, os.path.join(study_config.config_map['output_folder'], 'supplementary_data', 
+            'data_{}_tcga.txt'.format(config2name_map[meta_config.alterationtype + ":" + 'Z-SCORE'])),
+            study_config.config_map['output_folder']
+            , False, True, verb)
+        helper.working_on(verb)
 
     # Generate meta data within the handler and not in generator.py
     # Generate metadata for mRNA expression continuous data
