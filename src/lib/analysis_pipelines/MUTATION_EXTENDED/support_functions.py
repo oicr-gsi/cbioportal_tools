@@ -55,9 +55,10 @@ def TGL_filter(meta_config, study_config):
     os.remove(data_path)
     
     #Only keep the columns that are given in vep_keep_columns.txt within accessory_files
-    vepkeep_file = open(meta_config.config_map['vepkeep'], 'r+')
+    vepkeep_file = open(meta_config.config_map['vepkeep'], 'r')
     vepkeep = [line.rstrip('\n') for line in vepkeep_file.readlines()]
     maf_dataframe = maf_dataframe[vepkeep]
+    vepkeep_file.close()
 
     #Adding columns tumor_vaf and normal_vaf   
     #tumor_vaf column is the result of dividing t_alt_count by t_depth
@@ -124,12 +125,9 @@ def TGL_filter(meta_config, study_config):
 
     # Filter data if TGL_FILTER_VERDICT has a value of "PASS"
     maf_dataframe = maf_dataframe[maf_dataframe['TGL_FILTER_VERDICT'] == 'PASS']
-            
+
     data_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
     maf_dataframe.to_csv(data_path, sep='\t', index=False)
-
-    # get snvs for dcsigs
-    maf_dataframe = maf_dataframe[maf_dataframe['Variant_Type'] == 'SNP']
 
 def verify_dual_columns(exports_config: Config.Config, verb):
     processes = []
