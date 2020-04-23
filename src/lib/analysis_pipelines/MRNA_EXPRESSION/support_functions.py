@@ -20,9 +20,16 @@ DataFrames = typing.List[pd.DataFrame]
 def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile, enscon, genelist, gepcomp, tcga):
     # read in data
     outputPath = study_config.config_map['output_folder']
-    gepData = pd.read_csv(outputPath + datafile, sep='\t')
-    ensConv = pd.read_csv(enscon, sep='\t')
-
+    try:
+        gepData = pd.read_csv(outputPath + datafile, sep='\t')
+    except FileNotFoundError:
+        print('data_expression_continuous.txt given is a wrong file or wrong file path given from {}'.format(output_Path + datafile))
+    
+    try:
+        ensConv = pd.read_csv(enscon, sep='\t')
+    except FileNotFoundError:
+        print('enscon given a wrong file or file path given from {} (enscon is set in the expression config within the headers).'.format(enscon))
+    
     # rename columns
     ensConv.columns = ['gene_id', 'Hugo_Symbol']
     gepData.rename(columns={'Hugo_Symbol':'gene_id'}, inplace=True)
@@ -46,17 +53,28 @@ def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile
    
     # output comparison data
     if gepcomp:
-        df.to_csv(outputPath + '/data_{}_gepcomp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep="\t", index=False)
+        try:
+            df.to_csv(outputPath + '/data_{}_gepcomp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep="\t", index=False)
+        except FileNotFoundError:
+            print('{} wrong file or file path'.format(outputPath + '/data_{}_gepcomp.txt'))
 
     # output study expression continuous data
     else:
-        df.to_csv(outputPath + '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep="\t", index=False)
+        try:
+            df.to_csv(outputPath + '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep="\t", index=False)
+        except FileNotFoundError:
+            print('{} wrong file or file path'.format(outputPath + '/data_{}.txt'))
 
     # output tcga data using the study expression data
     if tcga:
         #equalize samples 
-        tcga_comp = pd.read_csv(meta_config.config_map['tcgadata'], sep='\t')
-        df = pd.read_csv(outputPath + '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep='\t')
+        try:
+            tcga_comp = pd.read_csv(meta_config.config_map['tcgadata'], sep='\t')
+        except FileNotFoundError:
+            print('TCGA file not found from path {}'.format(meta_config.config_map['tcgadata']))
+
+        # TODO TODO TODO TODO TODO TODO TEST IF YOU CAN RUN WITHOUT THIS LINE - MAY BE REDUNDANT CODE
+        #df = pd.read_csv(outputPath + '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep='\t')
 
         intersected_Hugo_Symbols = set(tcga_comp['Hugo_Symbol']).intersection(df['Hugo_Symbol'].tolist())
 
@@ -70,7 +88,10 @@ def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile
         df_stud_tcga = pd.merge(df_stud_common, df_tcga_common, on = 'Hugo_Symbol', how = 'inner')
         
         # output merged samples
-        df_stud_tcga.to_csv(outputPath + '/data_{}_tcga.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep="\t", index=False)
+        try:
+            df_stud_tcga.to_csv(outputPath + '/data_{}_tcga.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep="\t", index=False)
+        except FileNotFoundError:
+            print('{} wrong file or file path'.format(outputPath + '/data_{}_tcga.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler])))
 
 def alpha_sort(exports_config: Config.Config, verb):
     input_folder = exports_config.config_map['input_folder']
@@ -94,6 +115,7 @@ def alpha_sort(exports_config: Config.Config, verb):
 
 
 def generate_expression_matrix(exports_config: Config.Config, study_config: Config.Config, verb):
+    # Output for data_expression_continuous_expression.txt data file
     output_file = os.path.join(study_config.config_map['output_folder'],
                                'data_{}.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datahandler]))
 
@@ -168,7 +190,10 @@ def generate_expression_matrix(exports_config: Config.Config, study_config: Conf
 def generate_expression_zscore(meta_config: Config.Config, input_file, outputPath, gepcomp, tcga, verb):
     # Z-Scores written by Dr. L Heisler
     helper.working_on(verb, message='Reading FPKM Matrix ...')
-    raw_data = pd.read_csv(input_file, sep='\t')
+    try:
+        raw_data = pd.read_csv(input_file, sep='\t')
+    except FileNotFoundError:
+        print('{} wrong file or file path'.format(input_file))
 
     helper.working_on(verb, message='Processing FPKM Matrix ...')
     raw_scores = raw_data.drop(['Hugo_Symbol'], axis=1)
@@ -218,8 +243,11 @@ def generate_expression_zscore(meta_config: Config.Config, input_file, outputPat
 # Input for this function should be a mRNA expression z-score file
 def generate_expression_percentile(meta_config: Config.Config, input_file, outputPath, gepcomp, tcga, verb):
     # Load in z-score file
-    z_scores_data = pd.read_csv(input_file, sep='\t')
-    
+    try:
+        z_scores_data = pd.read_csv(input_file, sep='\t')
+    except FileNotFoundError:
+        print('{} wrong file or file path'.format(input_file))
+
     # Percentile STUDY
     newColumns = z_scores_data.columns
     percentile_data = z_scores_data[newColumns[1:]].astype(float)

@@ -24,11 +24,15 @@ def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed,
     command = '/.mounts/labs/gsi/modulator/sw/Ubuntu18.04/rstats-3.6/bin/Rscript'
     path2script = '/.mounts/labs/gsiprojects/gsi/cBioGSI/aliang/cbioportal_tools/src/lib/analysis_pipelines/COPY_NUMBER_ALTERATION/preProcCNA.r'
     outputPath = study_config.config_map['output_folder']
-    args = [segData, genebed, gain, amp, htz, hmz, outputPath, genelist]
-    cmd = [command, path2script] + args
+    if os.path.exists(command) and os.path.exists(path2script):
+        args = [segData, genebed, gain, amp, htz, hmz, outputPath, genelist]
+        cmd = [command, path2script] + args
     
-    # Call the R script
-    subprocess.call(cmd)
+        # Call the R script
+        subprocess.call(cmd)
+
+    else:
+        print('There is a problem with the path(s) {} and/or {}'.format(command, path2script))
      
 def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, genelist, gain, amp, htz, hmz, oncokb_api_token, verb):
     gain = float(gain)
@@ -38,7 +42,13 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
     
     #RETRIEVE REDUCED SEG
     outputPath = study_config.config_map['output_folder']
-    reducedSeg = pd.read_csv(outputPath + "/data_reducedseg.txt", sep='\t')
+    
+    # Reduced seg loads the segmentation file after being processed by the libaries using bioconductor,
+    # this file is a temporary solution for this handler and should be replaced.
+    try:
+        reducedSeg = pd.read_csv(outputPath + "/data_reducedseg.txt", sep='\t')
+    except FileNotFoundError:
+        print('{} is the wrong file or file path'.format(outputPath + '/data_reducedseg.txt'))
     
     #REMOVE DUPLICATES FROM COLUMN 4 TO LAST COLUMN
     newColumns = reducedSeg.columns[5:]
@@ -62,7 +72,11 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
 
     # Generate log2CNA continuous file
     df_cna = df_cna[df_cna.Hugo_Symbol.isin(keep_genes)]
-    df_cna.to_csv(os.path.join(outputPath, 'data_{}.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + 'CONTINUOUS'])), sep='\t', index=False)
+    
+    try:
+        df_cna.to_csv(os.path.join(outputPath, 'data_{}.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + 'CONTINUOUS'])), sep='\t', index=False)
+    except FileNotFoundError:
+        print('{} is the wrong file or file path'.format(os.path.join(outputPath, 'data_{}.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + 'CONTINUOUS']))))
 
     print("Thresholding CNAs")
     df_cna_thresh = df_cna
@@ -85,15 +99,21 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
 
     #Generate discrete CNA data
     df_cna_thresh = df_cna_thresh[df_cna_thresh.Hugo_Symbol.isin(keep_genes)]
-    df_cna_thresh.to_csv(os.path.join(outputPath, 'data_{}.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + 'DISCRETE'])), sep='\t', index=False)
+    try:
+        df_cna_thresh.to_csv(os.path.join(outputPath, 'data_{}.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + 'DISCRETE'])), sep='\t', index=False)
+    except FileNotFoundError:
+        print('{} is the wrong file or file path'.format(os.path.join(outputPath, 'data_{}.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + 'DISCRETE']))))
 
     # Truncate data_CNA
     trunc_filter = [0]
     df_cna_thresh = df_cna_thresh[~df_cna_thresh[newColumns[1:]].isin(trunc_filter).all(axis=1)]
     os.makedirs(os.path.join(outputPath, 'supplementary_data'), exist_ok=True)
     data_path = os.path.join(outputPath, 'supplementary_data', 'data_{}_short.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + 'DISCRETE']))
-    df_cna_thresh.to_csv(data_path, sep='\t', index=False)
-    
+    try:
+        df_cna_thresh.to_csv(data_path, sep='\t', index=False)
+    except FileNotFoundError:
+        print('{} is the wrong file or file path'.format(data_path))
+
     # if TYPEC is 'mixed'
     if (meta_config.config_map['typec'] != "mixed"):
         # Create oncokb_clinical_info
@@ -105,7 +125,10 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
     else:
         # call CNA annotator
         f_out = os.path.join(outputPath, 'supplementary_data', 'data_{}_oncoKB.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + 'DISCRETE']))
-        helper.call_shell("CnaAnnotator.py -i {} -o {} -b {}".format(data_path, f_out, oncokb_api_token), verb)
+        if os.path.exists(data_path):
+            helper.call_shell("CnaAnnotator.py -i {} -o {} -b {}".format(data_path, f_out, oncokb_api_token), verb)
+        else:
+            print('{} wrong file or file path'.format(data_path))
 
 def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
     # Append 'chr' to chromosome if needed
