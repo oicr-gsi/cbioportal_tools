@@ -19,9 +19,13 @@ def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minim
     # grep -v -f $filtexc > body
         
     maf_path = os.path.join(study_config.config_map['output_folder'], 'data_{}_concat.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
-    maf_dataframe = pd.read_csv(maf_path, sep='\t')
-    os.remove(maf_path)
+    
+    try:
+        maf_dataframe = pd.read_csv(maf_path, sep='\t')
+    except FileNotFoundError:
+        print(maf_path + " is the wrong file or file path")
 
+    os.remove(maf_path)
     maf_dataframe = maf_dataframe[maf_dataframe['t_depth'] >= float(Minimum_Tumour_Depth)]
     
     # Filter the MAF file
@@ -38,24 +42,40 @@ def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minim
         maf_dataframe = maf_dataframe[~maf_dataframe.FILTER.str.split(';').astype('str').str.contains(filter_list[j])]
 
     maf_temp = os.path.join(study_config.config_map['output_folder'], 'data_{}_temp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
-    maf_dataframe.to_csv(maf_temp, sep='\t', index=False)
+    try:
+        maf_dataframe.to_csv(maf_temp, sep='\t', index=False)
+    except FileNotFoundError:
+        print(maf_temp + " problem with this path")
 
 # oncokb annotation of the maf file
 def oncokb_annotation(meta_config, study_config, oncokb_api_token, verb):
     input_path = os.path.join(study_config.config_map['output_folder'], 'data_{}_temp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
-    output_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
-    # Uses bash command to call MafAnnotator of oncokb_annotator using Jon's oncokb_api_token
-    helper.call_shell("MafAnnotator.py -i {} -o {} -b {}".format(input_path, output_path, oncokb_api_token), verb)
-    os.remove(input_path)
+
+    if os.path.exists(input_path):
+        output_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+        # Uses bash command to call MafAnnotator of oncokb_annotator using Jon's oncokb_api_token
+        try:
+            helper.call_shell("MafAnnotator.py -i {} -o {} -b {}".format(input_path, output_path, oncokb_api_token), verb)
+            os.remove(input_path)
+        except FileNotFoundError:
+            print('Cannot find MafAnnotator.py')
+    else:
+        print('No such file {}'.format(input_path))
 
 # TGL filter for the maf data which always happens for CAP_mutation data
 def TGL_filter(meta_config, study_config):
     data_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
-    maf_dataframe = pd.read_csv(data_path, sep='\t')
+    try:
+        maf_dataframe = pd.read_csv(data_path, sep='\t')
+    except FileNotFoundError:
+        print('{} is the wrong file or file path'.format(data_path))
     os.remove(data_path)
     
     #Only keep the columns that are given in vep_keep_columns.txt within accessory_files
-    vepkeep_file = open(meta_config.config_map['vepkeep'], 'r')
+    try: 
+        vepkeep_file = open(meta_config.config_map['vepkeep'], 'r')
+    except FileNotFoundError:
+        print('{} is the wrong file or file path'.format(meta_config.config_map['vepkeep']))
     vepkeep = [line.rstrip('\n') for line in vepkeep_file.readlines()]
     maf_dataframe = maf_dataframe[vepkeep]
     vepkeep_file.close()
@@ -121,13 +141,19 @@ def TGL_filter(meta_config, study_config):
     # unfiltered data
     os.makedirs(os.path.join(study_config.config_map['output_folder'], 'supplementary_data'), exist_ok=True)
     data_path = os.path.join(study_config.config_map['output_folder'], 'supplementary_data','unfiltered_data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
-    maf_dataframe.to_csv(data_path, sep='\t', index=False)
+    try:
+        maf_dataframe.to_csv(data_path, sep='\t', index=False)
+    except FileNotFoundError:
+        print('{} is the wrong file or file path'.format(data_path))
 
     # Filter data if TGL_FILTER_VERDICT has a value of "PASS"
     maf_dataframe = maf_dataframe[maf_dataframe['TGL_FILTER_VERDICT'] == 'PASS']
 
     data_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
-    maf_dataframe.to_csv(data_path, sep='\t', index=False)
+    try:
+        maf_dataframe.to_csv(data_path, sep='\t', index=False)
+    except FileNotFoundError:
+        print('{} is the wrong file or file path'.format(data_path))
 
 def verify_dual_columns(exports_config: Config.Config, verb):
     processes = []
