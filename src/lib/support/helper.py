@@ -125,7 +125,7 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
     if mutate_config.type_config == 'MAF':
         temp = get_temp_folder(study_config.config_map['output_folder'], 'vcf')
     else:
-        temp = get_temp_folder(study_config.config_map['output_folder'], mutate_config.datatype.lower())
+        temp = get_temp_folder(study_config.config_map['output_folder'], mutate_config.datahandler.lower())
 
     working_on(verb, message='Extracting/copying to {}'.format(temp))
     clean_folder(temp,True)
@@ -157,7 +157,7 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
 
 def concat_files(exports_config:Config.Config, study_config: Config.Config, verb):
     concated_file = os.path.join(study_config.config_map['output_folder'],
-                                 'data_{}.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datatype]))
+                                 'data_{}_concat.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datahandler]))
 
     input_folder = exports_config.config_map['input_folder']
 

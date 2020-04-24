@@ -1,5 +1,5 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
+__author__ = ["Kunal Chandan", "Allan Liang"]
+__email__ = ["kchandan@uwaterloo.ca", "a33liang@uwaterloo.ca"]
 __version__ = "1.0"
 __status__ = "Production"
 
@@ -12,7 +12,7 @@ import typing
 import os
 
 from lib.constants import constants
-from lib.study_generation import data, meta, case
+from lib.study_generation import data, meta, case, CAP_case_lists
 from lib.support import Config, helper, cbioportal_interface
 
 
@@ -270,37 +270,45 @@ def main(args):
     if args.config:
         ### load from file
         study_config = Config.get_single_config(args.config, 'study', 'study',verb)
+
     else:
         ### create an empty dataframe
         study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE_NAME']), 'study','study')
-
     ### command line argument can be provided that will overide what is in the configuation files
     add_cli_args(study_config, args, verb)
     ### study config collects all the command line and configuraiot Arguments
 
-    ##separate out to 3 variables, inforamtion, clinic_data, custom_case_list
+    ##separate out to 3 variables, information, clinic_data, custom_case_list
     [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
     information = resolve_priority_queue(information)
-    [print('Informational Files {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in information] if verb else print(),
-    [print('Clinical List Files {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in clinic_data] if verb else print(),
-    [print('Customized Case Set {}:{}:\n{}\n'.format(a.alterationtype,a.datatype, a)) for a in custom_list] if verb else print(),
+    [print('Informational Files {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in information] if verb else print(),
+    [print('Clinical List Files {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in clinic_data] if verb else print(),
+    [print('Customized Case Set {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in custom_list] if verb else print(),
     # Clean Output Folder/Initialize it
     helper.clean_folder(study_config.config_map['output_folder'],args.force)
 
+    # CAP_CASE_LISTS - generate case lists for CAP
+    # TODO --> change the way CAP_case_list.case_list_handler is being called - right now this handles ALL cases for generating case lists
+    CAP_case_lists.case_list_handler(information, custom_list, study_config, verb)
+    
     for each in information:
-        #meta.generate_meta_type(each.datatype, each.config_map, study_config, verb)
-        meta.generate_meta_type(each, study_config, verb)
+        
+        #The bottom line have been changed by calling the generation of metadata within the handlers instead of in generator.py
+        #meta.generate_meta_type(each.datahandler, each.config_map, study_config, verb)
         data.generate_data_type(each, study_config, path, verb)
-        case.generate_case_list(each, study_config, verb)
+        
+        # This line has been replaced with the CAP case list handler
+        #case.generate_case_list(each, study_config, verb)
 
     for each in clinic_data:
-        #meta.generate_meta_type(each.type_config, each.config_map, study_config, verb)
         meta.generate_meta_type(each, study_config, verb)
         data.generate_data_clinical(each, study_config, verb)
+    
+    # These two lines of code have been replaced with the CAP case list handler
+    #for each in custom_list:
+    #    case.generate_case_list(each, study_config, verb)
 
-    for each in custom_list:
-        case.generate_case_list(each, study_config, verb)
-
+    # This generates the metadata file for the study file
     meta.generate_meta_study(study_config, verb)
 
     # export to cbioportal!

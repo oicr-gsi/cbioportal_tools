@@ -1,10 +1,11 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
+__author__ = ["Kunal Chandan", "Allan Liang"]
+__email__ = ["kchandan@uwaterloo.ca", "a33liang@uwaterloo.ca"]
 __version__ = "1.0"
 __status__ = "Production"
 
 import os
 import argparse
+import uuid
 
 from ..support.helper import stars, working_on, call_shell, get_shell, restart_tomcat
 
@@ -12,7 +13,7 @@ from ..support.helper import stars, working_on, call_shell, get_shell, restart_t
 def define_parser() -> argparse.ArgumentParser:
     # Define program arguments
     parser = argparse.ArgumentParser(description="Importer script for cBioPortal. Import data_panel, study or both.")
-
+ 
     parser.add_argument("-f", "--folder",
                         help="The location of the study folder.",
                         metavar='FOLDER')
@@ -27,45 +28,73 @@ def define_parser() -> argparse.ArgumentParser:
                         help="The location of the cBioPortal Key.",
                         metavar='KEY',
                         default='')
+    parser.add_argument("-l", "--user",
+                        help="The linux distribution.",
+                        metavar='USER',
+                        default='Ubuntu - TESTING TESTING TESTING')
+    parser.add_argument("-s", "--study_import",
+                        help="Use import_study.sh to import by default (import_study) or use metaImport.py to import (metaImport)",
+                        metavar='STUDY_IMPORT',
+                        default='import_study')
     return parser
 
 
-def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, verb):
+def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, user, study_import, verb):
     if not key == '':
         key = '-i ' + key
     base_folder = os.path.basename(os.path.abspath(study_folder))
     # Copying folder to cBioPortal
     working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
-
-    call_shell("ssh {} debian@{} ' rm -r ~/oicr_studies/{}; mkdir ~/oicr_studies/{}'".format(key,
-                                                                                             cbioportal_url,
-                                                                                             base_folder,
-                                                                                             base_folder), verb)
+    
+    #Call to access cbioportal
+    unique_id = (uuid.uuid1()).int
+    new_dir = "~/gsi/{}.{}".format(base_folder, unique_id)
+    call_shell("ssh {} {}@{} ' mkdir {}'".format(key, user, cbioportal_url, new_dir), verb)
 
     # Copy over
-    call_shell('scp -r {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_folder, cbioportal_url),
+    # Check if the files to be imported are files and not directories
+    import_files = os.listdir(study_folder)
+    for i in range(len(import_files)):
+        if os.path.isfile("{}/{}".format(study_folder, import_files[i])):
+            print(import_files[i])
+            call_shell('scp -r {} {}/{} {}@{}:{}'.format(key, study_folder, import_files[i], user, cbioportal_url, new_dir),
+               verb)
+        elif os.path.basename(import_files[i]) == "case_lists":
+            print(import_files[i])
+            call_shell('scp -r {} {}/{} {}@{}:{}'.format(key, study_folder, import_files[i], user, cbioportal_url, new_dir),
                verb)
 
     working_on(verb)
 
     # Import study to cBioPortal
     working_on(verb, message='Importing study to cBioPortal...')
+    
+    # Temporary variables set for testing
+    valid = 3
+    result = "Testing"
 
-    result = get_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
-                       "sudo ./metaImport.py -s ~/oicr_studies/{} "
-                       "-u http://{} -o'; "
-                       "echo 'CBIOPORTAL_EXIT_CODE:' $?".format(key, cbioportal_url,
-                                                                base_folder,
-                                                                cbioportal_url), verb)
-    print(result)
-    valid = int(list(filter(None, [a if a.startswith('CBIOPORTAL_EXIT_CODE: ') else '' for a in result.split('\n')]))[0].strip('CBIOPORTAL_EXIT_CODE: '))
-    print(valid)
+    # Run import_study.sh script if the server uses a docker container
+    if study_import == "import_study":
+        get_shell("ssh {} -t {}@{} ' /home/ubuntu/import_study.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
+    # Run metaImport.py if cbioportal is installed directly on the system
+    # No portal checks and override warnings when running metaImport
+    elif study_import == "metaImport":
+        get_shell("ssh {} -t {}@{} ' /home/ubuntu/metaImport.py -s {} -n -o'".format(key, user, cbioportal_url, new_dir), verb)
+
+    ##### TEST #####
+    #elif study_import == "test":
+    #    get_shell("ssh {} -t {}@{} ' /home/ubuntu/janus_dev/test_direct.mutation.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
+
+    #elif study_import == "CNA":
+    #    get_shell("ssh {} -t {}@{} ' /home/ubuntu/janus_dev/test_direct.CNA.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
+    ##### TEST #####
 
     f = open(os.path.abspath(os.path.join(study_folder, 'import_log.txt')), 'w')
     f.write(result)
     f.flush()
     f.close()
 
+    # TODO Reimpliment the exit codes
     print('cBioPortal exit code: {}'.format(valid))
     if   valid == 1:
         stars()
@@ -100,9 +129,9 @@ def import_portal(key: str, cbioportal_url: str, gene_panel, verb):
     gene_panel = os.path.abspath(gene_panel)
 
     stars()
-    get_shell("scp {} {} debian@{}:/home/debian/gene_panels/{}".format(key, gene_panel, cbioportal_url, os.path.basename(gene_panel)), verb)
+    get_shell("scp {} {} ubuntu@{}:/home/debian/gene_panels/{}".format(key, gene_panel, cbioportal_url, os.path.basename(gene_panel)), verb)
 
-    out = get_shell("ssh {} debian@{} '"
+    out = get_shell("ssh {} ubuntu@{} '"
                     "source /etc/profile; "
                     "cd ~/cbioportal/core/src/main/scripts; "
                     "./importGenePanel.pl --data ~/gene_panels/{}'".format(key, cbioportal_url, os.path.basename(gene_panel)), verb)
@@ -121,7 +150,10 @@ def main(args):
     if not args.gene_panel or args.folder:
         print('ERROR:: Arguments -g/--gene-panel and/or -f/--folder are required.')
     if args.folder:
-        export_study_to_cbioportal(args.key, args.folder, args.url, True)
-    if args.gene_panel:
-        import_portal(args.key, args.url, args.gene_panel, True)
+        export_study_to_cbioportal(args.key, args.folder, args.url, args.user, args.study_import, True)
+    #TESTING COPYING TO CBIOPORTAL RIGHT NOW -- COMMENTED OUT IMPORTING TO PORTAL
+    #UNCOMMENT TO TEST IMPORTING TO PORTAL
+    #if args.gene_panel:
+    #    import_portal(args.key, args.url, args.gene_panel, True)get_shell("ssh {} -t {}@{} ' /home/ubuntu/import_study.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
+    #get_shell("ssh {} -t {}@{} ' /home/ubuntu/import_study.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
     restart_tomcat(args.url, args.key, True)

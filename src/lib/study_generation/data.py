@@ -1,5 +1,5 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
+__author__ = ["Kunal Chandan", "Allan Liang"]
+__email__ = ["kchandan@uwaterloo.ca", "a33liang@uwaterloo.ca"]
 __version__ = "1.0"
 __status__ = "Production"
 
@@ -45,7 +45,6 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
 
     ### READ DIRECTLY FROM THE FILE, NO OTHER ACTION
     if 'pipeline' in meta_config.config_map.keys() and meta_config.config_map['pipeline'] == 'FILE':
-
         #TODO:: Assert correct format for all data types...
         assert_format(meta_config, verb)
 
@@ -55,7 +54,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
                                       'data_{}.txt'.format(config2name_map[meta_config.type_config])),
                          verb)
 
-    elif meta_config.datatype == 'CANCER_TYPE':
+    elif meta_config.datahandler == 'CANCER_TYPE':
         helper.working_on(verb, message='Reading colours...')
         colours = cancer_type.get_colours(janus_path)
         helper.working_on(verb)
@@ -97,10 +96,10 @@ def get_sample_ids(meta_config: Config.Config, verb) -> pd.Series:
 def generate_data_clinical(samples_config: Config.ClinicalConfig, study_config: Config.Config, verb):
     print(samples_config)
     num_header_lines = 4
-    helper.working_on(verb, message='Writing to data_{}.txt ...'.format(config2name_map[samples_config.alterationtype + ":" + samples_config.datatype]))
+    helper.working_on(verb, message='Writing to data_{}.txt ...'.format(config2name_map[samples_config.alterationtype + ":" + samples_config.datahandler]))
 
     output_file = os.path.join(os.path.abspath(study_config.config_map['output_folder']),
-                               'data_{}.txt'.format(config2name_map[samples_config.alterationtype + ":" + samples_config.datatype]))
+                               'data_{}.txt'.format(config2name_map[samples_config.alterationtype + ":" + samples_config.datahandler]))
 
     array = np.array(samples_config.data_frame)
 
