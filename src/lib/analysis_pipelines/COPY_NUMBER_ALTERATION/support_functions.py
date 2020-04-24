@@ -1,5 +1,5 @@
-__author__ = "Allan Liang"
-__email__ = "Allan@uwaterloo.ca"
+__author__ = ["Kunal Chandan", "Allan Liang"]
+__email__ = ["kchandan@uwaterloo.ca", "a33liang@uwaterloo.ca"]
 __version__ = "1.0"
 __status__ = "Production"
 
@@ -16,8 +16,14 @@ from lib.constants import constants
 thresholds:list  = []
 
 def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, genelist, gain, amp, htz, hmz):
-    segData = os.path.join(study_config.config_map['output_folder'],
+    oldSegData = os.path.join(study_config.config_map['output_folder'],
                             'data_{}_concat.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+
+    segData = os.path.join(study_config.config_map['output_folder'],
+                            'data_{}.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    
+    # Rename SEG data
+    os.rename(oldSegData, segData)
     
     # Set up call to preProcCNA.r script because it needs to use the bioconductor libraries which is in R and not in Python
     # TODO Instead of having to run the processes in R, change it all into python
