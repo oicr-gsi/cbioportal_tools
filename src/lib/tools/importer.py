@@ -1,5 +1,5 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
+__author__ = ["Kunal Chandan", "Allan Liang"]
+__email__ = ["kchandan@uwaterloo.ca", "a33liang@uwaterloo.ca"]
 __version__ = "1.0"
 __status__ = "Production"
 
@@ -68,14 +68,6 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, user
 
     # Import study to cBioPortal
     working_on(verb, message='Importing study to cBioPortal...')
-
-    # Old code
-    #result = get_shell("ssh {} ubuntu@{} 'cd /home/ubuntu/cbioportal/core/src/main/scripts/importer; "
-    #                   "sudo ./metaImport.py -s ~/oicr_studies/{} "
-    #                   "-u http://{} -o'; "
-    #                   "echo 'CBIOPORTAL_EXIT_CODE:' $?".format(key, cbioportal_url,
-    #                                                            base_folder,
-    #                                                            cbioportal_url), verb)
     
     # Temporary variables set for testing
     valid = 3
@@ -90,31 +82,19 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, user
         get_shell("ssh {} -t {}@{} ' /home/ubuntu/metaImport.py -s {} -n -o'".format(key, user, cbioportal_url, new_dir), verb)
 
     ##### TEST #####
-    elif study_import == "test":
-        get_shell("ssh {} -t {}@{} ' /home/ubuntu/janus_dev/test_direct.mutation.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
+    #elif study_import == "test":
+    #    get_shell("ssh {} -t {}@{} ' /home/ubuntu/janus_dev/test_direct.mutation.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
 
-    elif study_import == "CNA":
-        get_shell("ssh {} -t {}@{} ' /home/ubuntu/janus_dev/test_direct.CNA.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
+    #elif study_import == "CNA":
+    #    get_shell("ssh {} -t {}@{} ' /home/ubuntu/janus_dev/test_direct.CNA.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
     ##### TEST #####
-    
-    
-    # Old code
-    #get_shell("ssh {} {}@{} ' ~/import_study.sh {}/'".format(key, user, cbioportal_url, new_dir),verb)
-    #result = get_shell ("ssh {} -t {}@{} \ ' ~/import_study.sh ~/gsi/{}/'".format(key, user, cbioportal_url, new_dir), verb)
-    #result = get_shell("ssh {} -t {}@{}\ ' /~/import_study.sh /~/gsi/{}'".format(key, user, cbioportal_url, new_dir), verb)
-    #                   "echo 'CBIOPORTAL_EXIT_CODE:' $?".format(key, cbioportal_url,
-    #                                                            base_folder,
-    #                                                            cbioportal_url), verb)
-
-    #print(result)
-    #valid = int(list(filter(None, [a if a.startswith('CBIOPORTAL_EXIT_CODE: ') else '' for a in result.split('\n')]))[0].strip('CBIOPORTAL_EXIT_CODE: '))
-    #print(valid)
 
     f = open(os.path.abspath(os.path.join(study_folder, 'import_log.txt')), 'w')
     f.write(result)
     f.flush()
     f.close()
 
+    # TODO Reimpliment the exit codes
     print('cBioPortal exit code: {}'.format(valid))
     if   valid == 1:
         stars()
