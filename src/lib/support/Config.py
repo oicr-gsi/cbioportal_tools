@@ -1,5 +1,5 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
+__author__ = ["Kunal Chandan", "Allan Liang"]
+__email__ = ["kchandan@uwaterloo.ca", "a33liang@uwaterloo.ca"]
 __version__ = "1.0"
 __status__ = "Production"
 
@@ -9,7 +9,7 @@ import typing
 import argparse
 
 import pandas as pd
-from ..constants.constants import clinical_type, no_data_frame
+from ..constants.constants import clinical_type, no_data_frame, supported_pipe
 
 
 class Config(object):
@@ -18,34 +18,34 @@ class Config(object):
     type_config: str = ''
     analysis: str = ''
 
-    def __init__(self, config_map: dict, data_frame: pd.DataFrame, datatype: str, alterationtype: str):
+    def __init__(self, config_map: dict, data_frame: pd.DataFrame, datahandler: str, alterationtype: str):
         self.config_map = config_map.copy()
         self.data_frame = data_frame.copy()
-        self.datatype = datatype
+        self.datahandler = datahandler
         self.alterationtype = alterationtype
 
     @classmethod
     def from_config(cls, config):
-        return cls(config.config_map, config.data_frame, config.datatype, config.alterationtype)
+        return cls(config.config_map, config.data_frame, config.datahandler, config.alterationtype)
 
     def __str__(self):
-        return str([self.config_map, self.data_frame, self.datatype, self.alterationtype])
+        return str([self.config_map, self.data_frame, self.datahandler, self.alterationtype])
 
 
 class ClinicalConfig(Config):
     data_frame: list
 
-    def __init__(self, config_map: dict, array, datatype: str):
+    def __init__(self, config_map: dict, array, datahandler: str):
         self.config_map = config_map
         self.data_frame = array
-        self.datatype = datatype
+        self.datahandler = datahandler
         self.alterationtype = "CLINICAL"
 
 
 Information = typing.List[Config]
 
 ### loads the study configuration from a file
-def get_single_config(file, f_type, analysis,verb) -> Config:
+def get_single_config(file, f_type, analysis, verb) -> Config:
 
     ### verify that the file exists
     if os.path.isfile(file):
@@ -61,7 +61,7 @@ def get_single_config(file, f_type, analysis,verb) -> Config:
 
     ### commented out header lines are key value pairs, these are stored in the file_map
     try:
-        for line in f:
+        for line in f:#TypeError: get_single_config() missing 1 required positional argument: 'verb'
             if line[0] == '#':
                 line = line.strip().replace('#', '').split('=')
                 file_map[line[0]] = line[1]
@@ -127,19 +127,67 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
         config_file_name = os.path.join(os.path.dirname(os.path.abspath(args.config)),
                                         str(study_config.data_frame['FILE_NAME'][i]))
 
-        config_file_type = study_config.data_frame['DATATYPE'][i]
+        config_file_type = study_config.data_frame['DATAHANDLER'][i]
         config_analysis = study_config.data_frame['ALTERATIONTYPE'][i]
 
         #### is the type one of the clinical types?
-        if   study_config.data_frame['DATATYPE'][i] in clinical_type:
+        if   study_config.data_frame['DATAHANDLER'][i] in clinical_type:
             clinic_data.append(get_config_clinical(config_file_name,
                                                    config_file_type,
                                                    verb))
+
         ### is it a case list
-        elif study_config.data_frame['DATATYPE'][i] == 'CASE_LIST':
+        elif study_config.data_frame['DATAHANDLER'][i] == 'CASE_LIST':
             custom_list.append(get_single_config(config_file_name,
                                                  config_file_type,
+                                                 config_analysis,
                                                  verb))
+        elif config_analysis in supported_pipe:
+            if os.path.isfile(config_file_name):
+                print('File Name: {}'.format(config_file_name))
+            else:
+                raise OSError('ERROR: Is not a file\n' + config_file_name)
+            ### open the datahandler file
+            f = open(config_file_name, 'r')
+            study_input = {}
+            line = ''
+
+            ### commented out header lines are key value pairs, these are stored in the file_map
+            try:
+                for line in f:  # TypeError: get_single_config() missing 1 required positional argument: 'verb'
+                    if line[0] == '#':
+                        line = line.strip().replace('#', '').split('=')
+                        study_input[line[0]] = line[1]
+                    else:
+                        ### break if not a comment line, the rest is a data table.  should not be any more comment lines
+                        break
+                f.flush()
+                f.close()
+            except IndexError:
+                print('ERROR:: there was a syntax error in the header of {}'.format(file))
+                print(line)
+                exit(1)
+
+            # If the datahandler contains a single datatype to handle and output
+            if study_input.get('DATATYPE') in supported_pipe.get(config_analysis) and isinstance(study_input.get('DATATYPE'), str):
+                information.append(get_single_config(config_file_name,
+                                                     study_input.get('DATATYPE'),
+                                                     config_analysis,
+                                                     verb))
+            # If the datahandler contains a list of datatypes to handle and output
+            elif study_input.get('DATATYPE') in supported_pipe.get(config_analysis) and isinstance(study_input.get('DATATYPE'), list):
+                for datatypes in study_input.get('DATATYPE'):
+                    information.append(get_single_config(config_file_name,
+                                                         study_input.get('DATATYPE')[datatypes],
+                                                         config_analysis,
+                                                         verb))
+            else:
+                print("There is no supported datatype of " + study_input.get('DATATYPE') + " for the alteration type " + config_analysis)
+                break
+
+            # Add the pipeline into the information config_map
+            information[-1].config_map['pipeline'] = config_file_type
+
         else:
             information.append(get_single_config(config_file_name,
                                                  config_file_type,

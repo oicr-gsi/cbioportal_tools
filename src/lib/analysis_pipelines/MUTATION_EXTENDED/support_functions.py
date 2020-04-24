@@ -1,13 +1,159 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
+__author__ = ["Kunal Chandan", "Allan Liang"]
+__email__ = ["kchandan@uwaterloo.ca", "a33liang@uwaterloo.ca"]
 __version__ = "1.0"
 __status__ = "Production"
 
 import os
 import pandas as pd
+import numpy as np
 
+from lib.constants.constants import config2name_map
 from lib.support import Config, helper
 
+def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minimum_Tumour_Depth = 14, Minimum_Tumour_AF = 0.05, Maximum_gnomAD_AF = 0.001, Maximum_Local_Freq = 0.1):
+    # This function replaces the cbiowrap function below
+    # awk -F "\t" 'NR>1' $maf
+    # awk -F "\t" '($40>=14)'
+    # awk -F "\t" '(($42/$40)>=0.05) && ($133<=0.1) && ( (($124<0.001) && ($17=="unmatched")) || ($17!="unmatched") )'
+    # grep -w -f $muttype
+    # grep -v -f $filtexc > body
+        
+    maf_path = os.path.join(study_config.config_map['output_folder'], 'data_{}_concat.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    
+    try:
+        maf_dataframe = pd.read_csv(maf_path, sep='\t')
+    except FileNotFoundError:
+        print(maf_path + " is the wrong file or file path")
+
+    os.remove(maf_path)
+    maf_dataframe = maf_dataframe[maf_dataframe['t_depth'] >= float(Minimum_Tumour_Depth)]
+    
+    # Filter the MAF file
+    maf_dataframe = maf_dataframe[((maf_dataframe['t_alt_count'] / maf_dataframe['t_depth']) >= float(Minimum_Tumour_AF)) \
+            & (maf_dataframe['TGL_Freq'] <= float(Maximum_Local_Freq)) \
+            & (((maf_dataframe['gnomAD_AF'] <  float(Maximum_gnomAD_AF)) & (maf_dataframe['Matched_Norm_Sample_Barcode'] == 'unmatched')) | (maf_dataframe['Matched_Norm_Sample_Barcode'] != 'unmatched'))]
+
+    # Keep the rows where they have Variant_Classification containing the given Mutation_Type
+    maf_dataframe = maf_dataframe[maf_dataframe.Variant_Classification.isin(mutation_type.split(','))]
+   
+    # Filter out the rows that contain values from the given filter_list in the FILTER column
+    filter_list = filter_exception.split(',')
+    for j in range(len(filter_list)):
+        maf_dataframe = maf_dataframe[~maf_dataframe.FILTER.str.split(';').astype('str').str.contains(filter_list[j])]
+
+    maf_temp = os.path.join(study_config.config_map['output_folder'], 'data_{}_temp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    try:
+        maf_dataframe.to_csv(maf_temp, sep='\t', index=False)
+    except FileNotFoundError:
+        print(maf_temp + " problem with this path")
+
+# oncokb annotation of the maf file
+def oncokb_annotation(meta_config, study_config, oncokb_api_token, verb):
+    input_path = os.path.join(study_config.config_map['output_folder'], 'data_{}_temp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+
+    if os.path.exists(input_path):
+        output_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+        # Uses bash command to call MafAnnotator of oncokb_annotator using Jon's oncokb_api_token
+        try:
+            helper.call_shell("MafAnnotator.py -i {} -o {} -b {}".format(input_path, output_path, oncokb_api_token), verb)
+            os.remove(input_path)
+        except FileNotFoundError:
+            print('Cannot find MafAnnotator.py')
+    else:
+        print('No such file {}'.format(input_path))
+
+# TGL filter for the maf data which always happens for CAP_mutation data
+def TGL_filter(meta_config, study_config):
+    data_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    try:
+        maf_dataframe = pd.read_csv(data_path, sep='\t')
+    except FileNotFoundError:
+        print('{} is the wrong file or file path'.format(data_path))
+    os.remove(data_path)
+    
+    #Only keep the columns that are given in vep_keep_columns.txt within accessory_files
+    try: 
+        vepkeep_file = open(meta_config.config_map['vepkeep'], 'r')
+    except FileNotFoundError:
+        print('{} is the wrong file or file path'.format(meta_config.config_map['vepkeep']))
+    vepkeep = [line.rstrip('\n') for line in vepkeep_file.readlines()]
+    maf_dataframe = maf_dataframe[vepkeep]
+    vepkeep_file.close()
+
+    #Adding columns tumor_vaf and normal_vaf   
+    #tumor_vaf column is the result of dividing t_alt_count by t_depth
+    maf_dataframe['tumor_vaf'] = maf_dataframe['t_alt_count'].div(maf_dataframe['t_depth'], fill_value = 0)
+    maf_dataframe['tumor_vaf'].replace([np.inf, -np.inf], 0)
+    #Rearramge tumor_vaf column to be after t_alt_count
+    cols = maf_dataframe.columns.tolist()
+    cols.insert(maf_dataframe.columns.get_loc('t_alt_count') + 1, cols.pop(cols.index('tumor_vaf')))
+    maf_dataframe = maf_dataframe.ix[:, cols]
+    print('Inserting tumor_vaf...')
+
+    #tumor_vaf column is the result of dividing n_alt_count by n_depth
+    maf_dataframe['normal_vaf'] = maf_dataframe['n_alt_count'].div(maf_dataframe['n_depth'], fill_value = 0)
+    maf_dataframe['normal_vaf'].replace([np.inf, -np.inf], 0)
+    #Rearramge tumor_vaf_column to be after n_alt_count
+    cols = maf_dataframe.columns.tolist()
+    cols.insert(maf_dataframe.columns.get_loc('n_alt_count') + 1, cols.pop(cols.index('normal_vaf')))
+    maf_dataframe = maf_dataframe.ix[:, cols]
+    print('Inserting normal_vaf...')
+
+    #Create oncogenic_binary column based on oncogenic column
+    if 'oncogenic' in maf_dataframe.columns:
+        maf_dataframe['oncogenic_binary'] = np.where((maf_dataframe['oncogenic'] == 'Oncogenic') | (maf_dataframe['oncogenic'] == 'Likely Oncogenic'), 'YES', 'NO')
+        print('Inserting oncogenic_binary...')
+
+    #Create ExAC_common column based on FILTER column
+    if 'FILTER' in maf_dataframe.columns:
+        maf_dataframe['ExAC_common'] = np.where(maf_dataframe['FILTER'].str.contains('common_variant'), 'YES', 'NO')
+        print('Inserting ExAC_common...')
+
+    #Create gnom_AD_AF_POPMAX column using the other gnomAD columns
+    maf_dataframe['gnomAD_AF_POPMAX'] = maf_dataframe[['gnomAD_AFR_AF', 'gnomAD_AMR_AF', 'gnomAD_ASJ_AF', 'gnomAD_EAS_AF', 'gnomAD_FIN_AF', "gnomAD_NFE_AF", 'gnomAD_OTH_AF', 'gnomAD_SAS_AF']].max(axis=1)
+    print('Inserting gnomAD_AF_POPMAX...')
+
+    #caller artifact filters
+    maf_dataframe = maf_dataframe.replace(regex = [r'^clustered_events$', r'^common_variant$', r'^.$'], value = 'PASS')
+
+    # some specific filter flags should be rescued if oncogenic (ie. EGFR had issues here)
+    maf_dataframe['FILTER'] = np.where( ( (maf_dataframe['oncogenic_binary'] == 'YES') & ( (maf_dataframe['FILTER'] == 'triallelic_site') | (maf_dataframe['FILTER'] == 'clustered_events;triallelic_site') \
+            | (maf_dataframe['FILTER'] == 'clustered_events;homologous_mapping_event') ) ), 'PASS', maf_dataframe['FILTER'])
+
+    # Artifact Filter
+    maf_dataframe['TGL_FILTER_ARTIFACT'] = np.where( (maf_dataframe['FILTER'] == 'PASS'), 'PASS', 'Artifact')
+
+    # ExAC Filter
+    maf_dataframe['TGL_FILTER_ExAC'] = np.where( ( (maf_dataframe['ExAC_common'] == 'YES') & (maf_dataframe['Matched_Norm_Sample_Barcode'] == 'unmatched') ), 'ExAC_common', 'PASS')
+
+    # gnomAD_AF_POPMAX Filter
+    maf_dataframe['TGL_FILTER_gnomAD'] = np.where( ( (maf_dataframe['gnomAD_AF_POPMAX'] > 0.001) & (maf_dataframe['Matched_Norm_Sample_Barcode'] == 'unmatched') ), 'gnomAD_common', 'PASS')
+
+    # VAF Filter
+    maf_dataframe['TGL_FILTER_VAF'] = np.where( ( (maf_dataframe['tumor_vaf'] >= 0.1) | ( (maf_dataframe['tumor_vaf'] < 0.1) & (maf_dataframe['oncogenic_binary'] == 'YES' ) \
+            & ( ( (maf_dataframe['Variant_Classification'] == 'In_Frame_Del') | (maf_dataframe['Variant_Classification'] == 'In_Frame_Ins') ) | (maf_dataframe['Variant_Type'] == 'SNP') ) ) ), 'PASS', 'low_VAF')
+
+    # Mark filters
+    maf_dataframe['TGL_FILTER_VERDICT'] = np.where( ( (maf_dataframe['TGL_FILTER_ARTIFACT'] == 'PASS') & (maf_dataframe['TGL_FILTER_ExAC'] == 'PASS') & (maf_dataframe['TGL_FILTER_gnomAD'] == 'PASS') \
+            & (maf_dataframe['TGL_FILTER_VAF'] == 'PASS') ), 'PASS', (maf_dataframe['TGL_FILTER_ARTIFACT'] + ';' + maf_dataframe['TGL_FILTER_ExAC'] + ';' + maf_dataframe['TGL_FILTER_gnomAD'] + ';' \
+            + maf_dataframe['TGL_FILTER_VAF']) )
+
+    # unfiltered data
+    os.makedirs(os.path.join(study_config.config_map['output_folder'], 'supplementary_data'), exist_ok=True)
+    data_path = os.path.join(study_config.config_map['output_folder'], 'supplementary_data','unfiltered_data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    try:
+        maf_dataframe.to_csv(data_path, sep='\t', index=False)
+    except FileNotFoundError:
+        print('{} is the wrong file or file path'.format(data_path))
+
+    # Filter data if TGL_FILTER_VERDICT has a value of "PASS"
+    maf_dataframe = maf_dataframe[maf_dataframe['TGL_FILTER_VERDICT'] == 'PASS']
+
+    data_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    try:
+        maf_dataframe.to_csv(data_path, sep='\t', index=False)
+    except FileNotFoundError:
+        print('{} is the wrong file or file path'.format(data_path))
 
 def verify_dual_columns(exports_config: Config.Config, verb):
     processes = []
@@ -101,11 +247,14 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
             gene_col_normal = normal_id
             gene_col_tumors = tumors_id
 
+        # ORIGINAL -- 
         ref_fasta = exports_config.config_map['ref_fasta']
+        # TESTING --
+        #ref_fasta = exports_config.config_map['$HG19_ROOT/hg19_random.fa']
         filter_vcf = exports_config.config_map['filter_vcf']
 
         # Bake in Parallel
-        processes.append(helper.parallel_call('vcf2maf.pl  --input-vcf {}    '
+        processes.append(helper.parallel_call('vcf2maf  --input-vcf {}    '
                                                        '--output-maf {}/{}   '
                                                        '--normal-id {}       '
                                                        '--tumor-id {}        '

@@ -1,5 +1,5 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
+__author__ = ["Kunal Chandan", "Allan Liang"]
+__email__ = ["kchandan@uwaterloo.ca", "a33liang@uwaterloo.ca"]
 __version__ = "1.0"
 __status__ = "Production"
 
@@ -13,6 +13,8 @@ import os
 #       no_data_frame
 
 # meta_info_map is an ordered set corresponding to gene_id_zip. This generates the meta files for each data_type
+# keys are pairs of alteration list values and datatype values
+# the values are a list of different values that correspond with the metadata
 meta_info_map = {'CLINICAL:PATIENT_ATTRIBUTES':      ['CLINICAL', 'PATIENT_ATTRIBUTES'],
                  'CLINICAL:SAMPLE_ATTRIBUTES':       ['CLINICAL', 'SAMPLE_ATTRIBUTES'],
                  # TODO:: IMPLEMENT TIMELINE
@@ -76,7 +78,8 @@ args2config_map = {'sample_info':               'SAMPLE_ATTRIBUTES',
                    'gene_set_data':             'GENE_SET'}
 
 #config2name_map is used for creating the meta_{name}.txt and data_{name}.txt file names
-## key for this should be the alterationtype:datatype
+## key for this should be the alterationtype:datatype 
+## values are used for file naming
 config2name_map = {'CLINICAL:SAMPLE_ATTRIBUTES':        'clinical_samples',
                    'CLINICAL:PATIENT_ATTRIBUTES':       'clinical_patients',
                    'CANCER_TYPE:CANCER_TYPE':           'cancer_type',
@@ -87,6 +90,7 @@ config2name_map = {'CLINICAL:SAMPLE_ATTRIBUTES':        'clinical_samples',
                    'MRNA_EXPRESSION:CONTINUOUS':        'expression_continous',
                    'MRNA_EXPRESSION:DISCRETE':          'expression_discrete',
                    'MRNA_EXPRESSION:Z-SCORE':           'expression_zscores',
+                   'MRNA_EXPRESSION:PERCENTILE':        'expression_percentile',
                    # TODO:: IMPLEMENT AND VERIFY AFTER THIS LINE
                    'FUSION:FUSION':                     'fusion',
                    'METHYLATION:CONTINUOUS':            'methylation',
@@ -118,22 +122,26 @@ config2name_map = {'CLINICAL:SAMPLE_ATTRIBUTES':        'clinical_samples',
 #                   'GENE_SET':                'gsva_scores'}
 
 
-# Keep note that a datatype will always have either:
-# genetic_alteration_type & datatype; or
-# genetic_alteration_type, datatype, stable_id & show_profile_in_analysis_tab:
+# Keep note that a datahandler will always have either:
+# genetic_alteration_type & datahandler; or
+# genetic_alteration_type, datahandler, stable_id & show_profile_in_analysis_tab:
 # The exception is Expression Data which also has source_stable_id on top of the other 4
 # A set of default ordered values all meta files have to a certain extent
-general_zip =     ['genetic_alteration_type', 'datatype', 'stable_id', 'show_profile_in_analysis_tab']
+general_zip =     ['genetic_alteration_type', 'datahandler', 'stable_id', 'show_profile_in_analysis_tab']
 
-ref_gene_id_zip = ['genetic_alteration_type', 'datatype', 'reference_genome_id']
+ref_gene_id_zip = ['genetic_alteration_type', 'datahandler', 'reference_genome_id']
 
 optional_fields = ['groups', 'gene_panel', 'swissprot_identifier', 'variant_classification_filter', 'Protein_position',
                    'SWISSPROT', 'Fusion_Status', 'citation', 'pmid']
 
+# keys are datatypes of the file being generated
+# values are the corresponding case lists that is generated for the datatype of the file
+# when adding new key and value pairs use cbioportal documentation on case lists naming
 case_list_map =   {'MAF':               '_sequenced',
                    'SEG':               '_cna',
                    'MRNA_EXPRESSION':   '_rna_seq_mrna',
-                   'CASE_LIST':         '_custom'}
+                   'CASE_LIST':         '_custom',
+                   'CONTINUOUS': '_rna_seq_mrna'}
 
 #TODO:: ensure correct suffixes
 # https://cbioportal.readthedocs.io/en/latest/File-Formats.html#case-list-stable-id-suffixes
@@ -149,10 +157,11 @@ no_data_frame = ['CONTINUOUS_COPY_NUMBER', 'DISCRETE_COPY_NUMBER', 'MRNA_EXPRESS
 #                  'DISCRETE_COPY_NUMBER':      ['CONTINUOUS_COPY_NUMBER']}
 
 ### this hash should be generated from the file hiearchy or from the import packages
+# The key is the alteration type and the values are a list of datahandlers/pipelines supported currently in Janus
 supported_pipe = {'MUTATION_EXTENDED':            ['MAF', 'Strelka', 'Mutect', 'Mutect2',
-                                                    'MutectStrelka', 'GATKHaplotypeCaller'],
-                  'COPY_NUMBER_ALTERATION':       ['CNVkit', 'Sequenza', 'HMMCopy'],
-                  'MRNA_EXPRESSION':              ['Cufflinks', 'RSEM']}
+                                                    'MutectStrelka', 'GATKHaplotypeCaller', 'CAP_mutation'],
+                  'COPY_NUMBER_ALTERATION':       ['CNVkit', 'Sequenza', 'HMMCopy', 'CAP_CNA', 'SEG'],
+                  'MRNA_EXPRESSION':              ['Cufflinks', 'RSEM', 'CAP_expression', 'CONTINUOUS']}
 #                  'MRNA_EXPRESSION_ZSCORES':   ['MRNA_EXPRESSION'],
 #                  'CONTINUOUS_COPY_NUMBER':    ['SEG'],
 #                  'DISCRETE_COPY_NUMBER':      ['CONTINUOUS_COPY_NUMBER']}
