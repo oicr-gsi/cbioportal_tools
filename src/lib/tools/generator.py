@@ -1,10 +1,6 @@
-__author__ = ["Kunal Chandan", "Allan Liang"]
-__email__ = ["kchandan@uwaterloo.ca", "a33liang@uwaterloo.ca"]
-__version__ = "1.0"
-__status__ = "Production"
+#! /usr/bin/env python3
 
-
-### this script is for generation of an import folder
+"""Script for generation of an import folder"""
 
 import pandas as pd
 import argparse

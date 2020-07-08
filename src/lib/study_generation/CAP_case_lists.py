@@ -1,7 +1,4 @@
-__author__ = "Allan Liang"
-__email__ = "a33liang@uwaterloo.ca"
-__version__ = "1.0"
-__status__ = "Production"
+"""Manipulate study generation CAP case lists"""
 
 import os
 

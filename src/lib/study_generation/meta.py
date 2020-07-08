@@ -1,7 +1,4 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
-__version__ = "1.0"
-__status__ = "Production"
+"""Manipulate study generation metadata"""
 
 from collections import OrderedDict
 import os
