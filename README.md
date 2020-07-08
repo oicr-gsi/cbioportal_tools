@@ -99,3 +99,9 @@ module load vcf2maf
 module load python-gsi/3.6.4
 module load R-gsi/3.5.1
 ```
+
+# Copyright and License
+
+Copyright (C) 2019, 2020 by Genome Sequence Informatics, Ontario Institute for Cancer Research
+
+Licensed under the [https://www.gnu.org/licenses/gpl-3.0.en.html](GPL 3.0 license).
