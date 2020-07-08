@@ -1,7 +1,6 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
-__version__ = "1.0"
-__status__ = "Production"
+"""General utility functions"""
+
+# TODO replace these with cleaner alternatives where possible, eg. excluding shell calls
 
 import os
 import shutil

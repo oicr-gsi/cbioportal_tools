@@ -1,7 +1,4 @@
-__author__ = "Allan Liang"
-__email__ = "a33liang@uwaterloo.ca"
-__version__ = "1.0"
-__status__ = "Production"
+"""Support for CAP CNA data"""
 
 from lib.support import helper
 from lib.analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id, preProcCNA, ProcCNA

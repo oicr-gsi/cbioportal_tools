@@ -1,7 +1,6 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
-__version__ = "1.0"
-__status__ = "Production"
+"""Functions to handle the cancer type"""
+
+# TODO is this redundant with analysis_pipelines/cancer_type.py?
 
 # Command Line Imports
 import os

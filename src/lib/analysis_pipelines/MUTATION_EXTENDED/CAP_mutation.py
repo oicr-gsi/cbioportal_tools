@@ -1,7 +1,4 @@
-__author__ = "Allan Liang"
-__email__ = "a33liang@uwaterloo.ca"
-__version__ = "1.0"
-__status__ = "Production"
+"""Support for CAP mutation data"""
 
 from lib.support import helper
 from lib.analysis_pipelines.MUTATION_EXTENDED import support_functions
