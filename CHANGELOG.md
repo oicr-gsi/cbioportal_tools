@@ -4,6 +4,7 @@ CHANGELOG
 ## Unreleased
 ### Added
 - GRD-251: Simple unit tests for generator mode
+- GRD-254: Remove unnecessary metadata attributes; add docstrings
 
 ## v0.0.1: 2020-07-03
 - Initial development release
