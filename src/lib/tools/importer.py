@@ -1,7 +1,6 @@
-__author__ = ["Kunal Chandan", "Allan Liang"]
-__email__ = ["kchandan@uwaterloo.ca", "a33liang@uwaterloo.ca"]
-__version__ = "1.0"
-__status__ = "Production"
+#! /usr/bin/env python3
+
+"""Script to upload data to cBioPortal"""
 
 import os
 import argparse

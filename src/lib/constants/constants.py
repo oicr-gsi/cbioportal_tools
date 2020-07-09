@@ -1,7 +1,6 @@
-__author__ = ["Kunal Chandan", "Allan Liang"]
-__email__ = ["kchandan@uwaterloo.ca", "a33liang@uwaterloo.ca"]
-__version__ = "1.0"
-__status__ = "Production"
+"""Constants for use in other code"""
+
+# TODO Simplify; reduce use of hard-coded strings; document where appropriate; remove excessive commented-out constants
 
 import os
 
