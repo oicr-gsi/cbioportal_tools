@@ -3,6 +3,7 @@
 import os
 import typing
 import argparse
+import sys # FIXME
 
 import pandas as pd
 from ..constants.constants import clinical_type, no_data_frame, supported_pipe
@@ -165,6 +166,8 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
                 exit(1)
 
             # If the datahandler contains a single datatype to handle and output
+            print("### Study input:", study_input, file=sys.stderr)
+            print("### config analysis:", config_analysis, file=sys.stderr)
             if study_input.get('DATATYPE') in supported_pipe.get(config_analysis) and isinstance(study_input.get('DATATYPE'), str):
                 information.append(get_single_config(config_file_name,
                                                      study_input.get('DATATYPE'),
