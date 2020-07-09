@@ -1,7 +1,4 @@
-__author__ = ["Kunal Chandan", "Allan Liang"]
-__email__ = ["kchandan@uwaterloo.ca", "a33liang@uwaterloo.ca"]
-__version__ = "1.0"
-__status__ = "Production"
+"""Utility functions for CAP mutation data"""
 
 import os
 import pandas as pd

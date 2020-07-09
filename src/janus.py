@@ -1,7 +1,6 @@
-__author__ = "Kunal Chandan"
-__email__ = "kchandan@uwaterloo.ca"
-__version__ = "1.0"
-__status__ = "Production"
+#! /usr/bin/env python3
+
+"""Main script to run the Janus tools"""
 
 # Command Line Imports
 import argparse
