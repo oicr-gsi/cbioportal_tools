@@ -4,7 +4,75 @@ import argparse, hashlib, os, tempfile, unittest
 
 from lib.tools import generator
 
-class TestGenerator(unittest.TestCase):
+class TestGeneratorCAPExpression(unittest.TestCase):
+
+    # run on the CAP expression dataset and validate output
+
+    def setUp(self):
+        self.testDir = os.path.dirname(os.path.realpath(__file__))
+        self.dataDir = os.path.realpath(
+            os.path.join(self.testDir, '..', 'study_input', 'examples')
+        )
+        self.tmp = tempfile.TemporaryDirectory(prefix='janus_generator_test_')
+        self.outDir = os.path.join(self.tmp.name, 'CAP_expression_test')
+        # construct a mock argparse namespace with required parameters
+        argsDict = {
+            "config": os.path.join(self.dataDir, 'CAP_expression', 'study.txt'),
+            "output_folder": self.outDir,
+            "path": os.path.join(self.testDir, '..'),
+            "force": True,
+            "url": None,
+            "key": None,
+            "push": False,
+            "verbose": False,
+        }
+        args = argparse.Namespace()
+        for key in argsDict.keys():
+            setattr(args, key, argsDict[key])
+        generator.main(args)
+
+    def test_file_checksums(self):
+        mainChecksums = {
+            'data_cancer_type.txt': 'd2000eb8d7355ef81a6d9c10bcca73af',
+            'data_clinical_patients.txt': '852777b8f1bc60b134c9dc999ac87a24',
+            'data_clinical_samples.txt': '199053f38a24c52072418a42dba3fdf4',
+            'data_expression_continous.txt': 'e2b50dc44307e0b9bee27d253b02c6d9',
+            'data_expression_zscores.txt': '0a04f5f68265ca9a1aded16dd013738c',
+            'meta_clinical_patients.txt': '59c55f5e4578f70e40f3b44d01d5baff',
+            'meta_clinical_samples.txt': '40543f66af0e05da059b569df6ff199c',
+            'meta_expression_continous.txt': '5db83d4ca1925117abc8837b2eebeb46',
+            'meta_expression_zscores.txt': '4c807196b4d1e1e47710bd96343b3ccc',
+            'meta_study.txt': 'd980b676d68ffacfd74ff32d233bc731'
+        }
+        caseListChecksums = {
+            'cases_merp.txt': '43685fab767e5961a11e68a45d68c5ec',
+            'cases_rna_seq_mrna.txt': '1497b32c3999df39b04333da92be5018'
+        }
+        supplementaryChecksums = {
+            'data_expression_percentile.txt': 'e1f603df04a6b6c32b8bceee912420c8',
+            'data_expression_percentile_comparison.txt': 'e1f603df04a6b6c32b8bceee912420c8',
+            'data_expression_percentile_tcga.txt': '597244ff8dd79c2bea46bb3bbb79278f',
+            'data_expression_zscores_comparison.txt': '4cd93477b3bb87f3aadeaebd25b4819f',
+            'data_expression_zscores_tcga.txt': 'e7bf737453a5298a849e2b76f6d40f3b'
+        }
+        # TODO also check the supplementary_data directory
+        allChecksums = {}
+        for fileName in mainChecksums.keys():
+            allChecksums[os.path.join(self.outDir, fileName)] = mainChecksums[fileName]
+        for fileName in caseListChecksums.keys():
+            allChecksums[os.path.join(self.outDir, 'case_lists', fileName)] = caseListChecksums[fileName]
+        for fileName in supplementaryChecksums.keys():
+            allChecksums[os.path.join(self.outDir, 'supplementary_data', fileName)] = supplementaryChecksums[fileName]
+        for outPath in allChecksums.keys():
+            self.assertTrue(os.path.exists(outPath), outPath+" exists")
+            md5 = hashlib.md5()
+            with open(outPath, 'rb') as f:
+                md5.update(f.read())
+            self.assertEqual(md5.hexdigest(),
+                             allChecksums[outPath],
+                             outPath+" checksums match")
+
+class TestGeneratorGECCO(unittest.TestCase):
 
     # run on the GECCO example dataset and validate output
     
