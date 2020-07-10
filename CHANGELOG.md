@@ -9,6 +9,8 @@ CHANGELOG
   - `test.py` with all tests; `fast_test.py` with a subset of tests
 ### Changed
 - GRD-254: Remove unnecessary metadata attributes; add docstrings
+### Removed
+- GRD-253: Remove `--path` argument to `generator.py`
 
 ## v0.0.1: 2020-07-03
 - Initial development release
