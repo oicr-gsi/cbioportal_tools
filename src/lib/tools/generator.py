@@ -260,7 +260,7 @@ def main(args):
     ### study_config defines the study, arguments and files to use for the data
     if args.config:
         ### load from file
-        study_config = Config.get_single_config(args.config, 'study', 'study',verb)
+        study_config = Config.get_single_config(args.config, 'study', 'study', logger)
 
     else:
         ### create an empty dataframe
@@ -270,7 +270,7 @@ def main(args):
     ### study config collects all the command line and configuraiot Arguments
 
     ##separate out to 3 variables, information, clinic_data, custom_case_list
-    [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
+    [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, logger)
     information = resolve_priority_queue(information)
     [logger.info('Informational Files {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in information]
     [logger.info('Clinical List Files {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in clinic_data]
