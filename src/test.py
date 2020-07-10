@@ -19,7 +19,6 @@ class TestGeneratorCAPExpression(unittest.TestCase):
         argsDict = {
             "config": os.path.join(self.dataDir, 'CAP_expression', 'study.txt'),
             "output_folder": self.outDir,
-            "path": os.path.join(self.testDir, '..'),
             "force": True,
             "url": None,
             "key": None,
@@ -87,7 +86,6 @@ class TestGeneratorGECCO(unittest.TestCase):
         argsDict = {
             "config": os.path.join(self.dataDir, 'GECCO', 'study.txt'),
             "output_folder": self.outDir,
-            "path": os.path.join(self.testDir, '..'),
             "force": True,
             "url": None,
             "key": None,

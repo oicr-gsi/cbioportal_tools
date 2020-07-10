@@ -52,10 +52,6 @@ def define_parser() -> argparse.ArgumentParser:
     config.add_argument("-d", "--description",
                         help="A description of the study.",
                         metavar='DESCRIPTION')
-    config.add_argument("--path",
-                        help="Path of Janus.py",
-                        metavar='PATH',
-                        required=True)
 
 
     config_spec = generator.add_argument_group('Overridable Required Configuration File Specifiers:')
@@ -254,7 +250,6 @@ class DocstringAction(argparse.Action):
 
 def main(args):
     verb = args.verbose
-    path = args.path
     constants.cbioportal_url = args.url
 
     from lib import analysis_pipelines
@@ -291,7 +286,7 @@ def main(args):
         
         #The bottom line have been changed by calling the generation of metadata within the handlers instead of in generator.py
         #meta.generate_meta_type(each.datahandler, each.config_map, study_config, verb)
-        data.generate_data_type(each, study_config, path, verb)
+        data.generate_data_type(each, study_config, verb)
         
         # This line has been replaced with the CAP case list handler
         #case.generate_case_list(each, study_config, verb)
