@@ -286,13 +286,13 @@ def main(args):
         
         #The bottom line have been changed by calling the generation of metadata within the handlers instead of in generator.py
         #meta.generate_meta_type(each.datahandler, each.config_map, study_config, verb)
-        data.generate_data_type(each, study_config, verb)
+        data.generate_data_type(each, study_config, logger)
         
         # This line has been replaced with the CAP case list handler
         #case.generate_case_list(each, study_config, verb)
 
     for each in clinic_data:
-        meta.generate_meta_type(each, study_config, verb)
+        meta.generate_meta_type(each, study_config, logger)
         data.generate_data_clinical(each, study_config, verb)
     
     # These two lines of code have been replaced with the CAP case list handler
@@ -300,7 +300,7 @@ def main(args):
     #    case.generate_case_list(each, study_config, verb)
 
     # This generates the metadata file for the study file
-    meta.generate_meta_study(study_config, verb)
+    meta.generate_meta_study(study_config, logger)
 
     # export to cbioportal!
     if args.key or args.push:
