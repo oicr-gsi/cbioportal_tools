@@ -4,12 +4,14 @@
 
 import pandas as pd
 import argparse
+import logging
 import typing
 import os
 
 from lib.constants import constants
 from lib.study_generation import data, meta, case, CAP_case_lists
 from lib.support import Config, helper, cbioportal_interface
+from lib.support.helper import configure_logger
 
 
 ## a map of command line arguments to internal terms
@@ -178,13 +180,6 @@ def define_parser() -> argparse.ArgumentParser:
                         action="store_true",
                         help="Force overwrite of output and temp folders; do not ask for permission")
 
-
-    # TODO:: Consider having multiple levels of verbosity
-    options.add_argument("-v", "--verbose",
-                         action="store_true",
-                         default=False,
-                         help="Makes program verbose")
-
     return generator
 
 
@@ -218,10 +213,10 @@ def resolve_priority_queue(information: Information) -> Information:
     return information
 
 
-def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) -> Config.Config:
+def add_cli_args(study_config: Config.Config, args: argparse.Namespace, logger: logging.Logger) -> Config.Config:
     meta_args = ['type_of_cancer', 'cancer_study_identifier', 'name', 'short_name', 'description', 'output_folder']
 
-    helper.working_on(verb, 'Merging Config information from command line and configuration file')
+    logger.info('Merging Config information from command line and configuration file')
 
     dictionary = {k: v for k, v in vars(args).items() if v is not None}
     for each in dictionary.keys():
@@ -235,8 +230,10 @@ def add_cli_args(study_config: Config.Config, args: argparse.Namespace, verb) ->
 
     # Check to ensure minimum conditions are filled.
     if not set(meta_args).issubset(set(study_config.config_map.keys())):
-        raise IOError('The minimum number of arguments have not been provided in the file and/or command-line arguments'
-                      '\nSee: {}'.format(meta_args))
+        msg = 'The minimum number of arguments have not been provided in the file and/or command-line arguments'+\
+              '\nSee: {}'.format(meta_args)
+        logger.error(msg)
+        raise ValueError(msg)
     return study_config
 
 
@@ -249,12 +246,15 @@ class DocstringAction(argparse.Action):
 
 
 def main(args):
-    verb = args.verbose
+
     constants.cbioportal_url = args.url
 
     from lib import analysis_pipelines
     import pkgutil
 
+    verb = args.verbose # TODO replace 'verb' switch for stdout with use of logger
+    # TODO improve logger namespace; eg. alongside reorganised code hierarchy
+    logger = configure_logger(logging.getLogger(__name__), args.log_path, args.debug, args.verbose)
 
     # TODO:: Fail gracefully if something breaks
     ### study_config defines the study, arguments and files to use for the data
@@ -266,15 +266,15 @@ def main(args):
         ### create an empty dataframe
         study_config = Config.Config({}, pd.DataFrame(columns=['TYPE', 'FILE_NAME']), 'study','study')
     ### command line argument can be provided that will overide what is in the configuation files
-    add_cli_args(study_config, args, verb)
+    add_cli_args(study_config, args, logger)
     ### study config collects all the command line and configuraiot Arguments
 
     ##separate out to 3 variables, information, clinic_data, custom_case_list
     [information, clinic_data, custom_list] = Config.gather_config_set(study_config, args, verb)
     information = resolve_priority_queue(information)
-    [print('Informational Files {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in information] if verb else print(),
-    [print('Clinical List Files {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in clinic_data] if verb else print(),
-    [print('Customized Case Set {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in custom_list] if verb else print(),
+    [logger.info('Informational Files {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in information]
+    [logger.info('Clinical List Files {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in clinic_data]
+    [logger.info('Customized Case Set {}:{}:\n{}\n'.format(a.alterationtype,a.datahandler, a)) for a in custom_list]
     # Clean Output Folder/Initialize it
     helper.clean_folder(study_config.config_map['output_folder'],args.force)
 
@@ -309,12 +309,7 @@ def main(args):
         helper.restart_tomcat(constants.cbioportal_url, args.key, verb)
         # TODO:: Make the validation step ensure that it doesn't overwrite an existing study
 
-    helper.stars()
-    helper.stars()
-    helper.working_on(True, message='CONGRATULATIONS! Your study should now be imported!')
-    helper.stars()
-    helper.working_on(True, message='Output folder: {}'.format(study_config.config_map['output_folder']))
-    helper.working_on(True, message='Study Name: {}'.format(study_config.config_map['name']))
-    helper.working_on(True, message='Study ID: {}'.format(study_config.config_map['cancer_study_identifier']))
-    helper.stars()
-    helper.stars()
+    logger.info('CONGRATULATIONS! Your study should now be imported!')
+    logger.info('Output folder: {}'.format(study_config.config_map['output_folder']))
+    logger.info('Study Name: {}'.format(study_config.config_map['name']))
+    logger.info('Study ID: {}'.format(study_config.config_map['cancer_study_identifier']))

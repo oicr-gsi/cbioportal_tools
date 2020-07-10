@@ -4,6 +4,7 @@
 
 # Command Line Imports
 import argparse
+import logging
 import sys
 
 # Other Scripts
@@ -16,6 +17,11 @@ def super_parser() -> argparse.ArgumentParser:
                     'Janus is a wrapper-like utility for managing cBioPortal studies and your instance, each sub-tool '
                     'functions on it\'s own. '
                     'For more usage, examples and documentation see https://github.com/oicr-gsi/cbioportal_tools')
+    parser.add_argument('--debug', action='store_true', help="Even more verbose logging")
+    parser.add_argument('--verbose', action='store_true', help="More verbose logging")
+    parser.add_argument('-l', '--log-path', metavar='PATH', help='Path of file where '+\
+                        'log output will be appended. Optional, defaults to STDERR.')
+
     subparsers = parser.add_subparsers(title='Janus a set of cBioPortal Tools',
                                        description='Current set of tools',
                                        dest='which')
@@ -41,14 +47,15 @@ def super_parser() -> argparse.ArgumentParser:
 
     return parser
 
-
 def main():
     parser = super_parser()
     args = parser.parse_args()
+    print(args, file=sys.stderr)
     if len(sys.argv) == 1:
-        parser.print_help()
+        parser.print_help(sys.stderr)
+        sys.exit(1)
 
-    if   args.which == 'generator':
+    if args.which == 'generator':
         generator.main(args)
     elif args.which == 'import':
         importer.main(args)
