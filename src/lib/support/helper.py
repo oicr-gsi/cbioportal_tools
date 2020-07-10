@@ -2,6 +2,7 @@
 
 # TODO replace these with cleaner alternatives where possible, eg. excluding shell calls
 
+import logging
 import os
 import shutil
 import subprocess
@@ -13,6 +14,38 @@ from ..constants.constants import config2name_map, supported_pipe
 extensionChoices = ["vcf", "maf"]
 c_choices = [".tar.gz", ".gz", ".zip"]
 
+def configure_logger(logger, log_path=None, debug=False, verbose=False):
+    """Customize a Logger object with given parameters"""
+    #logger = logging.getLogger(__name__)
+    log_level = logging.WARN
+    if debug:
+        log_level = logging.DEBUG
+    elif verbose:
+        log_level = logging.INFO
+    logger.setLevel(log_level)
+    handler = None
+    if log_path==None:
+        handler = logging.StreamHandler()
+    else:
+        dir_path = os.path.abspath(os.path.join(log_path, os.pardir))
+        valid = True
+        if not os.path.exists(dir_path):
+            sys.stderr.write("ERROR: Log directory %s does not exist.\n" % dir_path)
+            valid = False
+        elif not os.path.isdir(dir_path):
+            sys.stderr.write("ERROR: Log destination %s is not a directory.\n" % dir_path)
+            valid = False
+        elif not os.access(dir_path, os.W_OK):
+            sys.stderr.write("ERROR: Log directory %s is not writable.\n" % dir_path)
+            valid = False
+        if not valid: sys.exit(1)
+        handler = logging.FileHandler(log_path)
+    handler.setLevel(log_level)
+    formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s: %(message)s',
+                                  datefmt='%Y-%m-%d_%H:%M:%S')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
 
 def stars():
     # Prints a row of stars
