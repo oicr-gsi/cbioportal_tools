@@ -38,7 +38,12 @@ def assert_format(meta_config: Config.Config, verb):
         discrete_copy_number_data.verify_final_file(meta_config, verb)
 
 
-def generate_data_type(meta_config: Config.Config, study_config: Config.Config, janus_path, verb):
+def generate_data_type(meta_config: Config.Config, study_config: Config.Config, verb):
+
+    # janus_path is the root path of the cbioportal_tools repo
+    # TODO get rid of command-line execution of other scripts, and with it the need for janus_path
+    study_gen_dir = os.path.dirname((os.path.abspath(__file__)))
+    janus_path = os.path.abspath(os.path.join(study_gen_dir, os.pardir, os.pardir, os.pardir))
 
     ### READ DIRECTLY FROM THE FILE, NO OTHER ACTION
     if 'pipeline' in meta_config.config_map.keys() and meta_config.config_map['pipeline'] == 'FILE':
