@@ -1,5 +1,6 @@
 """Process config files"""
 
+import logging
 import os
 import typing
 import argparse
@@ -41,23 +42,24 @@ class ClinicalConfig(Config):
 Information = typing.List[Config]
 
 ### loads the study configuration from a file
-def get_single_config(file, f_type, analysis, verb) -> Config:
+def get_single_config(file, f_type, analysis, logger) -> Config:
 
     ### verify that the file exists
-    if os.path.isfile(file):
-        print('File Name: {}'.format(file))
+    if os.access(file, os.R_OK):
+        logger.info('Config File Name: {}'.format(file))
     else:
-        raise OSError('ERROR: Is not a file\n' + file)
+        msg = 'Config input "%s" is not a file\n' % file
+        logger.error(msg)
+        raise OSError(msg)
     ### open the filehandle
     f = open(file, 'r')
 
-    print('Reading information') if verb else print(),
     file_map = {}
     line = ''
 
     ### commented out header lines are key value pairs, these are stored in the file_map
     try:
-        for line in f:#TypeError: get_single_config() missing 1 required positional argument: 'verb'
+        for line in f:
             if line[0] == '#':
                 line = line.strip().replace('#', '').split('=')
                 file_map[line[0]] = line[1]
@@ -67,9 +69,8 @@ def get_single_config(file, f_type, analysis, verb) -> Config:
         f.flush()
         f.close()
     except IndexError:
-        print('ERROR:: there was a syntax error in the header of {}'.format(file))
-        print(line)
-        exit(1)
+        logger.error('There was a syntax error in the header of {}'.format(file))
+        raise
 
     ### now read in the data table, it should be tab delimited
     ## this is stored in data_frame
@@ -79,28 +80,29 @@ def get_single_config(file, f_type, analysis, verb) -> Config:
         if f_type in no_data_frame:
             data_frame = pd.DataFrame()
         else:
-            print('Your {} file does not have data in it but it probably should, please double check it'.format(f_type))
+            logger.warning('Your {} file does not have data in it but it probably should, please double check it'.format(f_type))
             raise pd.errors.EmptyDataError()
 
     ### check that it loaded properly
     if data_frame.isnull().values.any():
-        print('ERROR:: A configuration file is missing some values in the data-frame, this is not right.')
-        print('Check this file {}'.format(file))
-        exit(1)
+        msg = 'A configuration file is missing some values in the data-frame, this is not right. Check this file: {}'.format(file)
+        log.error(msg)
+        raise ValueError(msg)
 
     ### store all information in a config object, with properties config_map and data_frame
     config_file = Config(file_map, data_frame, f_type, analysis)
     return config_file
 
 
-def get_config_clinical(file: str, f_type: str, verb) -> ClinicalConfig:
-    if os.path.isfile(file):
-        print('Configuration File Name: {}'.format(file))
+def get_config_clinical(file: str, f_type: str, logger: logging.Logger) -> ClinicalConfig:
+    if os.access(file, os.R_OK):
+        logger.info('Configuration File Name: {}'.format(file))
     else:
-        raise OSError('ERROR: Is not a file\n' + file)
+        msg = 'Cannot read clinical config file: "%s"' % file
+        logger.error(msg)
+        raise OSError(msg)
     f = open(file, 'r')
 
-    print('Reading information') if verb else print(),
     file_map = {}
     data_frame = []
     for line in f:
@@ -113,7 +115,7 @@ def get_config_clinical(file: str, f_type: str, verb) -> ClinicalConfig:
     return config_file
 
 ### once the config is into the study_config object, parse and store the information in other objecgts
-def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [Information, Config, Information]:
+def gather_config_set(study_config: Config, args: argparse.Namespace, logger) -> [Information, Config, Information]:
     information = []
     clinic_data = []
     custom_list = []
@@ -130,19 +132,21 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
         if   study_config.data_frame['DATAHANDLER'][i] in clinical_type:
             clinic_data.append(get_config_clinical(config_file_name,
                                                    config_file_type,
-                                                   verb))
+                                                   logger))
 
         ### is it a case list
         elif study_config.data_frame['DATAHANDLER'][i] == 'CASE_LIST':
             custom_list.append(get_single_config(config_file_name,
                                                  config_file_type,
                                                  config_analysis,
-                                                 verb))
+                                                 logger))
         elif config_analysis in supported_pipe:
-            if os.path.isfile(config_file_name):
-                print('File Name: {}'.format(config_file_name))
+            if os.access(config_file_name, os.R_OK):
+                logger.info('Reading file: {}'.format(config_file_name))
             else:
-                raise OSError('ERROR: Is not a file\n' + config_file_name)
+                msg = 'Cannot read "%s"' % config_file_name
+                logger.error(msg)
+                raise OSError(msg)
             ### open the datahandler file
             f = open(config_file_name, 'r')
             study_input = {}
@@ -150,7 +154,7 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
 
             ### commented out header lines are key value pairs, these are stored in the file_map
             try:
-                for line in f:  # TypeError: get_single_config() missing 1 required positional argument: 'verb'
+                for line in f:
                     if line[0] == '#':
                         line = line.strip().replace('#', '').split('=')
                         study_input[line[0]] = line[1]
@@ -160,25 +164,25 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
                 f.flush()
                 f.close()
             except IndexError:
-                print('ERROR:: there was a syntax error in the header of {}'.format(file))
-                print(line)
-                exit(1)
+                msg = 'There was a syntax error in the header of {}'.format(file)
+                logger.error(msg)
+                raise ValueError(msg)
 
             # If the datahandler contains a single datatype to handle and output
             if study_input.get('DATATYPE') in supported_pipe.get(config_analysis) and isinstance(study_input.get('DATATYPE'), str):
                 information.append(get_single_config(config_file_name,
                                                      study_input.get('DATATYPE'),
                                                      config_analysis,
-                                                     verb))
+                                                     logger))
             # If the datahandler contains a list of datatypes to handle and output
             elif study_input.get('DATATYPE') in supported_pipe.get(config_analysis) and isinstance(study_input.get('DATATYPE'), list):
                 for datatypes in study_input.get('DATATYPE'):
                     information.append(get_single_config(config_file_name,
                                                          study_input.get('DATATYPE')[datatypes],
                                                          config_analysis,
-                                                         verb))
+                                                         logger))
             else:
-                print("There is no supported datatype of " + study_input.get('DATATYPE') + " for the alteration type " + config_analysis)
+                logger.error("There is no supported datatype of " + study_input.get('DATATYPE') + " for the alteration type " + config_analysis)
                 break
 
             # Add the pipeline into the information config_map
@@ -188,6 +192,6 @@ def gather_config_set(study_config: Config, args: argparse.Namespace, verb) -> [
             information.append(get_single_config(config_file_name,
                                                  config_file_type,
                                                  config_analysis,
-                                                 verb))
+                                                 logger))
 
     return [information, clinic_data, custom_list]
