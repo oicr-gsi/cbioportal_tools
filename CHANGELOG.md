@@ -4,7 +4,9 @@ CHANGELOG
 ## Unreleased
 ### Added
 - GRD-251: Simple unit tests for generator mode
-- GRD-252: Generator test for CAP expression data
+- GRD-252:
+  - Generator test for CAP expression data
+  - `test.py` with all tests; `fast_test.py` with a subset of tests
 ### Changed
 - GRD-254: Remove unnecessary metadata attributes; add docstrings
 
