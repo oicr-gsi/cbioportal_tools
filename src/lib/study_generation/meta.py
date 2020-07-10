@@ -1,20 +1,20 @@
 """Manipulate study generation metadata"""
 
 from collections import OrderedDict
+import logging
 import os
 
 from lib.constants.constants import meta_info_map, general_zip, ref_gene_id_zip, config2name_map, clinical_type, optional_fields
 from lib.support import Config, helper
 
 
-#def generate_meta_type(config_type: str, config_map: dict, study_config: Config.Config, verb):
-def generate_meta_type(meta_config: Config.Config, study_config: Config.Config, verb):
+def generate_meta_type(meta_config: Config.Config, study_config: Config.Config, logger: logging.Logger):
     # NOTE:: Should be able to generate any from the set of all meta files
 
     output_set = []
 
     ####################### BEGIN WRITING META_FILES ###########################
-    helper.working_on(verb, message='Saving meta_{}.txt ...'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
+    logger.debug('Saving meta_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
 
     if not meta_config.datahandler == 'CANCER_TYPE':
         # CANCER_TYPE meta file is the only one not to contain the identifier with the meta-data
@@ -28,7 +28,7 @@ def generate_meta_type(meta_config: Config.Config, study_config: Config.Config, 
             try:
                 output_set.append(('description', meta_config.config_map['description']))
             except KeyError:
-                print('Using Profile_Description instead of description because it is missing from type_config file.')
+                logger.warning('Using Profile_Description instead of description because it is missing from type_config file.')
                 output_set.append(('description', meta_config.config_map['profile_description']))
     else:
 
@@ -58,13 +58,13 @@ def generate_meta_type(meta_config: Config.Config, study_config: Config.Config, 
     f.write('\n'.join(['{}: {}'.format(i, output_set[i]) for i in output_set]))
     f.flush()
     f.close()
-    helper.working_on(verb)
+    logger.debug('Finished writing %s' % f_out)
 
 
-def generate_meta_study(study_config: Config.Config, verb):
+def generate_meta_study(study_config: Config.Config, logger):
 
     output_meta = os.path.join(study_config.config_map['output_folder'], 'meta_study.txt')
-    helper.working_on(verb, message='Saving meta_study.txt ...')
+    logger.debug('Saving meta_study.txt')
 
     f = open(output_meta, 'w')
 
@@ -75,13 +75,10 @@ def generate_meta_study(study_config: Config.Config, verb):
         f.write('short_name: {}\n'.format(study_config.config_map['short_name']))
         f.write('description: {}\n'.format(study_config.config_map['description']))
         f.write('add_global_case_list: true\r')
-    except KeyError as key:
-        helper.stars()
-        helper.stars()
-        print('The study config is missing a value, please add it. \n{}'.format(key.with_traceback()))
-        helper.stars()
-        helper.stars()
+    except KeyError:
+        logger.error('The study config is missing a value, please add it.')
+        raise
     f.flush()
     f.close()
 
-    helper.working_on(verb)
+    logger.debug('Finished writing %s' % output_meta)

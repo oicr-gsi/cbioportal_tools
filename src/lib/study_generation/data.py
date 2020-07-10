@@ -1,5 +1,6 @@
 """Manipulate study generation data"""
 
+import logging
 import os
 
 import numpy as np
@@ -38,12 +39,14 @@ def assert_format(meta_config: Config.Config, verb):
         discrete_copy_number_data.verify_final_file(meta_config, verb)
 
 
-def generate_data_type(meta_config: Config.Config, study_config: Config.Config, verb):
+def generate_data_type(meta_config: Config.Config, study_config: Config.Config, logger: logging.Logger):
 
     # janus_path is the root path of the cbioportal_tools repo
     # TODO get rid of command-line execution of other scripts, and with it the need for janus_path
     study_gen_dir = os.path.dirname((os.path.abspath(__file__)))
     janus_path = os.path.abspath(os.path.join(study_gen_dir, os.pardir, os.pardir, os.pardir))
+
+    verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with calls to a logger
 
     ### READ DIRECTLY FROM THE FILE, NO OTHER ACTION
     if 'pipeline' in meta_config.config_map.keys() and meta_config.config_map['pipeline'] == 'FILE':
@@ -57,17 +60,17 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
                          verb)
 
     elif meta_config.datahandler == 'CANCER_TYPE':
-        helper.working_on(verb, message='Reading colours...')
+        logger.debug('Started reading colours')
         colours = cancer_type.get_colours(janus_path)
-        helper.working_on(verb)
+        logger.debug('Finished reading colours')
 
-        helper.working_on(verb, message='Generating CANCER_TYPE records...')
+        logger.debug('Started generating CANCER_TYPE records')
         cancer_type.gen_cancer_type_data(meta_config, study_config, colours)
-        helper.working_on(verb)
+        logger.debug('Finished generating CANCER_TYPE records')
 
     else:
         helper.assert_type(meta_config.alterationtype)
-        helper.working_on(verb, 'Pipeline is {}, beginning preparation...'.format(meta_config.config_map['pipeline']))
+        logger.info('Pipeline is {}, beginning preparation.'.format(meta_config.config_map['pipeline']))
         helper.assert_pipeline(meta_config.alterationtype, meta_config.config_map['pipeline'])
         pipeline = os.path.abspath(os.path.join(janus_path,
                                                 'src/lib/analysis_pipelines/{}/{}.py'.format(meta_config.alterationtype,
