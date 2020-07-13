@@ -1,8 +1,8 @@
 """Support for CAP mutation data"""
 
-from lib.support import helper
-from lib.analysis_pipelines.MUTATION_EXTENDED import support_functions
-from lib.study_generation import meta
+from support import helper
+from analysis_pipelines.MUTATION_EXTENDED import support_functions
+from study_generation import meta
 
 
 def main():

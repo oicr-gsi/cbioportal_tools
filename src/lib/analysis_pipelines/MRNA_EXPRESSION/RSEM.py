@@ -1,6 +1,6 @@
-from lib.support import helper
-from lib.study_generation import meta
-from lib.analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_zscore
+from support import helper
+from study_generation import meta
+from analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_zscore
 
 def main():
     global meta_config

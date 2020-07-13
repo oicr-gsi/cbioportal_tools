@@ -4,8 +4,8 @@ import os
 
 import pandas as pd
 
-from lib.constants import constants
-from lib.support import Config, helper
+from constants import constants
+from support import Config, helper
 
 thresholds:list  = []
 

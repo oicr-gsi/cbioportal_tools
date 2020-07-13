@@ -9,8 +9,8 @@ import os
 import pandas as pd
 
 # Data management
-from lib.support import Config
-from lib.constants import constants
+from support import Config
+from constants import constants
 
 
 def get_colours(janus_path) -> pd.DataFrame:

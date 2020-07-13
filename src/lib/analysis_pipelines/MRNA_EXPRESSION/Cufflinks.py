@@ -1,7 +1,7 @@
-from lib.support import helper
-from lib.study_generation import meta
-from lib.data_type.MRNA_EXPRESSION import mrna_data, mrna_zscores_data
-from lib.analysis_pipelines.MRN_EXPRESSION.support_functions import fix_chrom, fix_seg_id
+from support import helper
+from study_generation import meta
+from data_type.MRNA_EXPRESSION import mrna_data, mrna_zscores_data
+from analysis_pipelines.MRN_EXPRESSION.support_functions import fix_chrom, fix_seg_id
 
 def main():
     global meta_config

@@ -1,5 +1,5 @@
-from lib.support import helper
-from lib.analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_hmmcopy_tsv, fix_chrom, fix_hmmcopy_max_chrom, fix_seg_id
+from support import helper
+from analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_hmmcopy_tsv, fix_chrom, fix_hmmcopy_max_chrom, fix_seg_id
 
 def main():
     global meta_config

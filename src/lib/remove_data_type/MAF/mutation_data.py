@@ -3,7 +3,7 @@
 import os
 import pandas as pd
 
-from lib.support import Config, helper
+from support import Config, helper
 
 
 def verify_dual_columns(exports_config: Config.Config, verb):

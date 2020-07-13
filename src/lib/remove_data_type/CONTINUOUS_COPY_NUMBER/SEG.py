@@ -1,5 +1,5 @@
-from lib.support import helper
-from lib.data_type.CONTINUOUS_COPY_NUMBER import continuous_copy_number_data
+from support import helper
+from data_type.CONTINUOUS_COPY_NUMBER import continuous_copy_number_data
 
 
 def main():

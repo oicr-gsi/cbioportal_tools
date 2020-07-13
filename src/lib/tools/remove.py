@@ -5,7 +5,7 @@
 import argparse
 import logging
 
-from lib.support.helper import call_shell, configure_logger, restart_tomcat
+from support.helper import call_shell, configure_logger, restart_tomcat
 
 def define_parser() -> argparse.ArgumentParser:
     # Define program arguments
