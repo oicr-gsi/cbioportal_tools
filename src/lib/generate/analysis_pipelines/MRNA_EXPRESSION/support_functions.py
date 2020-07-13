@@ -21,11 +21,13 @@ def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile
         gepData = pd.read_csv(outputPath + datafile, sep='\t')
     except FileNotFoundError:
         print('data_expression_continuous.txt given is a wrong file or wrong file path given from {}'.format(output_Path + datafile))
+        raise
     
     try:
         ensConv = pd.read_csv(enscon, sep='\t')
     except FileNotFoundError:
         print('enscon given a wrong file or file path given from {} (enscon is set in the expression config within the headers).'.format(enscon))
+        raise
     
     # rename columns
     ensConv.columns = ['gene_id', 'Hugo_Symbol']
@@ -54,6 +56,7 @@ def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile
             df.to_csv(outputPath + '/data_{}_gepcomp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep="\t", index=False)
         except FileNotFoundError:
             print('{} wrong file or file path'.format(outputPath + '/data_{}_gepcomp.txt'))
+            raise
 
     # output study expression continuous data
     else:
@@ -61,6 +64,7 @@ def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile
             df.to_csv(outputPath + '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep="\t", index=False)
         except FileNotFoundError:
             print('{} wrong file or file path'.format(outputPath + '/data_{}.txt'))
+            raise
 
     # output tcga data using the study expression data
     if tcga:
@@ -69,6 +73,7 @@ def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile
             tcga_comp = pd.read_csv(meta_config.config_map['tcgadata'], sep='\t')
         except FileNotFoundError:
             print('TCGA file not found from path {}'.format(meta_config.config_map['tcgadata']))
+            raise
 
         # TODO TODO TODO TODO TODO TODO TEST IF YOU CAN RUN WITHOUT THIS LINE - MAY BE REDUNDANT CODE
         #df = pd.read_csv(outputPath + '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep='\t')
@@ -89,6 +94,7 @@ def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile
             df_stud_tcga.to_csv(outputPath + '/data_{}_tcga.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), sep="\t", index=False)
         except FileNotFoundError:
             print('{} wrong file or file path'.format(outputPath + '/data_{}_tcga.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler])))
+            raise
 
 def alpha_sort(exports_config: Config.Config, verb):
     input_folder = exports_config.config_map['input_folder']
@@ -191,6 +197,7 @@ def generate_expression_zscore(meta_config: Config.Config, input_file, outputPat
         raw_data = pd.read_csv(input_file, sep='\t')
     except FileNotFoundError:
         print('{} wrong file or file path'.format(input_file))
+        raise
 
     helper.working_on(verb, message='Processing FPKM Matrix ...')
     raw_scores = raw_data.drop(['Hugo_Symbol'], axis=1)
@@ -244,6 +251,7 @@ def generate_expression_percentile(meta_config: Config.Config, input_file, outpu
         z_scores_data = pd.read_csv(input_file, sep='\t')
     except FileNotFoundError:
         print('{} wrong file or file path'.format(input_file))
+        raise
 
     # Percentile STUDY
     newColumns = z_scores_data.columns
