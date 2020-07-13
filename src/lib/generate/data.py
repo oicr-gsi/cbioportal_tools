@@ -14,10 +14,10 @@ from constants.constants import config2name_map
 #from lib.data_type.DISCRETE_COPY_NUMBER import discrete_copy_number_data
 from support import Config, helper
 
-from analysis_pipelines import cancer_type
-from analysis_pipelines.COPY_NUMBER_ALTERATION import support_functions
-from analysis_pipelines.MUTATION_EXTENDED import support_functions
-from analysis_pipelines.MRNA_EXPRESSION import support_functions
+from generate.analysis_pipelines import cancer_type
+from generate.analysis_pipelines.COPY_NUMBER_ALTERATION import support_functions
+from generate.analysis_pipelines.MUTATION_EXTENDED import support_functions
+from generate.analysis_pipelines.MRNA_EXPRESSION import support_functions
 
 from support import Config, helper
 
@@ -73,8 +73,8 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
         logger.info('Pipeline is {}, beginning preparation.'.format(meta_config.config_map['pipeline']))
         helper.assert_pipeline(meta_config.alterationtype, meta_config.config_map['pipeline'])
         pipeline = os.path.abspath(os.path.join(janus_path,
-                                                'src/lib/analysis_pipelines/{}/{}.py'.format(meta_config.alterationtype,
-                                                                                    meta_config.config_map['pipeline'])))
+                                                'src/lib/generate/analysis_pipelines/{}/{}.py'.format(meta_config.alterationtype,
+                                                                                                      meta_config.config_map['pipeline'])))
         helper.execfile(pipeline,
                         {'meta_config':meta_config,
                          'study_config':study_config,

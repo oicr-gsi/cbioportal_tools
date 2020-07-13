@@ -9,7 +9,7 @@ import typing
 import os
 
 from constants import constants
-from study_generation import data, meta, case, CAP_case_lists
+from generate import data, meta, case, CAP_case_lists
 from support import Config, helper, cbioportal_interface
 from support.helper import configure_logger
 
