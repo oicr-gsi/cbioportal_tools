@@ -11,7 +11,7 @@ class TestGeneratorCAPExpression(unittest.TestCase):
     def setUp(self):
         self.testDir = os.path.dirname(os.path.realpath(__file__))
         self.dataDir = os.path.realpath(
-            os.path.join(self.testDir, '..', 'study_input', 'examples')
+            os.path.join(self.testDir, os.pardir, os.pardir, 'study_input', 'examples')
         )
         self.tmp = tempfile.TemporaryDirectory(prefix='janus_generator_test_')
         self.outDir = os.path.join(self.tmp.name, 'CAP_expression_test')
