@@ -2,9 +2,9 @@
 
 import os
 
-from lib.constants.constants import case_list_map
-from lib.study_generation import data
-from lib.support import Config
+from constants.constants import case_list_map
+from study_generation import data
+from support import Config
 
 
 def generate_case_list(meta_config: Config.Config, study_config: Config.Config, verb):

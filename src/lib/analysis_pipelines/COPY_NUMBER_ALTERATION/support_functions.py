@@ -6,8 +6,8 @@ import pandas as pd
 import numpy as np
 
 
-from lib.support import Config, helper
-from lib.constants import constants
+from support import Config, helper
+from constants import constants
 
 ## this is for discrete data
 thresholds:list  = []

@@ -8,10 +8,10 @@ import logging
 import typing
 import os
 
-from lib.constants import constants
-from lib.study_generation import data, meta, case, CAP_case_lists
-from lib.support import Config, helper, cbioportal_interface
-from lib.support.helper import configure_logger
+from constants import constants
+from study_generation import data, meta, case, CAP_case_lists
+from support import Config, helper, cbioportal_interface
+from support.helper import configure_logger
 
 
 ## a map of command line arguments to internal terms
@@ -249,7 +249,8 @@ def main(args):
 
     constants.cbioportal_url = args.url
 
-    from lib import analysis_pipelines
+    # TODO is there a reason why imports are here, and not at the top of the module?
+    import analysis_pipelines
     import pkgutil
 
     verb = args.verbose # TODO replace 'verb' switch for stdout with use of logger

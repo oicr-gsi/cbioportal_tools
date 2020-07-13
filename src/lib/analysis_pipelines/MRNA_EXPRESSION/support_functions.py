@@ -7,8 +7,8 @@ import numpy as np
 import scipy as sp
 import subprocess
 
-from lib.support import Config, helper
-from lib.constants.constants import config2name_map
+from support import Config, helper
+from constants.constants import config2name_map
 from numpy import *
 from scipy.stats import norm
 

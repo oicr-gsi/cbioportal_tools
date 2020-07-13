@@ -6,20 +6,20 @@ import os
 import numpy as np
 import pandas as pd
 
-from lib.constants.constants import config2name_map
+from constants.constants import config2name_map
 #from lib.data_type import cancer_type
 #from lib.data_type.SEG import segmented_data
 #from lib.data_type.MAF import mutation_data
 #from lib.data_type.CONTINUOUS_COPY_NUMBER import continuous_copy_number_data
 #from lib.data_type.DISCRETE_COPY_NUMBER import discrete_copy_number_data
-from lib.support import Config, helper
+from support import Config, helper
 
-from lib.analysis_pipelines import cancer_type
-from lib.analysis_pipelines.COPY_NUMBER_ALTERATION import support_functions
-from lib.analysis_pipelines.MUTATION_EXTENDED import support_functions
-from lib.analysis_pipelines.MRNA_EXPRESSION import support_functions
+from analysis_pipelines import cancer_type
+from analysis_pipelines.COPY_NUMBER_ALTERATION import support_functions
+from analysis_pipelines.MUTATION_EXTENDED import support_functions
+from analysis_pipelines.MRNA_EXPRESSION import support_functions
 
-from lib.support import Config, helper
+from support import Config, helper
 
 
 

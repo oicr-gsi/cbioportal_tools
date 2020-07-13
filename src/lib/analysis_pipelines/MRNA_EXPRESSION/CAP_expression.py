@@ -2,10 +2,10 @@
 
 import os
 
-from lib.support import helper
-from lib.study_generation import meta
-from lib.analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_percentile, generate_expression_zscore, preProcRNA
-from lib.constants.constants import config2name_map
+from support import helper
+from study_generation import meta
+from analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_percentile, generate_expression_zscore, preProcRNA
+from constants.constants import config2name_map
 
 def main():
     global meta_config
