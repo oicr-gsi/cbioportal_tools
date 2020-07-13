@@ -73,7 +73,7 @@ def main():
 
     # Generate meta data within the handler and not in generator.py
     # Generate metadata for mRNA expression continuous data
-    logger.info(verb, message='Generating expression Meta ...')
+    logger.info('Generating expression Meta ...')
     meta.generate_meta_type(meta_config,study_config,logger)
     
     # Generate metadata for mRNA expression z-score data
