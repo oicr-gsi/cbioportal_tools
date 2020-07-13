@@ -3,7 +3,7 @@
 import os
 
 from constants.constants import case_list_map
-from study_generation import data
+from generate import data
 from support import Config
 
 
