@@ -79,7 +79,7 @@ def generate_data_type(meta_config: Config.Config, study_config: Config.Config, 
                         {'meta_config':meta_config,
                          'study_config':study_config,
                          'janus_path':janus_path,
-                         'verb':verb})
+                         'logger':logger})
 
 
 def get_sample_ids(meta_config: Config.Config, verb) -> pd.Series:
