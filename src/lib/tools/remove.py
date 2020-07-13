@@ -3,9 +3,9 @@
 """Script to remove data from cBioPortal"""
 
 import argparse
+import logging
 
-from ..support.helper import stars, working_on, call_shell, restart_tomcat
-
+from lib.support.helper import call_shell, configure_logger, restart_tomcat
 
 def define_parser() -> argparse.ArgumentParser:
     # Define program arguments
@@ -25,12 +25,13 @@ def define_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def delete_study(key: str, study_config: str, cbioportal_url, verb):
+def delete_study(key: str, study_config: str, cbioportal_url, logger):
+    verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
     if not key == '':
         key = '-i ' + key
     base_folder = 'study_removal'
     # Copying folder to cBioPortal
-    working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
+    logger.info('Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
 
     call_shell("ssh {} debian@{} 'rm ~/oicr_studies/{}'".format(key,
                                                                 cbioportal_url,
@@ -40,48 +41,34 @@ def delete_study(key: str, study_config: str, cbioportal_url, verb):
     # Copy over
     call_shell('scp {} {} debian@{}:/home/debian/oicr_studies/'.format(key, study_config, cbioportal_url), verb)
 
-    working_on(verb)
-
     # Import study to cBioPortal
-    working_on(verb, message='Importing study to cBioPortal...')
+    logger.info('Importing study to cBioPortal...')
 
-    valid = call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
+    # TODO do this without calling out to the shell
+    ec = call_shell("ssh {} debian@{} 'cd /home/debian/cbioportal/core/src/main/scripts/importer; "
                        "./cbioportalImporter.py --command remove-study --meta_filename ~/oicr_studies/meta_study.txt; "
                        "rm ~/oicr_studies/meta_study.txt' ".format(key,
                                                                    cbioportal_url,
                                                                    base_folder,
                                                                    cbioportal_url), verb)
-
-    if   valid == 1:
-        stars()
-        stars()
-        print('Validation of study failed. There could be something wrong with the data, please analyse cBioPortal\'s '
-              'message above. ')
-        stars()
-        stars()
+    # check the shell exit code
+    if ec == 1:
+        logger.error('Validation of study failed. There could be something wrong with the data, please analyse cBioPortalImporter.py output. Exiting.')
         exit(1)
-    elif valid == 3:
-        stars()
-        print('Validation of study succeeded with warnings. Don\'t worry about it, unless you think it\'s important.')
-        stars()
-    elif valid == 0:
-        stars()
-        print('This validated with 0 warnings, Congrats!!!')
-        stars()
+    elif exit_code == 3:
+        logger.warn('Validation of study succeeded with warnings. Don\'t worry about it, unless you think it\'s important.')
+    elif exit_code == 0:
+        logger.info('Validation of study succeeded without warnings')
     else:
-        stars()
-        print('I think something broke really bad, raise an issue about what happened...')
-        stars()
-        stars()
+        logger.critical('Unexpected error code %i from cbioportal importer; exiting.' % ec)
         exit(1)
-    working_on(verb)
-
 
 def main(args):
     study = 'meta_study.txt'
+    logger = configure_logger(logging.getLogger(__name__), args.log_path, args.debug, args.verbose)
     config = open(study, 'w+')
     config.write('cancer_study_identifier:{}\ntype_of_cancer:\nshort_name:\nname:\ndescription:\r'.format(args.id))
     config.flush()
     config.close()
-    delete_study(args.key, study, args.url, True)
+    delete_study(args.key, study, args.url, logger)
     restart_tomcat(args.url, args.key, True)
