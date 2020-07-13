@@ -1,7 +1,7 @@
 import os
 
-from lib.constants.constants import cbioportal_url
-from lib.support import helper
+from constants.constants import cbioportal_url
+from support import helper
 
 
 def export_study_to_cbioportal(key: str, study_folder: str, verb):

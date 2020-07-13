@@ -4,8 +4,8 @@ import os
 import pandas as pd
 import numpy as np
 
-from lib.constants.constants import config2name_map
-from lib.support import Config, helper
+from constants.constants import config2name_map
+from support import Config, helper
 
 def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minimum_Tumour_Depth = 14, Minimum_Tumour_AF = 0.05, Maximum_gnomAD_AF = 0.001, Maximum_Local_Freq = 0.1):
     # This function replaces the cbiowrap function below

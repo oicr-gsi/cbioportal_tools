@@ -4,8 +4,8 @@ from collections import OrderedDict
 import logging
 import os
 
-from lib.constants.constants import meta_info_map, general_zip, ref_gene_id_zip, config2name_map, clinical_type, optional_fields
-from lib.support import Config, helper
+from constants.constants import meta_info_map, general_zip, ref_gene_id_zip, config2name_map, clinical_type, optional_fields
+from support import Config, helper
 
 
 def generate_meta_type(meta_config: Config.Config, study_config: Config.Config, logger: logging.Logger):
