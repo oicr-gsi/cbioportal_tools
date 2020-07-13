@@ -1,8 +1,8 @@
 """Support for CAP CNA data"""
 
-from lib.support import helper
-from lib.analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id, preProcCNA, ProcCNA
-from lib.study_generation import meta
+from support import helper
+from analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id, preProcCNA, ProcCNA
+from study_generation import meta
 
 def main():
     global meta_config

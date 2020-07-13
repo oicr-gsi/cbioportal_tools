@@ -1,5 +1,5 @@
-from lib.support import helper
-from lib.analysis_pipelines.MUTATION_EXTENDED import support_functions
+from support import helper
+from analysis_pipelines.MUTATION_EXTENDED import support_functions
 
 
 def main():

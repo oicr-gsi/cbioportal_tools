@@ -6,7 +6,7 @@ import argparse
 import logging
 import sys
 
-from lib.support.helper import configure_logger, get_shell
+from support.helper import configure_logger, get_shell
 
 
 def define_parser() -> argparse.ArgumentParser:

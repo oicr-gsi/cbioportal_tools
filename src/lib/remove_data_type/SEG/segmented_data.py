@@ -4,8 +4,8 @@ import os
 import subprocess
 import pandas as pd
 
-from lib.support import Config, helper
-from lib.constants import constants
+from support import Config, helper
+from constants import constants
 
 
 def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):

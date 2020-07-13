@@ -10,7 +10,7 @@ import logging
 import os
 import uuid
 
-from lib.support.helper import configure_logger, call_shell, get_shell, restart_tomcat
+from support.helper import configure_logger, call_shell, get_shell, restart_tomcat
 
 
 def define_parser() -> argparse.ArgumentParser:

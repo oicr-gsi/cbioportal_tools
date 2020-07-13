@@ -4,8 +4,8 @@ import os
 
 import pandas as pd
 
-from lib.constants.constants import config2name_map
-from lib.support import Config, helper
+from constants.constants import config2name_map
+from support import Config, helper
 
 
 def generate_expression_zscore(exports_config: Config.Config, study_config: Config.Config, verb):
