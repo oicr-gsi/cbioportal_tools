@@ -2,7 +2,7 @@
 
 import argparse, hashlib, os, tempfile, unittest
 
-from lib.tools import generator
+from tools import generator
 
 class TestGeneratorCAPExpression(unittest.TestCase):
 
@@ -23,6 +23,8 @@ class TestGeneratorCAPExpression(unittest.TestCase):
             "url": None,
             "key": None,
             "push": False,
+            "log_path": None,
+            "debug": False,
             "verbose": False,
         }
         args = argparse.Namespace()
@@ -90,6 +92,8 @@ class TestGeneratorGECCO(unittest.TestCase):
             "url": None,
             "key": None,
             "push": False,
+            "log_path": None,
+            "debug": False,
             "verbose": False,
         }
         args = argparse.Namespace()
