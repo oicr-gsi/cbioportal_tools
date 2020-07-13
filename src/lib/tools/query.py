@@ -3,8 +3,10 @@
 """Script to query cBioPortal"""
 
 import argparse
+import logging
+import sys
 
-from ..support.helper import stars, working_on, get_shell
+from lib.support.helper import configure_logger, get_shell
 
 
 def define_parser() -> argparse.ArgumentParser:
@@ -40,18 +42,15 @@ def define_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def retrieve_auth(key, url, properties_path, verb) -> [str, str]:
+def retrieve_auth(key, url, properties_path, logger) -> [str, str]:
     if not key == '':
         key = '-i ' + key
 
-    stars()
     out = get_shell("ssh {} debian@{} '"
                     "grep -E 'db.user|db.password' {}'".format(key,
                                                                url,
-                                                               properties_path), verb)
-    stars()
-    print(out)
-    stars()
+                                                               properties_path), True)
+    logger.info(out)
     [user, password] = out.strip().splitlines(keepends=False)
     user = user.replace('db.user=', '')
     password = password.replace('db.password=', '')
@@ -59,7 +58,9 @@ def retrieve_auth(key, url, properties_path, verb) -> [str, str]:
     return [user, password]
 
 
-def query_portal(key: str, cbioportal_url: str, user: str, password: str, query_toc: bool, query_gp: bool, border, verb):
+def query_portal(key: str, cbioportal_url: str, user: str, password: str, query_toc: bool, query_gp: bool, border, logger):
+    verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with calls to a logger
+
     if not key == '':
         key = '-i ' + key
 
@@ -69,7 +70,6 @@ def query_portal(key: str, cbioportal_url: str, user: str, password: str, query_
         border = ''
 
     if query_toc:
-        stars()
         out = get_shell("ssh {} debian@{} 'mysql -u {} -p{} {} -e "
                         "\"use cbioportal; "
                         "select * "
@@ -78,13 +78,9 @@ def query_portal(key: str, cbioportal_url: str, user: str, password: str, query_
                                                          user,
                                                          password,
                                                          border), verb)
-        print('TYPE OF CANCER with keywords, name, descriptions, e.t.c. in the cBioPortal mysql database')
-        stars()
-        print(out)
-        stars()
+        logger.info('TYPE OF CANCER with keywords, name, descriptions, e.t.c. in the cBioPortal mysql database: %s' % out)
 
     if query_gp:
-        stars()
         out = get_shell("ssh {} debian@{} 'mysql -u root -p{} {} -e "
                         "\"use cbioportal; "
                         "select STABLE_ID, DESCRIPTION "
@@ -93,17 +89,14 @@ def query_portal(key: str, cbioportal_url: str, user: str, password: str, query_
                                                      user,
                                                      password,
                                                      border), verb)
-        print('GENE PANELS with descriptions in the cBioPortal mysql database')
-        stars()
-        print(out)
-        stars()
-
-    working_on(verb)
-
+        logger.info('GENE PANELS with descriptions in the cBioPortal mysql database: %s' % out)
 
 def main(args):
-    [user, password] = retrieve_auth(args.key, args.url, True)
+    logger = configure_logger(logging.getLogger(__name__), args.log_path, args.debug, args.verbose)
+    [user, password] = retrieve_auth(args.key, args.url, logger)
+
     if args.gene_panel or args.type_of_cancer:
-        query_portal(args.key, args.url, user, password, args.type_of_cancer, args.gene_panel, args.border, True)
+        query_portal(args.key, args.url, user, password, args.type_of_cancer, args.gene_panel, args.border, logger)
     else:
-        print('ERROR:: Arguments -g/--gene-panel and/or -t/--type-of-cancer are required.')
+        logger.error('Arguments -g/--gene-panel and/or -t/--type-of-cancer are required.')
+        sys.exit(1)
