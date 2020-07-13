@@ -1,12 +1,16 @@
 #! /usr/bin/env python3
 
-"""Script to upload data to cBioPortal"""
+"""Script to upload data to cBioPortal
 
-import os
+FIXME this script is in a rough testing state, with many functions commented out
+"""
+
 import argparse
+import logging
+import os
 import uuid
 
-from ..support.helper import stars, working_on, call_shell, get_shell, restart_tomcat
+from lib.support.helper import configure_logger, call_shell, get_shell, restart_tomcat
 
 
 def define_parser() -> argparse.ArgumentParser:
@@ -15,10 +19,12 @@ def define_parser() -> argparse.ArgumentParser:
  
     parser.add_argument("-f", "--folder",
                         help="The location of the study folder.",
-                        metavar='FOLDER')
+                        metavar='FOLDER',
+                        required=True)
     parser.add_argument("-g", "--gene-panel",
                         help="A formatted gene-panel you would like to upload.",
-                        metavar='PANEL')
+                        metavar='PANEL',
+                        required=True)
     parser.add_argument("-u", "--url",
                         help="The location of the cBioPortal instance (address).",
                         metavar='URL',
@@ -38,12 +44,13 @@ def define_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, user, study_import, verb):
+def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, user, study_import, logger):
+    verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with calls to a logger
     if not key == '':
         key = '-i ' + key
     base_folder = os.path.basename(os.path.abspath(study_folder))
     # Copying folder to cBioPortal
-    working_on(verb, message='Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
+    logger.info('Copying folder to cBioPortal instance at {} ...'.format(cbioportal_url))
     
     #Call to access cbioportal
     unique_id = (uuid.uuid1()).int
@@ -63,12 +70,10 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, user
             call_shell('scp -r {} {}/{} {}@{}:{}'.format(key, study_folder, import_files[i], user, cbioportal_url, new_dir),
                verb)
 
-    working_on(verb)
-
-    # Import study to cBioPortal
-    working_on(verb, message='Importing study to cBioPortal...')
+    logger.info('Importing study to cBioPortal')
     
     # Temporary variables set for testing
+    # TODO process these variables properly, or else remove the importer mode
     valid = 3
     result = "Testing"
 
@@ -93,32 +98,17 @@ def export_study_to_cbioportal(key: str, study_folder: str, cbioportal_url, user
     f.flush()
     f.close()
 
-    # TODO Reimpliment the exit codes
     print('cBioPortal exit code: {}'.format(valid))
-    if   valid == 1:
-        stars()
-        stars()
-        print('Validation of study failed. There could be something wrong with the data, please analyse cBioPortal\'s '
-              'message above. ')
-        stars()
-        stars()
+    if valid == 1:
+        logger.error('Validation of study failed. There could be something wrong with the data, please analyse cBioPortal import script output. Exiting.')
         exit(1)
     elif valid == 3:
-        stars()
-        print('Validation of study succeeded with warnings. Don\'t worry about it, unless you think it\'s important.')
-        stars()
+        logger.warn('Validation of study succeeded with warnings. Don\'t worry about it, unless you think it\'s important.')
     elif valid == 0:
-        stars()
-        print('This validated with 0 warnings, Congrats!!!')
-        stars()
+        logger.info('This validated with 0 warnings, Congrats!!!')
     else:
-        stars()
-        print('I think something broke really bad, raise an issue about what happened...')
-        stars()
-        stars()
+        logger.critical('Unexpected error code %i; exiting' % valid)
         exit(1)
-
-    working_on(verb)
 
 
 def import_portal(key: str, cbioportal_url: str, gene_panel, verb):
@@ -127,7 +117,6 @@ def import_portal(key: str, cbioportal_url: str, gene_panel, verb):
 
     gene_panel = os.path.abspath(gene_panel)
 
-    stars()
     get_shell("scp {} {} ubuntu@{}:/home/debian/gene_panels/{}".format(key, gene_panel, cbioportal_url, os.path.basename(gene_panel)), verb)
 
     out = get_shell("ssh {} ubuntu@{} '"
@@ -135,24 +124,18 @@ def import_portal(key: str, cbioportal_url: str, gene_panel, verb):
                     "cd ~/cbioportal/core/src/main/scripts; "
                     "./importGenePanel.pl --data ~/gene_panels/{}'".format(key, cbioportal_url, os.path.basename(gene_panel)), verb)
     print('importing cancer type')
-    stars()
     if 'exit status 70.' in out:
         print('There is a missing Identifier/Keyword in the gene_panel file. Or it has been mistyped')
         print(out)
-        stars()
         exit(1)
 
-    working_on(verb)
-
-
 def main(args):
-    if not args.gene_panel or args.folder:
-        print('ERROR:: Arguments -g/--gene-panel and/or -f/--folder are required.')
-    if args.folder:
-        export_study_to_cbioportal(args.key, args.folder, args.url, args.user, args.study_import, True)
+    logger = configure_logger(logging.getLogger(__name__), args.log_path, args.debug, args.verbose)
+    export_study_to_cbioportal(args.key, args.folder, args.url, args.user, args.study_import, logger)
+    
     #TESTING COPYING TO CBIOPORTAL RIGHT NOW -- COMMENTED OUT IMPORTING TO PORTAL
     #UNCOMMENT TO TEST IMPORTING TO PORTAL
     #if args.gene_panel:
     #    import_portal(args.key, args.url, args.gene_panel, True)get_shell("ssh {} -t {}@{} ' /home/ubuntu/import_study.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
     #get_shell("ssh {} -t {}@{} ' /home/ubuntu/import_study.sh {}'".format(key, user, cbioportal_url, new_dir), verb)
-    restart_tomcat(args.url, args.key, True)
+    restart_tomcat(args.url, args.key, args.verbose)
