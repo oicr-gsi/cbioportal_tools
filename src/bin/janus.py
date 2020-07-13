@@ -8,7 +8,8 @@ import logging
 import sys
 
 # Other Scripts
-from tools import remove, importer, query, generator
+from generate import generator
+from tools import remove, importer, query
 
 
 def super_parser() -> argparse.ArgumentParser:
