@@ -2,7 +2,7 @@
 
 import argparse, hashlib, os, tempfile, unittest
 
-from tools import generator
+from generate import generator
 
 class TestGeneratorCAPExpression(unittest.TestCase):
 
