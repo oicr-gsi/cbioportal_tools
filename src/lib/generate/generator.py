@@ -250,7 +250,7 @@ def main(args):
     constants.cbioportal_url = args.url
 
     # TODO is there a reason why imports are here, and not at the top of the module?
-    import analysis_pipelines
+    import generate.analysis_pipelines
     import pkgutil
 
     verb = args.verbose # TODO replace 'verb' switch for stdout with use of logger
