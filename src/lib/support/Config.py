@@ -102,7 +102,6 @@ def get_config_clinical(file: str, f_type: str, logger: logging.Logger) -> Clini
         logger.error(msg)
         raise OSError(msg)
     f = open(file, 'r')
-
     file_map = {}
     data_frame = []
     for line in f:
@@ -112,6 +111,7 @@ def get_config_clinical(file: str, f_type: str, logger: logging.Logger) -> Clini
         else:
             data_frame.append(line.strip().split('\t'))
     config_file = ClinicalConfig(file_map, data_frame, f_type)
+    f.close()
     return config_file
 
 ### once the config is into the study_config object, parse and store the information in other objecgts
