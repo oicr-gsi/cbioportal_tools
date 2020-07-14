@@ -73,6 +73,9 @@ class TestGeneratorCAPExpression(unittest.TestCase):
                              allChecksums[outPath],
                              outPath+" checksums match")
 
+    def tearDown(self):
+        self.tmp.cleanup()
+
 class TestGeneratorGECCO(unittest.TestCase):
 
     # run on the GECCO example dataset and validate output
@@ -119,6 +122,9 @@ class TestGeneratorGECCO(unittest.TestCase):
             self.assertEqual(md5.hexdigest(),
                              expectedChecksums[fileName],
                              outPath+" checksums match")
+
+    def tearDown(self):
+        self.tmp.cleanup()
 
 if __name__ == '__main__':
     unittest.main()
