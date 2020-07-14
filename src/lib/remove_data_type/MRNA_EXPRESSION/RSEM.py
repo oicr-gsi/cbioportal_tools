@@ -1,6 +1,6 @@
-from lib.support import helper
-from lib.study_generation import meta
-from lib.data_type.MRNA_EXPRESSION import mrna_data, mrna_zscores_data
+from support import helper
+from study_generation import meta
+from data_type.MRNA_EXPRESSION import mrna_data, mrna_zscores_data
 
 
 def main():

@@ -3,8 +3,8 @@
 #zscores=True
 #profile_name=mRNA Expression
 #profile_description=Expression information DCIS (5 Samples)
-#enscon=/u/ibancarz/git/cbioportal_tools/src/lib/analysis_pipelines/MRNA_EXPRESSION/accessory_files/ensemble_conversion.txt
-#genelist=/u/ibancarz/git/cbioportal_tools/src/lib/analysis_pipelines/MRNA_EXPRESSION/accessory_files/targeted_genelist.txt
+#enscon=/u/ibancarz/git/cbioportal_tools/src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/accessory_files/ensemble_conversion.txt
+#genelist=/u/ibancarz/git/cbioportal_tools/src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/accessory_files/targeted_genelist.txt
 #gepfile=/.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression/gepcomp.list
 #gepcomp=/.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression/gepcomp
 #tcgadata=/.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression/TCGA_ALL_TUMOR.csv

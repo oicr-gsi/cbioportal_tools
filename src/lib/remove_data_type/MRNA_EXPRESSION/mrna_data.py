@@ -5,8 +5,8 @@ import typing
 import pandas as pd
 import numpy as np
 
-from lib.support import Config, helper
-from lib.constants.constants import config2name_map
+from support import Config, helper
+from constants.constants import config2name_map
 
 DataFrames = typing.List[pd.DataFrame]
 

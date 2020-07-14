@@ -1,4 +1,4 @@
-"""Remove mRNA Z scores data"""
+"""Support for CAP mRNA Z scores"""
 
 import os
 

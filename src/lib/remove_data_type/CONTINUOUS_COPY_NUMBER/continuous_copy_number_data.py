@@ -2,8 +2,8 @@
 
 import os
 
-from lib.constants import constants
-from lib.support import Config, helper
+from constants import constants
+from support import Config, helper
 
 
 def gen_log2cna(exports_config: Config.Config, study_config: Config.Config, janus_path, verb):
