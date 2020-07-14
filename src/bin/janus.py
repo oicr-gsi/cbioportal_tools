@@ -2,21 +2,21 @@
 
 """Main script to run the Janus tools"""
 
-# Command Line Imports
+# Python library imports
 import argparse
 import logging
 import sys
 
-# Other Scripts
+# Janus tools
 from generate import generator
-from tools import remove, importer, query
+from query import query
+from remove import remove
+from upload import importer
 
 
 def super_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description='janus.py a set of cBioPortal interaction tools. '
-                    'Janus is a wrapper-like utility for managing cBioPortal studies and your instance, each sub-tool '
-                    'functions on it\'s own. '
+        description='janus.py: A toolkit for cBioPortal interaction. '+\
                     'For more usage, examples and documentation see https://github.com/oicr-gsi/cbioportal_tools')
     parser.add_argument('--debug', action='store_true', help="Even more verbose logging")
     parser.add_argument('--verbose', action='store_true', help="More verbose logging")
