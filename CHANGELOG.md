@@ -12,6 +12,7 @@ CHANGELOG
 - GRD-259: Change module structure to better reflect the application hierarchy
 ### Removed
 - GRD-253: Remove `--path` argument to `generator.py`
+- GRD-261: Delete the `remove_data_type` directory
 
 ## v0.0.1: 2020-07-03
 - Initial development release
