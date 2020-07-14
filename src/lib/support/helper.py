@@ -8,8 +8,8 @@ import shutil
 import subprocess
 import time
 
-from ..support import Config
-from ..constants.constants import config2name_map, supported_pipe
+from support.Config import Config
+from constants.constants import config2name_map, supported_pipe
 
 extensionChoices = ["vcf", "maf"]
 c_choices = [".tar.gz", ".gz", ".zip"]
@@ -152,7 +152,7 @@ def execfile(filepath, globals=None, locals=None):
         exec(compile(file.read(), filepath, 'exec'), globals, locals)
 
 
-def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config, verb):
+def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
     # Decompresses each file in the current folder to ../temp_vcf/ if it is compressed. otherwise, copy it over
     if mutate_config.type_config == 'MAF':
         temp = get_temp_folder(study_config.config_map['output_folder'], 'vcf')
@@ -187,7 +187,7 @@ def decompress_to_temp(mutate_config: Config.Config, study_config: Config.Config
     mutate_config.config_map['input_folder'] = temp
 
 
-def concat_files(exports_config:Config.Config, study_config: Config.Config, verb):
+def concat_files(exports_config:Config, study_config: Config, verb):
     concated_file = os.path.join(study_config.config_map['output_folder'],
                                  'data_{}_concat.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datahandler]))
 

@@ -6,7 +6,7 @@ import typing
 import argparse
 
 import pandas as pd
-from ..constants.constants import clinical_type, no_data_frame, supported_pipe
+from constants.constants import clinical_type, no_data_frame, supported_pipe
 
 
 class Config(object):

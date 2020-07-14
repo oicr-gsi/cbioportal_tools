@@ -1,5 +1,5 @@
-from lib.support import helper
-from lib.data_type.MAF import mutation_data
+from support import helper
+from data_type.MAF import mutation_data
 
 
 def main():

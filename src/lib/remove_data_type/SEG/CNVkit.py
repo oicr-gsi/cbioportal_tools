@@ -1,5 +1,5 @@
-from lib.support import helper
-from lib.data_type.SEG import segmented_data
+from support import helper
+from data_type.SEG import segmented_data
 
 
 def main():
