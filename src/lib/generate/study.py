@@ -1,11 +1,9 @@
 """Class to represent a study directory, formatted for upload to cBioPortal"""
 
 import os
-import sys
-import yaml
 
-from utilities.config import config
-from utilities.constants import REQUIRED_STUDY_META_FIELDS, OPTIONAL_STUDY_META_FIELDS
+from generate.components import study_meta, clinical_samples
+from generate.config import study_config
 
 class study:
 
@@ -53,59 +51,3 @@ class study:
             for datahandler in pipeline.datahandlers:
                 datahandler.write_all(out_dir)
 
-
-class study_config(config):
-    """cBioPortal study config in Janus format"""
-    pass
-
-                
-class study_component:
-
-    """
-    Base class for data/metadata components of a cBioPortal study
-    Eg. Study metadata, clinical sample/patient data, pipeline output
-    """
-
-    DATA_FILENAME = '_data_placeholder_'
-    META_FILENAME = '_meta_placeholder_'
-    
-    def __init__(self, config):
-        self.config = config
-
-    def write_all(self, out_dir):
-        pass
-        
-
-class study_meta(study_component):
-
-    META_FILENAME = 'meta_study.txt'
-    
-    def __init__(self, config):
-        self.study_meta = config.meta
-        
-    def write_all(self, out_dir):
-        meta = {}
-        for field in REQUIRED_STUDY_META_FIELDS:
-            try:
-                meta[field] = self.study_meta[field]
-            except KeyError:
-                msg = "Missing required study meta field "+field
-                print(msg, file=sys.stderr) # TODO add logger
-        for field in OPTIONAL_STUDY_META_FIELDS:
-            if field in self.study_meta:
-                meta[field] = self.study_meta[field]
-        out = open(os.path.join(out_dir, self.META_FILENAME), 'w')
-        out.write(yaml.dump(meta, sort_keys=True))
-        out.close()
-
-class clinical_samples(study_component):
-
-    DATA_FILENAME = 'data_clinical_samples.txt'
-    META_FILENAME = 'meta_clinical_samples.txt'
-
-    def __init__(self, config):
-        self.filename = config.get_sample_filename()
-        print(self.filename)
-
-    def write_all(self, out_dir):
-        print("### Placeholder: Sample output to "+out_dir)
