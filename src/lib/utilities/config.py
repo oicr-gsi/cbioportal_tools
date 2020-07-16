@@ -4,6 +4,7 @@
 
 import pandas as pd
 import re
+import os
 import sys
 import yaml
 
@@ -15,13 +16,21 @@ class config:
     OPTIONAL_META_FIELDS = []
     
     def __init__(self, input_path, strict=False):
+        self.config_dir = os.path.abspath(os.path.dirname(input_path))
         self.meta = self.read_meta(input_path)
         if strict:
             self.validate_meta_fields()
         self.table = pd.read_csv(input_path, sep="\t", comment="#")
 
-    def get_sample_filename(self):
-        return self.table.loc[self.table['DATAHANDLER']=='SAMPLE_ATTRIBUTES'].at[0, 'FILE_NAME']
+    def data_as_tsv(self):
+        return self.table.to_csv(sep="\t", index=False)
+
+    def get_cancer_study_identifier(self):
+        return self.meta['cancer_study_identifier']
+
+    def get_sample_config_path(self):
+        filename = self.table.loc[self.table['DATAHANDLER']=='SAMPLE_ATTRIBUTES'].at[0, 'FILE_NAME']
+        return os.path.join(self.config_dir, filename)
         
     def read_meta(self, input_path):
         yaml_lines = []
@@ -53,6 +62,49 @@ class config:
             msg = 'Missing required metadata fields: '+', '.join(missing_required)
             print(msg, file=sys.stderr) # TODO add a logger; error
             raise ConfigError(msg)
+
+class clinical_config(config):
+    """Clinical sample/patient config"""
+
+    DISPLAY_NAMES_KEY = 'display_names'
+    DESCRIPTIONS_KEY = 'descriptions'
+    DATATYPES_KEY = 'datatypes'
+    PRIORITIES_KEY = 'priorities'
+    STRING_TYPE = 'STRING'
+    NUMBER_TYPE = 'NUMBER'
+    BOOLEAN_TYPE = 'BOOLEAN'
+
+    # TODO check validity of table body
+
+    def is_valid_type(self, type_string):
+        return type_string in [self.STRING_TYPE, self.NUMBER_TYPE, self.BOOLEAN_TYPE]
+    
+    def get_clinical_headers(self):
+        display_names = self.meta[self.DISPLAY_NAMES_KEY]
+        descriptions = self.meta[self.DESCRIPTIONS_KEY]
+        datatypes = self.meta[self.DATATYPES_KEY]
+        priorities = self.meta[self.PRIORITIES_KEY]
+        columns = len(display_names)
+        if len(descriptions)!=columns or len(datatypes)!=columns or len(priorities)!=columns:
+            msg = "Inconsistent number of column fields in metadata"
+            raise ValueError(msg)
+        for datatype in datatypes:
+            if not self.is_valid_type(datatype):
+                raise ValueError("Type %s is not a valid cBioPortal datatype" % datatype)
+        for priority in priorities:
+            try:
+                num = int(priority)
+            except ValueError:
+                msg = "Priority '%s' is not an integer"
+                print(msg, file=sys.stderr) # TODO add logger
+                raise
+        return [display_names, descriptions, datatypes, priorities]
+
+
+class study_config(config):
+    """cBioPortal study config in Janus format"""
+    pass
+
 
 class ConfigError(Exception):
     pass
