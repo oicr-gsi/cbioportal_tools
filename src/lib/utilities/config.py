@@ -16,9 +16,12 @@ class config:
     
     def __init__(self, input_path, strict=False):
         self.meta = self.read_meta(input_path)
-        self.table = pd.read_csv(input_path, sep="\t", comment="#")
         if strict:
             self.validate_meta_fields()
+        self.table = pd.read_csv(input_path, sep="\t", comment="#")
+
+    def get_sample_filename(self):
+        return self.table.loc[self.table['DATAHANDLER']=='SAMPLE_ATTRIBUTES'].at[0, 'FILE_NAME']
         
     def read_meta(self, input_path):
         yaml_lines = []
@@ -49,7 +52,7 @@ class config:
         if len(missing_required) > 0:
             msg = 'Missing required metadata fields: '+', '.join(missing_required)
             print(msg, file=sys.stderr) # TODO add a logger; error
-            raise CSVYError(msg)
+            raise ConfigError(msg)
 
-class CSVYError(Exception):
+class ConfigError(Exception):
     pass

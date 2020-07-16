@@ -21,7 +21,8 @@ class study:
         return study_meta(config)
 
     def get_clinical_data(self, config):
-        return [None, None]
+        samples = clinical_samples(config)
+        return [samples, None]
     
     def get_cancer_type(self, config):
         return None
@@ -44,17 +45,17 @@ class study:
         # write component files
         for component in [self.study_meta, self.cancer_type, self.case_list]:
             if component != None:
-                component.write(out_dir)
+                component.write_all(out_dir)
         for component in self.clinical_data:
             if component != None:
-                component.write(out_dir)
+                component.write_all(out_dir)
         for pipeline in self.pipelines:
             for datahandler in pipeline.datahandlers:
-                datahandler.write(out_dir)
+                datahandler.write_all(out_dir)
 
 
 class study_config(config):
-    """cBioPortal study config in CSVY format"""
+    """cBioPortal study config in Janus format"""
     pass
 
                 
@@ -65,23 +66,24 @@ class study_component:
     Eg. Study metadata, clinical sample/patient data, pipeline output
     """
 
-    OUTPUT_FILENAME = '_placeholder_'
+    DATA_FILENAME = '_data_placeholder_'
+    META_FILENAME = '_meta_placeholder_'
     
     def __init__(self, config):
         self.config = config
 
-    def write(self, out_dir):
+    def write_all(self, out_dir):
         pass
         
 
 class study_meta(study_component):
 
-    OUTPUT_FILENAME = 'meta_study.txt'
+    META_FILENAME = 'meta_study.txt'
     
     def __init__(self, config):
         self.study_meta = config.meta
         
-    def write(self, out_dir):
+    def write_all(self, out_dir):
         meta = {}
         for field in REQUIRED_STUDY_META_FIELDS:
             try:
@@ -92,6 +94,18 @@ class study_meta(study_component):
         for field in OPTIONAL_STUDY_META_FIELDS:
             if field in self.study_meta:
                 meta[field] = self.study_meta[field]
-        out = open(os.path.join(out_dir, self.OUTPUT_FILENAME), 'w')
+        out = open(os.path.join(out_dir, self.META_FILENAME), 'w')
         out.write(yaml.dump(meta, sort_keys=True))
         out.close()
+
+class clinical_samples(study_component):
+
+    DATA_FILENAME = 'data_clinical_samples.txt'
+    META_FILENAME = 'meta_clinical_samples.txt'
+
+    def __init__(self, config):
+        self.filename = config.get_sample_filename()
+        print(self.filename)
+
+    def write_all(self, out_dir):
+        print("### Placeholder: Sample output to "+out_dir)
