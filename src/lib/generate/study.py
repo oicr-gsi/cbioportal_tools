@@ -93,5 +93,5 @@ class study_meta(study_component):
             if field in self.study_meta:
                 meta[field] = self.study_meta[field]
         out = open(os.path.join(out_dir, self.OUTPUT_FILENAME), 'w')
-        out.write(yaml.dump(meta))
+        out.write(yaml.dump(meta, sort_keys=True))
         out.close()
