@@ -20,7 +20,9 @@ class TestStudy(unittest.TestCase):
 
     def test_file_output(self):
         checksums = {
+            'data_clinical_patients.txt': '59bf1e06bbb024d8baa2270be4afb357',
             'data_clinical_samples.txt': 'b6ab6437e9abbc86bf65f49a4136fe93',
+            'meta_clinical_patients.txt': '0de6a7ae349e16b26b68ac5a4eb62a0c',
             'meta_clinical_samples.txt': '42609db9577d6192113be9ffeba92292',
             'meta_study.txt': '5ca90314306ad1f1aae94bc345bd0a23'
         }
