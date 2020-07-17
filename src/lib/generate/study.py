@@ -19,7 +19,11 @@ class study:
         return study_meta(config)
 
     def get_clinical_data(self, config):
-        return [samples(config), patients(config)]
+        sample_component = samples(config)
+        if sample_component.is_empty():
+            raise ValueError("Clinical sample data is required")
+        patient_component = patients(config)
+        return [sample_component, patient_component]
     
     def get_cancer_type(self, config):
         return None
@@ -52,9 +56,9 @@ class study:
         for component in [self.study_meta, self.cancer_type, self.case_list]:
             if component != None:
                 component.write_all(out_dir)
-        for component in self.clinical_data:
-            if component != None:
-                component.write_all(out_dir)
+        for clinical_component in self.clinical_data:
+            if not clinical_component.is_empty():
+                clinical_component.write_all(out_dir)
         for pipeline in self.pipelines:
             for datahandler in pipeline.datahandlers:
                 datahandler.write_all(out_dir)
