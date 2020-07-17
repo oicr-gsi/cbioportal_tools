@@ -1,9 +1,16 @@
-#profile_name=All Patients
-#profile_description=All TEST Patients (5 Patients)
-Patient Identifier	Patient Name
-Patient Identifier	Patient Name
-STRING	STRING
-1	1
+#datatypes:
+#- STRING
+#- STRING
+#descriptions:
+#- Patient Identifier
+#- Patient Name
+#display_names:
+#- Patient Identifier
+#- Patient Name
+#priorities:
+#- '1'
+#- '1'
+#
 PATIENT_ID	PATIENT_DISPLAY_NAME
 OCT-01-0118	OCT-01-0118
 OCT-01-0266	OCT-01-0266

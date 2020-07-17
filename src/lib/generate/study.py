@@ -2,7 +2,7 @@
 
 import os
 
-from generate.components import study_meta, clinical_samples
+from generate.components import study_meta, patients, samples
 from generate.config import study_config
 
 class study:
@@ -19,8 +19,7 @@ class study:
         return study_meta(config)
 
     def get_clinical_data(self, config):
-        samples = clinical_samples(config)
-        return [samples, None]
+        return [samples(config), patients(config)]
     
     def get_cancer_type(self, config):
         return None

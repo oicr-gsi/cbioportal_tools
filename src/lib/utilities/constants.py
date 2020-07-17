@@ -1,5 +1,8 @@
 """Module to define constants"""
 
+PATIENT_DATATYPE = 'PATIENT_ATTRIBUTES'
+SAMPLE_DATATYPE = 'SAMPLE_ATTRIBUTES'
+
 REQUIRED_STUDY_META_FIELDS = [
     'type_of_cancer',
     'cancer_study_identifier',
