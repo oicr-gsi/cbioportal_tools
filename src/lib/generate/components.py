@@ -4,6 +4,7 @@ Eg. study metadata, clinical sample/patient data, pipeline outputs
 """
 
 import os
+import sys
 import yaml
 
 from utilities.config import config
@@ -67,24 +68,40 @@ class clinical_data_component(study_component):
     def __init__(self, config):
         self.cancer_study_identifier = config.get_cancer_study_identifier()
         clinical_config_path = config.get_clinical_config_path(self.DATATYPE)
-        self.config = clinical_config(clinical_config_path)
+        if clinical_config_path == None:
+            self.config = None
+            self.empty = True
+        else:
+            self.config = clinical_config(clinical_config_path)
+            self.empty = False
+
+    def is_empty(self):
+        return self.empty
 
     def write_data(self, out_dir):
-        out = open(os.path.join(out_dir, self.DATA_FILENAME), 'w')
-        for row in self.config.get_clinical_headers():
-            print('#'+'\t'.join(row), file=out)
-        print(self.config.data_as_tsv(), file=out)
-        out.close()
+        if self.is_empty():
+            msg = "Warning: datatype %s not configured, no data written" % self.DATATYPE
+            print(msg, file=sys.stderr) # TODO replace with logger
+        else:
+            out = open(os.path.join(out_dir, self.DATA_FILENAME), 'w')
+            for row in self.config.get_clinical_headers():
+                print('#'+'\t'.join(row), file=out)
+            print(self.config.data_as_tsv(), file=out)
+            out.close()
 
     def write_meta(self, out_dir):
-        meta = {}
-        meta['cancer_study_identifier'] = self.cancer_study_identifier
-        meta['genetic_alteration_type'] = 'CLINICAL'
-        meta['datatype'] = self.DATATYPE
-        meta['data_filename'] = self.DATA_FILENAME
-        out = open(os.path.join(out_dir, self.META_FILENAME), 'w')
-        out.write(yaml.dump(meta, sort_keys=True))
-        out.close()
+        if self.is_empty():
+            msg = "Warning: datatype %s not configured, no metadata written" % self.DATATYPE
+            print(msg, file=sys.stderr) # TODO replace with logger
+        else:
+            meta = {}
+            meta['cancer_study_identifier'] = self.cancer_study_identifier
+            meta['genetic_alteration_type'] = 'CLINICAL'
+            meta['datatype'] = self.DATATYPE
+            meta['data_filename'] = self.DATA_FILENAME
+            out = open(os.path.join(out_dir, self.META_FILENAME), 'w')
+            out.write(yaml.dump(meta, sort_keys=True))
+            out.close()
 
 class patients(clinical_data_component):
 

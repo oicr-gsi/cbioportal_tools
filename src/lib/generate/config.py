@@ -52,6 +52,8 @@ class clinical_config(config):
 class study_config(config):
     """cBioPortal study config in Janus format"""
 
+    EXPECTED_COLUMNS = 3
+
     def get_cancer_study_identifier(self):
         return self.meta['cancer_study_identifier']
 
@@ -59,7 +61,16 @@ class study_config(config):
         permitted = [utilities.constants.PATIENT_DATATYPE, utilities.constants.SAMPLE_DATATYPE]
         if datatype not in permitted:
             raise ValueError("Datatype %s is not in permitted values" % datatype)
-        # TODO patient config is optional; return None if not present
-        # TODO this returns the first value; warn if multiple values are present
-        filename = self.table.loc[self.table['DATAHANDLER']==datatype].iloc[0]['FILE_NAME']
-        return os.path.join(self.config_dir, filename)
+        # test what happens with missing datatype
+        dt_frame = self.table.loc[self.table['DATAHANDLER']==datatype]
+        if dt_frame.size == 0:
+            #  patient config is optional; return None if not present
+            config_path = None
+        else:
+            filename = dt_frame.iloc[0]['FILE_NAME']
+            if dt_frame.size > self.EXPECTED_COLUMNS:
+                msg = "Warning: Multiple config files appear to be present "+\
+                      "for %s; using first value: '%s'" % (datatype, filename)
+                print(msg, file=sys.stderr) # TODO replace with logger
+            config_path = os.path.join(self.config_dir, filename)
+        return config_path
