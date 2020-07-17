@@ -30,17 +30,26 @@ class study:
 
     def get_pipelines(self, config):
         return []
-        
-    def write_all(self, out_dir):
-        """Write all outputs to the given directory path"""
-        # validate the output directory
+
+    def is_valid_output_dir(self, out_dir):
+        """validate an output directory"""
+        # TODO use a logger instead of immediately raising error
+        valid = True
         if not os.path.exists(out_dir):
+            valid = False
             raise OSError("Output directory %s does not exist" % out_dir)
         elif not os.path.isdir(out_dir):
+            valid = False
             raise OSError("Output path %s is not a directory" % out_dir)
         elif not os.access(out_dir, os.W_OK):
+            valid = False
             raise OSError("Output path %s is not writable" % out_dir)
+        return valid
+
+    def write_all(self, out_dir):
+        """Write all outputs to the given directory path"""
         # write component files
+        self.is_valid_output_dir(out_dir)
         for component in [self.study_meta, self.cancer_type, self.case_list]:
             if component != None:
                 component.write_all(out_dir)
