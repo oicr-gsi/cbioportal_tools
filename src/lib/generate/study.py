@@ -10,34 +10,38 @@ class study:
 
     def __init__(self, config_path):
         config = study_config(config_path)
+        self.study_id = config.get_cancer_study_identifier()
         self.study_meta = self.get_study_meta(config) # required
         self.clinical_data = self.get_clinical_data(config) # sample data is required
         self.cancer_type = self.get_cancer_type(config)
-        self.case_lists = self.get_case_lists(config)
         self.pipelines = self.get_pipelines(config) # warn if empty
+        self.case_lists = self.get_case_lists(config)
 
     def get_study_meta(self, config):
         return study_meta(config)
 
     def get_clinical_data(self, config):
         # read sample data
-        study_id = config.get_cancer_study_identifier()
         sample_config_path = config.get_sample_config_path()
         if sample_config_path == None:
             raise ValueError("Clinical sample data is required, but has not been configured")
-        sample_component = samples(sample_config_path, study_id)
+        sample_component = samples(sample_config_path, self.study_id)
         # read optional patient data
         patient_config_path = config.get_patient_config_path()
         if patient_config_path == None:
             patient_component = None
         else:
-            patient_component = patients(patient_config_path, study_id)
+            patient_component = patients(patient_config_path, self.study_id)
         return [sample_component, patient_component]
     
     def get_cancer_type(self, config):
         return cancer_type(config.get_cancer_type_config_path())
 
     def get_case_lists(self, config):
+        # TODO:
+        # - generate case lists for pipelines which require them (use self.pipelines)
+        # - read and generate case lists from custom config
+        # - use self.study_id for case_list construction
         return []
 
     def get_pipelines(self, config):
