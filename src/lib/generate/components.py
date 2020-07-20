@@ -25,10 +25,12 @@ class study_component:
         self.config = config
 
     def write_data(self, out_dir):
-        pass
+        # TODO use logger instead
+        print("Warning: Placeholder method of base class, should not be called", file=sys.stderr)
 
     def write_meta(self, out_dir):
-        pass
+        # TODO use logger instead
+        print("Warning: Placeholder method of base class, should not be called", file=sys.stderr)
 
     def write_all(self, out_dir):
         self.write_data(out_dir)
@@ -59,7 +61,33 @@ class cancer_type(study_component):
         out.close()
 
 class case_list(study_component):
-    pass
+
+    def __init__(self, study_id, suffix, name, description, samples, category=None):
+        self.cancer_study_identifier = study_id
+        self.stable_id = "%s_%s" % (study_id, suffix)
+        self.case_list_name = name
+        self.case_list_description = description
+        self.samples = samples
+        self.category = category
+
+    @classmethod
+    def from_config_path(klass, path):
+        # TODO create & return a new instance of klass with data read from path
+        # ie. klass(study_id, suffix, name, description, samples, category)
+        pass
+
+    def write_all(self, out_dir, filename):
+        data = {}
+        data['cancer_study_identifier'] = self.cancer_study_identifier
+        data['stable_id'] = self.stable_id
+        data['case_list_name'] = self.case_list_name
+        data['case_list_description'] = self.case_list_description
+        data['case_list_ids'] = "\t".join(self.samples)
+        if self.category != None:
+            data['category'] = self.category
+        out = open(os.path.join(out_dir, filename), 'w')
+        out.write(yaml.dump(meta))
+        out.close()
     
         
 class clinical_data_component(study_component):
