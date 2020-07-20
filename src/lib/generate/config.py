@@ -57,8 +57,6 @@ class clinical_config(config):
 class study_config(config):
     """cBioPortal study config in Janus format"""
 
-    EXPECTED_COLUMNS = 3
-
     def get_cancer_study_identifier(self):
         return self.meta['cancer_study_identifier']
 
