@@ -2,7 +2,7 @@
 
 import os
 
-from generate.components import study_meta, patients, samples
+from generate.components import cancer_type, study_meta, patients, samples
 from generate.config import study_config
 import utilities.constants
 
@@ -22,12 +22,12 @@ class study:
     def get_clinical_data(self, config):
         # read sample data
         study_id = config.get_cancer_study_identifier()
-        sample_config_path = config.get_clinical_config_path(utilities.constants.SAMPLE_DATATYPE)
+        sample_config_path = config.get_sample_config_path()
         if sample_config_path == None:
             raise ValueError("Clinical sample data is required, but has not been configured")
         sample_component = samples(sample_config_path, study_id)
         # read optional patient data
-        patient_config_path = config.get_clinical_config_path(utilities.constants.PATIENT_DATATYPE)
+        patient_config_path = config.get_patient_config_path()
         if patient_config_path == None:
             patient_component = None
         else:
@@ -35,7 +35,7 @@ class study:
         return [sample_component, patient_component]
     
     def get_cancer_type(self, config):
-        return None
+        return cancer_type(config.get_cancer_type_config_path())
     
     def get_case_list(self, config):
         return None

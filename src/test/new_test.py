@@ -20,8 +20,10 @@ class TestStudy(unittest.TestCase):
 
     def test_file_output(self):
         checksums = {
-            'data_clinical_patients.txt': '59bf1e06bbb024d8baa2270be4afb357',
-            'data_clinical_samples.txt': 'b6ab6437e9abbc86bf65f49a4136fe93',
+            'data_cancer_type.txt': 'c23f3a55d260022616a5a95b837c49d0',
+            'data_clinical_patients.txt': '852777b8f1bc60b134c9dc999ac87a24',
+            'data_clinical_samples.txt': '199053f38a24c52072418a42dba3fdf4',
+            'meta_cancer_type.txt': '19d950648288bb7428e8aaf5ee2939a0',
             'meta_clinical_patients.txt': '0de6a7ae349e16b26b68ac5a4eb62a0c',
             'meta_clinical_samples.txt': '42609db9577d6192113be9ffeba92292',
             'meta_study.txt': '5ca90314306ad1f1aae94bc345bd0a23'
