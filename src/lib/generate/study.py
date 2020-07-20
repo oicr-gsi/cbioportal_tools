@@ -4,6 +4,7 @@ import os
 
 from generate.components import study_meta, patients, samples
 from generate.config import study_config
+import utilities.constants
 
 class study:
 
@@ -19,10 +20,18 @@ class study:
         return study_meta(config)
 
     def get_clinical_data(self, config):
-        sample_component = samples(config)
-        if sample_component.is_empty():
-            raise ValueError("Clinical sample data is required")
-        patient_component = patients(config)
+        # read sample data
+        study_id = config.get_cancer_study_identifier()
+        sample_config_path = config.get_clinical_config_path(utilities.constants.SAMPLE_DATATYPE)
+        if sample_config_path == None:
+            raise ValueError("Clinical sample data is required, but has not been configured")
+        sample_component = samples(sample_config_path, study_id)
+        # read optional patient data
+        patient_config_path = config.get_clinical_config_path(utilities.constants.PATIENT_DATATYPE)
+        if patient_config_path == None:
+            patient_component = None
+        else:
+            patient_component = patients(patient_config_path, study_id)
         return [sample_component, patient_component]
     
     def get_cancer_type(self, config):
@@ -57,7 +66,7 @@ class study:
             if component != None:
                 component.write_all(out_dir)
         for clinical_component in self.clinical_data:
-            if not clinical_component.is_empty():
+            if clinical_component != None:
                 clinical_component.write_all(out_dir)
         for pipeline in self.pipelines:
             for datahandler in pipeline.datahandlers:

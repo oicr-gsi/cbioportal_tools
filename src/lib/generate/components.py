@@ -61,47 +61,30 @@ class study_meta(study_component):
 
 class clinical_data_component(study_component):
 
+    """Clinical patient/sample data in a cBioPortal study"""
+
     DATATYPE = '_placeholder_'
-    DATA_FILENAME = '_placeholder_'
-    META_FILENAME = '_placeholder_'
 
-    def __init__(self, config):
-        self.cancer_study_identifier = config.get_cancer_study_identifier()
-        clinical_config_path = config.get_clinical_config_path(self.DATATYPE)
-        if clinical_config_path == None:
-            self.config = None
-            self.empty = True
-        else:
-            self.config = clinical_config(clinical_config_path)
-            self.empty = False
-
-    def is_empty(self):
-        return self.empty
+    def __init__(self, clinical_config_path, study_id):
+        self.cancer_study_identifier = study_id
+        self.config = clinical_config(clinical_config_path)
 
     def write_data(self, out_dir):
-        if self.is_empty():
-            msg = "Warning: datatype %s not configured, no data written" % self.DATATYPE
-            print(msg, file=sys.stderr) # TODO replace with logger
-        else:
-            out = open(os.path.join(out_dir, self.DATA_FILENAME), 'w')
-            for row in self.config.get_clinical_headers():
-                print('#'+'\t'.join(row), file=out)
-            print(self.config.data_as_tsv(), file=out)
-            out.close()
+        out = open(os.path.join(out_dir, self.DATA_FILENAME), 'w')
+        for row in self.config.get_clinical_headers():
+            print('#'+'\t'.join(row), file=out)
+        print(self.config.data_as_tsv(), file=out)
+        out.close()
 
     def write_meta(self, out_dir):
-        if self.is_empty():
-            msg = "Warning: datatype %s not configured, no metadata written" % self.DATATYPE
-            print(msg, file=sys.stderr) # TODO replace with logger
-        else:
-            meta = {}
-            meta['cancer_study_identifier'] = self.cancer_study_identifier
-            meta['genetic_alteration_type'] = 'CLINICAL'
-            meta['datatype'] = self.DATATYPE
-            meta['data_filename'] = self.DATA_FILENAME
-            out = open(os.path.join(out_dir, self.META_FILENAME), 'w')
-            out.write(yaml.dump(meta, sort_keys=True))
-            out.close()
+        meta = {}
+        meta['cancer_study_identifier'] = self.cancer_study_identifier
+        meta['genetic_alteration_type'] = 'CLINICAL'
+        meta['datatype'] = self.DATATYPE
+        meta['data_filename'] = self.DATA_FILENAME
+        out = open(os.path.join(out_dir, self.META_FILENAME), 'w')
+        out.write(yaml.dump(meta, sort_keys=True))
+        out.close()
 
 class patients(clinical_data_component):
 
