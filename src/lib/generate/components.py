@@ -58,30 +58,10 @@ class cancer_type(study_component):
         out.write(yaml.dump(meta, sort_keys=True))
         out.close()
 
-class study_meta(study_component):
-
-    """Metadata for the study; no data in this component"""
-
-    META_FILENAME = 'meta_study.txt'
+class case_list(study_component):
+    pass
     
-    def __init__(self, study_config):
-        self.study_meta = study_config.get_meta()
         
-    def write_all(self, out_dir):
-        meta = {}
-        for field in utilities.constants.REQUIRED_STUDY_META_FIELDS:
-            try:
-                meta[field] = self.study_meta[field]
-            except KeyError:
-                msg = "Missing required study meta field "+field
-                print(msg, file=sys.stderr) # TODO add logger
-        for field in utilities.constants.OPTIONAL_STUDY_META_FIELDS:
-            if field in self.study_meta:
-                meta[field] = self.study_meta[field]
-        out = open(os.path.join(out_dir, self.META_FILENAME), 'w')
-        out.write(yaml.dump(meta, sort_keys=True))
-        out.close()
-
 class clinical_data_component(study_component):
 
     """Clinical patient/sample data in a cBioPortal study"""
@@ -121,3 +101,28 @@ class samples(clinical_data_component):
     DATATYPE = utilities.constants.SAMPLE_DATATYPE
     DATA_FILENAME = 'data_clinical_samples.txt'
     META_FILENAME = 'meta_clinical_samples.txt'
+
+
+class study_meta(study_component):
+
+    """Metadata for the study; no data in this component"""
+
+    META_FILENAME = 'meta_study.txt'
+
+    def __init__(self, study_config):
+        self.study_meta = study_config.get_meta()
+    
+    def write_all(self, out_dir):
+        meta = {}
+        for field in utilities.constants.REQUIRED_STUDY_META_FIELDS:
+            try:
+                meta[field] = self.study_meta[field]
+            except KeyError:
+                msg = "Missing required study meta field "+field
+                print(msg, file=sys.stderr) # TODO add logger
+        for field in utilities.constants.OPTIONAL_STUDY_META_FIELDS:
+            if field in self.study_meta:
+                meta[field] = self.study_meta[field]
+        out = open(os.path.join(out_dir, self.META_FILENAME), 'w')
+        out.write(yaml.dump(meta, sort_keys=True))
+        out.close()

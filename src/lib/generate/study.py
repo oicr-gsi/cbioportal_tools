@@ -13,7 +13,7 @@ class study:
         self.study_meta = self.get_study_meta(config) # required
         self.clinical_data = self.get_clinical_data(config) # sample data is required
         self.cancer_type = self.get_cancer_type(config)
-        self.case_list = self.get_case_list(config)
+        self.case_lists = self.get_case_lists(config)
         self.pipelines = self.get_pipelines(config) # warn if empty
 
     def get_study_meta(self, config):
@@ -36,9 +36,9 @@ class study:
     
     def get_cancer_type(self, config):
         return cancer_type(config.get_cancer_type_config_path())
-    
-    def get_case_list(self, config):
-        return None
+
+    def get_case_lists(self, config):
+        return []
 
     def get_pipelines(self, config):
         return []
@@ -62,9 +62,17 @@ class study:
         """Write all outputs to the given directory path"""
         # write component files
         self.is_valid_output_dir(out_dir)
-        for component in [self.study_meta, self.cancer_type, self.case_list]:
+        case_list_dir = os.path.join(out_dir, 'case_lists')
+        if len(self.case_lists) > 0:
+            if os.path.exists(case_list_dir):
+                self.is_valid_output_dir(case_list_dir)
+            else:
+                os.makedirs(case_list_dir)
+        for component in [self.study_meta, self.cancer_type]:
             if component != None:
                 component.write_all(out_dir)
+        for case_list in self.case_lists:
+            case_list.write_all(case_list_dir)
         for clinical_component in self.clinical_data:
             if clinical_component != None:
                 clinical_component.write_all(out_dir)

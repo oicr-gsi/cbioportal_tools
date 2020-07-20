@@ -45,7 +45,7 @@ class config:
                     elif boundary_expr.match(line):
                         break
                     else:
-                        raise ValueError("Lines in YAML header should begin with #")
+                        raise ConfigError("Lines in YAML header should begin with #")
         meta = yaml.safe_load(''.join(yaml_lines))
         return (meta, skiprows)
 
