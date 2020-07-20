@@ -17,10 +17,10 @@ class config:
     
     def __init__(self, input_path, strict=False):
         self.config_dir = os.path.abspath(os.path.dirname(input_path))
-        self.meta = self.read_meta(input_path)
+        [self.meta, skip_total] = self.read_meta(input_path)
         if strict:
             self.validate_meta_fields()
-        self.table = pd.read_csv(input_path, sep="\t", comment="#")
+        self.table = pd.read_csv(input_path, sep="\t", comment="#", skiprows=skip_total)
 
     def data_as_tsv(self):
         return self.table.to_csv(sep="\t", index=False)
@@ -32,12 +32,22 @@ class config:
         yaml_lines = []
         with open(input_path) as in_file:
             body = False
+            boundary_expr = re.compile('^(\.\.\.)|(---)$') # no regex quantifiers; avoids FutureWarning
+            skiprows = 0 # number of header rows to skip when reading TSV
             for line in in_file.readlines():
-                if re.match('#', line):
-                    yaml_lines.append(line.lstrip('#'))
-                else:
-                    break
-        return yaml.safe_load(''.join(yaml_lines))
+                if body == False and boundary_expr.match(line):
+                    body = True
+                    skiprows = 1
+                elif body:
+                    skiprows += 1
+                    if re.match('#', line):
+                        yaml_lines.append(line.lstrip('#'))
+                    elif boundary_expr.match(line):
+                        break
+                    else:
+                        raise ValueError("Lines in YAML header should begin with #")
+        meta = yaml.safe_load(''.join(yaml_lines))
+        return (meta, skiprows)
 
     def validate_meta_fields(self):
         missing_required = []

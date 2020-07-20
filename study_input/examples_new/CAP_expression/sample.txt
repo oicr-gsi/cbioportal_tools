@@ -1,3 +1,4 @@
+---
 #datatypes:
 #- STRING
 #- STRING
@@ -10,7 +11,7 @@
 #priorities:
 #- '1'
 #- '1'
-#
+---
 PATIENT_ID	SAMPLE_ID
 OCT-01-0118	OCT-01-0118-CAP
 OCT-01-0266	OCT-01-0266-CAP
