@@ -6,6 +6,10 @@ import sys
 from utilities.config import config
 import utilities.constants
 
+class cancer_type_config(config):
+    """cBioPortal cancer type config"""
+    pass
+
 class clinical_config(config):
     """Clinical sample/patient config"""
 
@@ -57,14 +61,11 @@ class study_config(config):
     def get_cancer_study_identifier(self):
         return self.meta['cancer_study_identifier']
 
-    def get_clinical_config_path(self, datatype):
-        permitted = [utilities.constants.PATIENT_DATATYPE, utilities.constants.SAMPLE_DATATYPE]
-        if datatype not in permitted:
-            raise ValueError("Datatype %s is not in permitted values" % datatype)
-        # test what happens with missing datatype
+    def get_config_path(self, datatype):
+        """General-purpose method to get the config path for a given datatype"""
         dt_frame = self.table.loc[self.table['DATAHANDLER']==datatype]
         if dt_frame.size == 0:
-            #  patient config is optional; return None if not present
+            # some config types are optional; return None if path is not found
             config_path = None
         else:
             filename = dt_frame.iloc[0]['FILE_NAME']
@@ -74,3 +75,12 @@ class study_config(config):
                 print(msg, file=sys.stderr) # TODO replace with logger
             config_path = os.path.join(self.config_dir, filename)
         return config_path
+
+    def get_cancer_type_config_path(self):
+        return self.get_config_path(utilities.constants.CANCER_TYPE_DATATYPE)
+
+    def get_patient_config_path(self):
+        return self.get_config_path(utilities.constants.PATIENT_DATATYPE)
+
+    def get_sample_config_path(self):
+        return self.get_config_path(utilities.constants.SAMPLE_DATATYPE)

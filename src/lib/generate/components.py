@@ -9,7 +9,7 @@ import yaml
 
 from utilities.config import config
 import utilities.constants
-from generate.config import clinical_config
+from generate.config import cancer_type_config, clinical_config
 
 class study_component:
 
@@ -35,14 +35,37 @@ class study_component:
         self.write_meta(out_dir)
         
 
+class cancer_type(study_component):
+
+    DATATYPE = utilities.constants.CANCER_TYPE_DATATYPE
+    DATA_FILENAME = 'data_cancer_type.txt'
+    META_FILENAME = 'meta_cancer_type.txt'
+
+    def __init__(self, cancer_type_config_path):
+        self.config = cancer_type_config(cancer_type_config_path)
+
+    def write_data(self, out_dir):
+        out = open(os.path.join(out_dir, self.DATA_FILENAME), 'w')
+        print(self.config.data_as_tsv(), end='', file=out)
+        out.close()
+
+    def write_meta(self, out_dir):
+        meta = {}
+        meta['genetic_alteration_type'] = self.DATATYPE
+        meta['datatype'] = self.DATATYPE
+        meta['data_filename'] = self.DATA_FILENAME
+        out = open(os.path.join(out_dir, self.META_FILENAME), 'w')
+        out.write(yaml.dump(meta, sort_keys=True))
+        out.close()
+
 class study_meta(study_component):
 
     """Metadata for the study; no data in this component"""
 
     META_FILENAME = 'meta_study.txt'
     
-    def __init__(self, config):
-        self.study_meta = config.meta
+    def __init__(self, study_config):
+        self.study_meta = study_config.get_meta()
         
     def write_all(self, out_dir):
         meta = {}
@@ -73,7 +96,7 @@ class clinical_data_component(study_component):
         out = open(os.path.join(out_dir, self.DATA_FILENAME), 'w')
         for row in self.config.get_clinical_headers():
             print('#'+'\t'.join(row), file=out)
-        print(self.config.data_as_tsv(), file=out)
+        print(self.config.data_as_tsv(), end='', file=out)
         out.close()
 
     def write_meta(self, out_dir):

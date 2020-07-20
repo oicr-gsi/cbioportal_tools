@@ -24,7 +24,10 @@ class config:
 
     def data_as_tsv(self):
         return self.table.to_csv(sep="\t", index=False)
-        
+
+    def get_meta(self):
+        return self.meta
+
     def read_meta(self, input_path):
         yaml_lines = []
         with open(input_path) as in_file:
