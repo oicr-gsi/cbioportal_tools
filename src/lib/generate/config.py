@@ -2,6 +2,7 @@
 
 import os
 import sys
+from math import inf as infinity
 
 from utilities.config import config
 import utilities.constants
@@ -61,26 +62,45 @@ class study_config(config):
     def get_cancer_study_identifier(self):
         return self.meta['cancer_study_identifier']
 
-    def get_config_path(self, datatype):
-        """General-purpose method to get the config path for a given datatype"""
+    def get_config_paths(self, datatype, required_min=0, allowed_max=infinity):
+        """Get config paths for a given datatype; raise error if total found is incorrect"""
         dt_frame = self.table.loc[self.table['DATAHANDLER']==datatype]
-        if dt_frame.size == 0:
-            # some config types are optional; return None if path is not found
-            config_path = None
+        total_rows = len(dt_frame.index)
+        if total_rows < required_min:
+            msg = "Error: Expected at least %i rows for datatype %s, found %i" \
+                  % (required_min, datatype, total_rows)
+            print(msg, file=sys.stderr) # TODO replace with logger
+            raise ValueError(msg)
+        elif total_rows > allowed_max:
+            msg = "Error: Expected at most %i rows for datatype %s, found %i" \
+                  % (allowed_max, datatype, total_rows)
+            print(msg, file=sys.stderr) # TODO replace with logger
+            raise ValueError(msg)
+        config_paths = []
+        for i in range(total_rows):
+            filename = dt_frame.iloc[i]['FILE_NAME']
+            config_paths.append(os.path.join(self.config_dir, filename))
+        return config_paths
+
+    def get_single_config_path(self, datatype, required=False):
+        """Find a config path expected to occur at most once"""
+        if required:
+            required_min = 1
         else:
-            filename = dt_frame.iloc[0]['FILE_NAME']
-            if dt_frame.size > self.EXPECTED_COLUMNS:
-                msg = "Warning: Multiple config files appear to be present "+\
-                      "for %s; using first value: '%s'" % (datatype, filename)
-                print(msg, file=sys.stderr) # TODO replace with logger
-            config_path = os.path.join(self.config_dir, filename)
-        return config_path
+            required_min = 0
+        paths = self.get_config_paths(datatype, required_min, allowed_max=1)
+        if len(paths) > 0:
+            path = paths[0]
+        else:
+            path = None
+        return path
 
     def get_cancer_type_config_path(self):
-        return self.get_config_path(utilities.constants.CANCER_TYPE_DATATYPE)
+        return self.get_single_config_path(utilities.constants.CANCER_TYPE_DATATYPE)
 
     def get_patient_config_path(self):
-        return self.get_config_path(utilities.constants.PATIENT_DATATYPE)
+        return self.get_single_config_path(utilities.constants.PATIENT_DATATYPE)
 
     def get_sample_config_path(self):
-        return self.get_config_path(utilities.constants.SAMPLE_DATATYPE)
+        # sample config is required
+        return self.get_single_config_path(utilities.constants.SAMPLE_DATATYPE, True)
