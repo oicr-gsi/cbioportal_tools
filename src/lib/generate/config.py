@@ -1,7 +1,7 @@
 """Config files for components of a cBioPortal study"""
 
+import logging
 import os
-import sys
 from math import inf as infinity
 
 from utilities.config import config
@@ -29,8 +29,9 @@ class clinical_config(config):
 
     # TODO check validity of table body
 
-    def __init__(self, input_path, strict=False):
-        super().__init__(input_path, strict)
+    def __init__(self, input_path, log_level=logging.WARNING, strict=False):
+        super().__init__(input_path, log_level, strict)
+        self.logger = self.get_logger(log_level, __name__)
         self.PATIENT_DATATYPE = utilities.constants.PATIENT_DATATYPE
         self.SAMPLE_DATATYPE = utilities.constants.SAMPLE_DATATYPE
 
@@ -48,19 +49,24 @@ class clinical_config(config):
             raise ValueError(msg)
         for datatype in datatypes:
             if not self.is_valid_type(datatype):
-                raise ValueError("Type %s is not a valid cBioPortal datatype" % datatype)
+                msg = "Type %s is not a valid cBioPortal datatype" % datatype
+                self.logger.error(msg)
+                raise ValueError(msg)
         for priority in priorities:
             try:
                 num = int(priority)
             except ValueError:
-                msg = "Priority '%s' is not an integer"
-                print(msg, file=sys.stderr) # TODO add logger
+                self.logger.error("Priority '%s' is not an integer")
                 raise
         return [display_names, descriptions, datatypes, priorities]
 
 
 class study_config(config):
     """cBioPortal study config in Janus format"""
+
+    def __init__(self, input_path, log_level=logging.WARNING, strict=False):
+        super().__init__(input_path, log_level, strict)
+        self.logger = self.get_logger(log_level, __name__)
 
     def get_cancer_study_identifier(self):
         return self.meta['cancer_study_identifier']
@@ -70,14 +76,14 @@ class study_config(config):
         dt_frame = self.table.loc[self.table['DATAHANDLER']==datatype]
         total_rows = len(dt_frame.index)
         if total_rows < required_min:
-            msg = "Error: Expected at least %i rows for datatype %s, found %i" \
+            msg = "Expected at least %i rows for datatype %s, found %i" \
                   % (required_min, datatype, total_rows)
-            print(msg, file=sys.stderr) # TODO replace with logger
+            self.logger.error(msg)
             raise ValueError(msg)
         elif total_rows > allowed_max:
-            msg = "Error: Expected at most %i rows for datatype %s, found %i" \
+            msg = "Expected at most %i rows for datatype %s, found %i" \
                   % (allowed_max, datatype, total_rows)
-            print(msg, file=sys.stderr) # TODO replace with logger
+            self.logger.error(msg)
             raise ValueError(msg)
         config_paths = []
         for i in range(total_rows):

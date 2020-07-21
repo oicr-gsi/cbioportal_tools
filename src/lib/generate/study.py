@@ -1,15 +1,17 @@
 """Class to represent a study directory, formatted for upload to cBioPortal"""
 
+import logging
 import os
-import sys # TODO remove when logging is in place
 
 from generate.components import cancer_type, case_list, study_meta, patients, samples
 from generate.config import study_config
+from utilities.base import base
 import utilities.constants
 
-class study:
+class study(base):
 
-    def __init__(self, config_path):
+    def __init__(self, config_path, log_level=logging.WARNING):
+        self.logger = self.get_logger(log_level, __name__)
         config = study_config(config_path)
         self.study_id = config.get_cancer_study_identifier()
         self.study_meta = self.get_study_meta(config) # required
@@ -25,7 +27,9 @@ class study:
         # read sample data
         sample_config_path = config.get_sample_config_path()
         if sample_config_path == None:
-            raise ValueError("Clinical sample data is required, but has not been configured")
+            msg = "Clinical sample data is required, but has not been configured"
+            self.logger.error(msg)
+            raise ValueError(msg)
         sample_component = samples(sample_config_path, self.study_id)
         # read optional patient data
         patient_config_path = config.get_patient_config_path()
@@ -41,8 +45,8 @@ class study:
     def get_case_lists(self, config):
         # TODO:
         # - generate case lists for pipelines which require them (use self.pipelines)
-        # - read and generate case lists from custom config
-        # - use self.study_id for case_list construction
+
+        # generate custom case lists from config files
         case_list_config_paths = config.get_case_list_config_paths()
         case_lists = []
         for path in case_list_config_paths:
@@ -54,23 +58,26 @@ class study:
 
     def is_valid_output_dir(self, out_dir):
         """validate an output directory"""
-        # TODO use a logger instead of immediately raising error
         valid = True
         if not os.path.exists(out_dir):
             valid = False
-            raise OSError("Output directory %s does not exist" % out_dir)
+            self.logger.error("Output directory %s does not exist" % out_dir)
         elif not os.path.isdir(out_dir):
             valid = False
-            raise OSError("Output path %s is not a directory" % out_dir)
+            self.logger.error("Output path %s is not a directory" % out_dir)
         elif not os.access(out_dir, os.W_OK):
             valid = False
-            raise OSError("Output path %s is not writable" % out_dir)
+            self.logger.error("Output path %s is not writable" % out_dir)
         return valid
 
     def write_all(self, out_dir):
         """Write all outputs to the given directory path"""
         # write component files
-        self.is_valid_output_dir(out_dir)
+        valid = self.is_valid_output_dir(out_dir)
+        if not valid:
+            msg = "Invalid output directory %s; exiting" % out_dir
+            self.logger.error(msg)
+            raise OSError(msg)
         case_list_dir = os.path.join(out_dir, 'case_lists')
         if len(self.case_lists) > 0:
             if os.path.exists(case_list_dir):
