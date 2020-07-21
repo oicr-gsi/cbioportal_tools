@@ -3,12 +3,14 @@
 # See http://csvy.org/ and https://cran.r-project.org/web/packages/csvy/readme/README.html
 
 import pandas as pd
+import logging
 import re
 import os
-import sys
 import yaml
 
-class config:
+from utilities.base import base
+
+class config(base):
 
     # TODO validate the CSV contents against a schema, eg. using https://pypi.org/project/csvvalidator/
 
@@ -22,7 +24,8 @@ class config:
     REQUIRED_META_FIELDS = []
     OPTIONAL_META_FIELDS = []
     
-    def __init__(self, input_path, strict=False):
+    def __init__(self, input_path, log_level=logging.WARNING, strict=False):
+        self.logger = self.get_logger(log_level, __name__)
         self.config_dir = os.path.abspath(os.path.dirname(input_path))
         [self.meta, skip_total] = self.read_meta(input_path)
         if strict:
@@ -58,9 +61,13 @@ class config:
                         body = False
                         break
                     else:
-                        raise ConfigError("Lines in YAML header should begin with #")
+                        msg = "Lines in YAML header should begin with #"
+                        self.logger.error(msg)
+                        raise ConfigError(msg)
             if body:
-                raise ConfigError("YAML header section opened with ... or ---, but never closed")
+                msg = "YAML header section opened with ... or ---, but never closed"
+                self.logger.error(msg)
+                raise ConfigError(msg)
         meta = yaml.safe_load(''.join(yaml_lines))
         return (meta, skip_rows)
 
@@ -77,11 +84,10 @@ class config:
             if field not in self.expected_fields():
                 unexpected.append(field)
         if len(unexpected) > 0:
-            msg = 'Unexpected metadata fields found: '+', '.join(unexpected)
-            print(msg, file=sys.stderr) # TODO add a logger; warn
+            self.logger.warn('Unexpected metadata fields found: '+', '.join(unexpected))
         if len(missing_required) > 0:
             msg = 'Missing required metadata fields: '+', '.join(missing_required)
-            print(msg, file=sys.stderr) # TODO add a logger; error
+            self.logger.error(msg)
             raise ConfigError(msg)
 
 class ConfigError(Exception):

@@ -3,15 +3,15 @@
 Eg. study metadata, clinical sample/patient data, pipeline outputs
 """
 
+import logging
 import os
-import sys
 import yaml
 
-from utilities.config import config
+from utilities.base import base
 import utilities.constants
 from generate.config import cancer_type_config, case_list_config, clinical_config
 
-class study_component:
+class study_component(base):
 
     """
     Base class for data/metadata components of a cBioPortal study
@@ -21,16 +21,15 @@ class study_component:
     DATA_FILENAME = '_data_placeholder_'
     META_FILENAME = '_meta_placeholder_'
     
-    def __init__(self, config):
+    def __init__(self, config, log_level=logging.WARN):
+        self.logger = self.get_logger(log_level, __name__)
         self.config = config
 
     def write_data(self, out_dir):
-        # TODO use logger instead
-        print("Warning: Placeholder method of base class, should not be called", file=sys.stderr)
+        self.logger.warn("Placeholder write_data method of base class, should not be called")
 
     def write_meta(self, out_dir):
-        # TODO use logger instead
-        print("Warning: Placeholder method of base class, should not be called", file=sys.stderr)
+        self.logger.warn("Placeholder write_meta method of base class, should not be called")
 
     def write_all(self, out_dir):
         self.write_data(out_dir)
@@ -159,17 +158,19 @@ class study_meta(study_component):
 
     META_FILENAME = 'meta_study.txt'
 
-    def __init__(self, study_config):
+    def __init__(self, study_config, log_level=logging.WARN):
+        self.logger = self.get_logger(log_level, __name__)
         self.study_meta = study_config.get_meta()
     
     def write_all(self, out_dir):
         meta = {}
+        # TODO check all required fields are present
         for field in utilities.constants.REQUIRED_STUDY_META_FIELDS:
             try:
                 meta[field] = self.study_meta[field]
             except KeyError:
                 msg = "Missing required study meta field "+field
-                print(msg, file=sys.stderr) # TODO add logger
+                self.logger.error(msg)
         for field in utilities.constants.OPTIONAL_STUDY_META_FIELDS:
             if field in self.study_meta:
                 meta[field] = self.study_meta[field]
