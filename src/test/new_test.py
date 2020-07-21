@@ -14,7 +14,13 @@ class TestStudy(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory(prefix='janus_study_test_')
         #self.outDir = os.path.join(self.tmp.name, 'CAP_expression_test')
         #os.mkdir(self.outDir)
+        ### temporary setup for output directory -- won't be deleted on test exit
         self.outDir = os.path.join('/tmp', 'CAP_expression_test')
+        from shutil import rmtree
+        if os.path.exists(self.outDir):
+            rmtree(self.outDir)
+        os.mkdir(self.outDir)
+        ###
         test_study = study(os.path.join(self.dataDir, 'CAP_expression', 'study.txt'))
         test_study.write_all(self.outDir)
 
@@ -26,7 +32,8 @@ class TestStudy(unittest.TestCase):
             'meta_cancer_type.txt': '19d950648288bb7428e8aaf5ee2939a0',
             'meta_clinical_patients.txt': '0de6a7ae349e16b26b68ac5a4eb62a0c',
             'meta_clinical_samples.txt': '42609db9577d6192113be9ffeba92292',
-            'meta_study.txt': '5ca90314306ad1f1aae94bc345bd0a23'
+            'meta_study.txt': '5ca90314306ad1f1aae94bc345bd0a23',
+            'case_lists/cases_merp.txt': '43685fab767e5961a11e68a45d68c5ec'
         }
         for name in checksums.keys():
             outPath = os.path.join(self.outDir, name)
