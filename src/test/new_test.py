@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-import hashlib, os, tempfile, unittest
+import hashlib, logging, os, tempfile, unittest
 
 from generate.study import study
 
@@ -21,7 +21,8 @@ class TestStudy(unittest.TestCase):
             rmtree(self.outDir)
         os.mkdir(self.outDir)
         ###
-        test_study = study(os.path.join(self.dataDir, 'CAP_expression', 'study.txt'))
+        config_path = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
+        test_study = study(config_path, log_level=logging.DEBUG)
         test_study.write_all(self.outDir)
 
     def test_file_output(self):
