@@ -12,6 +12,13 @@ class config:
 
     # TODO validate the CSV contents against a schema, eg. using https://pypi.org/project/csvvalidator/
 
+    # The optional YAML header block must:
+    # - be at the start of the file
+    # - start and finish with a line consisting of only '...' or '---'
+    # - have body lines which each start with a #
+    #
+    # Outwith the header, a line starting with # is treated as a comment and ignored
+
     REQUIRED_META_FIELDS = []
     OPTIONAL_META_FIELDS = []
     
@@ -30,24 +37,32 @@ class config:
 
     def read_meta(self, input_path):
         yaml_lines = []
+        line_count = 0
+        skip_rows = 0 # number of header rows to skip
         with open(input_path) as in_file:
             body = False
             boundary_expr = re.compile('^(\.\.\.)|(---)$') # no regex quantifiers; avoids FutureWarning
-            skiprows = 0 # number of header rows to skip when reading TSV
             for line in in_file.readlines():
-                if body == False and boundary_expr.match(line):
-                    body = True
-                    skiprows = 1
+                line_count += 1
+                if line_count == 1:
+                    if boundary_expr.match(line):
+                        skip_rows = 1
+                        body = True
+                    else:
+                        break
                 elif body:
-                    skiprows += 1
+                    skip_rows += 1
                     if re.match('#', line):
                         yaml_lines.append(line.lstrip('#'))
                     elif boundary_expr.match(line):
+                        body = False
                         break
                     else:
                         raise ConfigError("Lines in YAML header should begin with #")
+            if body:
+                raise ConfigError("YAML header section opened with ... or ---, but never closed")
         meta = yaml.safe_load(''.join(yaml_lines))
-        return (meta, skiprows)
+        return (meta, skip_rows)
 
     def validate_meta_fields(self):
         missing_required = []
