@@ -16,14 +16,14 @@ class study_component(base):
     """
     Base class for data/metadata components of a cBioPortal study
     Eg. Study metadata, clinical sample/patient data, pipeline output
+    Subclasses can call super().__init__() to set up simple logging
     """
 
     DATA_FILENAME = '_data_placeholder_'
     META_FILENAME = '_meta_placeholder_'
     
-    def __init__(self, config, log_level=logging.WARN):
+    def __init__(self, log_level=logging.WARN):
         self.logger = self.get_logger(log_level, __name__)
-        self.config = config
 
     def write_data(self, out_dir):
         self.logger.warn("Placeholder write_data method of base class, should not be called")
@@ -43,6 +43,7 @@ class cancer_type(study_component):
     META_FILENAME = 'meta_cancer_type.txt'
 
     def __init__(self, cancer_type_config_path):
+        super().__init__()
         self.config = cancer_type_config(cancer_type_config_path)
 
     def write_data(self, out_dir):
@@ -66,6 +67,7 @@ class case_list(study_component):
     DESC_KEY = 'case_list_description'
 
     def __init__(self, study_id, suffix, name, description, samples, category=None):
+        super().__init__()
         self.cancer_study_identifier = study_id
         self.suffix = suffix
         self.stable_id = "%s_%s" % (study_id, suffix)
@@ -118,6 +120,7 @@ class clinical_data_component(study_component):
     DATATYPE = '_placeholder_'
 
     def __init__(self, clinical_config_path, study_id):
+        super().__init__()
         self.cancer_study_identifier = study_id
         self.config = clinical_config(clinical_config_path)
 

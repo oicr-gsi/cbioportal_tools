@@ -31,7 +31,7 @@ class clinical_config(config):
 
     def __init__(self, input_path, log_level=logging.WARNING, strict=False):
         super().__init__(input_path, log_level, strict)
-        self.logger = self.get_logger(log_level, __name__)
+        self.logger = self.get_logger(log_level, __name__) # more specific logger name
         self.PATIENT_DATATYPE = utilities.constants.PATIENT_DATATYPE
         self.SAMPLE_DATATYPE = utilities.constants.SAMPLE_DATATYPE
 
@@ -66,7 +66,7 @@ class study_config(config):
 
     def __init__(self, input_path, log_level=logging.WARNING, strict=False):
         super().__init__(input_path, log_level, strict)
-        self.logger = self.get_logger(log_level, __name__)
+        self.logger = self.get_logger(log_level, __name__) # more specific logger name
 
     def get_cancer_study_identifier(self):
         return self.meta['cancer_study_identifier']
