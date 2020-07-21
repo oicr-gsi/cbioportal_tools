@@ -9,7 +9,7 @@ import yaml
 
 from utilities.config import config
 import utilities.constants
-from generate.config import cancer_type_config, clinical_config
+from generate.config import cancer_type_config, case_list_config, clinical_config
 
 class study_component:
 
@@ -62,8 +62,13 @@ class cancer_type(study_component):
 
 class case_list(study_component):
 
+    CATEGORY_KEY = 'category'
+    NAME_KEY = 'case_list_name'
+    DESC_KEY = 'case_list_description'
+
     def __init__(self, study_id, suffix, name, description, samples, category=None):
         self.cancer_study_identifier = study_id
+        self.suffix = suffix
         self.stable_id = "%s_%s" % (study_id, suffix)
         self.case_list_name = name
         self.case_list_description = description
@@ -71,22 +76,39 @@ class case_list(study_component):
         self.category = category
 
     @classmethod
-    def from_config_path(klass, path):
-        # TODO create & return a new instance of klass with data read from path
-        # ie. klass(study_id, suffix, name, description, samples, category)
-        pass
+    def from_config_path(klass, path, study_id):
+        # Creates & returns a new instance of case_list, with parameters read from path
+        config = case_list_config(path)
+        meta = config.get_meta()
+        if klass.CATEGORY_KEY in meta:
+            category = meta[klass.CATEGORY_KEY]
+        else:
+            category = None
+        return klass(
+            study_id,
+            meta['suffix'],
+            meta[klass.NAME_KEY],
+            meta[klass.DESC_KEY],
+            config.get_sample_ids(),
+            category
+        )
 
-    def write_all(self, out_dir, filename):
+    def write_all(self, out_dir):
         data = {}
         data['cancer_study_identifier'] = self.cancer_study_identifier
         data['stable_id'] = self.stable_id
-        data['case_list_name'] = self.case_list_name
-        data['case_list_description'] = self.case_list_description
+        data[self.NAME_KEY] = self.case_list_name
+        data[self.DESC_KEY] = self.case_list_description
         data['case_list_ids'] = "\t".join(self.samples)
         if self.category != None:
-            data['category'] = self.category
-        out = open(os.path.join(out_dir, filename), 'w')
-        out.write(yaml.dump(meta))
+            data[self.CATEGORY_KEY] = self.category
+        out_path = os.path.join(out_dir, 'cases_%s.txt' % self.suffix)
+        if os.path.exists(out_path):
+            raise OSError("Output path already exists; non-unique case list suffix?")
+        out = open(out_path, 'w')
+        for key in data.keys():
+            # not using YAML dump; we want a literal tab-delimited string, not YAML representation
+            print("%s: %s" % (key, data[key]), file=out)
         out.close()
     
         

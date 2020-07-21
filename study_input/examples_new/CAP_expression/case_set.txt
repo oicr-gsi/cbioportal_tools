@@ -1,7 +1,7 @@
 ---
-#suffix: _merp
-#profile_name: ImPoRtAnT SaMpLeS
-#profile_description: Test
+#suffix: merp
+#case_list_name: ImPoRtAnT SaMpLeS
+#case_list_description: Test
 ---
 SAMPLE_ID
 OCT-01-0118-CAP

@@ -11,6 +11,11 @@ class cancer_type_config(config):
     """cBioPortal cancer type config"""
     pass
 
+class case_list_config(config):
+
+    def get_sample_ids(self):
+        return self.table['SAMPLE_ID'].tolist()
+
 class clinical_config(config):
     """Clinical sample/patient config"""
 
@@ -92,6 +97,9 @@ class study_config(config):
         else:
             path = None
         return path
+
+    def get_case_list_config_paths(self):
+        return self.get_config_paths(utilities.constants.CASE_LIST_DATATYPE)
 
     def get_cancer_type_config_path(self):
         return self.get_single_config_path(utilities.constants.CANCER_TYPE_DATATYPE)

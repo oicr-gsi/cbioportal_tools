@@ -1,8 +1,9 @@
 """Class to represent a study directory, formatted for upload to cBioPortal"""
 
 import os
+import sys # TODO remove when logging is in place
 
-from generate.components import cancer_type, study_meta, patients, samples
+from generate.components import cancer_type, case_list, study_meta, patients, samples
 from generate.config import study_config
 import utilities.constants
 
@@ -42,7 +43,11 @@ class study:
         # - generate case lists for pipelines which require them (use self.pipelines)
         # - read and generate case lists from custom config
         # - use self.study_id for case_list construction
-        return []
+        case_list_config_paths = config.get_case_list_config_paths()
+        case_lists = []
+        for path in case_list_config_paths:
+            case_lists.append(case_list.from_config_path(path, self.study_id))
+        return case_lists
 
     def get_pipelines(self, config):
         return []
