@@ -66,8 +66,9 @@ class case_list(study_component):
     NAME_KEY = 'case_list_name'
     DESC_KEY = 'case_list_description'
 
-    def __init__(self, study_id, suffix, name, description, samples, category=None):
-        super().__init__()
+    def __init__(self, study_id, suffix, name, description, samples, category=None,
+                 log_level=logging.WARN):
+        self.logger = self.get_logger(log_level, __name__)
         self.cancer_study_identifier = study_id
         self.suffix = suffix
         self.stable_id = "%s_%s" % (study_id, suffix)
@@ -105,7 +106,9 @@ class case_list(study_component):
             data[self.CATEGORY_KEY] = self.category
         out_path = os.path.join(out_dir, 'cases_%s.txt' % self.suffix)
         if os.path.exists(out_path):
-            raise OSError("Output path already exists; non-unique case list suffix?")
+            msg = "Output path already exists; non-unique case list suffix?"
+            self.logger.error(msg)
+            raise OSError(msg)
         out = open(out_path, 'w')
         for key in data.keys():
             # not using YAML dump; we want a literal tab-delimited string, not YAML representation

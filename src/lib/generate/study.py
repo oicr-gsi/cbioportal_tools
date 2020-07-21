@@ -12,7 +12,7 @@ class study(base):
 
     def __init__(self, config_path, log_level=logging.WARNING):
         self.logger = self.get_logger(log_level, __name__)
-        config = study_config(config_path)
+        config = study_config(config_path, log_level)
         self.study_id = config.get_cancer_study_identifier()
         self.study_meta = self.get_study_meta(config) # required
         self.clinical_data = self.get_clinical_data(config) # sample data is required
@@ -54,7 +54,9 @@ class study(base):
         return case_lists
 
     def get_pipelines(self, config):
-        return []
+        pipeline_config_paths = config.get_pipeline_config_paths()
+        # TODO this is for proof-of-concept; need to configure and process each pipeline
+        return pipeline_config_paths.keys()
 
     def is_valid_output_dir(self, out_dir):
         """validate an output directory"""
@@ -93,6 +95,7 @@ class study(base):
             if clinical_component != None:
                 clinical_component.write_all(out_dir)
         for pipeline in self.pipelines:
-            for datahandler in pipeline.datahandlers:
-                datahandler.write_all(out_dir)
+            self.logger.debug("Found pipeline: "+str(pipeline))
+            #for datahandler in pipeline.datahandlers:
+            #    datahandler.write_all(out_dir)
 
