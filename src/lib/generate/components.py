@@ -9,7 +9,7 @@ import yaml
 
 from utilities.base import base
 import utilities.constants
-from generate.config import cancer_type_config, case_list_config, clinical_config
+from generate.config import cancer_type_config, case_list_config, clinical_config, datatype_config
 
 class component(base):
 
@@ -20,7 +20,7 @@ class component(base):
     """
 
     def __init__(self, log_level=logging.WARN):
-        self.logger = self.get_logger(log_level, __name__)
+        self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__))
     
     def write(self, out_dir):
         self.logger.warning("Placeholder write() method of base class, should not be called")
@@ -30,9 +30,6 @@ class dual_output_component(component):
     """
     Base class for components with separate data and metadata files
     """
-
-    def __init__(self, log_level=logging.WARN):
-        self.logger = self.get_logger(log_level, __name__)
 
     def write_data(self, out_dir):
         self.logger.warning("Placeholder write_data() method of base class, should not be called")
@@ -48,7 +45,20 @@ class alteration_type(component):
     """
     Class to represent a cBioPortal alteration type; contains one or more datahandlers
     """
-    pass
+
+    def __init__(self, alteration_type_name, config_paths_by_datatype, log_level=logging.WARN):
+        super().__init__(log_level)
+        self.name = alteration_type_name
+        self.datahandlers = []
+        if len(config_paths_by_datatype)==0:
+            self.logger.warning("No datatypes provided to alteration type '%s'" % alteration_type_name)
+        for key in config_paths_by_datatype.keys():
+            self.datahandlers.append(datahandler(key, config_paths_by_datatype[key], log_level))
+        self.logger.debug("Created %i datahandlers for %s" % (len(self.datahandlers), self.name))
+
+    def write(self, out_dir):
+        for dh in self.datahandlers:
+            dh.write(out_dir)
 
 class cancer_type(dual_output_component):
 
@@ -82,7 +92,7 @@ class case_list(component):
 
     def __init__(self, study_id, suffix, name, description, samples, category=None,
                  log_level=logging.WARN):
-        self.logger = self.get_logger(log_level, __name__)
+        super().__init__(log_level)
         self.cancer_study_identifier = study_id
         self.suffix = suffix
         self.stable_id = "%s_%s" % (study_id, suffix)
@@ -138,8 +148,8 @@ class clinical_data_component(dual_output_component):
     DATA_FILENAME = '_data_placeholder_'
     META_FILENAME = '_meta_placeholder_'
 
-    def __init__(self, clinical_config_path, study_id):
-        super().__init__()
+    def __init__(self, clinical_config_path, study_id, log_level=logging.WARN):
+        super().__init__(log_level)
         self.cancer_study_identifier = study_id
         self.config = clinical_config(clinical_config_path)
 
@@ -172,6 +182,16 @@ class samples(clinical_data_component):
     DATA_FILENAME = 'data_clinical_samples.txt'
     META_FILENAME = 'meta_clinical_samples.txt'
 
+class datahandler(component):
+
+    def __init__(self, datatype_name, config_path, log_level=logging.WARN):
+        super().__init__(log_level)
+        self.name = datatype_name
+        self.config = datatype_config(config_path)
+        self.logger.debug("Creating data handler for %s" % self.name)
+
+    def write(self, out_dir):
+        self.logger.error("Output for datahandler %s not yet enabled" % self.name)
 
 class study_meta(component):
 
@@ -180,7 +200,7 @@ class study_meta(component):
     META_FILENAME = 'meta_study.txt'
 
     def __init__(self, study_config, log_level=logging.WARN):
-        self.logger = self.get_logger(log_level, __name__)
+        super().__init__(log_level)
         self.study_meta = study_config.get_meta()
     
     def write(self, out_dir):

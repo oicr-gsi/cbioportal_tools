@@ -3,7 +3,7 @@
 import logging
 import os
 
-from generate.components import cancer_type, case_list, study_meta, patients, samples
+from generate.components import alteration_type, cancer_type, case_list, study_meta, patients, samples
 from generate.config import study_config
 from utilities.base import base
 import utilities.constants
@@ -11,7 +11,7 @@ import utilities.constants
 class study(base):
 
     def __init__(self, config_path, log_level=logging.WARNING):
-        self.logger = self.get_logger(log_level, __name__)
+        self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__))
         config = study_config(config_path, log_level)
         self.study_id = config.get_cancer_study_identifier()
         self.study_meta = self.get_study_meta(config) # required
@@ -54,9 +54,13 @@ class study(base):
         return case_lists
 
     def get_pipelines(self, config):
-        pipeline_config_paths = config.get_pipeline_config_paths()
-        # TODO this is for proof-of-concept; need to configure and process each pipeline
-        return pipeline_config_paths.keys()
+        config_paths = config.get_alterationtype_config_paths()
+        alteration_types = []
+        log_level = self.logger.getEffectiveLevel()
+        for name in config_paths.keys():
+            self.logger.debug("Found alteration type %s" % name)
+            alteration_types.append(alteration_type(name, config_paths[name], log_level))
+        return alteration_types
 
     def is_valid_output_dir(self, out_dir):
         """validate an output directory"""
@@ -95,7 +99,11 @@ class study(base):
             if clinical_component != None:
                 clinical_component.write(out_dir)
         for pipeline in self.pipelines:
-            self.logger.debug("Found pipeline: "+str(pipeline))
-            #for datahandler in pipeline.datahandlers:
-            #    datahandler.write(out_dir)
+            self.logger.debug("Found pipeline: "+str(pipeline.name))
+            self.logger.debug("Found %i datahandlers" % len(pipeline.datahandlers))
+            i = 0
+            for datahandler in pipeline.datahandlers:
+                i += 1
+                self.logger.debug("Writing output for datahandler %i" % i)
+                datahandler.write(out_dir)
 
