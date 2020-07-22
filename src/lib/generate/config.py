@@ -122,24 +122,19 @@ class study_config(config):
         return self.get_single_config_path_by_datatype(utilities.constants.PATIENT_DATATYPE)
 
     def get_pipeline_config_paths(self):
-        reserved = set([
-            utilities.constants.CASE_LIST_DATATYPE,
-            utilities.constants.CANCER_TYPE_DATATYPE,
-            utilities.constants.PATIENT_DATATYPE,
-            utilities.constants.SAMPLE_DATATYPE
-        ])
-        ak = utilities.constants.ALTERATION_TYPE_KEY
-        dk = utilities.constants.DATAHANDLER_KEY
+        reserved = set(self.RESERVED_DATATYPES)
+        at_key = utilities.constants.ALTERATION_TYPE_KEY
+        dh_key = utilities.constants.DATAHANDLER_KEY
         config_paths = {}
         for index, row in self.table.iterrows():
-            alteration_type = row[ak]
-            datahandler = row[dk]
+            alteration_type = row[at_key]
+            datahandler = row[dh_key]
             file_name = row[utilities.constants.FILE_NAME_KEY]
             if datahandler in reserved:
                 continue
             elif alteration_type in config_paths and datahandler in config_paths[alteration_type]:
                 msg = "Combination of {0} and {1} is not unique: {2},{3}".format(
-                    ak, dk, alteration_type, datahandler
+                    at_key, dh_key, alteration_type, datahandler
                 )
                 self.logger.error(msg)
                 raise ConfigError(msg)

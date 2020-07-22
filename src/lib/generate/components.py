@@ -11,7 +11,7 @@ from utilities.base import base
 import utilities.constants
 from generate.config import cancer_type_config, case_list_config, clinical_config
 
-class study_component(base):
+class component(base):
 
     """
     Base class for data/metadata components of a cBioPortal study
@@ -19,24 +19,38 @@ class study_component(base):
     Subclasses can call super().__init__() to set up simple logging
     """
 
-    DATA_FILENAME = '_data_placeholder_'
-    META_FILENAME = '_meta_placeholder_'
+    def __init__(self, log_level=logging.WARN):
+        self.logger = self.get_logger(log_level, __name__)
     
+    def write(self, out_dir):
+        self.logger.warning("Placeholder write() method of base class, should not be called")
+
+class dual_output_component(component):
+
+    """
+    Base class for components with separate data and metadata files
+    """
+
     def __init__(self, log_level=logging.WARN):
         self.logger = self.get_logger(log_level, __name__)
 
     def write_data(self, out_dir):
-        self.logger.warn("Placeholder write_data method of base class, should not be called")
+        self.logger.warning("Placeholder write_data() method of base class, should not be called")
 
     def write_meta(self, out_dir):
-        self.logger.warn("Placeholder write_meta method of base class, should not be called")
+        self.logger.warning("Placeholder write_meta() method of base class, should not be called")
 
-    def write_all(self, out_dir):
+    def write(self, out_dir):
         self.write_data(out_dir)
         self.write_meta(out_dir)
-        
 
-class cancer_type(study_component):
+class alteration_type(component):
+    """
+    Class to represent a cBioPortal alteration type; contains one or more datahandlers
+    """
+    pass
+
+class cancer_type(dual_output_component):
 
     DATATYPE = utilities.constants.CANCER_TYPE_DATATYPE
     DATA_FILENAME = 'data_cancer_type.txt'
@@ -60,7 +74,7 @@ class cancer_type(study_component):
         out.write(yaml.dump(meta, sort_keys=True))
         out.close()
 
-class case_list(study_component):
+class case_list(component):
 
     CATEGORY_KEY = 'category'
     NAME_KEY = 'case_list_name'
@@ -95,7 +109,7 @@ class case_list(study_component):
             category
         )
 
-    def write_all(self, out_dir):
+    def write(self, out_dir):
         data = {}
         data['cancer_study_identifier'] = self.cancer_study_identifier
         data['stable_id'] = self.stable_id
@@ -116,11 +130,13 @@ class case_list(study_component):
         out.close()
     
         
-class clinical_data_component(study_component):
+class clinical_data_component(dual_output_component):
 
     """Clinical patient/sample data in a cBioPortal study"""
 
     DATATYPE = '_placeholder_'
+    DATA_FILENAME = '_data_placeholder_'
+    META_FILENAME = '_meta_placeholder_'
 
     def __init__(self, clinical_config_path, study_id):
         super().__init__()
@@ -150,7 +166,6 @@ class patients(clinical_data_component):
     DATA_FILENAME = 'data_clinical_patients.txt'
     META_FILENAME = 'meta_clinical_patients.txt'
 
-
 class samples(clinical_data_component):
 
     DATATYPE = utilities.constants.SAMPLE_DATATYPE
@@ -158,7 +173,7 @@ class samples(clinical_data_component):
     META_FILENAME = 'meta_clinical_samples.txt'
 
 
-class study_meta(study_component):
+class study_meta(component):
 
     """Metadata for the study; no data in this component"""
 
@@ -168,7 +183,7 @@ class study_meta(study_component):
         self.logger = self.get_logger(log_level, __name__)
         self.study_meta = study_config.get_meta()
     
-    def write_all(self, out_dir):
+    def write(self, out_dir):
         meta = {}
         # TODO check all required fields are present
         for field in utilities.constants.REQUIRED_STUDY_META_FIELDS:
