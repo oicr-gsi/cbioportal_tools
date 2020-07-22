@@ -88,14 +88,14 @@ class study(base):
                 os.makedirs(case_list_dir)
         for component in [self.study_meta, self.cancer_type]:
             if component != None:
-                component.write_all(out_dir)
+                component.write(out_dir)
         for case_list in self.case_lists:
-            case_list.write_all(case_list_dir)
+            case_list.write(case_list_dir)
         for clinical_component in self.clinical_data:
             if clinical_component != None:
-                clinical_component.write_all(out_dir)
+                clinical_component.write(out_dir)
         for pipeline in self.pipelines:
             self.logger.debug("Found pipeline: "+str(pipeline))
             #for datahandler in pipeline.datahandlers:
-            #    datahandler.write_all(out_dir)
+            #    datahandler.write(out_dir)
 
