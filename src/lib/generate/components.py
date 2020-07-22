@@ -53,7 +53,8 @@ class alteration_type(component):
         if len(config_paths_by_datatype)==0:
             self.logger.warning("No datatypes provided to alteration type '%s'" % alteration_type_name)
         for key in config_paths_by_datatype.keys():
-            self.datahandlers.append(datahandler(key, config_paths_by_datatype[key], log_level))
+            dh = datahandler(self.name, key, config_paths_by_datatype[key], log_level)
+            self.datahandlers.append(dh)
         self.logger.debug("Created %i datahandlers for %s" % (len(self.datahandlers), self.name))
 
     def write(self, out_dir):
@@ -184,14 +185,28 @@ class samples(clinical_data_component):
 
 class datahandler(component):
 
-    def __init__(self, datatype_name, config_path, log_level=logging.WARN):
+    def __init__(self, alterationtype_name, datatype_name, config_path, log_level=logging.WARN):
         super().__init__(log_level)
-        self.name = datatype_name
+        self.atype = alterationtype_name
+        self.dtype = datatype_name
+        self.name = "%s:%s" % (self.atype, self.dtype)
         self.config = datatype_config(config_path)
-        self.logger.debug("Creating data handler for %s" % self.name)
+        self.logger.debug("Created data handler for '%s' from path %s" % (self.name, config_path))
+
+    # TODO write data for appropriate datahandler
+    # old method is to generate a path to a python script and run using exec :-(
+    # new way: create an instance of appropriate class and call its write method
+    # for now, the "new class" may simply be a wrapper for the old method
+
+    # TODO make a data handler module with a factory to supply appropriate datahandler class
+    # see https://stackoverflow.com/questions/51142320/how-to-instantiate-class-by-its-string-name-in-python-from-current-file
+    # eg. self.handler = self.get_handler(self.atype, self.dtype) where get_handler calls the factory
+
+    # TODO may be more natural to have alteration_type as the container for handler objects
 
     def write(self, out_dir):
-        self.logger.error("Output for datahandler %s not yet enabled" % self.name)
+        # TODO self.handler.write(outdir)
+        self.logger.error("Output for datahandler '%s' not yet enabled" % self.name)
 
 class study_meta(component):
 

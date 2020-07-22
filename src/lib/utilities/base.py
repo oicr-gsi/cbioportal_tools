@@ -16,7 +16,7 @@ class base:
     
     def get_logger(self, log_level=logging.WARN, name=None, log_path=None):
         """Create a Logger object with class identifier, log level, optional output path"""
-        if name == None: name = type(self).__name__
+        if name == None: name = "%s.%s" % (__name__, type(self))
         logger = logging.getLogger(name)
         logger.setLevel(log_level)
         handler = None
