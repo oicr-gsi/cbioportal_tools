@@ -7,16 +7,23 @@ from math import inf as infinity
 from utilities.config import config, ConfigError
 import utilities.constants
 
-class cancer_type_config(config):
+class generation_config(config):
+    """base class for study generation config"""
+
+    def __init__(self, input_path, log_level=logging.WARNING, strict=False):
+        name = "%s.%s" % (__name__, type(self).__name__)
+        super().__init__(input_path, log_level, name, strict)
+
+class cancer_type_config(generation_config):
     """cBioPortal cancer type config"""
     pass
 
-class case_list_config(config):
+class case_list_config(generation_config):
 
     def get_sample_ids(self):
         return self.table['SAMPLE_ID'].tolist()
 
-class clinical_config(config):
+class clinical_config(generation_config):
     """Clinical sample/patient config"""
 
     DISPLAY_NAMES_KEY = 'display_names'
@@ -31,7 +38,6 @@ class clinical_config(config):
 
     def __init__(self, input_path, log_level=logging.WARNING, strict=False):
         super().__init__(input_path, log_level, strict)
-        self.logger = self.get_logger(log_level, __name__) # more specific logger name
         self.PATIENT_DATATYPE = utilities.constants.PATIENT_DATATYPE
         self.SAMPLE_DATATYPE = utilities.constants.SAMPLE_DATATYPE
 
@@ -61,8 +67,11 @@ class clinical_config(config):
                 raise ConfigError(msg)
         return [display_names, descriptions, datatypes, priorities]
 
+class datatype_config(generation_config):
+    """Config for a datahandler corresponding to a cBioPortal datatype"""
+    pass
 
-class study_config(config):
+class study_config(generation_config):
     """cBioPortal study config in Janus format"""
 
     RESERVED_DATATYPES = [
@@ -121,7 +130,8 @@ class study_config(config):
     def get_patient_config_path(self):
         return self.get_single_config_path_by_datatype(utilities.constants.PATIENT_DATATYPE)
 
-    def get_pipeline_config_paths(self):
+    def get_alterationtype_config_paths(self):
+        """Return a dictionary of dictionaries of config paths, indexed by alteration and data type"""
         reserved = set(self.RESERVED_DATATYPES)
         at_key = utilities.constants.ALTERATION_TYPE_KEY
         dh_key = utilities.constants.DATAHANDLER_KEY
@@ -132,13 +142,15 @@ class study_config(config):
             file_name = row[utilities.constants.FILE_NAME_KEY]
             if datahandler in reserved:
                 continue
-            elif alteration_type in config_paths and datahandler in config_paths[alteration_type]:
-                msg = "Combination of {0} and {1} is not unique: {2},{3}".format(
+            if alteration_type not in config_paths:
+                config_paths[alteration_type] = {}
+            if datahandler in config_paths[alteration_type]:
+                msg = "Combination of {0} and {1} is not unique: {2}, {3}".format(
                     at_key, dh_key, alteration_type, datahandler
                 )
                 self.logger.error(msg)
                 raise ConfigError(msg)
-            config_paths[(alteration_type, datahandler)] = os.path.join(self.config_dir, file_name)
+            config_paths[alteration_type][datahandler] = os.path.join(self.config_dir, file_name)
         return config_paths
 
     def get_sample_config_path(self):

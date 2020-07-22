@@ -24,8 +24,10 @@ class config(base):
     REQUIRED_META_FIELDS = []
     OPTIONAL_META_FIELDS = []
     
-    def __init__(self, input_path, log_level=logging.WARNING, strict=False):
-        self.logger = self.get_logger(log_level, __name__)
+    def __init__(self, input_path, log_level=logging.WARNING, name=None, strict=False):
+        if name == None:
+            name = "%s.%s"% (__name__, type(self).__name__)
+        self.logger = self.get_logger(log_level, name)
         self.config_dir = os.path.abspath(os.path.dirname(input_path))
         [self.meta, skip_total] = self.read_meta(input_path)
         if strict:
