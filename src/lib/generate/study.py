@@ -101,9 +101,7 @@ class study(base):
         for pipeline in self.pipelines:
             self.logger.debug("Found pipeline: "+str(pipeline.name))
             self.logger.debug("Found %i datahandlers" % len(pipeline.datahandlers))
-            i = 0
             for datahandler in pipeline.datahandlers:
-                i += 1
-                self.logger.debug("Writing output for datahandler %i" % i)
+                self.logger.debug("Writing output for datahandler '%s'" % datahandler.name)
                 datahandler.write(out_dir)
 
