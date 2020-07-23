@@ -9,7 +9,7 @@ import yaml
 
 from utilities.base import base
 import utilities.constants
-from generate.config import cancer_type_config, case_list_config, clinical_config, datatype_config
+from generate.config import cancer_type_config, case_list_config, clinical_config, pipeline_config
 
 class component(base):
 
@@ -43,23 +43,23 @@ class dual_output_component(component):
 
 class alteration_type(component):
     """
-    Class to represent a cBioPortal alteration type; contains one or more datahandlers
+    Class to represent a cBioPortal alteration type; contains one or more pipeline components
     """
 
     def __init__(self, alteration_type_name, config_paths_by_datatype, log_level=logging.WARN):
         super().__init__(log_level)
         self.name = alteration_type_name
-        self.datahandlers = []
+        self.components = []
         if len(config_paths_by_datatype)==0:
             self.logger.warning("No datatypes provided to alteration type '%s'" % alteration_type_name)
         for key in config_paths_by_datatype.keys():
-            dh = datahandler(self.name, key, config_paths_by_datatype[key], log_level)
-            self.datahandlers.append(dh)
-        self.logger.debug("Created %i datahandlers for %s" % (len(self.datahandlers), self.name))
+            pc = pipeline_component(self.name, key, config_paths_by_datatype[key], log_level)
+            self.components.append(pc)
+        self.logger.debug("Created %i components for %s" % (len(self.components), self.name))
 
     def write(self, out_dir):
-        for dh in self.datahandlers:
-            dh.write(out_dir)
+        for pc in self.pipeline_components:
+            pc.write(out_dir)
 
 class cancer_type(dual_output_component):
 
@@ -183,14 +183,17 @@ class samples(clinical_data_component):
     DATA_FILENAME = 'data_clinical_samples.txt'
     META_FILENAME = 'meta_clinical_samples.txt'
 
-class datahandler(component):
+
+class pipeline_component(component):
+
+    """Basic unit of pipeline output; results for a given alteration_type and data_type"""
 
     def __init__(self, alterationtype_name, datatype_name, config_path, log_level=logging.WARN):
         super().__init__(log_level)
         self.atype = alterationtype_name
         self.dtype = datatype_name
         self.name = "%s:%s" % (self.atype, self.dtype)
-        self.config = datatype_config(config_path)
+        self.config = pipeline_config(config_path)
         self.logger.debug("Created data handler for '%s' from path %s" % (self.name, config_path))
 
     # TODO write data for appropriate datahandler
@@ -206,7 +209,24 @@ class datahandler(component):
 
     def write(self, out_dir):
         # TODO self.handler.write(outdir)
-        self.logger.error("Output for datahandler '%s' not yet enabled" % self.name)
+        self.logger.error("Output for pipeline component '%s' not yet enabled" % self.name)
+
+class legacy_pipeline_component(pipeline_component):
+
+    """Run a legacy datahandler script using exec"""
+
+    pass
+
+class pipeline_component_factory(base):
+
+    """Construct pipeline components for a given ALTERATIONTYPE and DATATYPE"""
+
+    def __init__(self, log_level=logging.WARN):
+        self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__))
+
+    def get_component(self, alt_type, datatype):
+        pass
+
 
 class study_meta(component):
 
