@@ -9,6 +9,7 @@ import yaml
 
 from utilities.base import base
 import utilities.constants
+from utilities.config import legacy_config_wrapper
 from generate.config import cancer_type_config, case_list_config, clinical_config, pipeline_config
 
 class component(base):
@@ -52,10 +53,13 @@ class alteration_type(component):
         self.components = []
         if len(config_paths_by_datatype)==0:
             self.logger.warning("No datatypes provided to alteration type '%s'" % alteration_type_name)
+        factory = pipeline_component_factory(log_level)
         for key in config_paths_by_datatype.keys():
-            pc = pipeline_component(self.name, key, config_paths_by_datatype[key], log_level)
+            pc = factory.get_component(self.name, key, config_paths_by_datatype[key])
             self.components.append(pc)
         self.logger.debug("Created %i components for %s" % (len(self.components), self.name))
+        #self.logger.debug("Globals: "+str(globals()))
+        self.logger.debug("Sample class: "+str(globals()['samples']))
 
     def write(self, out_dir):
         for pc in self.pipeline_components:
@@ -184,6 +188,30 @@ class samples(clinical_data_component):
     META_FILENAME = 'meta_clinical_samples.txt'
 
 
+class pipeline_component_factory(base):
+
+    """Construct pipeline components for a given ALTERATIONTYPE and DATATYPE"""
+
+    CLASSNAMES = {
+        ('MRNA_EXPRESSION', 'CAP_expression'): 'legacy_pipeline_component'
+    }
+
+    # factory to supply appropriate pipeline component class, given name strings
+    # see https://stackoverflow.com/questions/51142320/how-to-instantiate-class-by-its-string-name-in-python-from-current-file
+
+    def __init__(self, log_level=logging.WARN):
+        self.log_level = log_level
+        self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__))
+
+    def get_component(self, alt_type, datatype, config_path):
+        classname = self.CLASSNAMES.get((alt_type, datatype), None)
+        if classname == None:
+            self.logger.warning("No classname found for (%s, %s)" % (alt_type, datatype))
+            return None
+        component_class = globals()[classname]
+        return component_class(alt_type, datatype, config_path, self.log_level)
+
+
 class pipeline_component(component):
 
     """Basic unit of pipeline output; results for a given alteration_type and data_type"""
@@ -196,36 +224,53 @@ class pipeline_component(component):
         self.config = pipeline_config(config_path)
         self.logger.debug("Created data handler for '%s' from path %s" % (self.name, config_path))
 
-    # TODO write data for appropriate datahandler
-    # old method is to generate a path to a python script and run using exec :-(
-    # new way: create an instance of appropriate class and call its write method
-    # for now, the "new class" may simply be a wrapper for the old method
-
-    # TODO make a data handler module with a factory to supply appropriate datahandler class
-    # see https://stackoverflow.com/questions/51142320/how-to-instantiate-class-by-its-string-name-in-python-from-current-file
-    # eg. self.handler = self.get_handler(self.atype, self.dtype) where get_handler calls the factory
-
-    # TODO may be more natural to have alteration_type as the container for handler objects
-
-    def write(self, out_dir):
+    def write(self, out_dir, dry_run=False):
         # TODO self.handler.write(outdir)
-        self.logger.error("Output for pipeline component '%s' not yet enabled" % self.name)
+        self.logger.warning("Output for pipeline component '%s' not yet enabled" % self.name)
+        if dry_run:
+            self.logger.info("Dry run for pipeline component %s" % self.name)
+        else:
+            msg = "Pipeline component '%s' is not supported for execution" % self.name
+            self.logger.error(msg)
+            raise ValueError(msg)
+
 
 class legacy_pipeline_component(pipeline_component):
 
     """Run a legacy datahandler script using exec"""
 
-    pass
+    def __init__(self, alterationtype_name, datatype_name, config_path, log_level=logging.WARN):
+        super().__init__(alterationtype_name, datatype_name, config_path, log_level)
+        # TODO make a legacy_config_wrapper class
+        # duplicates functionality of legacy Config.Config on a utilities.config object
+        self.legacy_config = legacy_config_wrapper(self.config, alterationtype_name, datatype_name)
 
-class pipeline_component_factory(base):
-
-    """Construct pipeline components for a given ALTERATIONTYPE and DATATYPE"""
-
-    def __init__(self, log_level=logging.WARN):
-        self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__))
-
-    def get_component(self, alt_type, datatype):
-        pass
+    def write(self, out_dir, dry_run=False):
+        # legacy method; construct path to a script and run using exec()
+        # !!! DEPRECATED WITH EXTREME PREJUDICE !!!
+        # TODO refactor to remove legacy elements
+        module_dir = os.path.dirname((os.path.abspath(__file__)))
+        # root dir of janus source; may be required for some legacy scripts
+        janus_path = os.path.abspath(os.path.join(module_dir, os.pardir, os.pardir, os.pardir))
+        script_path = os.path.join(module_dir, 'analysis_pipelines', self.atype, "%s.py" % self.dtype)
+        global_args = {
+            'meta_config': self.legacy_config,
+            'study_config': self.legacy_config,
+            'janus_path': janus_path,
+            'logger': self.logger
+        }
+        local_args = {}
+        if not os.path.exists(script_path) and os.access(script_path, os.R_OK):
+            msg = "Legacy pipeline script path %s does not exist, or is not readable" % script_path
+            self.logger.error(msg)
+            raise(OSError(msg))
+        elif dry_run:
+            msg = "%s: Dry run of script %s, global_args %s" % (self.name, script_path, str(global_args))
+            self.logger.info(msg)
+        else:
+            self.logger.debug("%s: Running legacy pipeline script %s" % (self.name, script_path))
+            with open(script_path, 'rb') as script_file:
+                exec(compile(script_file.read(), script_path, 'exec'), global_args, local_args)
 
 
 class study_meta(component):
