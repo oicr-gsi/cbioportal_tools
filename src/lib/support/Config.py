@@ -21,10 +21,6 @@ class Config(object):
         self.datahandler = datahandler
         self.alterationtype = alterationtype
 
-    @classmethod
-    def from_config(cls, config):
-        return cls(config.config_map, config.data_frame, config.datahandler, config.alterationtype)
-
     def __str__(self):
         return str([self.config_map, self.data_frame, self.datahandler, self.alterationtype])
 
