@@ -99,9 +99,9 @@ class study(base):
             if clinical_component != None:
                 clinical_component.write(out_dir)
         for pipeline in self.pipelines:
-            self.logger.debug("Found pipeline: "+str(pipeline.name))
-            self.logger.debug("Found %i datahandlers" % len(pipeline.datahandlers))
-            for datahandler in pipeline.datahandlers:
-                self.logger.debug("Writing output for datahandler '%s'" % datahandler.name)
-                datahandler.write(out_dir)
+            self.logger.debug("Found alteration type: "+str(pipeline.name))
+            self.logger.debug("Found %i components" % len(pipeline.components))
+            for component in pipeline.components:
+                self.logger.debug("Writing output for component '%s'" % component.name)
+                component.write(out_dir)
 

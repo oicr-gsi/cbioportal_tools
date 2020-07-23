@@ -67,8 +67,8 @@ class clinical_config(generation_config):
                 raise ConfigError(msg)
         return [display_names, descriptions, datatypes, priorities]
 
-class datatype_config(generation_config):
-    """Config for a datahandler corresponding to a cBioPortal datatype"""
+class pipeline_config(generation_config):
+    """Config for a pipeline component corresponding to a cBioPortal datatype"""
     pass
 
 class study_config(generation_config):
