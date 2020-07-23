@@ -19,6 +19,8 @@ class base:
         if name == None: name = "%s.%s" % (__name__, type(self))
         logger = logging.getLogger(name)
         logger.setLevel(log_level)
+        if len(logger.handlers) > 0: # remove duplicate handlers from previous get_logger() calls
+            logger.handlers.clear()
         handler = None
         if log_path==None:
             handler = logging.StreamHandler()
