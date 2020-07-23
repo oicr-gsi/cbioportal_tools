@@ -59,7 +59,7 @@ class study(base):
         log_level = self.logger.getEffectiveLevel()
         for name in config_paths.keys():
             self.logger.debug("Found alteration type %s" % name)
-            alteration_types.append(alteration_type(name, config_paths[name], log_level))
+            alteration_types.append(alteration_type(name, config_paths[name], config, log_level))
         return alteration_types
 
     def is_valid_output_dir(self, out_dir):

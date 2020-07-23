@@ -1,18 +1,19 @@
 """Support for CAP mRNA expression data"""
 
-import logging
-import os
-
-from support import helper
-from generate import meta
-from generate.analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_percentile, generate_expression_zscore, preProcRNA
-from constants.constants import config2name_map
 
 def main():
     global meta_config
     global study_config
     global janus_path
     global logger
+
+    # imports are moved into the main (and only) method to work with the legacy component class
+    import logging
+    import os
+    from support import helper
+    from generate import meta
+    from generate.analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_percentile, generate_expression_zscore, preProcRNA
+    from constants.constants import config2name_map
 
     verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
 
@@ -83,4 +84,5 @@ def main():
         meta.generate_meta_type(meta_config,study_config,logger)
 
 if __name__ == '__main__':
+
     main()
