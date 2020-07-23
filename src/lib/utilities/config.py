@@ -105,10 +105,16 @@ class legacy_config_wrapper(base):
         self.logger = self.get_logger(log_level, name)
         self.config = config
         # duplicate attributes of the legacy config class
+        self.analysis = ''
+        self.type_config = ''
         self.config_map = config.get_meta()
         self.data_frame = config.get_table()
         self.alterationtype = alt_type
         self.datahandler = data_type
+
+    def set_config_mapping(self, k, v):
+        """Update a key/value pair in the metadata map; eg. the study output path"""
+        self.config_map[k] = v
 
     def __str__(self):
         return str([self.config_map, self.data_frame, self.datahandler, self.alterationtype])

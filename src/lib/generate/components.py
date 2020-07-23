@@ -47,7 +47,8 @@ class alteration_type(component):
     Class to represent a cBioPortal alteration type; contains one or more pipeline components
     """
 
-    def __init__(self, alteration_type_name, config_paths_by_datatype, log_level=logging.WARN):
+    def __init__(self, alteration_type_name, config_paths_by_datatype, study_config,
+                 log_level=logging.WARN):
         super().__init__(log_level)
         self.name = alteration_type_name
         self.components = []
@@ -55,7 +56,7 @@ class alteration_type(component):
             self.logger.warning("No datatypes provided to alteration type '%s'" % alteration_type_name)
         factory = pipeline_component_factory(log_level)
         for key in config_paths_by_datatype.keys():
-            pc = factory.get_component(self.name, key, config_paths_by_datatype[key])
+            pc = factory.get_component(self.name, key, config_paths_by_datatype[key], study_config)
             self.components.append(pc)
         self.logger.debug("Created %i components for %s" % (len(self.components), self.name))
         #self.logger.debug("Globals: "+str(globals()))
@@ -203,25 +204,29 @@ class pipeline_component_factory(base):
         self.log_level = log_level
         self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__))
 
-    def get_component(self, alt_type, datatype, config_path):
+    def get_component(self, alt_type, datatype, config_path, study_config):
+        # some legacy components need the global study config
+        # TODO factor out this requirement; create with the component config plus specific variables
         classname = self.CLASSNAMES.get((alt_type, datatype), None)
         if classname == None:
             self.logger.warning("No classname found for (%s, %s)" % (alt_type, datatype))
             return None
         component_class = globals()[classname]
-        return component_class(alt_type, datatype, config_path, self.log_level)
+        return component_class(alt_type, datatype, config_path, study_config, self.log_level)
 
 
 class pipeline_component(component):
 
     """Basic unit of pipeline output; results for a given alteration_type and data_type"""
 
-    def __init__(self, alterationtype_name, datatype_name, config_path, log_level=logging.WARN):
+    def __init__(self, alterationtype_name, datatype_name, config_path, study_config,
+                 log_level=logging.WARN):
         super().__init__(log_level)
         self.atype = alterationtype_name
         self.dtype = datatype_name
         self.name = "%s:%s" % (self.atype, self.dtype)
         self.config = pipeline_config(config_path)
+        self.study_config = study_config
         self.logger.debug("Created data handler for '%s' from path %s" % (self.name, config_path))
 
     def write(self, out_dir, dry_run=False):
@@ -239,11 +244,12 @@ class legacy_pipeline_component(pipeline_component):
 
     """Run a legacy datahandler script using exec"""
 
-    def __init__(self, alterationtype_name, datatype_name, config_path, log_level=logging.WARN):
-        super().__init__(alterationtype_name, datatype_name, config_path, log_level)
+    def __init__(self, atype_name, dtype_name, config_path, study_config, log_level=logging.WARN):
+        super().__init__(atype_name, dtype_name, config_path, study_config, log_level)
         # TODO make a legacy_config_wrapper class
         # duplicates functionality of legacy Config.Config on a utilities.config object
-        self.legacy_config = legacy_config_wrapper(self.config, alterationtype_name, datatype_name)
+        self.legacy_config = legacy_config_wrapper(self.config, atype_name, dtype_name)
+        self.legacy_config_study = legacy_config_wrapper(self.study_config, atype_name, dtype_name)
 
     def write(self, out_dir, dry_run=False):
         # legacy method; construct path to a script and run using exec()
@@ -253,11 +259,14 @@ class legacy_pipeline_component(pipeline_component):
         # root dir of janus source; may be required for some legacy scripts
         janus_path = os.path.abspath(os.path.join(module_dir, os.pardir, os.pardir, os.pardir))
         script_path = os.path.join(module_dir, 'analysis_pipelines', self.atype, "%s.py" % self.dtype)
+        # workaround; legacy code sets output directory in the study config object
+        self.legacy_config_study.set_config_mapping('output_folder', out_dir)
         global_args = {
             'meta_config': self.legacy_config,
-            'study_config': self.legacy_config,
+            'study_config': self.legacy_config_study,
             'janus_path': janus_path,
-            'logger': self.logger
+            'logger': self.logger,
+            "__name__": "__main__"
         }
         local_args = {}
         if not os.path.exists(script_path) and os.access(script_path, os.R_OK):
@@ -270,7 +279,7 @@ class legacy_pipeline_component(pipeline_component):
         else:
             self.logger.debug("%s: Running legacy pipeline script %s" % (self.name, script_path))
             with open(script_path, 'rb') as script_file:
-                exec(compile(script_file.read(), script_path, 'exec'), global_args, local_args)
+                exec(compile(script_file.read(), script_path, 'exec'), globals().update(global_args), local_args)
 
 
 class study_meta(component):
