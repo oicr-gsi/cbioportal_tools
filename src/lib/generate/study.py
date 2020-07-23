@@ -76,7 +76,7 @@ class study(base):
             self.logger.error("Output path %s is not writable" % out_dir)
         return valid
 
-    def write_all(self, out_dir):
+    def write_all(self, out_dir, dry_run=False):
         """Write all outputs to the given directory path"""
         # write component files
         valid = self.is_valid_output_dir(out_dir)
@@ -103,5 +103,5 @@ class study(base):
             self.logger.debug("Found %i components" % len(pipeline.components))
             for component in pipeline.components:
                 self.logger.debug("Writing output for component '%s'" % component.name)
-                component.write(out_dir)
+                component.write(out_dir, dry_run)
 

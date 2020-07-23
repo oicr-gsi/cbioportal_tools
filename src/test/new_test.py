@@ -23,7 +23,7 @@ class TestStudy(unittest.TestCase):
         ###
         config_path = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
         test_study = study(config_path, log_level=logging.DEBUG)
-        test_study.write_all(self.outDir)
+        test_study.write_all(self.outDir, dry_run=True)
 
     def test_file_output(self):
         checksums = {

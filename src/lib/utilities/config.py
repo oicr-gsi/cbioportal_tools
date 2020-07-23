@@ -40,6 +40,9 @@ class config(base):
     def get_meta(self):
         return self.meta
 
+    def get_table(self):
+        return self.table
+
     def read_meta(self, input_path):
         yaml_lines = []
         line_count = 0
@@ -91,6 +94,25 @@ class config(base):
             msg = 'Missing required metadata fields: '+', '.join(missing_required)
             self.logger.error(msg)
             raise ConfigError(msg)
+
+
+class legacy_config_wrapper(base):
+
+    """duplicates functionality of legacy Config.Config on a utilities.config object"""
+    def __init__(self, config, alt_type, data_type, log_level=logging.WARNING, name=None, strict=False):
+        if name == None:
+            name = "%s.%s"% (__name__, type(self).__name__)
+        self.logger = self.get_logger(log_level, name)
+        self.config = config
+        # duplicate attributes of the legacy config class
+        self.config_map = config.get_meta()
+        self.data_frame = config.get_table()
+        self.alterationtype = alt_type
+        self.datahandler = data_type
+
+    def __str__(self):
+        return str([self.config_map, self.data_frame, self.datahandler, self.alterationtype])
+
 
 class ConfigError(Exception):
     pass
