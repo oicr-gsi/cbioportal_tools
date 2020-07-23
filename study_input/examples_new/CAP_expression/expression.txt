@@ -1,14 +1,16 @@
-#DATATYPE=CONTINUOUS
-#input_folder=/.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression
-#zscores=True
-#profile_name=mRNA Expression
-#profile_description=Expression information DCIS (5 Samples)
-#enscon=/u/ibancarz/git/cbioportal_tools/src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/accessory_files/ensemble_conversion.txt
-#genelist=/u/ibancarz/git/cbioportal_tools/src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/accessory_files/targeted_genelist.txt
-#gepfile=/.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression/gepcomp.list
-#gepcomp=/.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression/gepcomp
-#tcgadata=/.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression/TCGA_ALL_TUMOR.csv
-#studyid=OCTCAP
+---
+#DATATYPE: CONTINUOUS
+#input_folder: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression
+#zscores: True
+#profile_name: mRNA Expression
+#profile_description: Expression information DCIS (5 Samples)
+#enscon: /u/ibancarz/git/cbioportal_tools/src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/accessory_files/ensemble_conversion.txt
+#genelist: /u/ibancarz/git/cbioportal_tools/src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/accessory_files/targeted_genelist.txt
+#gepfile: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression/gepcomp.list
+#gepcomp: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression/gepcomp
+#tcgadata: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression/TCGA_ALL_TUMOR.csv
+#studyid: OCTCAP
+---
 FILE_NAME	PATIENT_ID	SAMPLE_ID
 OCT-01-0118-TS_191217_A00469_0073_BHWWL3DSXX_ATTCAGAA-ATAGAGGC_L004.genes.results	OCT-01-0118	OCT-01-0118-CAP
 OCT-01-0266-TS_191217_A00469_0073_BHWWL3DSXX_CTGAAGCT-ATAGAGGC_L004.genes.results	OCT-01-0266	OCT-01-0266-CAP
