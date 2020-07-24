@@ -50,7 +50,7 @@ class TestStudy(unittest.TestCase):
 
     def verify_checksums(self, checksums):
         """Checksums is a dictionary: md5sum -> relative path from output directory """
-         for relative_path in checksums.keys():
+        for relative_path in checksums.keys():
             outPath = os.path.join(self.outDir, relative_path)
             self.assertTrue(os.path.exists(outPath), rel+" exists")
             md5 = hashlib.md5()
