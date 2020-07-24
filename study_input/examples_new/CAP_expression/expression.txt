@@ -1,0 +1,23 @@
+---
+#DATATYPE: CONTINUOUS
+#input_folder: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression
+#zscores: True
+#profile_name: mRNA Expression
+#profile_description: Expression information DCIS (5 Samples)
+#enscon: /u/ibancarz/git/cbioportal_tools/src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/accessory_files/ensemble_conversion.txt
+#genelist: /u/ibancarz/git/cbioportal_tools/src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/accessory_files/targeted_genelist.txt
+#gepfile: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression/gepcomp.list
+#gepcomp: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression/gepcomp
+#tcgadata: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression/TCGA_ALL_TUMOR.csv
+#studyid: OCTCAP
+---
+FILE_NAME	PATIENT_ID	SAMPLE_ID
+OCT-01-0118-TS_191217_A00469_0073_BHWWL3DSXX_ATTCAGAA-ATAGAGGC_L004.genes.results	OCT-01-0118	OCT-01-0118-CAP
+OCT-01-0266-TS_191217_A00469_0073_BHWWL3DSXX_CTGAAGCT-ATAGAGGC_L004.genes.results	OCT-01-0266	OCT-01-0266-CAP
+OCT-01-0384-TS_191121_A00469_0067_BHK3JLDSXX_TAATGCGC-ATAGAGGC_L001.genes.results	OCT-01-0384	OCT-01-0384-CAP
+OCT-01-0472-TS_191121_A00469_0067_BHK3JLDSXX_ATTCAGAA-CCTATCCT_L001.genes.results	OCT-01-0472	OCT-01-0472-CAP
+OCT-01-0676-TS_191121_A00469_0067_BHK3JLDSXX_GAATTCGT-CCTATCCT_L001.genes.results	OCT-01-0676	OCT-01-0676-CAP
+OCT-01-1256-TS_191121_A00469_0067_BHK3JLDSXX_GAATTCGT-GGCTCTGA_L001.genes.results	OCT-01-1256	OCT-01-1256-CAP
+OCT-01-1322-TS_191121_A00469_0067_BHK3JLDSXX_TAATGCGC-GGCTCTGA_L001.genes.results	OCT-01-1322	OCT-01-1322-CAP
+OCT-01-1328-TS_191121_A00469_0067_BHK3JLDSXX_TCCGCGAA-ATAGAGGC_L001.genes.results	OCT-01-1328	OCT-01-1328-CAP
+OCT-01-1493-TS_191121_A00469_0067_BHK3JLDSXX_TCCGCGAA-CCTATCCT_L001.genes.results	OCT-01-1493	OCT-01-1493-CAP
