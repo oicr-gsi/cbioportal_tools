@@ -269,7 +269,7 @@ class legacy_pipeline_component(pipeline_component):
             "__name__": "__main__"
         }
         local_args = {}
-        if not os.path.exists(script_path) and os.access(script_path, os.R_OK):
+        if not (os.path.exists(script_path) and os.access(script_path, os.R_OK)):
             msg = "Legacy pipeline script path %s does not exist, or is not readable" % script_path
             self.logger.error(msg)
             raise(OSError(msg))
