@@ -39,10 +39,10 @@ class TestStudy(unittest.TestCase):
         test_study = study(self.config_path, log_level=logging.DEBUG)
         test_study.write_all(out_dir, dry_run=False)
         more_checksums = {
-            'data_expression_continous.txt', 'e2b50dc44307e0b9bee27d253b02c6d9',
-            'data_expression_zscores.txt', '0a04f5f68265ca9a1aded16dd013738c',
-            'meta_expression_continous.txt', '5db83d4ca1925117abc8837b2eebeb46',
-            'meta_expression_zscores.txt', '4c807196b4d1e1e47710bd96343b3ccc',
+            'data_expression_continous.txt': 'e2b50dc44307e0b9bee27d253b02c6d9',
+            'data_expression_zscores.txt': '0a04f5f68265ca9a1aded16dd013738c',
+            'meta_expression_continous.txt': '5db83d4ca1925117abc8837b2eebeb46',
+            'meta_expression_zscores.txt': '4c807196b4d1e1e47710bd96343b3ccc'
         }
         checksums = self.base_checksums.copy()
         checksums.update(more_checksums)
