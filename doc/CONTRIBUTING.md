@@ -1,4 +1,13 @@
 # Contributing
+
+-----------------------------------------------------
+
+## !!! WARNING !!!
+
+This document refers to the legacy code structure in release 0.0.1. It will be made obsolete in subsequent releases.
+
+-----------------------------------------------------
+
 To contribute or support another data-type or pipeline, I recommend following these steps as it will ensure the process goes **smoothly**. It will also ensure the **documentation** is also **up to date** with the changes you've made.
 
 The 2 large features that can be implemented are:

@@ -184,6 +184,8 @@ def define_parser() -> argparse.ArgumentParser:
 
 
 def resolve_priority_queue(information: Information) -> Information:
+    # this method decides on the order of processing for config files, based on a dependency structure
+    # *very* opaque; TODO replace with a more explicit representation of dependencies
     score = {}
     # Initialize scores
     for each in information:
