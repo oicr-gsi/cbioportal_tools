@@ -54,10 +54,10 @@ class TestStudy(unittest.TestCase):
             out_path = os.path.join(out_dir, relative_path)
             self.assertTrue(os.path.exists(out_path), out_path+" exists")
             md5 = hashlib.md5()
-            with open(outPath, 'rb') as f:
+            with open(out_path, 'rb') as f:
                 md5.update(f.read())
             self.assertEqual(md5.hexdigest(),
-                             checksums[name],
+                             checksums[relative_path],
                              out_path+" checksums match")
 
     def tearDown(self):
