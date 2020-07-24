@@ -30,7 +30,7 @@ def main():
     preProcRNA(meta_config, study_config, '/data_{}_gepcomp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), meta_config.config_map['enscon'], meta_config.config_map['genelist'], True, False)
     preProcRNA(meta_config, study_config, '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), meta_config.config_map['enscon'], meta_config.config_map['genelist'], False, True)
 
-    if 'zscores' in meta_config.config_map.keys() and meta_config.config_map['zscores'].lower() == 'true':
+    if meta_config.config_map.get('zscores'):
         # Generate the z-scores for mRNA expression data
         logger.info('Generating expression Z-Score Data ...')
         generate_expression_zscore(meta_config, os.path.join(study_config.config_map['output_folder'],
@@ -78,7 +78,7 @@ def main():
     meta.generate_meta_type(meta_config,study_config,logger)
     
     # Generate metadata for mRNA expression z-score data
-    if 'zscores' in meta_config.config_map.keys() and meta_config.config_map['zscores'].lower() == 'true':
+    if meta_config.config_map.get('zscores'):
         logger.info('Generating expression Z-Score Meta ...')
         meta_config.datahandler = 'Z-SCORE'
         meta.generate_meta_type(meta_config,study_config,logger)
