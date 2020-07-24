@@ -8,6 +8,7 @@ import re
 import os
 import yaml
 
+import utilities.constants
 from utilities.base import base
 
 class config(base):
@@ -110,7 +111,9 @@ class legacy_config_wrapper(base):
         self.config_map = config.get_meta()
         self.data_frame = config.get_table()
         self.alterationtype = alt_type
-        self.datahandler = data_type
+        self.data_type = data_type # TODO clarify datatype/handler terminology
+        self.datahandler = self.config_map.get(utilities.constants.DATATYPE_KEY)
+
 
     def set_config_mapping(self, k, v):
         """Update a key/value pair in the metadata map; eg. the study output path"""
