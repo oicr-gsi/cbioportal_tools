@@ -27,17 +27,17 @@ class TestStudy(unittest.TestCase):
         }
 
     def test_dry_run(self):
-        outDir = self.outDir = os.path.join(self.tmp.name, 'dry_run')
-        os.mkdir(self.outdir)
+        out_dir = os.path.join(self.tmp.name, 'dry_run')
+        os.mkdir(out_dir)
         test_study = study(self.config_path, log_level=logging.DEBUG)
-        test_study.write_all(outDir, dry_run=True)
-        self.verify_checksums(self.base_checksums)
+        test_study.write_all(out_dir, dry_run=True)
+        self.verify_checksums(self.base_checksums, out_dir)
 
     def test_CAP_expression(self):
-        outDir = self.outDir = os.path.join(self.tmp.name, 'CAP_expression')
-        os.mkdir(self.outdir)
+        out_dir = os.path.join(self.tmp.name, 'CAP_expression')
+        os.mkdir(out_dir)
         test_study = study(self.config_path, log_level=logging.DEBUG)
-        test_study.write_all(outDir, dry_run=False)
+        test_study.write_all(out_dir, dry_run=False)
         more_checksums = {
             'data_expression_continous.txt', 'e2b50dc44307e0b9bee27d253b02c6d9',
             'data_expression_zscores.txt', '0a04f5f68265ca9a1aded16dd013738c',
@@ -46,19 +46,19 @@ class TestStudy(unittest.TestCase):
         }
         checksums = self.base_checksums.copy()
         checksums.update(more_checksums)
-        self.verify_checksums(checksums)
+        self.verify_checksums(checksums, out_dir)
 
-    def verify_checksums(self, checksums):
+    def verify_checksums(self, checksums, out_dir):
         """Checksums is a dictionary: md5sum -> relative path from output directory """
         for relative_path in checksums.keys():
-            outPath = os.path.join(self.outDir, relative_path)
-            self.assertTrue(os.path.exists(outPath), rel+" exists")
+            out_path = os.path.join(out_dir, relative_path)
+            self.assertTrue(os.path.exists(out_path), rel+" exists")
             md5 = hashlib.md5()
             with open(outPath, 'rb') as f:
                 md5.update(f.read())
             self.assertEqual(md5.hexdigest(),
                              checksums[name],
-                             outPath+" checksums match")
+                             out_path+" checksums match")
 
     def tearDown(self):
         self.tmp.cleanup()
