@@ -20,6 +20,11 @@ CHANGELOG
 ### Removed
 - GRD-253: Remove `--path` argument to `generator.py`
 - GRD-261: Delete the `remove_data_type` directory
+- GRD-272:
+  - Calls to old classes/modules
+  - Self-contained push to cBioPortal instance from `generator.py`. For now can be accomplished by separate push script; may reinstate later.
+  - Code to override config file options on the command line; may reinstate later.
+  - `resolve_priority_queue` method. Reinstate later if needed; see [GitHub issue](https://github.com/oicr-gsi/cbioportal_tools/issues/80).
 
 ## v0.0.1: 2020-07-03
 - Initial development release
