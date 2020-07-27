@@ -2,6 +2,8 @@
 
 import logging
 import os
+from shutil import rmtree
+
 
 from generate.components import alteration_type, cancer_type, case_list, study_meta, patients, samples
 from generate.config import study_config
@@ -10,8 +12,8 @@ import utilities.constants
 
 class study(base):
 
-    def __init__(self, config_path, log_level=logging.WARNING):
-        self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__))
+    def __init__(self, config_path, log_level=logging.WARNING, log_path=None):
+        self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__), log_path)
         config = study_config(config_path, log_level)
         self.study_id = config.get_cancer_study_identifier()
         self.study_meta = self.get_study_meta(config) # required
@@ -76,7 +78,7 @@ class study(base):
             self.logger.error("Output path %s is not writable" % out_dir)
         return valid
 
-    def write_all(self, out_dir, dry_run=False):
+    def write_all(self, out_dir, dry_run=False, force=False):
         """Write all outputs to the given directory path"""
         # write component files
         valid = self.is_valid_output_dir(out_dir)
@@ -84,6 +86,18 @@ class study(base):
             msg = "Invalid output directory %s; exiting" % out_dir
             self.logger.error(msg)
             raise OSError(msg)
+        if len(os.listdir(out_dir)) > 0:
+            if force:
+                msg = "Output directory %s is not empty; --force "+\
+                      "is in effect, removing directory contents." % out_dir
+                self.logger.info(msg)
+                rmtree(out_dir)
+                os.mkdir(out_dir)
+            else:
+                 msg = "Output directory %s is not empty; exiting. "+\
+                       "(Run with --force to delete contents of directory.)" % out_dir
+                 self.logger.error(msg)
+                 raise OSError(msg)
         case_list_dir = os.path.join(out_dir, 'case_lists')
         if len(self.case_lists) > 0:
             if os.path.exists(case_list_dir):
