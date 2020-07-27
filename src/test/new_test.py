@@ -40,7 +40,8 @@ class TestStudy(unittest.TestCase):
         test_study.write_all(out_dir, dry_run=True)
         self.verify_checksums(self.base_checksums, out_dir)
 
-    def test_CAP_expression(self):
+    def OMIT_test_CAP_expression(self):
+        # omit this test for now; largely redundant with TestGenerator.test_CAP_expression
         out_dir = os.path.join(self.tmp.name, 'study_CAP_expression')
         os.mkdir(out_dir)
         test_study = study(self.config_path, log_level=logging.WARN)
