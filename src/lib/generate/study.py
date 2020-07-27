@@ -51,12 +51,16 @@ class study(base):
         # TODO:
         # - cnaseq case list if CNA data and mutation data both present
         # - 3way_complete case list if CNA data, mutation data, expression data all present
+        maf_key = utilities.constants.MAF_KEY
+        seg_key = utilities.constants.SEG_KEY
+        mrnax_key = utilities.constants.MRNA_EXPRESSION_KEY
         case_list_suffix_by_alteration_type = {
-            'MAF': 'sequenced',
-            'SEG': 'cna',
-            'MRNA_EXPRESSION': 'rna_seq_mrna'
+            maf_key: 'sequenced',
+            seg_key: 'cna',
+            mrnax_key: 'rna_seq_mrna'
         }
         case_lists = []
+        generated = {}
         for pipeline in self.pipelines:
             alt_type = pipeline.get_name()
             suffix = case_list_suffix_by_alteration_type.get(alt_type, None)
@@ -66,6 +70,11 @@ class study(base):
                 samples = pipeline.get_sample_ids()
                 if name!=None and description!=None and len(samples)>0:
                      case_lists.append(case_list(self.study_id, suffix, name, description, samples))
+                     generated[alt_type] = pipeline
+        if generated.get(maf_key) and generated.get(seg_key):
+            self.logger.warning("cnaseq case list is applicable, but not yet implemented")
+            if generated.get(mrnax_key):
+                self.logger.warning("3way_complete case list is applicable, but not yet implemented")
         # generate custom case lists from config files
         case_list_config_paths = config.get_case_list_config_paths()
         for path in case_list_config_paths:
