@@ -24,7 +24,8 @@ class TestStudy(unittest.TestCase):
             'meta_clinical_patients.txt': '0de6a7ae349e16b26b68ac5a4eb62a0c',
             'meta_clinical_samples.txt': '42609db9577d6192113be9ffeba92292',
             'meta_study.txt': '5ca90314306ad1f1aae94bc345bd0a23',
-            'case_lists/cases_merp.txt': '43685fab767e5961a11e68a45d68c5ec'
+            'case_lists/cases_merp.txt': '43685fab767e5961a11e68a45d68c5ec',
+            'case_lists/cases_rna_seq_mrna.txt': '1497b32c3999df39b04333da92be5018'
         }
         self.CAP_expression_checksums = {
             'data_expression_continous.txt': 'e2b50dc44307e0b9bee27d253b02c6d9',
@@ -34,7 +35,10 @@ class TestStudy(unittest.TestCase):
         }
 
     def test_dry_run(self):
-        out_dir = os.path.join(self.tmp.name, 'study_dry_run')
+        #out_dir = os.path.join(self.tmp.name, 'study_dry_run')
+        out_dir = os.path.join('/tmp/janus', 'study_dry_run')
+        from shutil import rmtree
+        rmtree(out_dir)
         os.mkdir(out_dir)
         test_study = study(self.config_path, log_level=logging.WARN)
         test_study.write_all(out_dir, dry_run=True)

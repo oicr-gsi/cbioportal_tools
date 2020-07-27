@@ -59,8 +59,55 @@ class alteration_type(component):
             pc = factory.get_component(self.name, key, config_paths_by_datatype[key], study_config)
             self.components.append(pc)
         self.logger.debug("Created %i components for %s" % (len(self.components), self.name))
-        #self.logger.debug("Globals: "+str(globals()))
         self.logger.debug("Sample class: "+str(globals()['samples']))
+
+    def consensus_meta_value(self, key):
+        """
+        Get the value of a metadata field; check if consistent between all subcomponents.
+        Return the first non-null value found (if any), None otherwise.
+        """
+        consensus = None
+        for component in self.components:
+            value = component.get_meta_value(key)
+            if value == None:
+                msg = "Metadata value for %s not found in component %s" % key, component.name
+                self.logger.warning(msg)
+            elif consensus == None:
+                consensus = value
+            elif value != consensus:
+                msg = "Inconsistent metadata value for %s in component %s" % key, component.name
+                self.logger.warn(msg)
+        return consensus
+
+    def get_profile_description(self):
+        """Get the profile_description field, if consistent between subcomponents"""
+        return self.consensus_meta_value("profile_description")
+
+    def get_profile_name(self):
+        """Get the profile_name field, if consistent between subcomponents"""
+        return self.consensus_meta_value("profile_name")
+
+    def get_sample_ids(self):
+        """Get the SAMPLE_ID column as a list; check if consistent between subcomponents"""
+        sample_id_set = None
+        samples = []
+        consistent = True
+        for component in self.components:
+            samples = component.get_sample_ids()
+            if sample_id_set == None:
+                sample_id_set = set(samples)
+            elif set(samples) != sample_id_set:
+                msg = "Inconsistent SAMPLE_ID values in pipeline component %s" % component.name
+                self.logger.warning(msg)
+                consistent = False
+        if not consistent:
+            self.logger.warning("Inconsistent SAMPLE_ID values; returning first non-empty set found")
+        elif len(samples) == 0:
+            self.logger.warning("No SAMPLE_ID values found for any component in %s") % self.name
+        return samples
+
+    def get_name(self):
+        return self.name
 
     def write(self, out_dir):
         for pc in self.pipeline_components:
@@ -136,9 +183,9 @@ class case_list(component):
             data[self.CATEGORY_KEY] = self.category
         out_path = os.path.join(out_dir, 'cases_%s.txt' % self.suffix)
         if os.path.exists(out_path):
-            msg = "Output path already exists; non-unique case list suffix?"
-            self.logger.error(msg)
-            raise OSError(msg)
+            msg = "Output path already exists; not overwriting; case list suffix %s may not be unique" \
+                  % self.suffix
+            self.logger.warn(msg)
         out = open(out_path, 'w')
         for key in data.keys():
             # not using YAML dump; we want a literal tab-delimited string, not YAML representation
@@ -228,6 +275,21 @@ class pipeline_component(component):
         self.config = pipeline_config(config_path)
         self.study_config = study_config
         self.logger.debug("Created data handler for '%s' from path %s" % (self.name, config_path))
+
+    def get_meta_value(self, key):
+        """Return self.meta[key] if present, None otherwise"""
+        return self.config.get_meta().get(key, None)
+
+    def get_sample_ids(self):
+        """Return the SAMPLE_ID column, if any, as a list"""
+        dataframe = self.config.get_table()
+        key = 'SAMPLE_ID'
+        samples = []
+        if key in dataframe.columns:
+            samples = dataframe[key].tolist()
+        else:
+            self.logger.warning("No sample IDs found for pipeline component %s" % self.name)
+        return samples
 
     def write(self, out_dir, dry_run=False):
         # TODO self.handler.write(outdir)

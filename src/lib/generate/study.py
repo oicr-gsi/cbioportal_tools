@@ -45,12 +45,29 @@ class study(base):
         return cancer_type(config.get_cancer_type_config_path())
 
     def get_case_lists(self, config):
+        # generate default case lists based on pipelines in study:
+        # - case lists for alteration_types MAF, SEG, MRNA_EXPRESSION
+        # - only need one case list per alteration type (they may have multiple datatypes)
         # TODO:
-        # - generate case lists for pipelines which require them (use self.pipelines)
-
+        # - cnaseq case list if CNA data and mutation data both present
+        # - 3way_complete case list if CNA data, mutation data, expression data all present
+        case_list_suffix_by_alteration_type = {
+            'MAF': 'sequenced',
+            'SEG': 'cna',
+            'MRNA_EXPRESSION': 'rna_seq_mrna'
+        }
+        case_lists = []
+        for pipeline in self.pipelines:
+            alt_type = pipeline.get_name()
+            suffix = case_list_suffix_by_alteration_type.get(alt_type, None)
+            if suffix != None:
+                name = pipeline.get_profile_name()
+                description = pipeline.get_profile_description()
+                samples = pipeline.get_sample_ids()
+                if name!=None and description!=None and len(samples)>0:
+                     case_lists.append(case_list(self.study_id, suffix, name, description, samples))
         # generate custom case lists from config files
         case_list_config_paths = config.get_case_list_config_paths()
-        case_lists = []
         for path in case_list_config_paths:
             case_lists.append(case_list.from_config_path(path, self.study_id))
         return case_lists
