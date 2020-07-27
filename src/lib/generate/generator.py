@@ -8,15 +8,15 @@ import logging
 from generate.study import study
 
 def define_parser() -> argparse.ArgumentParser:
-    generator = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(
         description="janus: CLI tool to generate an importable study for a cBioPortal instance")
-    required = generator.add_argument_group('Required arguments:')
+    required = parser.add_argument_group('Required arguments:')
 
     required.add_argument("-c", "--config", help="Path to study config file",
                         metavar='PATH', required=True)
     required.add_argument("-o", "--out", help="Directory for study output",
                         metavar='PATH', required=True)
-    optional = generator.add_argument_group('Optional arguments:')
+    optional = parser.add_argument_group('Optional arguments:')
     optional.add_argument("-d", "--dry-run",
                           action="store_true",
                           help="Dry-run mode; write sample, patient, and metadata files, but "+\
@@ -24,7 +24,7 @@ def define_parser() -> argparse.ArgumentParser:
     optional.add_argument("-f", "--force",
                           action="store_true",
                           help="Force overwrite of output folder; delete previous contents, if any.")
-    return generator
+    return parser
 
 
 def main(args):
