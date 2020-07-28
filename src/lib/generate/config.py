@@ -4,7 +4,7 @@ import logging
 import os
 from math import inf as infinity
 
-from utilities.config import config, ConfigError
+from utilities.config import config, JanusConfigError
 import utilities.constants
 
 class generation_config(config):
@@ -52,19 +52,19 @@ class clinical_config(generation_config):
         columns = len(display_names)
         if len(descriptions)!=columns or len(datatypes)!=columns or len(priorities)!=columns:
             msg = "Inconsistent number of column fields in metadata"
-            raise ConfigError(msg)
+            raise JanusConfigError(msg)
         for datatype in datatypes:
             if not self.is_valid_type(datatype):
                 msg = "Type %s is not a valid cBioPortal datatype" % datatype
                 self.logger.error(msg)
-                raise ConfigError(msg)
+                raise JanusConfigError(msg)
         for priority in priorities:
             try:
                 num = int(priority)
             except ValueError as ve:
                 msg = "Priority '%s' is not an integer: {0}".format(ve)
                 self.logger.error(msg)
-                raise ConfigError(msg)
+                raise JanusConfigError(msg)
         return [display_names, descriptions, datatypes, priorities]
 
 class pipeline_config(generation_config):
@@ -101,7 +101,7 @@ class study_config(generation_config):
             msg = "Expected at most %i rows for datatype %s, found %i" \
                   % (allowed_max, datatype, total_rows)
             self.logger.error(msg)
-            raise ConfigError(msg)
+            raise JanusConfigError(msg)
         config_paths = []
         for i in range(total_rows):
             filename = dt_frame.iloc[i]['FILE_NAME']
@@ -149,7 +149,7 @@ class study_config(generation_config):
                     at_key, dh_key, alteration_type, datahandler
                 )
                 self.logger.error(msg)
-                raise ConfigError(msg)
+                raise JanusConfigError(msg)
             config_paths[alteration_type][datahandler] = os.path.join(self.config_dir, file_name)
         return config_paths
 

@@ -1,4 +1,4 @@
-"""Manipulate study generation metadata"""
+"""Module with function to write metadata files; used by legacy analysis pipeline scripts"""
 
 from collections import OrderedDict
 import logging
@@ -60,25 +60,3 @@ def generate_meta_type(meta_config: Config.Config, study_config: Config.Config, 
     f.close()
     logger.debug('Finished writing %s' % f_out)
 
-
-def generate_meta_study(study_config: Config.Config, logger):
-
-    output_meta = os.path.join(study_config.config_map['output_folder'], 'meta_study.txt')
-    logger.debug('Saving meta_study.txt')
-
-    f = open(output_meta, 'w')
-
-    try:
-        f.write('type_of_cancer: {}\n'.format(study_config.config_map['type_of_cancer']))
-        f.write('cancer_study_identifier: {}\n'.format(study_config.config_map['cancer_study_identifier']))
-        f.write('name: {}\n'.format(study_config.config_map['name']))
-        f.write('short_name: {}\n'.format(study_config.config_map['short_name']))
-        f.write('description: {}\n'.format(study_config.config_map['description']))
-        f.write('add_global_case_list: true\r')
-    except KeyError:
-        logger.error('The study config is missing a value, please add it.')
-        raise
-    f.flush()
-    f.close()
-
-    logger.debug('Finished writing %s' % output_meta)

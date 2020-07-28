@@ -24,7 +24,8 @@ class TestStudy(unittest.TestCase):
             'meta_clinical_patients.txt': '0de6a7ae349e16b26b68ac5a4eb62a0c',
             'meta_clinical_samples.txt': '42609db9577d6192113be9ffeba92292',
             'meta_study.txt': '5ca90314306ad1f1aae94bc345bd0a23',
-            'case_lists/cases_merp.txt': '43685fab767e5961a11e68a45d68c5ec'
+            'case_lists/cases_merp.txt': '43685fab767e5961a11e68a45d68c5ec',
+            'case_lists/cases_rna_seq_mrna.txt': '1497b32c3999df39b04333da92be5018'
         }
         self.CAP_expression_checksums = {
             'data_expression_continous.txt': 'e2b50dc44307e0b9bee27d253b02c6d9',

@@ -69,11 +69,11 @@ class config(base):
                     else:
                         msg = "Lines in YAML header should begin with #"
                         self.logger.error(msg)
-                        raise ConfigError(msg)
+                        raise JanusConfigError(msg)
             if body:
                 msg = "YAML header section opened with ... or ---, but never closed"
                 self.logger.error(msg)
-                raise ConfigError(msg)
+                raise JanusConfigError(msg)
         meta = yaml.safe_load(''.join(yaml_lines))
         return (meta, skip_rows)
 
@@ -94,7 +94,7 @@ class config(base):
         if len(missing_required) > 0:
             msg = 'Missing required metadata fields: '+', '.join(missing_required)
             self.logger.error(msg)
-            raise ConfigError(msg)
+            raise JanusConfigError(msg)
 
 
 class legacy_config_wrapper(base):
@@ -123,5 +123,5 @@ class legacy_config_wrapper(base):
         return str([self.config_map, self.data_frame, self.datahandler, self.alterationtype])
 
 
-class ConfigError(Exception):
+class JanusConfigError(Exception):
     pass
