@@ -48,7 +48,6 @@ class study(base):
         # generate default case lists based on pipelines in study:
         # - case lists for alteration_types MAF, SEG, MRNA_EXPRESSION
         # - only need one case list per alteration type (they may have multiple datatypes)
-        # TODO:
         # - cnaseq case list if CNA data and mutation data both present
         # - 3way_complete case list if CNA data, mutation data, expression data all present
         maf_key = utilities.constants.MAF_KEY
@@ -63,8 +62,8 @@ class study(base):
         generated = {}
         for pipeline in self.pipelines:
             alt_type = pipeline.get_name()
-            suffix = case_list_suffix_by_alteration_type.get(alt_type, None)
-            if suffix != None:
+            suffix = case_list_suffix_by_alteration_type.get(alt_type)
+            if suffix:
                 name = pipeline.get_profile_name()
                 description = pipeline.get_profile_description()
                 samples = pipeline.get_sample_ids()
@@ -72,9 +71,22 @@ class study(base):
                      case_lists.append(case_list(self.study_id, suffix, name, description, samples))
                      generated[alt_type] = pipeline
         if generated.get(maf_key) and generated.get(seg_key):
-            self.logger.warning("cnaseq case list is applicable, but not yet implemented")
+            self.logger.info("Generating cnaseq case list")
+            suffix = 'cnaseq'
+            samples_maf = set(generated[maf_key].get_sample_ids())
+            samples_seg = set(generated[seg_key].get_sample_ids())
+            samples_cnaseq = list(samples_maf & samples_seg) # intersection of samples
+            name = 'Samples profiled for mutations and CNAs'
+            description = 'Case list containing all samples profiled for mutations and CNAs'
+            case_lists.append(case_list(self.study_id, suffix, name, description, samples_cnaseq))
             if generated.get(mrnax_key):
-                self.logger.warning("3way_complete case list is applicable, but not yet implemented")
+                self.logger.info("Generating 3way_complete case list")
+                suffix = '3way_complete'
+                samples_3wc = set(generated[mrnax_key].get_sample_ids()) & samples_cnaseq
+                name = 'Samples profiled for mutations, CNAs, and mRNA expression'
+                description = 'Case list containing all samples profiled for mutations, CNAs, '+\
+                              'and mRNA expression'
+                case_lists.append(case_list(self.study_id, suffix, name, description, samples_3wc))
         # generate custom case lists from config files
         case_list_config_paths = config.get_case_list_config_paths()
         for path in case_list_config_paths:

@@ -292,10 +292,10 @@ class pipeline_component(component):
         return samples
 
     def write(self, out_dir, dry_run=False):
-        # TODO self.handler.write(outdir)
-        self.logger.warning("Output for pipeline component '%s' not yet enabled" % self.name)
+        # TODO use this method for new (non-legacy) pipeline output types
+        self.logger.warning("Output for pipeline component '%s' not yet supported" % self.name)
         if dry_run:
-            self.logger.info("Dry run for pipeline component %s" % self.name)
+            self.logger.info("Dry run for unsupported pipeline component %s" % self.name)
         else:
             msg = "Pipeline component '%s' is not supported for execution" % self.name
             self.logger.error(msg)
@@ -341,7 +341,12 @@ class legacy_pipeline_component(pipeline_component):
         else:
             self.logger.debug("%s: Running legacy pipeline script %s" % (self.name, script_path))
             with open(script_path, 'rb') as script_file:
-                exec(compile(script_file.read(), script_path, 'exec'), globals().update(global_args), local_args)
+                try:
+                    compiled = compile(script_file.read(), script_path, 'exec')
+                    exec(compiled, globals().update(global_args), local_args)
+                except Exception as exc:
+                    self.logger.error("Unexpected error in legacy pipeline exec: "+str(exc))
+                    raise
 
 
 class study_meta(component):
@@ -356,15 +361,15 @@ class study_meta(component):
     
     def write(self, out_dir):
         meta = {}
-        # TODO check all required fields are present
         for field in utilities.constants.REQUIRED_STUDY_META_FIELDS:
             try:
                 meta[field] = self.study_meta[field]
             except KeyError:
                 msg = "Missing required study meta field "+field
                 self.logger.error(msg)
+                raise
         for field in utilities.constants.OPTIONAL_STUDY_META_FIELDS:
-            if field in self.study_meta:
+            if self.study_meta.get(field):
                 meta[field] = self.study_meta[field]
         out = open(os.path.join(out_dir, self.META_FILENAME), 'w')
         out.write(yaml.dump(meta, sort_keys=True))
