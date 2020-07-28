@@ -20,6 +20,9 @@ CHANGELOG
 ### Removed
 - GRD-253: Remove `--path` argument to `generator.py`
 - GRD-261: Delete the `remove_data_type` directory
+- GRD-271:
+  - Removed obsolete generator code
+  - Replaced legacy generation of default study lists
 - GRD-272:
   - Calls to old classes/modules
   - Self-contained push to cBioPortal instance from `generator.py`. For now can be accomplished by separate push script; may reinstate later.
