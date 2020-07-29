@@ -1,106 +1,78 @@
-#  janus
-janus is a tool for the import of data and administration of the GSI cBioPortal instance. 
+#  Janus
 
-Janus has multiple faces, as of now, just 4. Each one defines a set of functions that are described more accurately [here.](src/README.md)
+## Overview
 
-More information on the file types from cBioPortal is [Data Loading](https://cbioportal.readthedocs.io/en/latest/Data-Loading.html),
-and [File Formats](https://cbioportal.readthedocs.io/en/latest/File-Formats.html). 
-We also have links to the OICR Wiki. [cBioPortal Study Components](https://wiki.oicr.on.ca/display/GSI/cBioPortal+Study+Components)
-and [cBioPortal-Tools](https://wiki.oicr.on.ca/display/GSI/cBioPortal-Tools)
+Janus provides a gateway to a [cBioPortal](https://www.cbioportal.org/) instance. It is named for the Roman god of doorways and transitions.
 
+Janus takes as its input pipeline data and metadata, as generated at the [Ontario Institute for Cancer Research](https://oicr.on.ca/). Its core (and for now, only) function is to prepare a study directory for upload, as specified in the [cBioPortal documentation](https://docs.cbioportal.org/5.1-data-loading/data-loading/file-formats).
+
+This document provides a general introduction to Janus. Further documentation is in the `doc` subdirectory. Janus has a changelog in `CHANGELOG.md`.
+
+## Prerequisites
+
+Janus is primarily implemented in Python, with a few ancillary scripts in R. Requirements:
+
+- Python >= 3.7
+- Python packages:
+  - numpy >= 1.19.0
+  - pandas >= 1.0.5
+  - PyYAML >= 5.3.1
+- R >= 3.5.1
+- [ensembl-vep](https://github.com/Ensembl/ensembl-vep) >= 98.0
+- [vcf2maf](https://github.com/mskcc/vcf2maf) >= 1.6.17
+- Some legacy pipeline scripts require Linux utilities such as `awk` and `grep`
+- Minimum 16G of RAM (32G is preferred)
+
+## Installation and Testing
+
+Janus has a `setup.py` script and can be installed using [pip](https://pypi.org/project/pip/):
 ```
-   ______            ______   
-  /(@/@@@@\        /@@@@\@)\  
- |(@|@@@@@@\__  __/@@@@@@|@)| 
-  \(@\@@@@@@|)\/(|@@@@@@/@)/   
-     |    @@@|)(|@@@    |     
-     /~     @|@@|@    (~\     
-    /_     @@|@@|@@     _\    
-      ~    @@@@@@@@    ~      
-@     %@@@@@      @@@@@%     @
- @@@@@@@@@ \______/ @@@@@@@@@ 
+pip install $JANUS_SOURCE_DIR
 ```
+
+Alternatively, to install to a specific directory:
+```
+pip install --prefix $INSTALL_ROOT $JANUS_SOURCE_DIR
+```
+
+To run tests, assuming all prerequisites are installed:
+```
+export PYTHONPATH=${JANUS_SOURCE_DIR}/src/lib:$PYTHONPATH
+./src/test/test.py
+```
+
+Example study input appears in the `study_input` subdirectory.
 
 ## Usage
 
-### `janus.py generator`
+The main script is `janus.py`, which is copied to the `bin` subdirectory of the installation. Run `janus.py --help` for usage information.
 
-For each face of janus there is help, however the heaviest face `generator` creates and uploads a study from raw data to your cBioPortal instance.
+## Code Structure
 
-If you are using the runner script you must simply specify the location of your study configuration files.
+The prototype version of Janus in release 0.0.1 required modification to be ready for production. Deprecated code retained from the prototype is referred to as "legacy".
 
-Should you be exporting the study to a cBioPortal instance, a log file will be generated of the import process in the study folder.
+Python modules in `src/lib`:
+- `constants`: Legacy constants
+- `generate`: Code to generate study directories, ready for upload.
+- `generate/analysis_pipelines`: Generation code specific to analysis pipelines. Includes scripts from the legacy version.
+- `support`: Legacy support and utility functions
+- `utilities`: General purpose code for logging and configuration
 
-You will need a minimum of 16g. i.e. `qrsh -l h_vmem=16g`* I recommend having `32g` or more, as more samples can then be processed in parallel.
+## Potential Extension
 
-\* I don't actually know the minimum, but this is the most I've seen used.
+Janus may later be extended to:
+- Upload the study to a cBioPortal instance
+- Query a cBioPortal instance
+- Delete data from a cBioPortal instance
+- Prepare and upload data to resources other than cBioPortal
 
-#### Minimal Study:
+## Credits
 
-Refer to [Specification README.md](study_input/Specification/README.md#minimal-study)
+Janus prototype developed by OICR co-op students [Kunal Chandan](https://github.com/kunalchandan) and [Allan Liang](https://github.com/a33liang).
 
-### `janus.py import`
+Subsequent development by Iain Bancarz, <ibancarz@oicr.on.ca>.
 
-This face will take either a complete study or a `gene-panel` file and will upload them to a target cBioPortal instance and restart it.
-
-### `janus.py remove`
-
-This face will remove a study from a target instance given a `cancer_study_id`, and will automatically restart the instance.
-
-### `janus.py query`
-
-This face will query an instance for `cancer-type`s and `gene-panel`s. It should grow to query more properties.
-
-## Contributing:
-
-Refer to [`CONTRIBUTING.md`](CONTRIBUTING.md)
-
-Lists all steps that should be taken to ensure proper and complete integration of new feature.
-
-
-## What's in each folder?
-
-* [`src/`](src) contains all the scripts, with deeper organization as you go
-
-* [`study_input/`](study_input) contains example input configuration files for sample studies.
-
-* [`study_input/Specification/`](study_input/Specification) contains documentation on making your own config files.
-
-* [`src/lib/study_generation/README.md`](src/lib/study_generation/README.md) contains documentation on contributing and expanding `janus.py` functionality.
-
-## Dependencies
-You shouldn't need this if you use the runner script.
-
-This tool depends on:
-
-Python libraries required, should be available under:
-* `python-gsi/3.6.4`
-  * `pandas`
-  * `numpy`
-  * `argparse`
-
-Linux command line utilities:
-* `awk`, `sort`, `uniq`, `grep`
-
-OICR Spec
-* `vep/92`
-* `vcf2maf`
-* `python-gsi/3.6.4`
-* `R-gsi/3.5.1`
-
-Python packages require pip however they are included in `python-gsi`, to install/load everything on OICR nodes, run:
-
-Both `module use ...` statements are required.
-```
-module use /oicr/local/analysis/Modules/modulefiles
-module use /.mounts/labs/PDE/Modules/modulefiles
-module load vep/92
-module load vcf2maf
-module load python-gsi/3.6.4
-module load R-gsi/3.5.1
-```
-
-# Copyright and License
+## Copyright and License
 
 Copyright (C) 2019, 2020 by Genome Sequence Informatics, Ontario Institute for Cancer Research
 
