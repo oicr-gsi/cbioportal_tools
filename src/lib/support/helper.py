@@ -56,11 +56,6 @@ def stars():
     logger.warning("Call to deprecated helper.stars() method")
 
 
-def exit_program(message='', code=1):
-    print(message)
-    exit(code)
-
-
 def clean_folder(path,force):
     if os.path.exists(path):
         if force:
