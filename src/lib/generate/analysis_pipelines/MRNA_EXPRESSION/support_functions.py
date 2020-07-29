@@ -45,7 +45,7 @@ def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile
     df = df.drop_duplicates(subset = newColumns)
 
     # subset with given genelist
-    keep_genes_file = open(genelist, 'r+')
+    keep_genes_file = open(genelist, 'r')
     keep_genes = [line.rstrip('\n') for line in keep_genes_file.readlines()]
     keep_genes_file.close()
     df = df[df.Hugo_Symbol.isin(keep_genes)]
