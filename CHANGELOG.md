@@ -29,6 +29,9 @@ CHANGELOG
   - Self-contained push to cBioPortal instance from `generator.py`. For now can be accomplished by separate push script; may reinstate later.
   - Code to override config file options on the command line; may reinstate later.
   - `resolve_priority_queue` method. Reinstate later if needed; see [GitHub issue](https://github.com/oicr-gsi/cbioportal_tools/issues/80).
+- GRD-276:
+  - Remove the `upload/import`, `query`, and `remove` top-level tools; may reinstate later
+  - Remove convenience scripts `qsub_Janus.sh` and `runner.sh`
 
 ## v0.0.1: 2020-07-03
 - Initial development release
