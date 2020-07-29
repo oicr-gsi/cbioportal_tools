@@ -58,6 +58,12 @@ Python modules in `src/lib`:
 - `support`: Legacy support and utility functions
 - `utilities`: General purpose code for logging and configuration
 
+## Release Procedure
+
+- Update `CHANGELOG.md`
+- Update the version number in `setup.py`
+- Create, test, and install a new environment module in [OICR Modulator](https://gitlab.oicr.on.ca/ResearchIT/modulator)
+
 ## Potential Extension
 
 Janus may later be extended to:
