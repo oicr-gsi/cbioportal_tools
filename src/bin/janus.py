@@ -17,7 +17,7 @@ from upload import importer
 def super_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description='janus.py: A toolkit for cBioPortal interaction. '+\
-                    'For more usage, examples and documentation see https://github.com/oicr-gsi/cbioportal_tools')
+                    'Supports generation of folders for upload; other prototype modes currently disabled.')
     parser.add_argument('--debug', action='store_true', help="Even more verbose logging")
     parser.add_argument('--verbose', action='store_true', help="More verbose logging")
     parser.add_argument('-l', '--log-path', metavar='PATH', help='Path of file where '+\
@@ -32,6 +32,8 @@ def super_parser() -> argparse.ArgumentParser:
                           parents=[generator.define_parser()],
                           help='Generator Functions for generating whole studies from data pipelines. '
                                'Will require configuration of study configuration files')
+    """
+    # deprecated for now -- may reinstate later
     subparsers.add_parser('import',
                           add_help=False,
                           parents=[importer.define_parser()],
@@ -45,7 +47,7 @@ def super_parser() -> argparse.ArgumentParser:
                           add_help=False,
                           parents=[query.define_parser()],
                           help='Query tool for gene_panels and cancer_type. Requires password to root MySQL user')
-
+    """
     return parser
 
 def main():
@@ -57,12 +59,15 @@ def main():
 
     if args.which == 'generator':
         generator.main(args)
+    """
+    # deprecated modes -- may reinstate later
     elif args.which == 'import':
         importer.main(args)
     elif args.which == 'remove':
         remove.main(args)
     elif args.which == 'query':
         query.main(args)
+    """
 
 if __name__ == '__main__':
     main()
