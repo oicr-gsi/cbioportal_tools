@@ -8,6 +8,9 @@ from setuptools import setup, find_packages
 package_version = '0.0.2-alpha'
 package_root = 'src/lib'
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name='Janus',
     version=package_version,
@@ -19,7 +22,8 @@ setup(
     author="Iain Bancarz",
     author_email="ibancarz@oicr.on.ca",
     description="Gateway for cBioPortal",
-    long_description="Format study data for upload to a cBioPortal instance",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/oicr-gsi/cbioportal_tools",
     keywords=['cancer', 'bioinformatics', 'cBioPortal'],
     license='GPL 3.0',
