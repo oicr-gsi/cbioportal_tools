@@ -7,11 +7,12 @@ CHANGELOG
 - GRD-252:
   - Generator test for CAP expression data
   - `test.py` with all tests; `fast_test.py` with a subset of tests
+- GRD-274: `setup.py` script for installation
 ### Changed
 - GRD-254: Remove unnecessary metadata attributes; add docstrings
 - GRD-259: Change module structure to better reflect the application hierarchy
 - GRD-264: Eliminate filesystem warnings in tests
-- GRD-627: New class structure for generator
+- GRD-267: New class structure for generator
   - Data is written by _components_ defined in `components.py`
   - New configuration format defined in `generate/config.py` and `utilities/config.py`
   - Additional utility code in `utilities`
