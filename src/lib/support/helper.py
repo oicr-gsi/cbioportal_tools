@@ -17,6 +17,8 @@ c_choices = [".tar.gz", ".gz", ".zip"]
 def configure_logger(logger, log_path=None, debug=False, verbose=False):
     """Customize a Logger object with given parameters"""
     #logger = logging.getLogger(__name__)
+    if len(logger.handlers) > 0: # remove duplicate handlers from previous get_logger() calls
+        logger.handlers.clear()
     log_level = logging.WARN
     if debug:
         log_level = logging.DEBUG
@@ -48,22 +50,10 @@ def configure_logger(logger, log_path=None, debug=False, verbose=False):
     return logger
 
 def stars():
-    # Prints a row of stars
-    for a in range(100):
-        print('*', end="")
-    print('')
-
-
-def exit_program(message='', code=1):
-    print(message)
-    exit(code)
-
-
-def make_folder(path):
-    try:
-        os.stat(path)
-    except OSError:
-        os.makedirs(path)
+    # Formerly used to print a decorative row of stars
+    logger = logging.getLogger(__name__)
+    logger = configure_logger(logger, verbose=True)
+    logger.warning("Call to deprecated helper.stars() method")
 
 
 def clean_folder(path,force):
@@ -89,19 +79,16 @@ def clean_folder(path,force):
     else:
         make_folder(path)
 
-
-def copy_file(input, output, verb):
-    call_shell("cp {} {}".format(input, output), verb)
-
-
-def working_on(verbosity, message='Success!\n'):
+def working_on(verbose, message='Success reported via deprecated working_on() method'):
     # Method is for verbose option. Prints Success if no parameter specified
-    if verbosity:
-        print(message)
+    logger = logging.getLogger(__name__)
+    logger = configure_logger(logger, verbose=verbose)
+    logger.info(message)
 
 
 def get_temp_folder(output_folder, ext) -> str:
     return os.path.abspath(os.path.join(output_folder, 'temp/temp_{}/'.format(ext)))
+
 
 def call_shell(command: str, verb):
     working_on(verb, message=command)
@@ -120,39 +107,8 @@ def parallel_call(command: str, verb):
     return subprocess.Popen(command, shell=True)
 
 
-def assert_pipeline(type: str, pipeline: str):
-    if not pipeline in supported_pipe[type]:
-        stars()
-        stars()
-        print('ERROR:: The pipeline ({}) you have placed in the {} file is not currently supported. '
-              'Please use one of these {}'.format(pipeline, type, supported_pipe[type]))
-        stars()
-        stars()
-        exit(1)
-
-### checking that the pipe
-def assert_type(type: str):
-    if not type in supported_pipe.keys():
-        stars()
-        stars()
-        print('ERROR:: The type ({}) you are attempting to use is not currently supported. '
-              'Please use one of these {}'.format(type, supported_pipe.keys()))
-        stars()
-        stars()
-        exit(1)
-
-
-def execfile(filepath, globals=None, locals=None):
-    if globals is None:
-        globals = {}
-    globals.update({
-        "__name__": "__main__",
-    })
-    with open(filepath, 'rb') as file:
-        exec(compile(file.read(), filepath, 'exec'), globals, locals)
-
-
 def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
+    # TODO refactor to use Python tar & gzip libraries instead of shell calls
     # Decompresses each file in the current folder to ../temp_vcf/ if it is compressed. otherwise, copy it over
     if mutate_config.type_config == 'MAF':
         temp = get_temp_folder(study_config.config_map['output_folder'], 'vcf')
@@ -188,6 +144,7 @@ def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
 
 
 def concat_files(exports_config:Config, study_config: Config, verb):
+    # TODO refactor to use Python file objects instead of shell calls
     concated_file = os.path.join(study_config.config_map['output_folder'],
                                  'data_{}_concat.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datahandler]))
 
@@ -201,12 +158,3 @@ def concat_files(exports_config:Config, study_config: Config, verb):
         # Concat all but first line to remove header.
         call_shell('tail -n +2 {} >> {}'.format(input_file, concated_file), verb)
 
-
-def restart_tomcat(cbioportal_url, key, verb):
-    if not key == '':
-        key = '-i ' + key
-    call_shell("ssh {} debian@{} 'sudo systemctl stop  tomcat'".format(key, cbioportal_url), verb)
-    call_shell("ssh {} debian@{} 'sudo systemctl start tomcat'".format(key, cbioportal_url), verb)
-
-def load_pipelines():
-    return 1
