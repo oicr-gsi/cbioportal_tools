@@ -50,22 +50,15 @@ def configure_logger(logger, log_path=None, debug=False, verbose=False):
     return logger
 
 def stars():
-    # Prints a row of stars
+    # Formerly used to print a decorative row of stars
     logger = logging.getLogger(__name__)
     logger = configure_logger(logger, verbose=True)
-    logger.info("***** Call to deprecated stars() method *****")
+    logger.warning("Call to deprecated helper.stars() method")
 
 
 def exit_program(message='', code=1):
     print(message)
     exit(code)
-
-
-def make_folder(path):
-    try:
-        os.stat(path)
-    except OSError:
-        os.makedirs(path)
 
 
 def clean_folder(path,force):
@@ -91,11 +84,6 @@ def clean_folder(path,force):
     else:
         make_folder(path)
 
-
-def copy_file(input, output, verb):
-    call_shell("cp {} {}".format(input, output), verb)
-
-
 def working_on(verbose, message='Success reported via deprecated working_on() method'):
     # Method is for verbose option. Prints Success if no parameter specified
     logger = logging.getLogger(__name__)
@@ -105,6 +93,7 @@ def working_on(verbose, message='Success reported via deprecated working_on() me
 
 def get_temp_folder(output_folder, ext) -> str:
     return os.path.abspath(os.path.join(output_folder, 'temp/temp_{}/'.format(ext)))
+
 
 def call_shell(command: str, verb):
     working_on(verb, message=command)
@@ -121,38 +110,6 @@ def get_shell(command: str, verb) -> str:
 def parallel_call(command: str, verb):
     working_on(verb, message=command)
     return subprocess.Popen(command, shell=True)
-
-
-def assert_pipeline(type: str, pipeline: str):
-    if not pipeline in supported_pipe[type]:
-        stars()
-        stars()
-        print('ERROR:: The pipeline ({}) you have placed in the {} file is not currently supported. '
-              'Please use one of these {}'.format(pipeline, type, supported_pipe[type]))
-        stars()
-        stars()
-        exit(1)
-
-### checking that the pipe
-def assert_type(type: str):
-    if not type in supported_pipe.keys():
-        stars()
-        stars()
-        print('ERROR:: The type ({}) you are attempting to use is not currently supported. '
-              'Please use one of these {}'.format(type, supported_pipe.keys()))
-        stars()
-        stars()
-        exit(1)
-
-
-def execfile(filepath, globals=None, locals=None):
-    if globals is None:
-        globals = {}
-    globals.update({
-        "__name__": "__main__",
-    })
-    with open(filepath, 'rb') as file:
-        exec(compile(file.read(), filepath, 'exec'), globals, locals)
 
 
 def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
@@ -206,12 +163,3 @@ def concat_files(exports_config:Config, study_config: Config, verb):
         # Concat all but first line to remove header.
         call_shell('tail -n +2 {} >> {}'.format(input_file, concated_file), verb)
 
-
-def restart_tomcat(cbioportal_url, key, verb):
-    if not key == '':
-        key = '-i ' + key
-    call_shell("ssh {} debian@{} 'sudo systemctl stop  tomcat'".format(key, cbioportal_url), verb)
-    call_shell("ssh {} debian@{} 'sudo systemctl start tomcat'".format(key, cbioportal_url), verb)
-
-def load_pipelines():
-    return 1
