@@ -1,12 +1,15 @@
 CHANGELOG
 =========
 
-## Unreleased
+## v0.0.2: 2020-07-30
+### Summary
+- Development release with extensive refactoring
+- Proof-of-concept for new class structure; see GRD-267
+- Tests and runs the `CAP_expression` pipeline only; other analysis pipelines TBD
+- Removes the untested `query`, `remove`, and `upload/import` modes; only `generator` remains
 ### Added
 - GRD-251: Simple unit tests for generator mode
-- GRD-252:
-  - Generator test for CAP expression data
-  - `test.py` with all tests; `fast_test.py` with a subset of tests
+- GRD-252: Generator test for CAP expression data
 - GRD-274: `setup.py` script for installation
 ### Changed
 - GRD-254: Remove unnecessary metadata attributes; add docstrings
@@ -17,7 +20,7 @@ CHANGELOG
   - New configuration format defined in `generate/config.py` and `utilities/config.py`
   - Additional utility code in `utilities`
   - Encapsulate legacy pipelines in `legacy_pipeline_component` class; can run with minimal changes
-  - Working test in `new_test.py`
+  - Working test in `test.py` (previously `new_test.py`)
 ### Removed
 - GRD-253: Remove `--path` argument to `generator.py`
 - GRD-261: Delete the `remove_data_type` directory

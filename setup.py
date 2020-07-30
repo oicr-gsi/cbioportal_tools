@@ -5,11 +5,13 @@ Setup script for Janus
 import os
 from setuptools import setup, find_packages
 
-package_version = '0.0.2-alpha'
+package_version = '0.0.2'
 package_root = 'src/lib'
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
+# TODO setup will need to copy R scripts as "data files", when adding pipelines which need them
 
 setup(
     name='Janus',
