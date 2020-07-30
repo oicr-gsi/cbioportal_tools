@@ -1,4 +1,0 @@
-#pipeline=SEG
-#bed_file=/.mounts/labs/gsiprojects/gsi/cBioGSI/kchandan/cBioWrap/testdata/ncbi_genes_hg19_canonical.bed
-#profile_name=Log2 copy-number values
-#profile_description=Log2 copy-number values

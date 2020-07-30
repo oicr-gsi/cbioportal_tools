@@ -241,7 +241,8 @@ class pipeline_component_factory(base):
     """Construct pipeline components for a given ALTERATIONTYPE and DATATYPE"""
 
     CLASSNAMES = {
-        ('MRNA_EXPRESSION', 'CAP_expression'): 'legacy_pipeline_component'
+        ('MRNA_EXPRESSION', 'CAP_expression'): 'legacy_pipeline_component',
+        ('MUTATION_EXTENDED', 'CAP_mutation'): 'legacy_pipeline_component'
     }
 
     # factory to supply appropriate pipeline component class, given name strings
@@ -308,8 +309,6 @@ class legacy_pipeline_component(pipeline_component):
 
     def __init__(self, atype_name, dtype_name, config_path, study_config, log_level=logging.WARN):
         super().__init__(atype_name, dtype_name, config_path, study_config, log_level)
-        # TODO make a legacy_config_wrapper class
-        # duplicates functionality of legacy Config.Config on a utilities.config object
         self.legacy_config = legacy_config_wrapper(self.config, atype_name, dtype_name)
         self.legacy_config_study = legacy_config_wrapper(self.study_config, atype_name, dtype_name)
 

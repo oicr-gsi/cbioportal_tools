@@ -1,2 +1,0 @@
-NAME	CLINICAL_TRIAL_KEYWORDS	PARENT_TYPE_OF_CANCER
-ductal carcinoma	carcinoma, ductal carcinoma, ductal carcinoma in situ	tissue

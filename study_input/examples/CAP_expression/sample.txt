@@ -1,9 +1,17 @@
-#profile_name=All samples
-#profile_description=All TEST Samples (10 Samples)
-Patient Identifier	Sample Identifier
-Patient Identifier	Sample Identifier
-STRING	STRING
-1	1
+---
+#datatypes:
+#- STRING
+#- STRING
+#descriptions:
+#- Patient Identifier
+#- Sample Identifier
+#display_names:
+#- Patient Identifier
+#- Sample Identifier
+#priorities:
+#- '1'
+#- '1'
+---
 PATIENT_ID	SAMPLE_ID
 OCT-01-0118	OCT-01-0118-CAP
 OCT-01-0266	OCT-01-0266-CAP

@@ -60,24 +60,11 @@ def clean_folder(path,force):
     if os.path.exists(path):
         if force:
             shutil.rmtree(path)
-            make_folder(path)
+            os.makedirs(path)
         else:
-            print('The following path will be removed and overwritten : {}'.format(path))
-            ## ask for a response, get the first character in lowercase
-            response=input("Press y to continue, any other key to exit:").lower().strip()[:1]
-            try:
-                if response == 'y':
-                    shutil.rmtree(path)
-                    make_folder(path)
-                else:
-                    print('Exiting Janus')
-                    exit()
-                    ### trying to handle ctrl-c butthis doesnt seem to be working
-            except KeyboardInterrupt:
-                print('Exiting Janus')
-                exit()
+            raise OSError("Output path %s exists and --force not in effect; exiting" % path)
     else:
-        make_folder(path)
+        os.makedirs(path)
 
 def working_on(verbose, message='Success reported via deprecated working_on() method'):
     # Method is for verbose option. Prints Success if no parameter specified
