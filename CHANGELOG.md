@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+## Unreleased
+### Added
+- GRD-273: Add support for legacy pipelines
+  - `MUTATION_EXTENDED/CAP_mutation.py`
+
 ## v0.0.2: 2020-07-30
 ### Summary
 - Development release with extensive refactoring

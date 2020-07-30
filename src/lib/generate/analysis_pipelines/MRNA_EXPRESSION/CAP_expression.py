@@ -17,6 +17,8 @@ def main():
 
     verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
 
+    logger.info('Started processing data for CAP_expression pipeline')
+    
     logger.info('Gathering and decompressing MRNA_EXPRESSION files into temporary folder')
     helper.decompress_to_temp(meta_config, study_config, verb)
 
@@ -83,6 +85,8 @@ def main():
         meta_config.datahandler = 'Z-SCORE'
         meta.generate_meta_type(meta_config,study_config,logger)
 
+    logger.info('Finished processing data for CAP_expression pipeline')
+        
 if __name__ == '__main__':
 
     main()
