@@ -103,6 +103,17 @@ class TestGenerator(TestStudy):
         generator.main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
 
+    def OMIT_test_CAP_mutation(self):
+        # live test not working yet; seems to assume MAF.py has been run first
+        out_dir = os.path.join(self.tmp.name, 'CAP_mutation_dry_run')
+        os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, 'CAP_mutation', 'study.txt')
+        out_dir = '/tmp/CAP_mutation' # FIXME
+        self.args.out = out_dir
+        self.args.dry_run = False
+        generator.main(self.args)
+        self.verify_checksums(self.base_checksums, out_dir)
+
     def test_CAP_mutation_dry_run(self):
         out_dir = os.path.join(self.tmp.name, 'CAP_mutation_dry_run')
         os.mkdir(out_dir)
