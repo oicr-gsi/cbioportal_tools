@@ -1,0 +1,26 @@
+---
+#DATATYPE: MAF
+#input_folder: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_mutation
+#Minimum_Tumour_Depth: 14
+#Minimum_Tumour_AF: 0.05
+#Maximum_Local_Freq: 0.1
+#Maximum_gnomAD_AF: 0.001
+#Mutation_Type: Frame_Shift_Del,Frame_Shift_Ins,In_Frame_Del,In_Frame_Ins,Missense_Mutation,Nonsense_Mutation,Nonstop_Mutation,Silent,Splice_Site,Translation_Start_Site
+#Filter_Exception: str_contraction,t_lod_fstar
+#oncokb_api_token: e326982a-02ba-4f04-8ef6-80b04fa74acd
+#vepkeep: /.mounts/labs/gsiprojects/gsi/cBioGSI/aliang/cbioportal_tools/src/lib/analysis_pipelines/MUTATION_EXTENDED/accessory_files/vep_keep_columns.txt
+#profile_name: Mutations (Ductal Carcinoma)
+#profile_description: Mutation data from whole exome sequencing. (12 Samples)
+#ref_fasta: /.mounts/labs/resit/modulator/sw/data/hg19-p13/hg19_random.fa
+#filter_vcf: /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz
+---
+FILE_NAME	PATIENT_ID	NORMAL_ID	SAMPLE_ID	NORMAL_COL	TUMOR_COL
+OCT-01-0118-CAP.mutect2.somatic.maf.txt.gz	OCT-01-0118	OCT-01-0118-CAP	OCT-01-0118-CAP	NORMAL	TUMOR
+OCT-01-0266-CAP.mutect2.somatic.maf.txt.gz	OCT-01-0266	OCT-01-0266-CAP	OCT-01-0266-CAP	NORMAL	TUMOR
+OCT-01-0384-CAP.mutect2.somatic.maf.txt.gz	OCT-01-0384	OCT-01-0384-CAP	OCT-01-0384-CAP	NORMAL	TUMOR
+OCT-01-0472-CAP.mutect2.somatic.maf.txt.gz	OCT-01-0472	OCT-01-0472-CAP	OCT-01-0472-CAP	NORMAL	TUMOR
+OCT-01-0676-CAP.mutect2.somatic.maf.txt.gz	OCT-01-0676	OCT-01-0676-CAP	OCT-01-0676-CAP	NORMAL	TUMOR
+OCT-01-1256-CAP.mutect2.somatic.maf.txt.gz	OCT-01-1256	OCT-01-1256-CAP	OCT-01-1256-CAP	NORMAL	TUMOR
+OCT-01-1322-CAP.mutect2.somatic.maf.txt.gz	OCT-01-1322	OCT-01-1322-CAP	OCT-01-1322-CAP	NORMAL	TUMOR
+OCT-01-1328-CAP.mutect2.somatic.maf.txt.gz	OCT-01-1328	OCT-01-1328-CAP	OCT-01-1328-CAP	NORMAL	TUMOR
+OCT-01-1493-CAP.mutect2.somatic.maf.txt.gz	OCT-01-1493	OCT-01-1493-CAP	OCT-01-1493-CAP	NORMAL	TUMOR

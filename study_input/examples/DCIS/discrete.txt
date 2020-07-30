@@ -1,4 +1,0 @@
-#pipeline=CONTINUOUS_COPY_NUMBER
-#thresholds=-0.7,-0.3,0.3,0.7
-#profile_name=Putative copy-number alterations from GISTIC
-#profile_description=Putative copy-number calls:  Values: -2=homozygous deletion; -1=hemizygous deletion; 0=neutral/no change; 1=gain; 2=high level amplification
