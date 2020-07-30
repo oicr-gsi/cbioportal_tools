@@ -11,7 +11,7 @@ def main():
     import os
     from support import helper
     from generate import meta
-    from analysis_pipelines.MUTATION_EXTENDED import support_functions
+    from generate.analysis_pipelines.MUTATION_EXTENDED import support_functions
 
     verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
 
@@ -31,7 +31,7 @@ def main():
 
     # Genearte the meta data files for mutation extended data
     logger.info('Generating MUTATION_EXTENDED Meta ...')
-    meta.generate_meta_type(meta_config,study_config,verb)
+    meta.generate_meta_type(meta_config,study_config,logger)
     
     #Filtering MAF Files
     logger.info('Filtering MAF Files ...')
