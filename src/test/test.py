@@ -12,7 +12,7 @@ class TestStudy(unittest.TestCase):
     def setUp(self):
         self.testDir = os.path.dirname(os.path.realpath(__file__))
         self.dataDir = os.path.realpath(
-            os.path.join(self.testDir, os.pardir, os.pardir, 'study_input', 'examples_new')
+            os.path.join(self.testDir, os.pardir, os.pardir, 'study_input', 'examples')
         )
         self.tmp = tempfile.TemporaryDirectory(prefix='janus_study_test_')
         self.config_path = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
@@ -24,14 +24,14 @@ class TestStudy(unittest.TestCase):
             'meta_clinical_patients.txt': '0de6a7ae349e16b26b68ac5a4eb62a0c',
             'meta_clinical_samples.txt': '42609db9577d6192113be9ffeba92292',
             'meta_study.txt': '5ca90314306ad1f1aae94bc345bd0a23',
-            'case_lists/cases_merp.txt': '43685fab767e5961a11e68a45d68c5ec',
-            'case_lists/cases_rna_seq_mrna.txt': '1497b32c3999df39b04333da92be5018'
+            'case_lists/cases_merp.txt': '43685fab767e5961a11e68a45d68c5ec'
         }
         self.CAP_expression_checksums = {
             'data_expression_continous.txt': 'e2b50dc44307e0b9bee27d253b02c6d9',
             'data_expression_zscores.txt': '0a04f5f68265ca9a1aded16dd013738c',
             'meta_expression_continous.txt': '5db83d4ca1925117abc8837b2eebeb46',
-            'meta_expression_zscores.txt': '4c807196b4d1e1e47710bd96343b3ccc'
+            'meta_expression_zscores.txt': '4c807196b4d1e1e47710bd96343b3ccc',
+            'case_lists/cases_rna_seq_mrna.txt': '1497b32c3999df39b04333da92be5018'
         }
 
     def test_dry_run(self):
@@ -72,7 +72,7 @@ class TestGenerator(TestStudy):
     def setUp(self):
         super().setUp()
         argsDict = {
-            "config": os.path.join(self.dataDir, 'CAP_expression', 'study.txt'),
+            "config": None, # placeholder
             "out": None, # placeholder
             "force": False,
             "log_path": None,
@@ -85,8 +85,9 @@ class TestGenerator(TestStudy):
             setattr(self.args, key, argsDict[key])
 
     def test_CAP_expression(self):
-        out_dir = os.path.join(self.tmp.name, 'study_CAP_expression')
+        out_dir = os.path.join(self.tmp.name, 'CAP_expression')
         os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
         self.args.out = out_dir
         self.args.dry_run = False
         generator.main(self.args)
@@ -94,12 +95,33 @@ class TestGenerator(TestStudy):
         checksums.update(self.CAP_expression_checksums)
         self.verify_checksums(checksums, out_dir)
 
-    def test_dry_run(self):
-        out_dir = os.path.join(self.tmp.name, 'generator_dry_run')
+    def test_CAP_expression_dry_run(self):
+        out_dir = os.path.join(self.tmp.name, 'CAP_expression_dry_run')
         os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
         self.args.out = out_dir
         generator.main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
+
+    def OMIT_test_CAP_mutation(self):
+        # live test not working yet; seems to assume MAF.py has been run first
+        out_dir = os.path.join(self.tmp.name, 'CAP_mutation_dry_run')
+        os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, 'CAP_mutation', 'study.txt')
+        out_dir = '/tmp/CAP_mutation' # FIXME
+        self.args.out = out_dir
+        self.args.dry_run = False
+        generator.main(self.args)
+        self.verify_checksums(self.base_checksums, out_dir)
+
+    def test_CAP_mutation_dry_run(self):
+        out_dir = os.path.join(self.tmp.name, 'CAP_mutation_dry_run')
+        os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, 'CAP_mutation', 'study.txt')
+        self.args.out = out_dir
+        generator.main(self.args)
+        self.verify_checksums(self.base_checksums, out_dir)
+
 
 if __name__ == '__main__':
     unittest.main()

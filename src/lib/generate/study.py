@@ -100,6 +100,8 @@ class study(base):
         for name in config_paths.keys():
             self.logger.debug("Found alteration type %s" % name)
             alteration_types.append(alteration_type(name, config_paths[name], config, log_level))
+        if len(alteration_types) == 0:
+            self.logger.warn("No pipeline data found for study %s" % self.study_id)
         return alteration_types
 
     def is_valid_output_dir(self, out_dir):
@@ -125,15 +127,13 @@ class study(base):
             self.logger.error(msg)
             raise OSError(msg)
         if len(os.listdir(out_dir)) > 0:
+            prefix = "Output directory %s is not empty; " % out_dir
             if force:
-                msg = "Output directory %s is not empty; --force "+\
-                      "is in effect, removing directory contents." % out_dir
-                self.logger.info(msg)
+                self.logger.info(prefix+"--force is in effect, removing directory contents.")
                 rmtree(out_dir)
                 os.mkdir(out_dir)
             else:
-                 msg = "Output directory %s is not empty; exiting. "+\
-                       "(Run with --force to delete contents of directory.)" % out_dir
+                 msg = prefix+"exiting. Run with --force to delete contents of directory."
                  self.logger.error(msg)
                  raise OSError(msg)
         case_list_dir = os.path.join(out_dir, 'case_lists')
