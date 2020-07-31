@@ -132,33 +132,34 @@ class TestGenerator(TestStudy):
             generator.main(self.args)
             self.verify_checksums(self.base_checksums, out_dir)
 
-    def test_legacy_mutation(self):
+    def test_CAP_mutation(self):
+        self.verify_legacy_mutation('CAP_mutation')
+
+    def test_mutect(self):
+        self.verify_legacy_mutation('Mutect')
+
+    def test_mutect2(self):
+        self.verify_legacy_mutation('Mutect2')
+
+    def test_mutect_strelka(self):
+        self.verify_legacy_mutation('MutectStrelka')
+
+    def test_strelka(self):
+        self.verify_legacy_mutation('Strelka')
+
+    def verify_legacy_mutation(self, name):
         """test the legacy mutation scripts for real"""
         # TODO some or all of these scripts will need debugging/refactoring
-        names = [
-            'CAP_mutation',
-            #'GATK_haplotype_caller', # no config in /.mounts/labs/gsiprojects/gsi/cBioGSI/
-            'Mutect',
-            'Mutect2',
-            'MutectStrelka',
-            'Strelka'
-        ]
-        for name in names:
-            #out_dir = os.path.join(self.tmp.name, name)
-            out_dir = os.path.join('/tmp/janus', name) # FIXME temporary hack to retain out_dir
-            os.mkdir(out_dir)
-            self.args.config = os.path.join(self.dataDir, name, 'study.txt')
-            self.args.out = out_dir
-            self.args.dry_run = False
-            generator.main(self.args)
-            # FIXME another temporary hack to avoid exiting on test error
-            # TODO separate into individual tests for each script
-            errors = []
-            try:
-                self.verify_checksums(self.base_checksums, out_dir)
-            except AssertionError as e:
-                errors.append(str(e))
-            self.assertEqual([], errors)
+
+        #out_dir = os.path.join(self.tmp.name, name)
+        out_dir = os.path.join('/tmp/janus', name) # FIXME temporary hack to retain out_dir
+        os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, name, 'study.txt')
+        self.args.out = out_dir
+        self.args.dry_run = False
+        generator.main(self.args)
+        self.verify_checksums(self.base_checksums, out_dir)
+
 
 
 if __name__ == '__main__':
