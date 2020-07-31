@@ -114,13 +114,44 @@ class TestGenerator(TestStudy):
         generator.main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
 
-    def test_CAP_mutation_dry_run(self):
-        out_dir = os.path.join(self.tmp.name, 'CAP_mutation_dry_run')
-        os.mkdir(out_dir)
-        self.args.config = os.path.join(self.dataDir, 'CAP_mutation', 'study.txt')
-        self.args.out = out_dir
-        generator.main(self.args)
-        self.verify_checksums(self.base_checksums, out_dir)
+    def test_legacy_mutation_dry_run(self):
+        """test the legacy mutation scripts in dry-run mode"""
+        names = [
+            'CAP_mutation',
+            #'GATK_haplotype_caller',  # no config in /.mounts/labs/gsiprojects/gsi/cBioGSI/
+            'Mutect',
+            'Mutect2',
+            'MutectStrelka',
+            'Strelka'
+        ]
+        for name in names:
+            out_dir = os.path.join(self.tmp.name, name)
+            os.mkdir(out_dir)
+            self.args.config = os.path.join(self.dataDir, name, 'study.txt')
+            self.args.out = out_dir
+            generator.main(self.args)
+            self.verify_checksums(self.base_checksums, out_dir)
+
+    def test_legacy_mutation(self):
+        """test the legacy mutation scripts for real"""
+        # TODO some or all of these scripts will need debugging/refactoring
+        names = [
+            'CAP_mutation',
+            #'GATK_haplotype_caller', # no config in /.mounts/labs/gsiprojects/gsi/cBioGSI/
+            'Mutect',
+            'Mutect2',
+            'MutectStrelka',
+            'Strelka'
+        ]
+        for name in names:
+            #out_dir = os.path.join(self.tmp.name, name)
+            out_dir = os.path.join('/tmp', name) # FIXME temporary hack to retain out_dir
+            os.mkdir(out_dir)
+            self.args.config = os.path.join(self.dataDir, name, 'study.txt')
+            self.args.out = out_dir
+            self.args.dry_run = False
+            generator.main(self.args)
+            self.verify_checksums(self.base_checksums, out_dir)
 
 
 if __name__ == '__main__':

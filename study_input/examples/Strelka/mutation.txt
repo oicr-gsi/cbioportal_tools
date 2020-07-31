@@ -1,0 +1,14 @@
+---
+#input_folder: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests/data/Strelka
+#pipeline: Strelka
+#profile_name: Mutations (Ductal Carcinoma)
+#profile_description: Mutation data from whole exome sequencing. (12 Samples)
+#ref_fasta: /.mounts/labs/resit/modulator/sw/data/hg19-p13/hg19_random.fa
+#filter_vcf: /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz
+---
+FILE_NAME	PATIENT_ID	NORMAL_ID	SAMPLE_ID	NORMAL_COL	TUMOR_COL
+TEST_0001_Br_P_EX_1.sorted.filter.dedup.P.GID1.final.strelka.snvs.vcf.gz	TEST_0001	TEST_0001_Br_R_EX_1	TEST_0001_Br_P_EX_1	NORMAL	TUMOR
+TEST_0002_Br_P_EX_1.sorted.filter.dedup.P.GID1.final.strelka.snvs.vcf.gz	TEST_0002	TEST_0002_Br_R_EX_1	TEST_0002_Br_P_EX_1	NORMAL	TUMOR
+TEST_0003_Br_P_EX_1.sorted.filter.dedup.P.GID1.final.strelka.snvs.vcf.gz	TEST_0003	TEST_0003_Br_R_EX_1	TEST_0003_Br_P_EX_1	NORMAL	TUMOR
+TEST_0004_Br_P_EX_1.sorted.filter.dedup.P.GID1.final.strelka.snvs.vcf.gz	TEST_0004	TEST_0004_Br_R_EX_1	TEST_0004_Br_P_EX_1	NORMAL	TUMOR
+TEST_0005_Br_P_EX_1.sorted.filter.dedup.P.GID1.final.strelka.snvs.vcf.gz	TEST_0005	TEST_0005_Br_R_EX_1	TEST_0005_Br_P_EX_1	NORMAL	TUMOR

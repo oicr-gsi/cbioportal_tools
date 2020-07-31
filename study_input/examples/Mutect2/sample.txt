@@ -1,0 +1,24 @@
+---
+#datatypes:
+#- STRING
+#- STRING
+#descriptions:
+#- Patient Identifier
+#- Sample Identifier
+#display_names:
+#- Patient Identifier
+#- Sample Identifier
+#priorities:
+#- '1'
+#- '1'
+---
+PATIENT_ID	SAMPLE_ID
+OCT-01-0118	OCT-01-0118-CAP
+OCT-01-0266	OCT-01-0266-CAP
+OCT-01-0384	OCT-01-0384-CAP
+OCT-01-0472	OCT-01-0472-CAP
+OCT-01-0676	OCT-01-0676-CAP
+OCT-01-1256	OCT-01-1256-CAP
+OCT-01-1322	OCT-01-1322-CAP
+OCT-01-1328	OCT-01-1328-CAP
+OCT-01-1493	OCT-01-1493-CAP
