@@ -41,6 +41,9 @@ class config(base):
     def get_meta(self):
         return self.meta
 
+    def get_meta_value(self, key):
+        return self.meta[key]
+
     def get_table(self):
         return self.table
 

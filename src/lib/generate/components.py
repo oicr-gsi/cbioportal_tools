@@ -259,7 +259,10 @@ class pipeline_component_factory(base):
     def get_component(self, alt_type, datatype, config_path, study_config):
         # some legacy components need the global study config
         # TODO factor out this requirement; create with the component config plus specific variables
-        classname = self.CLASSNAMES.get((alt_type, datatype), None)
+        # TODO we are reading the pipeline config twice (here and in component_class); avoid?
+        config = pipeline_config(config_path)
+        pipeline_name = config.get_meta_value('pipeline')
+        classname = self.CLASSNAMES.get((alt_type, pipeline_name), None)
         if classname == None:
             self.logger.warning("No classname found for (%s, %s)" % (alt_type, datatype))
             return None
