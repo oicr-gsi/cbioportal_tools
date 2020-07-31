@@ -242,7 +242,11 @@ class pipeline_component_factory(base):
 
     CLASSNAMES = {
         ('MRNA_EXPRESSION', 'CAP_expression'): 'legacy_pipeline_component',
-        ('MUTATION_EXTENDED', 'CAP_mutation'): 'legacy_pipeline_component'
+        ('MUTATION_EXTENDED', 'CAP_mutation'): 'legacy_pipeline_component',
+        ('MUTATION_EXTENDED', 'Mutect'): 'legacy_pipeline_component',
+        ('MUTATION_EXTENDED', 'Mutect2'): 'legacy_pipeline_component',
+        ('MUTATION_EXTENDED', 'MutectStrelka'): 'legacy_pipeline_component',
+        ('MUTATION_EXTENDED', 'Strelka'): 'legacy_pipeline_component'
     }
 
     # factory to supply appropriate pipeline component class, given name strings

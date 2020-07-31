@@ -1,0 +1,14 @@
+---
+#type_of_cancer: ductal carcinoma
+#cancer_study_identifier: janus_test
+#name: janus_test
+#short_name: janus_test
+#description: janus_test
+#output_folder: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/import_folder
+---
+ALTERATIONTYPE	DATAHANDLER	FILE_NAME
+CLINICAL	SAMPLE_ATTRIBUTES	sample.txt
+CLINICAL	PATIENT_ATTRIBUTES	patient.txt
+MUTATION_EXTENDED	Mutect2	mutation.txt
+CANCER_TYPE	CANCER_TYPE	cancer_type.txt
+CUSTOM	CASE_LIST	case_set.txt

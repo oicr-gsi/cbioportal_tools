@@ -1,24 +1,24 @@
-from support import helper
-from analysis_pipelines.MUTATION_EXTENDED import support_functions
+"""Support for MAF files"""
 
+# TODO this module does not appear to be used anywhere else; can it be deleted?
 
 def main():
     global meta_config
     global study_config
     global janus_path
-    global verb
+    global logger
 
-    helper.working_on(verb, message='Gathering and decompressing MAF files into temporary folder')
+    from support import helper
+    from analysis_pipelines.MUTATION_EXTENDED import support_functions
+
+    logger.info('Gathering and decompressing MAF files into temporary folder')
     helper.decompress_to_temp(meta_config, study_config, verb)
-    helper.working_on(verb)
 
-    helper.working_on(verb, message='Cleaning MAF Files ...')
+    logger.info('Cleaning MAF Files')
     support_functions.clean_head(meta_config, verb)
-    helper.working_on(verb)
 
-    helper.working_on(verb, message='Concating MAF Files to export folder  ...')
+    logger.info('Concatenating MAF Files to export folder')
     helper.concat_files(meta_config, study_config, verb)
-    helper.working_on(verb)
 
 
 if __name__ == '__main__':
