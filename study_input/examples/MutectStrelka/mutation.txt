@@ -1,4 +1,5 @@
 ---
+#DATATYPE: MAF
 #input_folder: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests/data/MutectStrelka
 #pipeline: MutectStrelka
 #profile_name: Mutations (Ductal Carcinoma)
