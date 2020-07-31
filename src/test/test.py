@@ -145,13 +145,20 @@ class TestGenerator(TestStudy):
         ]
         for name in names:
             #out_dir = os.path.join(self.tmp.name, name)
-            out_dir = os.path.join('/tmp', name) # FIXME temporary hack to retain out_dir
+            out_dir = os.path.join('/tmp/janus', name) # FIXME temporary hack to retain out_dir
             os.mkdir(out_dir)
             self.args.config = os.path.join(self.dataDir, name, 'study.txt')
             self.args.out = out_dir
             self.args.dry_run = False
             generator.main(self.args)
-            self.verify_checksums(self.base_checksums, out_dir)
+            # FIXME another temporary hack to avoid exiting on test error
+            # TODO separate into individual tests for each script
+            errors = []
+            try:
+                self.verify_checksums(self.base_checksums, out_dir)
+            except AssertionError as e:
+                errors.append(str(e))
+            self.assertEqual([], errors)
 
 
 if __name__ == '__main__':
