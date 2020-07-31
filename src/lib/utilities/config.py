@@ -42,7 +42,8 @@ class config(base):
         return self.meta
 
     def get_meta_value(self, key):
-        return self.meta[key]
+        """return meta[key] if present, None otherwise"""
+        return self.meta.get(key)
 
     def get_table(self):
         return self.table

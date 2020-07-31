@@ -260,14 +260,17 @@ class pipeline_component_factory(base):
         # some legacy components need the global study config
         # TODO factor out this requirement; create with the component config plus specific variables
         # TODO we are reading the pipeline config twice (here and in component_class); avoid?
+        # TODO clarify the distinction between cBioPortal 'datatype name' and Janus 'pipeline name'
         config = pipeline_config(config_path)
         pipeline_name = config.get_meta_value('pipeline')
+        if pipeline_name == None:
+            pipeline_name = datatype # for CAP_expression test
         classname = self.CLASSNAMES.get((alt_type, pipeline_name), None)
         if classname == None:
             self.logger.warning("No classname found for (%s, %s)" % (alt_type, datatype))
             return None
         component_class = globals()[classname]
-        return component_class(alt_type, datatype, config_path, study_config, self.log_level)
+        return component_class(alt_type, pipeline_name, config_path, study_config, self.log_level)
 
 
 class pipeline_component(component):
