@@ -110,8 +110,8 @@ class legacy_config_wrapper(base):
         self.logger = self.get_logger(log_level, name)
         self.config = config
         # duplicate attributes of the legacy config class
-        self.analysis = ''
-        self.type_config = ''
+        self.analysis = alt_type
+        self.type_config = data_type
         self.config_map = config.get_meta()
         self.data_frame = config.get_table()
         self.alterationtype = alt_type
