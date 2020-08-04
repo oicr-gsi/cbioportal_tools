@@ -149,10 +149,10 @@ class TestGenerator(TestStudy):
 
     def verify_legacy_mutation(self, name):
         """test the legacy mutation scripts for real"""
-        # TODO some or all of these scripts will need debugging/refactoring
 
         #out_dir = os.path.join(self.tmp.name, name)
-        out_dir = os.path.join('/tmp/janus', name) # FIXME temporary hack to retain out_dir
+        # FIXME temporary hack to retain out_dir
+        out_dir = os.path.join('/scratch2/users/ibancarz/cbioportal_tools/unittest/', name)
         os.mkdir(out_dir)
         self.args.config = os.path.join(self.dataDir, name, 'study.txt')
         self.args.out = out_dir

@@ -59,7 +59,6 @@ class alteration_type(component):
             pc = factory.get_component(self.name, key, config_paths_by_datatype[key], study_config)
             self.components.append(pc)
         self.logger.debug("Created %i components for %s" % (len(self.components), self.name))
-        self.logger.debug("Sample class: "+str(globals()['samples']))
 
     def consensus_meta_value(self, key):
         """
@@ -264,6 +263,7 @@ class pipeline_component_factory(base):
         config = pipeline_config(config_path)
         pipeline_name = config.get_meta_value('pipeline')
         if pipeline_name == None:
+            self.logger.debug("No pipeline configured, using datatype %s" % datatype)
             pipeline_name = datatype # for CAP_expression test
         classname = self.CLASSNAMES.get((alt_type, pipeline_name), None)
         if classname == None:
