@@ -267,7 +267,7 @@ class pipeline_component_factory(base):
             pipeline_name = datatype # for CAP_expression test
         classname = self.CLASSNAMES.get((alt_type, pipeline_name), None)
         if classname == None:
-            self.logger.warning("No classname found for (%s, %s)" % (alt_type, datatype))
+            self.logger.warning("No classname found for (%s, %s)" % (alt_type, pipeline_name))
             return None
         component_class = globals()[classname]
         return component_class(alt_type, pipeline_name, config_path, study_config, self.log_level)

@@ -76,7 +76,7 @@ class TestGenerator(TestStudy):
             "out": None, # placeholder
             "force": False,
             "log_path": None,
-            "debug": False,
+            "debug": True,
             "verbose": False,
             "dry_run": True
         }
