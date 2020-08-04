@@ -84,16 +84,16 @@ def TGL_filter(meta_config, study_config):
     #Rearramge tumor_vaf column to be after t_alt_count
     cols = maf_dataframe.columns.tolist()
     cols.insert(maf_dataframe.columns.get_loc('t_alt_count') + 1, cols.pop(cols.index('tumor_vaf')))
-    maf_dataframe = maf_dataframe.ix[:, cols]
+    maf_dataframe = maf_dataframe[cols]
     print('Inserting tumor_vaf...')
 
     #tumor_vaf column is the result of dividing n_alt_count by n_depth
     maf_dataframe['normal_vaf'] = maf_dataframe['n_alt_count'].div(maf_dataframe['n_depth'], fill_value = 0)
     maf_dataframe['normal_vaf'].replace([np.inf, -np.inf], 0)
-    #Rearramge tumor_vaf_column to be after n_alt_count
+    #Rearramge normal_vaf_column to be after n_alt_count
     cols = maf_dataframe.columns.tolist()
     cols.insert(maf_dataframe.columns.get_loc('n_alt_count') + 1, cols.pop(cols.index('normal_vaf')))
-    maf_dataframe = maf_dataframe.ix[:, cols]
+    maf_dataframe = maf_dataframe[cols]
     print('Inserting normal_vaf...')
 
     #Create oncogenic_binary column based on oncogenic column
