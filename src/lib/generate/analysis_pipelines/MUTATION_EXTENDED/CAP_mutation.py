@@ -29,7 +29,7 @@ def main():
     logger.info('Concatenating MAF Files to export folder  ...')
     helper.concat_files(meta_config, study_config, verb)
 
-    # Genearte the meta data files for mutation extended data
+    # Generate the meta data files for mutation extended data
     logger.info('Generating MUTATION_EXTENDED Meta ...')
     meta.generate_meta_type(meta_config,study_config,logger)
     
