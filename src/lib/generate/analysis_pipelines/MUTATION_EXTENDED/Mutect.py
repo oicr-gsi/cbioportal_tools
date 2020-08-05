@@ -8,6 +8,7 @@ def main():
 
     import logging
     from support import helper
+    from generate import meta
     from generate.analysis_pipelines.MUTATION_EXTENDED import support_functions
 
     verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
