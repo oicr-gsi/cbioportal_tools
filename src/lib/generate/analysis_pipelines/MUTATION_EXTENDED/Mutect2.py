@@ -7,6 +7,7 @@ def main():
     global logger
 
     from support import helper
+    from generate import meta
     from generate.analysis_pipelines.MUTATION_EXTENDED import support_functions
 
     import logging
