@@ -42,7 +42,8 @@ class study(base):
         return [sample_component, patient_component]
     
     def get_cancer_type(self, config):
-        return cancer_type(config.get_cancer_type_config_path())
+        type_of_cancer_string = self.study_meta.get('type_of_cancer')
+        return cancer_type(config.get_cancer_type_config_path(), type_of_cancer_string)
 
     def get_case_lists(self, config):
         # generate default case lists based on pipelines in study:
