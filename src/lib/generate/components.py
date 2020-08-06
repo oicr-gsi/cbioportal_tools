@@ -5,7 +5,10 @@ Eg. study metadata, clinical sample/patient data, pipeline outputs
 
 import logging
 import os
+import pandas as pd
+import re
 import yaml
+
 
 from utilities.base import base
 import utilities.constants
@@ -22,7 +25,7 @@ class component(base):
 
     def __init__(self, log_level=logging.WARN):
         self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__))
-    
+
     def write(self, out_dir):
         self.logger.warning("Placeholder write() method of base class, should not be called")
 
@@ -115,17 +118,59 @@ class alteration_type(component):
 
 class cancer_type(dual_output_component):
 
+    """cancer_type component, including dedicated colours and type_of_cancer from study"""
+
     DATATYPE = utilities.constants.CANCER_TYPE_DATATYPE
     DATA_FILENAME = 'data_cancer_type.txt'
     META_FILENAME = 'meta_cancer_type.txt'
+    COLOUR_FILENAME = 'cancer_colours.csv'
+    DEFAULT_COLOUR = 'lavender' # default colour for general cancer awareness
+    CONFIG_NAME_KEY = 'NAME'
 
-    def __init__(self, cancer_type_config_path):
+    def __init__(self, cancer_type_config_path, cancer_type_string):
         super().__init__()
+        # cancer_type_string is obtained from study metadata, used for "type_of_cancer" field
         self.config = cancer_type_config(cancer_type_config_path)
+        self.cancer_type_string = cancer_type_string
+        config_table = self.config.get_table()
+        # generate the 'type_of_cancer' column from study metadata
+        rows, cols = config_table.shape
+        self.type_of_cancer_column = [self.cancer_type_string]*rows
+        # generate the 'colours' column; attempt to find a matching colour in reference file
+        colours_path = os.path.join(os.path.dirname(__file__), 'data', self.COLOUR_FILENAME)
+        colours = pd.read_csv(colours_path)
+        self.colours_column = []
+        for name in config_table[self.CONFIG_NAME_KEY].tolist():
+            # use .casefold() instead of .lower() to handle special cases
+            name_expr = re.compile(name.casefold())
+            candidate_colours = []
+            for index, row in colours.iterrows():
+                ref_name = row[self.CONFIG_NAME_KEY]
+                if name_expr.search(ref_name.casefold()):
+                    candidate_colours.append(row['COLOUR'])
+            unique_colour_total = len(set(candidate_colours))
+            if unique_colour_total == 0:
+                colour = self.DEFAULT_COLOUR_NAME
+            elif unique_colour_total == 1:
+                colour = candidate_colours[0].casefold()
+            else:
+                colour = self.DEFAULT_COLOUR_NAME
+                msg = "Conflicting colour values found for cancer name "+\
+                      "'%s', defaulting to '%s'" % (name, colour)
+                self.logger.warning(msg)
+            self.colours_column.append(colour)
 
     def write_data(self, out_dir):
+        table = pd.DataFrame()
+        config_table = self.config.get_table()
+        # assemble columns into the cancer_type data table
+        table.insert(0, 'type_of_cancer', self.type_of_cancer_column)
+        table.insert(1, 'name', config_table[self.CONFIG_NAME_KEY])
+        table.insert(2, 'clinical_trial_keywords', config_table['CLINICAL_TRIAL_KEYWORDS'])
+        table.insert(3, 'dedicated_color', self.colours_column)
+        table.insert(4, 'parent_type_of_cancer', config_table['PARENT_TYPE_OF_CANCER'])
         out = open(os.path.join(out_dir, self.DATA_FILENAME), 'w')
-        print(self.config.data_as_tsv(), end='', file=out)
+        table.to_csv(out, sep="\t", header=False, index=False) # TODO check if header is required
         out.close()
 
     def write_meta(self, out_dir):
@@ -357,7 +402,10 @@ class study_meta(component):
     def __init__(self, study_config, log_level=logging.WARN):
         super().__init__(log_level)
         self.study_meta = study_config.get_meta()
-    
+
+    def get(self, key):
+        return self.study_meta.get(key)
+
     def write(self, out_dir):
         meta = {}
         for field in utilities.constants.REQUIRED_STUDY_META_FIELDS:

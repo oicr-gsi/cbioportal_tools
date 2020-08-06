@@ -17,7 +17,7 @@ class TestStudy(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory(prefix='janus_study_test_')
         self.config_path = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
         self.base_checksums = {
-            'data_cancer_type.txt': 'c23f3a55d260022616a5a95b837c49d0',
+            'data_cancer_type.txt': '2756288ed26ccafbf762c52543bd4fe0',
             'data_clinical_patients.txt': '852777b8f1bc60b134c9dc999ac87a24',
             'data_clinical_samples.txt': '199053f38a24c52072418a42dba3fdf4',
             'meta_cancer_type.txt': '19d950648288bb7428e8aaf5ee2939a0',
