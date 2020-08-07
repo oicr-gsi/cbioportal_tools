@@ -15,6 +15,8 @@ CHANGELOG
 - GRD-275: Install data files in setup.py
 ### Changed
   - Check that legacy scripts compile in dry-run mode
+### Removed
+  - Unused script `MUTATION_EXTENDED/MAF.py`
 ### Fixed
 - Add colour designation to `cancer_type` component; present in v0.0.1, inadvertently dropped in v0.0.2
 - Generate metadata in mutation scripts other than `CAP_mutation.py`; missing in v.0.0.1
