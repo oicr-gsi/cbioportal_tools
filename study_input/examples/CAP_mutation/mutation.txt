@@ -8,7 +8,6 @@
 #Mutation_Type: Frame_Shift_Del,Frame_Shift_Ins,In_Frame_Del,In_Frame_Ins,Missense_Mutation,Nonsense_Mutation,Nonstop_Mutation,Silent,Splice_Site,Translation_Start_Site
 #Filter_Exception: str_contraction,t_lod_fstar
 #oncokb_api_token: e326982a-02ba-4f04-8ef6-80b04fa74acd
-#vepkeep: /.mounts/labs/gsiprojects/gsi/cBioGSI/aliang/cbioportal_tools/src/lib/analysis_pipelines/MUTATION_EXTENDED/accessory_files/vep_keep_columns.txt
 #profile_name: Mutations (Ductal Carcinoma)
 #profile_description: Mutation data from whole exome sequencing. (12 Samples)
 #ref_fasta: /.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19_random.fa
