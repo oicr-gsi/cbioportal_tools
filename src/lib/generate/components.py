@@ -147,10 +147,10 @@ class cancer_type(dual_output_component):
                 ref_name = row[self.CONFIG_NAME_KEY]
                 if name_expr.search(ref_name.casefold()):
                     candidate_colours.append(row['COLOUR'])
-            unique_colour_total = len(set(candidate_colours))
-            if unique_colour_total == 0:
+            distinct_colour_total = len(set(candidate_colours))
+            if distinct_colour_total == 0:
                 colour = self.DEFAULT_COLOUR_NAME
-            elif unique_colour_total == 1:
+            elif distinct_colour_total == 1:
                 colour = candidate_colours[0].casefold()
             else:
                 colour = self.DEFAULT_COLOUR_NAME
