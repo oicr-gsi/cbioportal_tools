@@ -389,18 +389,24 @@ class legacy_pipeline_component(pipeline_component):
             msg = "Legacy pipeline script path %s does not exist, or is not readable" % script_path
             self.logger.error(msg)
             raise(OSError(msg))
-        elif dry_run:
+        with open(script_path, 'rb') as script_file:
+            try:
+                compiled = compile(script_file.read(), script_path, 'exec')
+                self.logger.debug("Legacy pipeline script %s compiled successfully" % script_path)
+            except Exception as exc:
+                msg = "Legacy pipeline script %s does not compile: %s" % (script_path, str(exc))
+                self.logger.error(msg)
+                raise
+        if dry_run:
             msg = "%s: Dry run of script %s, global_args %s" % (self.name, script_path, str(global_args))
             self.logger.info(msg)
         else:
             self.logger.debug("%s: Running legacy pipeline script %s" % (self.name, script_path))
-            with open(script_path, 'rb') as script_file:
-                try:
-                    compiled = compile(script_file.read(), script_path, 'exec')
-                    exec(compiled, globals().update(global_args), local_args)
-                except Exception as exc:
-                    self.logger.error("Unexpected error in legacy pipeline exec: "+str(exc))
-                    raise
+            try:
+                exec(compiled, globals().update(global_args), local_args)
+            except Exception as exc:
+                self.logger.error("Unexpected error in legacy pipeline exec: "+str(exc))
+                raise
 
 
 class study_meta(component):
