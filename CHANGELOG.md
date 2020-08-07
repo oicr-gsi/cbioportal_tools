@@ -12,7 +12,9 @@ CHANGELOG
   - `MUTATION_EXTENDED/Strelka.py`
 - GRD-273: Script updated, but *not* enabled or tested
   - `MUTATION_EXTENDED/GATKHaplotypeCaller.py`
-- GRD-275: Install data files in setup.py
+- GRD-275:
+  - Install data files in `setup.py`
+  - Add `__init__.py` files to enabled analysis pipeline directories; ensures they are installed by `setup.py`
 ### Changed
   - Check that legacy scripts compile in dry-run mode
 ### Removed
