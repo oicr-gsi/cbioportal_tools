@@ -69,10 +69,13 @@ def TGL_filter(meta_config, study_config):
     os.remove(data_path)
     
     #Only keep the columns that are given in vep_keep_columns.txt within accessory_files
-    try: 
-        vepkeep_file = open(meta_config.config_map['vepkeep'], 'r')
-    except FileNotFoundError:
-        print('{} is the wrong file or file path'.format(meta_config.config_map['vepkeep']))
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    vep_keep_path = os.path.join(dir_path, os.pardir, os.pardir, 'data', 'vep_keep_columns.txt')
+    if not os.path.exists(vep_keep_path):
+        raise FileNotFoundError("File '%s' does not exist" % vep_keep_path)
+    elif not os.access(vep_keep_path, os.R_OK):
+        raise FileNotFoundError("File '%s' is not readable" % vep_keep_path)
+    vepkeep_file = open(vep_keep_path, 'r')
     vepkeep = [line.rstrip('\n') for line in vepkeep_file.readlines()]
     maf_dataframe = maf_dataframe[vepkeep]
     vepkeep_file.close()
