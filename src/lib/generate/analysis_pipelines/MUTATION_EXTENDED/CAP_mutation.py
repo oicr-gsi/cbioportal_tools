@@ -43,7 +43,11 @@ def main():
 
     #TGL Pipe Filtering
     logger.info('Filtering TGL pipe ...')
-    support_functions.TGL_filter(meta_config, study_config)
+    try:
+        support_functions.TGL_filter(meta_config, study_config)
+    except FileNotFoundError as err: # eg. failure to read vep_keep_columns.txt
+        logger.error("Cannot read file: {0}".format(err)))
+        raise
 
     logger.info('Finished processing data for CAP_mutation pipeline')
 
