@@ -19,7 +19,7 @@ setup(
     scripts=['src/bin/janus.py'],
     packages=find_packages(where=package_root),
     package_dir={'' : package_root},
-    package_data={'generate': ['data/cancer_colours.csv']},
+    package_data={'generate': ['data/cancer_colours.csv', 'data/vep_keep_columns.txt']},
     install_requires=['numpy', 'pandas', 'scipy', 'PyYAML'],
     python_requires='>=3.7',
     author="Iain Bancarz",

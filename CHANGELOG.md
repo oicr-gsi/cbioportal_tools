@@ -4,7 +4,25 @@ CHANGELOG
 ## Unreleased
 ### Added
 - GRD-273: Add support for legacy pipelines
+- GRD-273: Enabled and added tests for:
   - `MUTATION_EXTENDED/CAP_mutation.py`
+  - `MUTATION_EXTENDED/Mutect.py`
+  - `MUTATION_EXTENDED/Mutect2.py`
+  - `MUTATION_EXTENDED/MutectStrelka.py`
+  - `MUTATION_EXTENDED/Strelka.py`
+- GRD-273: Script updated, but *not* enabled or tested
+  - `MUTATION_EXTENDED/GATKHaplotypeCaller.py`
+- GRD-275:
+  - Install data files in `setup.py`
+  - Add `__init__.py` files to enabled analysis pipeline directories; ensures they are installed by `setup.py`
+### Changed
+  - Check that legacy scripts compile in dry-run mode
+### Removed
+  - Unused script `MUTATION_EXTENDED/MAF.py`
+### Fixed
+- Add colour designation to `cancer_type` component; present in v0.0.1, inadvertently dropped in v0.0.2
+- Generate metadata in mutation scripts other than `CAP_mutation.py`; missing in v.0.0.1
+- Remove hard-coded home directory path for `vep_keep_columns.txt`; instead read from the `generate/data` directory
 
 ## v0.0.2: 2020-07-30
 ### Summary

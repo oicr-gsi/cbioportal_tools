@@ -1,38 +1,41 @@
-from support import helper
-from analysis_pipelines.MUTATION_EXTENDED import support_functions
-
+"""Mutect pipeline"""
 
 def main():
     global meta_config
     global study_config
     global janus_path
-    global verb
+    global logger
 
-    helper.working_on(verb, message='Gathering and decompressing VCF files into temporary folder')
+    import logging
+    from support import helper
+    from generate import meta
+    from generate.analysis_pipelines.MUTATION_EXTENDED import support_functions
+
+    verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
+
+    logger.info('Gathering and decompressing VCF files into temporary folder')
     helper.decompress_to_temp(meta_config, study_config, verb)
-    helper.working_on(verb)
 
-    helper.working_on('Ensuring both columns exist, otherwise adding UNMATCHED column ...')
+    logger.info('Ensuring both columns exist, otherwise adding UNMATCHED column ...')
     support_functions.verify_dual_columns(meta_config, verb)
-    helper.working_on(verb)
 
-    helper.working_on(verb, message='Filtering for only PASS ...')
+    logger.info('Filtering for only PASS ...')
     support_functions.filter_vcf_rejects(meta_config, verb)
-    helper.working_on(verb)
 
-    helper.working_on(verb, message='Exporting vcf2maf...')
-    helper.working_on(verb, message='And deleting .vcf s...')
+    logger.info('Exporting vcf2maf, and deleting .VCFs')
     meta_config = support_functions.export2maf(meta_config, study_config, verb)
-    helper.working_on(verb)
     
-    helper.working_on(verb, message='Cleaning MAF Files ...')
+    # Generate the meta data files for mutation extended data
+    logger.info('Generating MUTATION_EXTENDED Meta ...')
+    meta.generate_meta_type(meta_config,study_config,logger)
+
+    logger.info('Cleaning MAF Files ...')
     support_functions.clean_head(meta_config, verb)
-    helper.working_on(verb)
 
-    helper.working_on(verb, message='Concating MAF Files to export folder  ...')
+    logger.info('Concating MAF Files to export folder  ...')
     helper.concat_files(meta_config, study_config, verb)
-    helper.working_on(verb)
 
+    logger.info('Finished processing data for Mutect pipeline')
 
 if __name__ == '__main__':
     main()

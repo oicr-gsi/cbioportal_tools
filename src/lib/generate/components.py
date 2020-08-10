@@ -62,7 +62,6 @@ class alteration_type(component):
             pc = factory.get_component(self.name, key, config_paths_by_datatype[key], study_config)
             self.components.append(pc)
         self.logger.debug("Created %i components for %s" % (len(self.components), self.name))
-        self.logger.debug("Sample class: "+str(globals()['samples']))
 
     def consensus_meta_value(self, key):
         """
@@ -148,10 +147,10 @@ class cancer_type(dual_output_component):
                 ref_name = row[self.CONFIG_NAME_KEY]
                 if name_expr.search(ref_name.casefold()):
                     candidate_colours.append(row['COLOUR'])
-            unique_colour_total = len(set(candidate_colours))
-            if unique_colour_total == 0:
+            distinct_colour_total = len(set(candidate_colours))
+            if distinct_colour_total == 0:
                 colour = self.DEFAULT_COLOUR_NAME
-            elif unique_colour_total == 1:
+            elif distinct_colour_total == 1:
                 colour = candidate_colours[0].casefold()
             else:
                 colour = self.DEFAULT_COLOUR_NAME
@@ -287,7 +286,11 @@ class pipeline_component_factory(base):
 
     CLASSNAMES = {
         ('MRNA_EXPRESSION', 'CAP_expression'): 'legacy_pipeline_component',
-        ('MUTATION_EXTENDED', 'CAP_mutation'): 'legacy_pipeline_component'
+        ('MUTATION_EXTENDED', 'CAP_mutation'): 'legacy_pipeline_component',
+        ('MUTATION_EXTENDED', 'Mutect'): 'legacy_pipeline_component',
+        ('MUTATION_EXTENDED', 'Mutect2'): 'legacy_pipeline_component',
+        ('MUTATION_EXTENDED', 'MutectStrelka'): 'legacy_pipeline_component',
+        ('MUTATION_EXTENDED', 'Strelka'): 'legacy_pipeline_component'
     }
 
     # factory to supply appropriate pipeline component class, given name strings
@@ -300,12 +303,19 @@ class pipeline_component_factory(base):
     def get_component(self, alt_type, datatype, config_path, study_config):
         # some legacy components need the global study config
         # TODO factor out this requirement; create with the component config plus specific variables
-        classname = self.CLASSNAMES.get((alt_type, datatype), None)
+        # TODO we are reading the pipeline config twice (here and in component_class); avoid?
+        # TODO clarify the distinction between cBioPortal 'datatype name' and Janus 'pipeline name'
+        config = pipeline_config(config_path)
+        pipeline_name = config.get_meta_value('pipeline')
+        if pipeline_name == None:
+            self.logger.debug("No pipeline configured, using datatype %s" % datatype)
+            pipeline_name = datatype # for CAP_expression test
+        classname = self.CLASSNAMES.get((alt_type, pipeline_name), None)
         if classname == None:
-            self.logger.warning("No classname found for (%s, %s)" % (alt_type, datatype))
+            self.logger.warning("No classname found for (%s, %s)" % (alt_type, pipeline_name))
             return None
         component_class = globals()[classname]
-        return component_class(alt_type, datatype, config_path, study_config, self.log_level)
+        return component_class(alt_type, pipeline_name, config_path, study_config, self.log_level)
 
 
 class pipeline_component(component):
@@ -379,18 +389,24 @@ class legacy_pipeline_component(pipeline_component):
             msg = "Legacy pipeline script path %s does not exist, or is not readable" % script_path
             self.logger.error(msg)
             raise(OSError(msg))
-        elif dry_run:
+        with open(script_path, 'rb') as script_file:
+            try:
+                compiled = compile(script_file.read(), script_path, 'exec')
+                self.logger.debug("Legacy pipeline script %s compiled successfully" % script_path)
+            except Exception as exc:
+                msg = "Legacy pipeline script %s does not compile: %s" % (script_path, str(exc))
+                self.logger.error(msg)
+                raise
+        if dry_run:
             msg = "%s: Dry run of script %s, global_args %s" % (self.name, script_path, str(global_args))
             self.logger.info(msg)
         else:
             self.logger.debug("%s: Running legacy pipeline script %s" % (self.name, script_path))
-            with open(script_path, 'rb') as script_file:
-                try:
-                    compiled = compile(script_file.read(), script_path, 'exec')
-                    exec(compiled, globals().update(global_args), local_args)
-                except Exception as exc:
-                    self.logger.error("Unexpected error in legacy pipeline exec: "+str(exc))
-                    raise
+            try:
+                exec(compiled, globals().update(global_args), local_args)
+            except Exception as exc:
+                self.logger.error("Unexpected error in legacy pipeline exec: "+str(exc))
+                raise
 
 
 class study_meta(component):
