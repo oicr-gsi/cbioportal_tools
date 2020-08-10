@@ -1,0 +1,24 @@
+---
+#datatypes:
+#- STRING
+#- STRING
+#descriptions:
+#- Patient Identifier
+#- Patient Name
+#display_names:
+#- Patient Identifier
+#- Patient Name
+#priorities:
+#- '1'
+#- '1'
+---
+PATIENT_ID	PATIENT_DISPLAY_NAME
+OCT-01-0118	OCT-01-0118
+OCT-01-0266	OCT-01-0266
+OCT-01-0384	OCT-01-0384
+OCT-01-0472	OCT-01-0472
+OCT-01-0676	OCT-01-0676
+OCT-01-1256	OCT-01-1256
+OCT-01-1322	OCT-01-1322
+OCT-01-1328	OCT-01-1328
+OCT-01-1493	OCT-01-1493

@@ -69,10 +69,13 @@ def TGL_filter(meta_config, study_config):
     os.remove(data_path)
     
     #Only keep the columns that are given in vep_keep_columns.txt within accessory_files
-    try: 
-        vepkeep_file = open(meta_config.config_map['vepkeep'], 'r')
-    except FileNotFoundError:
-        print('{} is the wrong file or file path'.format(meta_config.config_map['vepkeep']))
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    vep_keep_path = os.path.join(dir_path, os.pardir, os.pardir, 'data', 'vep_keep_columns.txt')
+    if not os.path.exists(vep_keep_path):
+        raise FileNotFoundError("File '%s' does not exist" % vep_keep_path)
+    elif not os.access(vep_keep_path, os.R_OK):
+        raise FileNotFoundError("File '%s' is not readable" % vep_keep_path)
+    vepkeep_file = open(vep_keep_path, 'r')
     vepkeep = [line.rstrip('\n') for line in vepkeep_file.readlines()]
     maf_dataframe = maf_dataframe[vepkeep]
     vepkeep_file.close()
@@ -84,16 +87,16 @@ def TGL_filter(meta_config, study_config):
     #Rearramge tumor_vaf column to be after t_alt_count
     cols = maf_dataframe.columns.tolist()
     cols.insert(maf_dataframe.columns.get_loc('t_alt_count') + 1, cols.pop(cols.index('tumor_vaf')))
-    maf_dataframe = maf_dataframe.ix[:, cols]
+    maf_dataframe = maf_dataframe[cols]
     print('Inserting tumor_vaf...')
 
     #tumor_vaf column is the result of dividing n_alt_count by n_depth
     maf_dataframe['normal_vaf'] = maf_dataframe['n_alt_count'].div(maf_dataframe['n_depth'], fill_value = 0)
     maf_dataframe['normal_vaf'].replace([np.inf, -np.inf], 0)
-    #Rearramge tumor_vaf_column to be after n_alt_count
+    #Rearramge normal_vaf_column to be after n_alt_count
     cols = maf_dataframe.columns.tolist()
     cols.insert(maf_dataframe.columns.get_loc('n_alt_count') + 1, cols.pop(cols.index('normal_vaf')))
-    maf_dataframe = maf_dataframe.ix[:, cols]
+    maf_dataframe = maf_dataframe[cols]
     print('Inserting normal_vaf...')
 
     #Create oncogenic_binary column based on oncogenic column

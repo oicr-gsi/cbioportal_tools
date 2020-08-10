@@ -29,7 +29,7 @@ def main():
     logger.info('Concatenating MAF Files to export folder  ...')
     helper.concat_files(meta_config, study_config, verb)
 
-    # Genearte the meta data files for mutation extended data
+    # Generate the meta data files for mutation extended data
     logger.info('Generating MUTATION_EXTENDED Meta ...')
     meta.generate_meta_type(meta_config,study_config,logger)
     
@@ -43,7 +43,11 @@ def main():
 
     #TGL Pipe Filtering
     logger.info('Filtering TGL pipe ...')
-    support_functions.TGL_filter(meta_config, study_config)
+    try:
+        support_functions.TGL_filter(meta_config, study_config)
+    except FileNotFoundError as err: # eg. failure to read vep_keep_columns.txt
+        logger.error("Cannot read file: {0}".format(err))
+        raise
 
     logger.info('Finished processing data for CAP_mutation pipeline')
 
