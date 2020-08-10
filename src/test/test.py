@@ -113,15 +113,11 @@ class TestGenerator(TestStudy):
 
     def test_CAP_mutation(self):
         checksums = {
-            # 'data_mutations_extended.txt': '708506ece7217253432d1eb4c81c7551',
+            'data_mutations_extended.txt': '708506ece7217253432d1eb4c81c7551',
             'meta_mutations_extended.txt': '75c2227886bfe19383e3cc7050042bf9',
             'supplementary_data/unfiltered_data_mutations_extended.txt': 'd7a1303a865c89f268728f3f48c5a13b'
         }
         self.verify_legacy_mutation('CAP_mutation', checksums)
-        # md5 for data_mutations_extended.txt is not consistent between tests; rounding error?
-        # TODO compare file contents
-        out_path = os.path.join(out_dir, 'data_mutations_extended.txt')
-        self.assertTrue(os.path.exists(out_path), out_path+" exists")
 
     def test_mutect(self):
         checksums = {
