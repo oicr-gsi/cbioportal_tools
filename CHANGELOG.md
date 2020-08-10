@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-## Unreleased
+## v0.0.3: 2020-08-10
 ### Added
 - GRD-273: Add support for legacy pipelines
 - GRD-273: Enabled and added tests for:
