@@ -72,7 +72,8 @@ Python modules in `src/lib`:
 
 - Update `CHANGELOG.md`
 - Update the version number in `setup.py`
-- Create, test, and install a new environment module in [OICR Modulator](https://gitlab.oicr.on.ca/ResearchIT/modulator)
+- Tag the release on Github
+- Create, test, and install a new environment module in [OICR Modulator](https://gitlab.oicr.on.ca/ResearchIT/modulator) to install the newly tagged release
 
 ## Potential Extension
 
@@ -86,7 +87,7 @@ Janus may later be extended to:
 
 Janus prototype developed by OICR co-op students [Kunal Chandan](https://github.com/kunalchandan) and [Allan Liang](https://github.com/a33liang).
 
-Subsequent development by Iain Bancarz, <ibancarz@oicr.on.ca>.
+Subsequent development by [Iain Bancarz](https://github.com/iainrb).
 
 ## Copyright and License
 
