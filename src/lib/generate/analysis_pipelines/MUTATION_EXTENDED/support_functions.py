@@ -7,6 +7,9 @@ import numpy as np
 from constants.constants import config2name_map
 from support import Config, helper
 
+HG19_ROOT = 'HG19_ROOT'
+HG38_ROOT = 'HG38_ROOT'
+
 def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minimum_Tumour_Depth = 14, Minimum_Tumour_AF = 0.05, Maximum_gnomAD_AF = 0.001, Maximum_Local_Freq = 0.1):
     # This function replaces the cbiowrap function below
     # awk -F "\t" 'NR>1' $maf
@@ -247,11 +250,15 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
             gene_col_normal = normal_id
             gene_col_tumors = tumors_id
 
-        # ORIGINAL -- 
-        ref_fasta = exports_config.config_map['ref_fasta']
-        # TESTING --
-        #ref_fasta = exports_config.config_map['$HG19_ROOT/hg19_random.fa']
-        filter_vcf = exports_config.config_map['filter_vcf']
+        # genome reference from environment module
+        if os.environ.get(HG38_ROOT):
+            ref_fasta = os.path.join(os.environ.get(HG38_ROOT), 'hg38_random.fa')
+        elif os.environ.get(HG19_ROOT):
+            ref_fasta = os.path.join(os.environ.get(HG19_ROOT), 'hg19_random.fa')
+        else:
+            msg = "Must set environment variable "+\
+                  "%s or %s for genome reference" % (HG19_ROOT, HG38_ROOT)
+            raise ValueError(msg)
 
         # Bake in Parallel
         processes.append(helper.parallel_call('vcf2maf  --input-vcf {}    '
