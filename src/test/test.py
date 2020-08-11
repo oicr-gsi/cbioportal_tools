@@ -67,6 +67,14 @@ class TestGenerator(TestStudy):
         for key in argsDict.keys():
             setattr(self.args, key, argsDict[key])
 
+    def test_CAP_CNA_dry_run(self):
+        out_dir = os.path.join(self.tmp.name, 'CAP_CNA_dry_run')
+        os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, 'CAP_CNA', 'study.txt')
+        self.args.out = out_dir
+        generator.main(self.args)
+        self.verify_checksums(self.base_checksums, out_dir)
+            
     def test_CAP_expression(self):
         out_dir = os.path.join(self.tmp.name, 'CAP_expression')
         os.mkdir(out_dir)
