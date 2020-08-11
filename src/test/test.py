@@ -74,6 +74,17 @@ class TestGenerator(TestStudy):
         self.args.out = out_dir
         generator.main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
+
+    def test_CAP_CNA(self):
+        #out_dir = os.path.join(self.tmp.name, 'CAP_CNA_dry_run')
+        # temporary out_dir to retain output
+        out_dir = os.path.join('/scratch2/users/ibancarz/cbioportal_tools/unittest', 'CAP_CNA')
+        os.mkdir(out_dir)
+        self.args.dry_run = False
+        self.args.config = os.path.join(self.dataDir, 'CAP_CNA', 'study.txt')
+        self.args.out = out_dir
+        generator.main(self.args)
+        self.verify_checksums(self.base_checksums, out_dir)
             
     def test_CAP_expression(self):
         out_dir = os.path.join(self.tmp.name, 'CAP_expression')
