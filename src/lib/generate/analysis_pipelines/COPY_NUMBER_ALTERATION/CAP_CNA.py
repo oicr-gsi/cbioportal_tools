@@ -8,8 +8,8 @@ def main():
 
     import logging
     from support import helper
-    from analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id, preProcCNA, ProcCNA
-    from study_generation import meta
+    from generate.analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id, preProcCNA, ProcCNA
+    from generate import meta
 
     verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
     
