@@ -20,7 +20,6 @@ def main():
     logger.info('Fixing Chromosome numbering ...')
     fix_chrom(meta_config, study_config, verb)
     logger.info('Done.')
-
     
     logger.info('Fixing .SEG IDs')
     fix_seg_id(meta_config, study_config, verb)
@@ -32,7 +31,7 @@ def main():
     
     #Call preProcCNA.r to generate reduced seg files
     logger.info('Generating reduced SEG files ...')
-    preProcCNA(meta_config, study_config, meta_config.config_map['genebed'], meta_config.config_map['genelist'], meta_config.config_map['gain'], meta_config.config_map['ampl'], meta_config.config_map['htzd'], meta_config.config_map['hmzd'])
+    preProcCNA(meta_config, study_config, meta_config.config_map['genebed'], meta_config.config_map['genelist'], meta_config.config_map['gain'], meta_config.config_map['ampl'], meta_config.config_map['htzd'], meta_config.config_map['hmzd'], logger)
     logger.info('Done.')
 
     logger.info('Generating CNA and log2CNA files ...')
