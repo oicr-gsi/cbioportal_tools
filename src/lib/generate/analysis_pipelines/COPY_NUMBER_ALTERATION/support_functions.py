@@ -24,19 +24,20 @@ def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed,
     
     # Set up call to preProcCNA.r script because it needs to use the bioconductor libraries which is in R and not in Python
     # TODO Instead of having to run the processes in R, change it all into python
-    command = '/.mounts/labs/gsi/modulator/sw/Ubuntu18.04/rstats-3.6/bin/Rscript'
-    path2script = '/.mounts/labs/gsiprojects/gsi/cBioGSI/aliang/cbioportal_tools/src/lib/analysis_pipelines/COPY_NUMBER_ALTERATION/preProcCNA.r'
+    command = 'Rscript'
+    path2script = os.path.join(os.path.dirname(__file__), 'preProcCNA.r')
     outputPath = study_config.config_map['output_folder']
-    if os.path.exists(command) and os.path.exists(path2script):
-        args = [segData, genebed, gain, amp, htz, hmz, outputPath, genelist]
+    if os.path.exists(path2script):
+        args = [str(x) for x in [segData, genebed, gain, amp, htz, hmz, outputPath, genelist]]
         cmd = [command, path2script] + args
-    
+        print(cmd, file=sys.stderr)
         # Call the R script
         subprocess.call(cmd)
-
     else:
-        print('There is a problem with the path(s) {} and/or {}'.format(command, path2script))
-     
+        raise FileNotFoundError('Cannot find script path {}'.format(path2script))
+    print("directory contents after preProcCNA:", os.listdir(outputPath), file=sys.stderr)
+
+
 def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, genelist, gain, amp, htz, hmz, oncokb_api_token, verb):
     gain = float(gain)
     amp = float(amp)
