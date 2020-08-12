@@ -39,21 +39,21 @@ def main():
     ProcCNA(meta_config, study_config, meta_config.config_map['genebed'], meta_config.config_map['genelist'], meta_config.config_map['gain'], meta_config.config_map['ampl'], meta_config.config_map['htzd'], meta_config.config_map['hmzd'], meta_config.config_map['oncokb_api_token'], verb)
     logger.info('Done.')
 
-    # Generate meta data within the handler and not in generator.py    
+    # TODO legacy metadata generation left in place for now. But does it make sense for data to be *both* discrete and continuous?
     logger.info('Generating segments Meta ...')
     meta.generate_meta_type(meta_config,study_config,logger)
     logger.info('Done.')
 
-    if 'DISCRETE' in meta_config.config_map.keys() and meta_config.config_map['DISCRETE'].lower() == 'true':
+    if meta_config.config_map.get('DISCRETE'):
         logger.info('Generating DISCRETE Meta ...')
         meta_config.datahandler = 'DISCRETE'
-        meta.generate_meta_type(meta_config,study_config,verb)
+        meta.generate_meta_type(meta_config,study_config,logger)
         logger.info('Done.')
 
-    if 'CONTINUOUS' in meta_config.config_map.keys() and meta_config.config_map['CONTINUOUS'].lower() == 'true':
+    if meta_config.config_map.get('CONTINUOUS'):
         logger.info('Generating CONTINUOUS Meta ...')
         meta_config.datahandler = 'CONTINUOUS'
-        meta.generate_meta_type(meta_config,study_config,verb)
+        meta.generate_meta_type(meta_config,study_config,logger)
         logger.info('Done.')
 
 if __name__ == '__main__':

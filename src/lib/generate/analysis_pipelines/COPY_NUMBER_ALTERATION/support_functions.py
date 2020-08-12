@@ -30,12 +30,10 @@ def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed,
     if os.path.exists(path2script):
         args = [str(x) for x in [segData, genebed, gain, amp, htz, hmz, outputPath, genelist]]
         cmd = [command, path2script] + args
-        print(cmd, file=sys.stderr)
         # Call the R script
         subprocess.call(cmd)
     else:
         raise FileNotFoundError('Cannot find script path {}'.format(path2script))
-    print("directory contents after preProcCNA:", os.listdir(outputPath), file=sys.stderr)
 
 
 def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, genelist, gain, amp, htz, hmz, oncokb_api_token, verb):
