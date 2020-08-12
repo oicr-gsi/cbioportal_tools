@@ -12,7 +12,7 @@ from constants import constants
 ## this is for discrete data
 thresholds:list  = []
 
-def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, genelist, gain, amp, htz, hmz):
+def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, genelist, gain, amp, htz, hmz, logger):
     oldSegData = os.path.join(study_config.config_map['output_folder'],
                             'data_{}_concat.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
 
@@ -30,10 +30,15 @@ def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed,
     if os.path.exists(path2script):
         args = [str(x) for x in [segData, genebed, gain, amp, htz, hmz, outputPath, genelist]]
         cmd = [command, path2script] + args
-        # Call the R script
-        subprocess.call(cmd)
+        command_string = +', '.join(cmd))
+        logger.debug('Running R script command: '+command_string)
+        rc = subprocess.call(cmd)
+        if rc != 0:
+            msg = "Non-zero exit code %i from R script command '%s'" % (rc, command_string)
+            logger.error(msg)
+            raise ValueError(msg)
     else:
-        raise FileNotFoundError('Cannot find script path {}'.format(path2script))
+        raise FileNotFoundError('Cannot find R script path {}'.format(path2script))
 
 
 def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, genelist, gain, amp, htz, hmz, oncokb_api_token, verb):
