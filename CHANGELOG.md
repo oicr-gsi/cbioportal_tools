@@ -5,9 +5,17 @@ CHANGELOG
 ### Added
 - GRD-273: Enabled and added tests for:
   - `MUTATION_EXTENDED/CAP_CNA.py`
+### Changed
+- GRD-284: Install and read accessory files
+  - R scripts and data files are now installed by `setup.py`
+  - Data files for legacy pipeline scripts default to source tree versions; some can be overridden in config
+  - Clean up execution of `seg2gene.r`
+- GRD-284: If FASTA reference is not in config file, try to find from environment module
 ### Removed
 - Unused Python file `src/lib/generate/analysis_pipelines/cancer_type.py`
 - Unused R script `src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/get_tcga.r`
+- Obsolete copy of `cancer_colours.csv`
+- Obsolete README files
 
 ## v0.0.3: 2020-08-10
 ### Added
