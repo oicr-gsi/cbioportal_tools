@@ -5,4 +5,4 @@ __pycache__
 # setup.py build directories
 build
 dist
-Janus.egg-info
+janus.egg-info

@@ -14,12 +14,30 @@ with open("README.md", "r") as fh:
 # TODO setup will need to copy R scripts as "data files", when adding pipelines which need them
 
 setup(
-    name='Janus',
+    name='janus',
     version=package_version,
     scripts=['src/bin/janus.py'],
     packages=find_packages(where=package_root),
     package_dir={'' : package_root},
-    package_data={'generate': ['data/cancer_colours.csv', 'data/vep_keep_columns.txt']},
+    package_data={
+        'generate': [
+            'data/cancer_colours.csv',
+            'data/vep_keep_columns.txt'
+        ],
+        'generate.analysis_pipelines.COPY_NUMBER_ALTERATION': [
+            'data/ncbi_genes_hg19_canonical.bed',
+            'data/targeted_genelist.txt',
+            'R_scripts/preProcCNA.r',
+            'R_scripts/seg2gene.r'
+        ],
+        'generate.analysis_pipelines.MRNA_EXPRESSION': [
+            'data/targeted_genelist.txt',
+            'data/ensemble_conversion.txt'
+        ],
+        'generate.analysis_pipelines.MUTATION_EXTENDED': [
+            'data/vep_keep_columns.txt'
+        ]
+    },
     install_requires=['numpy', 'pandas', 'scipy', 'PyYAML'],
     python_requires='>=3.7',
     author="Iain Bancarz",

@@ -136,8 +136,8 @@ class cancer_type(dual_output_component):
         rows, cols = config_table.shape
         self.type_of_cancer_column = [self.cancer_type_string]*rows
         # generate the 'colours' column; attempt to find a matching colour in reference file
-        colours_path = os.path.join(os.path.dirname(__file__), 'data', self.COLOUR_FILENAME)
-        colours = pd.read_csv(colours_path)
+        components = [os.path.dirname(__file__), utilities.constants.DATA_DIRNAME, self.COLOUR_FILENAME]
+        colours = pd.read_csv(os.path.join(*components))
         self.colours_column = []
         for name in config_table[self.CONFIG_NAME_KEY].tolist():
             # use .casefold() instead of .lower() to handle special cases
