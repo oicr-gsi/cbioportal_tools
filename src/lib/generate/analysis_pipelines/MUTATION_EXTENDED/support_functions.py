@@ -4,7 +4,8 @@ import os
 import pandas as pd
 import numpy as np
 
-from constants.constants import config2name_map
+from constants.constants import config2name_map # legacy constants
+from utilities.constants import DATA_DIR_NAME # new constants
 from support import Config, helper
 
 def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minimum_Tumour_Depth = 14, Minimum_Tumour_AF = 0.05, Maximum_gnomAD_AF = 0.001, Maximum_Local_Freq = 0.1):
@@ -70,7 +71,7 @@ def TGL_filter(meta_config, study_config):
     
     #Only keep the columns that are given in vep_keep_columns.txt within accessory_files
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    vep_keep_path = os.path.join(dir_path, os.pardir, os.pardir, 'data', 'vep_keep_columns.txt')
+    vep_keep_path = os.path.join(dir_path, DATA_DIR_NAME, 'vep_keep_columns.txt')
     if not os.path.exists(vep_keep_path):
         raise FileNotFoundError("File '%s' does not exist" % vep_keep_path)
     elif not os.access(vep_keep_path, os.R_OK):

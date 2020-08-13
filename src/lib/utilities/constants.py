@@ -13,6 +13,10 @@ CASE_LIST_DATATYPE = 'CASE_LIST'
 PATIENT_DATATYPE = 'PATIENT_ATTRIBUTES'
 SAMPLE_DATATYPE = 'SAMPLE_ATTRIBUTES'
 
+# for constructing paths to supplementary R scripts / data files
+R_SCRIPT_DIRNAME = 'R_scripts'
+DATA_DIRNAME = 'data'
+
 REQUIRED_STUDY_META_FIELDS = [
     'type_of_cancer',
     'cancer_study_identifier',

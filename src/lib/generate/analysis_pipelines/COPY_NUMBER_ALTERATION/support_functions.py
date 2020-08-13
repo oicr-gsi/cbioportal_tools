@@ -7,7 +7,8 @@ import numpy as np
 
 
 from support import Config, helper
-from constants import constants
+from constants import constants # legacy constants
+from utilities.constants import R_SCRIPT_DIRNAME
 
 ## this is for discrete data
 thresholds:list  = []
@@ -25,7 +26,7 @@ def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed,
     # Set up call to preProcCNA.r script because it needs to use the bioconductor libraries which is in R and not in Python
     # TODO Instead of having to run the processes in R, change it all into python
     executable = 'Rscript'
-    path2script = os.path.join(os.path.dirname(__file__), 'preProcCNA.r')
+    path2script = os.path.join(os.path.dirname(__file__), R_SCRIPT_DIRNAME, 'preProcCNA.r')
     outputPath = study_config.config_map['output_folder']
     if os.path.exists(path2script):
         args = [str(x) for x in [segData, genebed, gain, amp, htz, hmz, outputPath, genelist]]
@@ -338,22 +339,18 @@ def gen_log2cna(exports_config: Config.Config, study_config: Config.Config, janu
 
     helper.working_on(verb, message='Generating log2CNA...')
 
-    # This may break if after loading the module R-gsi/3.5.1, Rscript is not set as a constant
-    exit_code = helper.call_shell('Rscript {} '
-                                  '-s {} '
-                                  '-g {} '
-                                  '-o {} '.format(os.path.join(janus_path,
-                                                               constants.seg2gene), seg_file, bed_file, l_o_file), verb)
-    if exit_code == 1:
-        helper.stars()
-        helper.stars()
-        print('R Failed to load libraries, please ensure you\'re using R-gsi/3.5.1')
-        exit(1)
-    if exit_code == 2:
-        helper.stars()
-        helper.stars()
-        print('There was some error when processing or something. I have no idea')
-        exit(2)
+    executable = 'Rscript'
+    r_script_path = os.path.join(os.dirname(__file__), R_SCRIPT_DIRNAME, 'seg2gene.r')
+    if os.path.exists(r_script_path):
+        cmd = [executable, path2script, seg_file, bed_file, l_o_file]
+        command_string = ', '.join(cmd)
+        logger.debug('Running R script command: '+command_string)
+        rc = subprocess.call(cmd)
+        if rc != 0:
+            msg = "Non-zero exit code %i from R script command '%s'" % (rc, command_string)
+            raise ValueError(msg)
+    else:
+        raise FileNotFoundError('Cannot find R script path {}'.format(r_script_path))
 
 
 def verify_final_continuous_file(exports_config: Config.Config, verb):
