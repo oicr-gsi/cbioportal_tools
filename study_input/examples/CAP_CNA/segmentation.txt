@@ -1,7 +1,5 @@
 ---
 #input_folder: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests/data/CAP_CNA
-#genebed: /.mounts/labs/gsiprojects/gsi/cBioGSI/aliang/cbioportal_tools/src/lib/analysis_pipelines/COPY_NUMBER_ALTERATION/accessory_files/ncbi_genes_hg19_canonical.bed
-#genelist: /.mounts/labs/gsiprojects/gsi/cBioGSI/aliang/cbioportal_tools/src/lib/analysis_pipelines/COPY_NUMBER_ALTERATION/accessory_files/targeted_genelist.txt
 #DATATYPE: SEG
 #profile_name: CNVs (Ductal Carcinoma)
 #profile_description: CAP_CNA Copy Number Variations from whole exome sequencing. (10 Samples)
