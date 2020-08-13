@@ -8,7 +8,7 @@ import numpy as np
 
 from support import Config, helper
 from constants import constants # legacy constants
-from utilities.constants import R_SCRIPT_DIRNAME
+from utilities.constants import DATA_DIRNAME, R_SCRIPT_DIRNAME
 
 ## this is for discrete data
 thresholds:list  = []
@@ -271,6 +271,7 @@ def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, 
 
 
 def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Config, janus_path, verb):
+    # TODO janus_path argument is not used, can remove; replace verb with logger
     # Replace chromosome numbers that exceed chromosome length with chromosome length
     # Write num.mark as a n arbitrary operation
     calls = []
@@ -284,7 +285,7 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
 
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
-        dictionary = os.path.join(janus_path, constants.hmmcopy_chrom_positions)
+        dictionary = os.path.join(os.path.dirname(__file__), DATA_DIRNAME, 'hmmcopy_chrom_positions.txt')
 
         output_temp = output_file + '.temp'
 
@@ -328,8 +329,7 @@ def verify_final_seg_file(exports_config: Config.Config, verb):
 
 
 def gen_log2cna(exports_config: Config.Config, study_config: Config.Config, janus_path, verb):
-
-    # This is log2CNA
+    # TODO janus_path argument is not used, can remove; replace verb with logger
     helper.working_on(verb, message='Gathering files ...')
     seg_file = os.path.join(study_config.config_map['output_folder'],
                             'data_{}.txt'.format(constants.config2name_map['SEG']))

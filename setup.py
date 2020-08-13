@@ -11,8 +11,6 @@ package_root = 'src/lib'
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-# TODO setup will need to copy R scripts as "data files", when adding pipelines which need them
-
 setup(
     name='janus',
     version=package_version,
@@ -21,10 +19,10 @@ setup(
     package_dir={'' : package_root},
     package_data={
         'generate': [
-            'data/cancer_colours.csv',
-            'data/vep_keep_columns.txt'
+            'data/cancer_colours.csv'
         ],
         'generate.analysis_pipelines.COPY_NUMBER_ALTERATION': [
+            'data/hmmcopy_chrom_positions.txt',
             'data/ncbi_genes_hg19_canonical.bed',
             'data/targeted_genelist.txt',
             'R_scripts/preProcCNA.r',
