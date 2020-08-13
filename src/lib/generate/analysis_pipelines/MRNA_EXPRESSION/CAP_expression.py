@@ -14,8 +14,18 @@ def main():
     from generate import meta
     from generate.analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_percentile, generate_expression_zscore, preProcRNA
     from constants.constants import config2name_map
+    from utilities.constants import DATA_DIRNAME
 
     verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
+
+    if meta_config.config_map.get('genelist'):
+        genelist = meta_config.config_map.get('genelist')
+    else:
+        genelist = os.path.join(os.pardir(__file__), DATA_DIRNAME, 'targeted_genelist.txt')
+    if meta_config.config_map.get('enscon'):
+        enscon = meta_config.config_map.get('enscon')
+    else:
+        enscon = os.path.join(os.pardir(__file__), DATA_DIRNAME, ensemble_conversion.txt)
 
     logger.info('Started processing data for CAP_expression pipeline')
     
@@ -29,8 +39,8 @@ def main():
     generate_expression_matrix(meta_config, study_config, verb)
 
     #preProcRNA - generate processed continuous data using the generated expression matrix - one for study and one for study comparison and one for TCGA data
-    preProcRNA(meta_config, study_config, '/data_{}_gepcomp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), meta_config.config_map['enscon'], meta_config.config_map['genelist'], True, False)
-    preProcRNA(meta_config, study_config, '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), meta_config.config_map['enscon'], meta_config.config_map['genelist'], False, True)
+    preProcRNA(meta_config, study_config, '/data_{}_gepcomp.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), enscon, genelist, True, False)
+    preProcRNA(meta_config, study_config, '/data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]), enscon, genelist, False, True)
 
     if meta_config.config_map.get('zscores'):
         # Generate the z-scores for mRNA expression data

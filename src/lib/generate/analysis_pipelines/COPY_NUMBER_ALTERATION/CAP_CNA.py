@@ -7,11 +7,22 @@ def main():
     global logger
 
     import logging
+    import os
     from support import helper
     from generate.analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id, preProcCNA, ProcCNA
     from generate import meta
+    from utilities.constants import DATA_DIRNAME
 
     verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
+
+    if meta_config.config_map.get('genebed'):
+        genebed = meta_config.config_map.get('genebed')
+    else:
+        genebed = os.path.join(os.pardir(__file__), DATA_DIRNAME, 'ncbi_genes_hg19_canonical.bed')
+    if meta_config.config_map.get('genelist'):
+        genelist = meta_config.config_map.get('genelist')
+    else:
+        genelist = os.path.join(os.pardir(__file__), DATA_DIRNAME, 'targeted_genelist.txt')
     
     logger.info('Gathering and decompressing SEG files into temporary folder')
     helper.decompress_to_temp(meta_config, study_config, verb)
@@ -31,11 +42,11 @@ def main():
     
     #Call preProcCNA.r to generate reduced seg files
     logger.info('Generating reduced SEG files ...')
-    preProcCNA(meta_config, study_config, meta_config.config_map['genebed'], meta_config.config_map['genelist'], meta_config.config_map['gain'], meta_config.config_map['ampl'], meta_config.config_map['htzd'], meta_config.config_map['hmzd'], logger)
+    preProcCNA(meta_config, study_config, genebed, genelist, meta_config.config_map['gain'], meta_config.config_map['ampl'], meta_config.config_map['htzd'], meta_config.config_map['hmzd'], logger)
     logger.info('Done.')
 
     logger.info('Generating CNA and log2CNA files ...')
-    ProcCNA(meta_config, study_config, meta_config.config_map['genebed'], meta_config.config_map['genelist'], meta_config.config_map['gain'], meta_config.config_map['ampl'], meta_config.config_map['htzd'], meta_config.config_map['hmzd'], meta_config.config_map['oncokb_api_token'], verb)
+    ProcCNA(meta_config, study_config, genebed, genelist, meta_config.config_map['gain'], meta_config.config_map['ampl'], meta_config.config_map['htzd'], meta_config.config_map['hmzd'], meta_config.config_map['oncokb_api_token'], verb)
     logger.info('Done.')
 
     # TODO legacy metadata generation left in place for now. But does it make sense for data to be *both* discrete and continuous?
