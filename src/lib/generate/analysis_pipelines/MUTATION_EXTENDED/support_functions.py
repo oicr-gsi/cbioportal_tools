@@ -248,10 +248,18 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
             gene_col_normal = normal_id
             gene_col_tumors = tumors_id
 
-        # ORIGINAL -- 
-        ref_fasta = exports_config.config_map['ref_fasta']
-        # TESTING --
-        #ref_fasta = exports_config.config_map['$HG19_ROOT/hg19_random.fa']
+        # if FASTA reference not in config file, try to find from environment variable
+        if exports_config.config_map.get('ref_fasta'):
+            ref_fasta = exports_config.config_map.get('ref_fasta')
+        elif os.environ.get('HG38_ROOT'):
+            ref_fasta = os.path.join(os.environ.get('HG38_ROOT'), 'hg38_random.fa')
+        elif os.environ.get('HG19_ROOT'):
+            ref_fasta = os.path.join(os.environ.get('HG19_ROOT'), 'hg19_random.fa')
+        else:
+            raise ValueError("FASTA reference not configured")
+        if not os.path.exists(ref_fasta):
+            raise FileNotFoundError("FASTA reference %s does not exist" % ref_fasta)
+
         filter_vcf = exports_config.config_map['filter_vcf']
 
         # Bake in Parallel
