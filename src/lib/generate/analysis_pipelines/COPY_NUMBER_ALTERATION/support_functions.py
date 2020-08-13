@@ -24,13 +24,13 @@ def preProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed,
     
     # Set up call to preProcCNA.r script because it needs to use the bioconductor libraries which is in R and not in Python
     # TODO Instead of having to run the processes in R, change it all into python
-    command = 'Rscript'
+    executable = 'Rscript'
     path2script = os.path.join(os.path.dirname(__file__), 'preProcCNA.r')
     outputPath = study_config.config_map['output_folder']
     if os.path.exists(path2script):
         args = [str(x) for x in [segData, genebed, gain, amp, htz, hmz, outputPath, genelist]]
-        cmd = [command, path2script] + args
-        command_string = +', '.join(cmd))
+        cmd = [executable, path2script] + args
+        command_string = ', '.join(cmd)
         logger.debug('Running R script command: '+command_string)
         rc = subprocess.call(cmd)
         if rc != 0:
