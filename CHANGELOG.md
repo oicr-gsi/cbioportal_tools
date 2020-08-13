@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+## Unreleased
+### Added
+- GRD-273: Enabled and added tests for:
+  - `MUTATION_EXTENDED/CAP_CNA.py`
+### Removed
+- Unused Python file `src/lib/generate/analysis_pipelines/cancer_type.py`
+- Unused R script `src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/get_tcga.r`
+
 ## v0.0.3: 2020-08-10
 ### Added
 - GRD-273: Add support for legacy pipelines
