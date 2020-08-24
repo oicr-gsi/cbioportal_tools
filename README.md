@@ -20,6 +20,7 @@ Janus is primarily implemented in Python, with a few ancillary scripts in R and 
 - R >= 3.5.1
 - [ensembl-vep](https://github.com/Ensembl/ensembl-vep) >= 98.0
 - [vcf2maf](https://github.com/mskcc/vcf2maf) >= 1.6.17
+- [oncokb-annotator](https://github.com/oncokb/oncokb-annotator) >= 2.0
 - Some legacy pipeline scripts require Linux utilities such as `awk` and `grep`
 - Minimum 16G of RAM (32G is preferred)
 
@@ -35,10 +36,10 @@ Alternatively, to install to a specific directory:
 pip install --prefix $INSTALL_ROOT $JANUS_SOURCE_DIR
 ```
 
-To run tests, assuming all prerequisites are installed:
+To run tests from the source directory, assuming all prerequisites are installed:
 ```
 export PYTHONPATH=${JANUS_SOURCE_DIR}/src/lib:$PYTHONPATH
-./src/test/test.py
+${JANUS_SOURCE_DIR}/src/test/test.py
 ```
 
 Example study input appears in the `study_input` subdirectory.
@@ -51,11 +52,18 @@ The main script is `janus.py`, which is copied to the `bin` subdirectory of the 
 
 ### Config files
 
-Study generation requires a master config file, and a number of subsidiary config files. Config file format is CSVY, documented in [config_format.md](./doc/config_format.md); config file contents are specified in [Specification/README.md](./study_input/Specification/README.md). (The content specification is legacy documentation, due to be updated.)
+Study generation requires a master config file, and a number of subsidiary config files. Config file format is CSVY, documented in [config_format.md](./doc/config_format.md). Documentation of required variables for each config file type is TBD, but the examples in `study_input` can be used as templates.
 
 ### Data files
 
-The config files may specify additional data and metadata files specific to a given analysis pipeline. See [Specification/README.md](./study_input/Specification/README.md) for details.
+The config files may specify additional data and metadata files specific to a given analysis pipeline. Examples appear in the test data.
+
+### Environment variables
+
+Human genome reference for the `MUTATION_EXTENDED` pipeline is set as follows, in _descending_ order of priority:
+1. `ref_fasta` parameter in the pipeline config file (if any)
+2. `HG38_ROOT` environment variable, as set by the `hg38` module
+2. `HG19_ROOT` environment variable, as set by the `hg19` module
 
 ## Code Structure
 
@@ -66,7 +74,7 @@ Python modules in `src/lib`:
 - `generate`: Code to generate study directories, ready for upload.
 - `generate/analysis_pipelines`: Generation code specific to analysis pipelines. Includes Python and R scripts from the legacy version.
 - `support`: Legacy support and utility functions
-- `utilities`: General purpose code for logging and configuration
+- `utilities`: Non-legacy support and utility functions
 
 ## Release Procedure
 
