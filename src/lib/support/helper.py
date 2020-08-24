@@ -2,10 +2,13 @@
 
 # TODO replace these with cleaner alternatives where possible, eg. excluding shell calls
 
+import gzip
 import logging
 import os
+import re
 import shutil
 import subprocess
+import tarfile
 import time
 
 from support.Config import Config
@@ -95,39 +98,50 @@ def parallel_call(command: str, verb):
 
 
 def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
-    # TODO refactor to use Python tar & gzip libraries instead of shell calls
-    # Decompresses each file in the current folder to ../temp_vcf/ if it is compressed. otherwise, copy it over
+    """Create a temporary directory; extract/decompress/copy input to it; also updates mutate_config"""
+    logger = configure_logger(logging.getLogger(__name__), verbose=verb)
+    # construct the output directory
+    output_folder = study_config.config_map['output_folder']
     if mutate_config.type_config == 'MAF':
-        temp = get_temp_folder(study_config.config_map['output_folder'], 'vcf')
+        suffix = 'vcf'
     else:
-        temp = get_temp_folder(study_config.config_map['output_folder'], mutate_config.datahandler.lower())
-
-    working_on(verb, message='Extracting/copying to {}'.format(temp))
-    clean_folder(temp,True)
-
-    for i in range(len(mutate_config.data_frame['FILE_NAME'])):
-        input_file =  os.path.abspath(os.path.join(mutate_config.config_map['input_folder'],
-                                                   mutate_config.data_frame['FILE_NAME'][i]))
-        print(input_file)
-        if not os.path.isfile(input_file):
-            raise FileNotFoundError('The path to the file you have provided is not correct ...\n' + input_file)
-
-        output_file = os.path.abspath(os.path.join(temp, mutate_config.data_frame['FILE_NAME'][i]))
-
-        if input_file.endswith(".tar.gz"):
-            call_shell("tar -xzf {} -C {}".format(input_file, temp), verb)
-
-            mutate_config.data_frame['FILE_NAME'][i] = mutate_config.data_frame['FILE_NAME'][i].strip('.tar.gz')
-
-        elif input_file.endswith('.gz'):
-            call_shell("zcat {} > {}".format(input_file, output_file.strip('.gz')), verb)
-
-            mutate_config.data_frame['FILE_NAME'][i] = mutate_config.data_frame['FILE_NAME'][i].strip('.gz')
-
+        suffix = mutate_config.datahandler.lower()
+    temp_dir = os.path.abspath(os.path.join(output_folder, 'temp/temp_{}/'.format(suffix)))
+    if os.path.exists(temp_dir):
+        logger.info("Removing existing directory '%s'" % temp_dir)
+        shutil.rmtree(temp_dir)
+    os.makedirs(temp_dir)
+    # extract, decompress, or copy files
+    for name in mutate_config.data_frame['FILE_NAME'].tolist():
+        input_path = os.path.abspath(os.path.join(mutate_config.config_map['input_folder'], name))
+        err = None
+        if not os.path.exists(input_path):
+            err = "Input path '%s' does not exist" % input_path
+        elif not os.path.isfile(input_path):
+            err = "Input path '%s' exists but is not a file" % input_path
+        elif not os.access(input_path, os.R_OK):
+            err = "Input file '%s' exists but is not readable" % input_path
+        if err:
+            logger.error(err)
+            raise FileNotFoundError(err)
+        if re.search('\.tar(\.gz)?$', input_path) or re.search('\.tgz$', input_path):
+            logger.info("Extracting .tar archive %s to %s" % (input_path, temp_dir))
+            with tarfile.open(input_path) as tf:
+                tf.extractall(temp_dir)
+        elif re.search('\.gz$', input_path):
+            logger.info("Decompressing .gz file %s to %s" % (input_path, temp_dir))
+            dest_name = re.split('\.gz$', os.path.basename(input_path)).pop(0)
+            with gzip.open(input_path) as source:
+                dest = open(os.path.join(temp_dir, dest_name), 'wb')
+                shutil.copyfileobj(source, dest)
+                dest.close()
         else:
-            call_shell("cp {} {}".format(input_file, output_file), verb)
-
-    mutate_config.config_map['input_folder'] = temp
+            logger.info("Copying file %s to %s" % (input_path, temp_dir))
+            dest = os.path.join(temp_dir, os.path.basename(input_path))
+            shutil.copyfile(input_path, dest)
+    # side effect: modify mutate_config to set input folder to the new temp_dir
+    # TODO refactor to make this more explicit
+    mutate_config.config_map['input_folder'] = temp_dir
 
 
 def concat_files(exports_config:Config, study_config: Config, verb):
