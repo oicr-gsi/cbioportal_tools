@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 from constants.constants import config2name_map # legacy constants
-from utilities.constants import DATA_DIR_NAME # new constants
+from utilities.constants import DATA_DIRNAME # new constants
 from support import Config, helper
 
 def maf_filter(meta_config, study_config, mutation_type, filter_exception, Minimum_Tumour_Depth = 14, Minimum_Tumour_AF = 0.05, Maximum_gnomAD_AF = 0.001, Maximum_Local_Freq = 0.1):

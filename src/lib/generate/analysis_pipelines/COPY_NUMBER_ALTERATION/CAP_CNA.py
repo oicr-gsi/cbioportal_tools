@@ -13,19 +13,23 @@ def main():
     from generate import meta
     from utilities.constants import DATA_DIRNAME
 
+    AP_NAME = 'analysis_pipelines'
+    CNA_NAME = 'COPY_NUMBER_ALTERATION'
+
     verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
 
+    # note that __file__ is the path to the executing module components.py, not this script
     if meta_config.config_map.get('genebed'):
         genebed = meta_config.config_map.get('genebed')
     else:
-        genebed = os.path.join(os.pardir(__file__), DATA_DIRNAME, 'ncbi_genes_hg19_canonical.bed')
+        genebed = os.path.join(os.path.dirname(__file__), AP_NAME, CNA_NAME, DATA_DIRNAME, 'ncbi_genes_hg19_canonical.bed')
     if meta_config.config_map.get('genelist'):
         genelist = meta_config.config_map.get('genelist')
     else:
-        genelist = os.path.join(os.pardir(__file__), DATA_DIRNAME, 'targeted_genelist.txt')
+        genelist = os.path.join(os.path.dirname(__file__), AP_NAME, CNA_NAME, DATA_DIRNAME, 'targeted_genelist.txt')
     
-    logger.info('Gathering and decompressing SEG files into temporary folder')
-    helper.decompress_to_temp(meta_config, study_config, verb)
+    logger.info('Transferring SEG files to temporary folder')
+    meta_config = helper.relocate_inputs(meta_config, study_config, verb)
     logger.info('Done.')
 
     logger.info('Fixing Chromosome numbering ...')

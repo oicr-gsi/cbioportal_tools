@@ -2,10 +2,31 @@
 
 import argparse, hashlib, logging, os, tempfile, unittest
 
+import pandas as pd
+
 from generate import generator
 from generate.study import study
+from support.helper import relocate_inputs
 
-class TestStudy(unittest.TestCase):
+class TestBase(unittest.TestCase):
+
+    def verify_checksums(self, checksums, out_dir):
+        """Checksums is a dictionary: md5sum -> relative path from output directory """
+        for relative_path in checksums.keys():
+            out_path = os.path.join(out_dir, relative_path)
+            self.assertTrue(os.path.exists(out_path), out_path+" exists")
+            md5 = hashlib.md5()
+            with open(out_path, 'rb') as f:
+                md5.update(f.read())
+            self.assertEqual(md5.hexdigest(),
+                             checksums[relative_path],
+                             out_path+" checksums match")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+
+class TestStudy(TestBase):
 
     """Tests for Janus study generation"""
 
@@ -34,20 +55,6 @@ class TestStudy(unittest.TestCase):
         test_study.write_all(out_dir, dry_run=True)
         self.verify_checksums(self.base_checksums, out_dir)
 
-    def verify_checksums(self, checksums, out_dir):
-        """Checksums is a dictionary: md5sum -> relative path from output directory """
-        for relative_path in checksums.keys():
-            out_path = os.path.join(out_dir, relative_path)
-            self.assertTrue(os.path.exists(out_path), out_path+" exists")
-            md5 = hashlib.md5()
-            with open(out_path, 'rb') as f:
-                md5.update(f.read())
-            self.assertEqual(md5.hexdigest(),
-                             checksums[relative_path],
-                             out_path+" checksums match")
-
-    def tearDown(self):
-        self.tmp.cleanup()
 
 
 class TestGenerator(TestStudy):
@@ -178,6 +185,46 @@ class TestGenerator(TestStudy):
         checksums.update(additional_checksums)
         self.verify_checksums(checksums, out_dir)
 
+class TestGeneratorMethods(TestBase):
+
+    """Low-level tests of generator methods"""
+
+    def setUp(self):
+        self.testDir = os.path.dirname(os.path.realpath(__file__))
+        self.dataDir = os.path.join(self.testDir, 'data')
+        self.tmp = tempfile.TemporaryDirectory(prefix='janus_generator_method_test_')
+
+    def test_relocate_inputs(self):
+        test_name = 'relocate_inputs'
+        input_dir = os.path.join(self.dataDir, test_name)
+        out_dir = os.path.join(self.tmp.name, test_name)
+        os.mkdir(out_dir)
+        inputs = ['blue.txt', 'green.tar.gz', 'yellow.tgz', 'purple.tar', 'red.txt.gz']
+        df = pd.DataFrame({'FILE_NAME': inputs})
+        mutate_config = mock_legacy_config({'input_folder': input_dir}, df)
+        study_config = mock_legacy_config({'output_folder': out_dir})
+        updated_mutate_config = relocate_inputs(mutate_config, study_config, True)
+        outputs = ['blue.txt', 'green/green.txt', 'yellow/yellow.txt', 'purple/purple.txt', 'red.txt']
+        md5sum = 'edc715389af2498a623134608ba0a55b' # all output files should be identical
+        checksums = {output: md5sum for output in outputs}
+        mock_output = os.path.join(out_dir, 'temp', 'temp_mock')
+        self.verify_checksums(checksums, mock_output)
+        self.assertEqual(updated_mutate_config.config_map['input_folder'],
+                         mock_output,
+                         'input folder updated')
+        outputs = set(['blue.txt', 'green.tar.gz', 'yellow.tgz', 'purple.tar', 'red.txt'])
+        self.assertTrue(outputs == set(updated_mutate_config.data_frame['FILE_NAME'].values),
+                        'filenames updated')
+
+class mock_legacy_config:
+
+    """Bare-bones mockup of the legacy Config class"""
+
+    def __init__(self, dictionary, data_frame=None, type_config='mock', datahandler='mock'):
+        self.config_map = dictionary
+        self.data_frame = data_frame
+        self.type_config = type_config
+        self.datahandler = datahandler
 
 
 if __name__ == '__main__':

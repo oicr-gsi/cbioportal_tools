@@ -10,7 +10,9 @@ CHANGELOG
   - R scripts and data files are now installed by `setup.py`
   - Data files for legacy pipeline scripts default to source tree versions; some can be overridden in config
   - Clean up execution of `seg2gene.r`
-- GRD-284: If FASTA reference is not in config file, try to find from environment module
+- GRD-284:
+  - If FASTA reference is not in config file, try to find from environment module
+  - Rename `decompress_to_temp` to `relocate_inputs`; refactor to eliminate system calls; make config update explicit; add test
 ### Removed
 - Unused Python file `src/lib/generate/analysis_pipelines/cancer_type.py`
 - Unused R script `src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/get_tcga.r`
