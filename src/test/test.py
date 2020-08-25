@@ -116,6 +116,23 @@ class TestGenerator(TestStudy):
         os.mkdir(out_dir)
         self.args.config = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
         self.args.out = out_dir
+        self.args.dry_run = False
+        generator.main(self.args)
+        self.verify_checksums(self.base_checksums, out_dir)
+
+    def test_cufflinks_dry_run(self):
+        out_dir = os.path.join(self.tmp.name, 'Cufflinks_dry_run')
+        os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, 'Cufflinks', 'study.txt')
+        self.args.out = out_dir
+        generator.main(self.args)
+        self.verify_checksums(self.base_checksums, out_dir)
+
+    def test_cufflinks_dry_run(self):
+        out_dir = os.path.join(self.tmp.name, 'Cufflinks_dry_run')
+        os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, 'Cufflinks', 'study.txt')
+        self.args.out = out_dir
         generator.main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
 
