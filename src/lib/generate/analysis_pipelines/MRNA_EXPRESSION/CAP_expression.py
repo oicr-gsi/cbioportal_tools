@@ -29,8 +29,8 @@ def main():
 
     logger.info('Started processing data for CAP_expression pipeline')
     
-    logger.info('Gathering and decompressing MRNA_EXPRESSION files into temporary folder')
-    helper.decompress_to_temp(meta_config, study_config, verb)
+    logger.info('Decompressing MRNA_EXPRESSION files to temporary folder')
+    meta_config = helper.relocate_inputs(meta_config, study_config, verb)
 
     logger.info('Alpha sorting each file ...')
     alpha_sort(meta_config, verb)

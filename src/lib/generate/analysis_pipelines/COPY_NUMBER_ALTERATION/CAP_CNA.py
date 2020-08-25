@@ -28,8 +28,8 @@ def main():
     else:
         genelist = os.path.join(os.path.dirname(__file__), AP_NAME, CNA_NAME, DATA_DIRNAME, 'targeted_genelist.txt')
     
-    logger.info('Gathering and decompressing SEG files into temporary folder')
-    helper.decompress_to_temp(meta_config, study_config, verb)
+    logger.info('Transferring SEG files to temporary folder')
+    meta_config = helper.relocate_inputs(meta_config, study_config, verb)
     logger.info('Done.')
 
     logger.info('Fixing Chromosome numbering ...')

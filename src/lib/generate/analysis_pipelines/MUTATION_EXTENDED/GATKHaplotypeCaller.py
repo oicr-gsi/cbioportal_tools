@@ -12,8 +12,8 @@ def main():
     import logging
     verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
 
-    logger.info('Gathering and decompressing VCF files into temporary folder')
-    helper.decompress_to_temp(meta_config, study_config, verb)
+    logger.info('Transferring VCF files to temporary folder')
+    meta_config = helper.relocate_inputs(meta_config, study_config, verb)
 
     logger.info('Ensuring both columns exist, otherwise adding UNMATCHED column ...')
     support_functions.verify_dual_columns(meta_config, verb)
