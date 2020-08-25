@@ -18,8 +18,8 @@ def main():
     logger.info('Started processing data for CAP_mutation pipeline')
     
     # Decompress MAF files to temp folder
-    logger.info('Gathering and decompressing MAF files into temporary folder')
-    helper.decompress_to_temp(meta_config, study_config, verb)
+    logger.info('Decompressing MAF files to temporary folder')
+    meta_config = helper.relocate_inputs(meta_config, study_config, verb)
 
     # Clean MAF files
     logger.info('Cleaning MAF Files ...')
