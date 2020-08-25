@@ -8,6 +8,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import time
 
@@ -153,17 +154,27 @@ def relocate_inputs(mutate_config: Config, study_config: Config, verb):
     return mutate_config
 
 def concat_files(exports_config:Config, study_config: Config, verb):
-    # TODO refactor to use Python file objects instead of shell calls
-    concated_file = os.path.join(study_config.config_map['output_folder'],
-                                 'data_{}_concat.txt'.format(config2name_map[exports_config.alterationtype + ":" + exports_config.datahandler]))
-
-    input_folder = exports_config.config_map['input_folder']
-
-    call_shell('head -n 1 {} > {}'.format(os.path.join(input_folder,exports_config.data_frame['FILE_NAME'][0]),
-                                          concated_file), verb)
-
-    for each in exports_config.data_frame['FILE_NAME']:
-        input_file = os.path.join(input_folder, each)
-        # Concat all but first line to remove header.
-        call_shell('tail -n +2 {} >> {}'.format(input_file, concated_file), verb)
+    """Concatenate input files; keep the first (header) line from first file only"""
+    logger = configure_logger(logging.getLogger(__name__), verbose=verb)
+    input_dir = exports_config.config_map['input_folder']
+    output_dir = study_config.config_map['output_folder']
+    input_names = exports_config.data_frame['FILE_NAME'].tolist()
+    # TODO get rid of unwieldy and error-prone config2name_map
+    output_name_key = exports_config.alterationtype + ":" + exports_config.datahandler
+    output_name = 'data_{}_concat.txt'.format(config2name_map[output_name_key])
+    output_path = os.path.join(output_dir, output_name)
+    logger.info("Started writing concatenated output from %s to %s" % (input_dir, output_path))
+    output_file = open(output_path, 'w')
+    first = True
+    for name in input_names:
+        logger.debug("Appending contents of %s to output %s" % (name, output_path))
+        with open(os.path.join(input_dir, name), 'r') as input_file:
+            header = input_file.readline()
+            if first:
+                output_file.write(header)
+                first = False
+            # copy from current position (2nd line) to EOF
+            shutil.copyfileobj(input_file, output_file)
+    output_file.close()
+    logger.info("Finished writing concatenated output from %s to %s" % (input_dir, output_path))
 
