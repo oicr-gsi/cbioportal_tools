@@ -111,10 +111,14 @@ def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
         logger.info("Removing existing directory '%s'" % temp_dir)
         shutil.rmtree(temp_dir)
     os.makedirs(temp_dir)
-    # extract, decompress, or copy files
-    for name in mutate_config.data_frame['FILE_NAME'].tolist():
+    # extract, decompress, or copy files; as a side effect, update filenames in mutate_config
+    # TODO deprecated holdover from legacy code; refactor to explicitly return updated params
+    input_names = mutate_config.data_frame['FILE_NAME'].tolist()
+    updated_names = []
+    for name in input_names:
         input_path = os.path.abspath(os.path.join(mutate_config.config_map['input_folder'], name))
         err = None
+        updated_name = name
         if not os.path.exists(input_path):
             err = "Input path '%s' does not exist" % input_path
         elif not os.path.isfile(input_path):
@@ -131,6 +135,7 @@ def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
         elif re.search('\.gz$', input_path):
             logger.info("Decompressing .gz file %s to %s" % (input_path, temp_dir))
             dest_name = re.split('\.gz$', os.path.basename(input_path)).pop(0)
+            updated_name = dest_name
             with gzip.open(input_path) as source:
                 dest = open(os.path.join(temp_dir, dest_name), 'wb')
                 shutil.copyfileobj(source, dest)
@@ -139,8 +144,10 @@ def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
             logger.info("Copying file %s to %s" % (input_path, temp_dir))
             dest = os.path.join(temp_dir, os.path.basename(input_path))
             shutil.copyfile(input_path, dest)
+        updated_names.append(updated_name)
     # side effect: modify mutate_config to set input folder to the new temp_dir
     # TODO refactor to make this more explicit
+    mutate_config.data_frame['FILE_NAME'] = updated_names
     mutate_config.config_map['input_folder'] = temp_dir
 
 
