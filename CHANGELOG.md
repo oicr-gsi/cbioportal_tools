@@ -16,6 +16,7 @@ CHANGELOG
 - GRD-284: Refactor `concat_files` method and add test
 ### Removed
 - Unused Python file `src/lib/generate/analysis_pipelines/cancer_type.py`
+- Unused Python file `src/lib/support/cbioportal_interface.py`
 - Unused R script `src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/get_tcga.r`
 - Obsolete copy of `cancer_colours.csv`
 - Obsolete README files
