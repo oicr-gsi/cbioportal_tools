@@ -13,14 +13,11 @@ import tarfile
 import time
 
 from support.Config import Config
-from constants.constants import config2name_map, supported_pipe
-
-extensionChoices = ["vcf", "maf"]
-c_choices = [".tar.gz", ".gz", ".zip"]
+from constants.constants import config2name_map
 
 def configure_logger(logger, log_path=None, debug=False, verbose=False):
     """Customize a Logger object with given parameters"""
-    #logger = logging.getLogger(__name__)
+    # standalone method, for use to configure loggers in the helper module
     if len(logger.handlers) > 0: # remove duplicate handlers from previous get_logger() calls
         logger.handlers.clear()
     log_level = logging.WARN
@@ -57,8 +54,7 @@ def stars():
     # Formerly used to print a decorative row of stars
     logger = logging.getLogger(__name__)
     logger = configure_logger(logger, verbose=True)
-    logger.warning("Call to deprecated helper.stars() method")
-
+    logger.warning("Use of deprecated helper.stars() method")
 
 def clean_folder(path,force):
     if os.path.exists(path):
@@ -74,28 +70,11 @@ def working_on(verbose, message='Success reported via deprecated working_on() me
     # Method is for verbose option. Prints Success if no parameter specified
     logger = logging.getLogger(__name__)
     logger = configure_logger(logger, verbose=verbose)
+    logger.warning("Use of deprecated 'working_on' method")
     logger.info(message)
-
 
 def get_temp_folder(output_folder, ext) -> str:
     return os.path.abspath(os.path.join(output_folder, 'temp/temp_{}/'.format(ext)))
-
-
-def call_shell(command: str, verb):
-    working_on(verb, message=command)
-    output = subprocess.call(command, shell=True)
-    return output
-
-
-def get_shell(command: str, verb) -> str:
-    working_on(verb, message=command)
-    output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
-    return output.decode('utf-8')
-
-
-def parallel_call(command: str, verb):
-    working_on(verb, message=command)
-    return subprocess.Popen(command, shell=True)
 
 def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
     logger = configure_logger(logging.getLogger(__name__), verbose=verb)

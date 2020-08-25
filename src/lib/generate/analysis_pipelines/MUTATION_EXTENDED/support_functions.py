@@ -52,11 +52,9 @@ def oncokb_annotation(meta_config, study_config, oncokb_api_token, verb):
     if os.path.exists(input_path):
         output_path = os.path.join(study_config.config_map['output_folder'], 'data_{}.txt'.format(config2name_map[meta_config.alterationtype + ":" + meta_config.datahandler]))
         # Uses bash command to call MafAnnotator of oncokb_annotator using Jon's oncokb_api_token
-        try:
-            helper.call_shell("MafAnnotator.py -i {} -o {} -b {}".format(input_path, output_path, oncokb_api_token), verb)
-            os.remove(input_path)
-        except FileNotFoundError:
-            print('Cannot find MafAnnotator.py')
+        cmd = "MafAnnotator.py -i {} -o {} -b {}".format(input_path, output_path, oncokb_api_token)
+        subprocess.call(cmd, shell=True)
+        os.remove(input_path)
     else:
         print('No such file {}'.format(input_path))
 
@@ -160,19 +158,21 @@ def verify_dual_columns(exports_config: Config.Config, verb):
     processes = []
     for i in range(exports_config.data_frame.shape[0]):
         file = os.path.join(exports_config.config_map['input_folder'], exports_config.data_frame['FILE_NAME'][i])
-        # if the normal_id is UNMATCHED, then do this silly business.
+        # if the normal_id is UNMATCHED, munge the file using awk; TODO use Python instead
         if exports_config.data_frame['NORMAL_ID'][i] == 'UNMATCHED':
 
             # Essentially, print the header,
             # add an unmatched column to header,
             # duplicate last column
-            processes.append(helper.parallel_call('awk -F\'\\t\' \'{{ OFS = FS }} '
-                                                  '{{   if ($1 ~ "##"){{ print }} '
-                                                  'else if ($1 ~ "#"){{ for(i = 1; i <= NF;i++){{ printf "%s\\t", $i }}'
-                                                  ' print "UNMATCHED" }}'
-                                                  'else {{ for(i = 1; i <= NF; i++){{ printf "%s\\t", $i}} print $NF }}'
-                                                  '}}\' {0} > {0}.temp;'
-                                                  'mv {0}.temp {0}'.format(file), verb))
+            cmd = 'awk -F\'\\t\' \'{{ OFS = FS }} '+\
+                  '{{   if ($1 ~ "##"){{ print }} '+\
+                  'else if ($1 ~ "#"){{ for(i = 1; i <= NF;i++){{ printf "%s\\t", $i }}'+\
+                  ' print "UNMATCHED" }}'+\
+                  'else {{ for(i = 1; i <= NF; i++){{ printf "%s\\t", $i}} print $NF }}'+\
+                  '}}\' {0} > {0}.temp;'+\
+                  'mv {0}.temp {0}'.format(file)
+            processes.append(subprocess.Popen(cmd, shell=True))
+
     # Wait until Baked
     exit_codes = [p.wait() for p in processes]
     if verb:
@@ -187,7 +187,8 @@ def filter_vcf_rejects(mutation_config: Config.Config, verb):
     processes = []
     for file in mutation_config.data_frame['FILE_NAME']:
         file = os.path.join(mutation_config.config_map['input_folder'], file)
-        processes.append(helper.parallel_call("cat {} | grep -E 'PASS|#' > {}".format(file, file + '.temp'), verb))
+        cmd = "cat {} | grep -E 'PASS|#' > {}".format(file, file + '.temp')
+        processes.append(subprocess.Popen(cmd, shell=True))
 
     # Wait until Baked
     exit_codes = [p.wait() for p in processes]
@@ -200,7 +201,8 @@ def filter_vcf_rejects(mutation_config: Config.Config, verb):
     processes = []
     for file in mutation_config.data_frame['FILE_NAME']:
         file = os.path.join(mutation_config.config_map['input_folder'], file)
-        processes.append(helper.parallel_call("cat {} > {}".format(file + '.temp', file), verb))
+        cmd = "cat {} > {}".format(file + '.temp', file)
+        processes.append(subprocess.Popen(cmd, shell=True))
 
     # Wait until Baked
     exit_codes = [p.wait() for p in processes]
@@ -262,40 +264,37 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
 
         filter_vcf = exports_config.config_map['filter_vcf']
 
-        # Bake in Parallel
-        processes.append(helper.parallel_call('vcf2maf  --input-vcf {}    '
-                                                       '--output-maf {}/{}   '
-                                                       '--normal-id {}       '
-                                                       '--tumor-id {}        '
-                                                       '--vcf-normal-id {}   '
-                                                       '--vcf-tumor-id {}    '
-                                                       '--ref-fasta {}       '
-                                                       '--filter-vcf {}      '
-                                                       '--vep-path $VEP_PATH '
-                                                       '--vep-data $VEP_DATA '
-                                                       '--species homo_sapiens'.format(input_vcf,
-                                                                                      maf_temp,
-                                                                                      output_maf,
-                                                                                      normal_id,
-                                                                                      tumors_id,
-                                                                                      gene_col_normal,
-                                                                                      gene_col_tumors,
-                                                                                      ref_fasta,
-                                                                                      filter_vcf),
-                                              verb))
-        try:
-            exports_config.data_frame['FILE_NAME'][i] = output_maf
-        except (FileExistsError, OSError):
-            pass
+        # run calls in parallel
+        cmd = 'vcf2maf  '+\
+              '--input-vcf {} '+\
+              '--output-maf {}/{} '+\
+              '--normal-id {} '+\
+              '--tumor-id {} '+\
+              '--vcf-normal-id {} '+\
+              '--vcf-tumor-id {} '+\
+              '--ref-fasta {} '+\
+              '--filter-vcf {} '+\
+              '--vep-path $VEP_PATH '+\
+              '--vep-data $VEP_DATA '+\
+              '--species homo_sapiens'.format(input_vcf,
+                                              maf_temp,
+                                              output_maf,
+                                              normal_id,
+                                              tumors_id,
+                                              gene_col_normal,
+                                              gene_col_tumors,
+                                              ref_fasta,
+                                              filter_vcf)
+        processes.append(subprocess.Popen(cmd, shell=True))
+        exports_config.data_frame['FILE_NAME'][i] = output_maf
     exports_config.config_map['input_folder'] = maf_temp
-    # Wait until Baked
+
     exit_codes = [p.wait() for p in processes]
     if any(exit_codes):
         raise ValueError('ERROR:: Conversion from vcf 2 maf failed. Please Resolve the issue')
     if verb:
         print(exit_codes)
     return exports_config
-
 
 def clean_head(exports_config: Config.Config, verb):
     # Remove excess header from top of MAF files
@@ -304,8 +303,8 @@ def clean_head(exports_config: Config.Config, verb):
     processes = []
     for file in exports_config.data_frame['FILE_NAME']:
         file = os.path.join(exports_config.config_map['input_folder'], file)
-        processes.append(helper.parallel_call('grep -v \'#\' {0} > {0}.temp;'
-                                              'mv {0}.temp {0}'.format(file), verb))
+        cmd = 'grep -v \'#\' {0} > {0}.temp; mv {0}.temp {0}'.format(file)
+        processes.append(subprocess.Popen(cmd, shell=True))
 
     exit_codes = [p.wait() for p in processes]
     if verb:

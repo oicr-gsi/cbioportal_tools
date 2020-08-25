@@ -134,7 +134,8 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
         # call CNA annotator
         f_out = os.path.join(outputPath, 'supplementary_data', 'data_{}_oncoKB.txt'.format(constants.config2name_map[meta_config.alterationtype + ":" + 'DISCRETE']))
         if os.path.exists(data_path):
-            helper.call_shell("CnaAnnotator.py -i {} -o {} -b {}".format(data_path, f_out, oncokb_api_token), verb)
+            cmd = "CnaAnnotator.py -i {} -o {} -b {}".format(data_path, f_out, oncokb_api_token)
+            subprocess.call(cmd, shell=True)
         else:
             print('{} wrong file or file path'.format(data_path))
 
@@ -153,11 +154,9 @@ def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
         helper.working_on(verb, 'Removing chr from {}'.format(export_data['FILE_NAME'][i]))
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
-
         output_temp = output_file + '.temp'
-
-        calls.append(helper.parallel_call('awk \'NR>1 {{sub(/\\tchr/,"\\t")}} 1\' {} > {}; '
-                                          'mv {} {}'.format(input_file, output_temp, output_temp, output_file), verb))
+        cmd = 'awk \'NR>1 {{sub(/\\tchr/,"\\t")}} 1\' {} > {}; mv {} {}'.format(input_file, output_temp, output_temp, output_file)
+        calls.append(subprocess.Popen(command, shell=True))
 
     exports_config.config_map['input_folder'] = seg_temp
     # Wait until Baked
@@ -179,7 +178,6 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
 
     seg_temp = helper.get_temp_folder(output_folder, 'seg')
 
-    # Cook
     for i in range(len(export_data)):
         helper.working_on(verb, 'Resolving Sample_ID {}'.format(export_data['FILE_NAME'][i]))
 
@@ -189,16 +187,14 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
 
         output_temp = output_file + '.temp'
 
-        calls.append(helper.parallel_call('head -n 1 "{}" > {}; '.format(input_file, output_temp) +
-                                          'cat  {} |'
-                                          'awk -F"\\t" \'NR>1 {{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' >> {}; '
-                                          'mv {} {}'.format(input_file, sample_id, output_temp,
-                                                            output_temp, output_file), verb))
-    exports_config.config_map['input_folder'] = seg_temp
-    # Wait until Baked
-    exit_codes = [p.wait() for p in calls]
+        cmd = 'head -n 1 "{}" > {}; '.format(input_file, output_temp) +\
+              'cat  {} |'+\
+              'awk -F"\\t" \'NR>1 {{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' >> {}; '+\
+              'mv {} {}'.format(input_file, sample_id, output_temp, output_temp, output_file)
+        calls.append(subprocess.Popen(cmd, shell=True))
 
-    # Clean up
+    exports_config.config_map['input_folder'] = seg_temp
+    exit_codes = [p.wait() for p in calls]
     if any(exit_codes):
         raise ValueError('ERROR:: Something went wrong when parsing Segmented format file? Please resolve the issue')
     if verb:
@@ -226,44 +222,26 @@ def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, 
     #input(bed_filter)
 
     header = 'ID\\tchrom\\tloc.start\\tloc.end\\tnum.mark\\tseg.mean'
-    # Cook
     for i in range(len(export_data)):
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
         sample_id = export_data['SAMPLE_ID'][i]
 
         helper.working_on(verb, 'Refactoring cols: {}'.format(export_data['FILE_NAME'][i]))
-        #input("here")
         output_temp = output_file + '.temp'
-        # Get all the genes in the .bed,
-        # Save each line with a matching gene
-        # Rename the Sample_ID
-        #### LEH : this is a difficult to read call to a bash Script
-        ###  LEH : it should be rewritten in a python way
-        ### replacing the original line with the line below, original maintained.  1 is a placeholder for num.mark columns
-        calls.append(helper.parallel_call('echo "{}" > {}; '.format(header, output_temp) +
-                                          'cat  {} | '
-                                          'awk \'BEGIN{{split("{}",t); for (i in t) vals[t[i]]}} ($2 in vals)\' | '
-                                          'awk -F"\\t" \'{{ OFS="\\t"; print "{}", $2, $3, $4, 1, $5}}\' >> '
-                                          '{}; '.format(input_file, '|'.join(bed_filter), sample_id, output_temp) +
-                                          'mv {} {}'.format(output_temp, output_file),
-                                          verb))
-
-        #calls.append(helper.parallel_call('echo "{}" > {}; '.format(header, output_temp) +
-        #                                  'cat  {} | '
-        #                                  'awk \'BEGIN{{split("{}",t); for (i in t) vals[t[i]]}} ($2 in vals)\' | '
-        #                                  'awk -F"\\t" \'{{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' >> '
-        #                                  '{}; '.format(input_file, '|'.join(bed_filter), sample_id, output_temp) +
-        #                                  'mv {} {}'.format(output_temp, output_file),
-        #                                  verb))
-
-
-    #exit()
+        # Get all the genes in the .bed; save each line with a matching gene; rename the Sample_ID
+        # TODO get rid of this ugly & fragile bash script, rewrite using Python
+        # See comments by LEH in earlier commit
+        columns = '1' # placeholder for num.mark columns
+        cmd = 'echo "{}" > {}; '.format(header, output_temp)+\
+              'cat  {} | '+\
+              'awk \'BEGIN{{split("{}",t); for (i in t) vals[t[i]]}} ($2 in vals)\' | '+\
+              'awk -F"\\t" \'{{ OFS="\\t"; print "{}", $2, $3, $4, {}, $5}}\' >> '+\
+              '{}; '.format(input_file, '|'.join(bed_filter), sample_id, output_temp, columns)+\
+              'mv {} {}'.format(output_temp, output_file)
+        calls.append((subprocess.Popen(cmd, shell=True))
     exports_config.config_map['input_folder'] = seg_temp
-    # Wait until Baked
     exit_codes = [p.wait() for p in calls]
-    #input("here")
-    # Clean up
     if any(exit_codes):
         raise ValueError('ERROR:: Something went wrong when parsing HMMCopy format file? Please resolve the issue')
     if verb:
@@ -280,7 +258,6 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
     export_data = exports_config.data_frame
     seg_temp = helper.get_temp_folder(output_folder, 'seg')
 
-    # Cook
     for i in range(len(export_data)):
 
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
@@ -289,13 +266,13 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
 
         output_temp = output_file + '.temp'
 
-        calls.append(helper.parallel_call("awk -F'\\t' 'BEGIN {{OFS = FS}} FNR==NR {{dict[$1]=$2; next}} "
-                                          "FNR >= 2 {{$4=($4 in dict) ? dict[$4] : $4; $5=int(($4-$3)/1000)}}1' {} {}"
-                                          "> {};".format(dictionary, input_file, output_temp) +
-                                          'mv {} {}'.format(output_temp, output_file), verb))
+        cmd = "awk -F'\\t' 'BEGIN {{OFS = FS}} FNR==NR {{dict[$1]=$2; next}} "+\
+              "FNR >= 2 {{$4=($4 in dict) ? dict[$4] : $4; $5=int(($4-$3)/1000)}}1' {} {}"+\
+              "> {};".format(dictionary, input_file, output_temp)+\
+              'mv {} {}'.format(output_temp, output_file)
+        calls.append(subprocess.Popen(cmd, shell=True))
 
     exports_config.config_map['input_folder'] = seg_temp
-    # Wait until Baked
     exit_codes = [p.wait() for p in calls]
 
     # Clean up
