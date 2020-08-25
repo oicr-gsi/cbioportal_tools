@@ -6,7 +6,7 @@ import pandas as pd
 
 from generate import generator
 from generate.study import study
-from support.helper import decompress_to_temp
+from support.helper import relocate_inputs
 
 class TestBase(unittest.TestCase):
 
@@ -194,21 +194,27 @@ class TestGeneratorMethods(TestBase):
         self.dataDir = os.path.join(self.testDir, 'data')
         self.tmp = tempfile.TemporaryDirectory(prefix='janus_generator_method_test_')
 
-    def test_decompress_to_temp(self):
-        input_dir = os.path.join(self.dataDir, 'decompress_to_temp')
-        out_dir = os.path.join(self.tmp.name, 'decompress_to_temp')
+    def test_relocate_inputs(self):
+        test_name = 'relocate_inputs'
+        input_dir = os.path.join(self.dataDir, test_name)
+        out_dir = os.path.join(self.tmp.name, test_name)
         os.mkdir(out_dir)
         inputs = ['blue.txt', 'green.tar.gz', 'yellow.tgz', 'purple.tar', 'red.txt.gz']
         df = pd.DataFrame({'FILE_NAME': inputs})
         mutate_config = mock_legacy_config({'input_folder': input_dir}, df)
         study_config = mock_legacy_config({'output_folder': out_dir})
-        decompress_to_temp(mutate_config, study_config, True)
+        updated_mutate_config = relocate_inputs(mutate_config, study_config, True)
         outputs = ['blue.txt', 'green/green.txt', 'yellow/yellow.txt', 'purple/purple.txt', 'red.txt']
         md5sum = 'edc715389af2498a623134608ba0a55b' # all output files should be identical
         checksums = {output: md5sum for output in outputs}
         mock_output = os.path.join(out_dir, 'temp', 'temp_mock')
         self.verify_checksums(checksums, mock_output)
-        self.assertEqual(mutate_config.config_map['input_folder'], mock_output, 'input folder updated')
+        self.assertEqual(updated_mutate_config.config_map['input_folder'],
+                         mock_output,
+                         'input folder updated')
+        outputs = set(['blue.txt', 'green.tar.gz', 'yellow.tgz', 'purple.tar', 'red.txt'])
+        self.assertTrue(outputs == set(updated_mutate_config.data_frame['FILE_NAME'].values),
+                        'filenames updated')
 
 class mock_legacy_config:
 
