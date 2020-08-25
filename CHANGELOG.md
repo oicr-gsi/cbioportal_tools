@@ -20,6 +20,7 @@ CHANGELOG
 - Unused R script `src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/get_tcga.r`
 - Obsolete copy of `cancer_colours.csv`
 - Obsolete README files
+- Unnecessary wrappers for `subprocess` functions in `helper.py`
 
 ## v0.0.3: 2020-08-10
 ### Added
