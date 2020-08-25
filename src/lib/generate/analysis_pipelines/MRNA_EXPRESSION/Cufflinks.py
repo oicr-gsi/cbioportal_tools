@@ -9,7 +9,7 @@ def main():
     import logging
     from support import helper
     from generate import meta
-    from analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, fix_chrom, fix_seg_id, generate_expression_matrix, generate_expression_zscore
+    from generate.analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_zscore
 
     verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
 
