@@ -6,7 +6,7 @@ import pandas as pd
 
 from generate import generator
 from generate.study import study
-from support.helper import relocate_inputs
+from support.helper import concat_files, relocate_inputs
 
 class TestBase(unittest.TestCase):
 
@@ -194,6 +194,19 @@ class TestGeneratorMethods(TestBase):
         self.dataDir = os.path.join(self.testDir, 'data')
         self.tmp = tempfile.TemporaryDirectory(prefix='janus_generator_method_test_')
 
+    def test_concatenate_files(self):
+        test_name = 'concatenate_files'
+        input_dir = os.path.join(self.dataDir, test_name)
+        out_dir = os.path.join(self.tmp.name, test_name)
+        os.mkdir(out_dir)
+        inputs = ['foo.tsv', 'bar.tsv', 'baz.tsv']
+        df = pd.DataFrame({'FILE_NAME': inputs})
+        exports_config = mock_legacy_config({'input_folder': input_dir}, df)
+        study_config = mock_legacy_config({'output_folder': out_dir})
+        concat_files(exports_config, study_config, True)
+        checksums = {'data_mock_concat.txt': 'd5f4cd22aed26f6e5022571ad5f3d745'}
+        self.verify_checksums(checksums, out_dir)
+
     def test_relocate_inputs(self):
         test_name = 'relocate_inputs'
         input_dir = os.path.join(self.dataDir, test_name)
@@ -220,11 +233,12 @@ class mock_legacy_config:
 
     """Bare-bones mockup of the legacy Config class"""
 
-    def __init__(self, dictionary, data_frame=None, type_config='mock', datahandler='mock'):
+    def __init__(self, dictionary, data_frame=None, type_config='mock', datahandler='mock', alterationtype='mock'):
         self.config_map = dictionary
         self.data_frame = data_frame
         self.type_config = type_config
         self.datahandler = datahandler
+        self.alterationtype = alterationtype
 
 
 if __name__ == '__main__':

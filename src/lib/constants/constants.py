@@ -90,6 +90,8 @@ config2name_map = {'CLINICAL:SAMPLE_ATTRIBUTES':        'clinical_samples',
                    'MRNA_EXPRESSION:DISCRETE':          'expression_discrete',
                    'MRNA_EXPRESSION:Z-SCORE':           'expression_zscores',
                    'MRNA_EXPRESSION:PERCENTILE':        'expression_percentile',
+                   # dummy value for testing
+                   'mock:mock':                         'mock',
                    # TODO:: IMPLEMENT AND VERIFY AFTER THIS LINE
                    'FUSION:FUSION':                     'fusion',
                    'METHYLATION:CONTINUOUS':            'methylation',
