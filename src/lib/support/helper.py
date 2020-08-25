@@ -96,9 +96,13 @@ def parallel_call(command: str, verb):
     working_on(verb, message=command)
     return subprocess.Popen(command, shell=True)
 
-
 def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
-    """Create a temporary directory; extract/decompress/copy input to it; also updates mutate_config"""
+    logger = configure_logger(logging.getLogger(__name__), verbose=verb)
+    logger.warn("Call to deprecated legacy decompress_to_temp method; use relocate_inputs instead")
+    return relocate_inputs(mutate_config, study_config, verb)
+
+def relocate_inputs(mutate_config: Config, study_config: Config, verb):
+    """Extract/decompress/copy input to a new tempdir; return updated mutate_config"""
     logger = configure_logger(logging.getLogger(__name__), verbose=verb)
     # construct the output directory
     output_folder = study_config.config_map['output_folder']
@@ -111,11 +115,9 @@ def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
         logger.info("Removing existing directory '%s'" % temp_dir)
         shutil.rmtree(temp_dir)
     os.makedirs(temp_dir)
-    # extract, decompress, or copy files; as a side effect, update filenames in mutate_config
-    # TODO deprecated holdover from legacy code; refactor to explicitly return updated params
-    input_names = mutate_config.data_frame['FILE_NAME'].tolist()
+    # extract, decompress, or copy files; update filenames in mutate_config
     updated_names = []
-    for name in input_names:
+    for name in mutate_config.data_frame['FILE_NAME'].tolist():
         input_path = os.path.abspath(os.path.join(mutate_config.config_map['input_folder'], name))
         err = None
         updated_name = name
@@ -129,7 +131,7 @@ def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
             logger.error(err)
             raise FileNotFoundError(err)
         if re.search('\.tar(\.gz)?$', input_path) or re.search('\.tgz$', input_path):
-            logger.info("Extracting .tar archive %s to %s" % (input_path, temp_dir))
+            logger.info("Extracting TAR archive %s to %s" % (input_path, temp_dir))
             with tarfile.open(input_path) as tf:
                 tf.extractall(temp_dir)
         elif re.search('\.gz$', input_path):
@@ -145,11 +147,10 @@ def decompress_to_temp(mutate_config: Config, study_config: Config, verb):
             dest = os.path.join(temp_dir, os.path.basename(input_path))
             shutil.copyfile(input_path, dest)
         updated_names.append(updated_name)
-    # side effect: modify mutate_config to set input folder to the new temp_dir
-    # TODO refactor to make this more explicit
+    # modify mutate_config to update input folder and changed filenames (if any)
     mutate_config.data_frame['FILE_NAME'] = updated_names
     mutate_config.config_map['input_folder'] = temp_dir
-
+    return mutate_config
 
 def concat_files(exports_config:Config, study_config: Config, verb):
     # TODO refactor to use Python file objects instead of shell calls
