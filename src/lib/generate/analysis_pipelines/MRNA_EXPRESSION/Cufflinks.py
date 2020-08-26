@@ -7,6 +7,7 @@ def main():
     global logger
 
     import logging
+    from constants.constants import config2name_map
     from support import helper
     from generate import meta
     from generate.analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_zscore
@@ -22,20 +23,19 @@ def main():
     logger.info('Generating expression matrix ...')
     generate_expression_matrix(meta_config, study_config, verb)
 
-    # Works because shorting ...
     if 'zscores' in meta_config.config_map.keys() and meta_config.config_map['zscores']:
         logger.info('Generating expression Z-Score Meta ...')
-        meta.generate_meta_type(
-            meta_config.type_config + '_ZSCORES',
-            {
-                'profile_name': 'mRNA expression z-scores',
-                'profile_description': 'Expression level z-scores'
-            },
-            study_config,
-            logger
-        )
+        meta.generate_meta_type(meta_config, study_config, logger)
         logger.info('Generating expression Z-Score Data ...')
-        generate_expression_zscore(meta_config, study_config, verb)
+        generate_expression_zscore(
+            meta_config,
+            os.path.join(study_config.config_map['output_folder'],
+                         'data_{}.txt'.format(config2name_map[meta_config.alterationtype+":"+meta_config.datahandler])),
+            study_config.config_map['output_folder'],
+            False,
+            False,
+            verb
+        )
 
 
 if __name__ == '__main__':
