@@ -21,11 +21,11 @@ def main():
     if meta_config.config_map.get('genelist'):
         genelist = meta_config.config_map.get('genelist')
     else:
-        genelist = os.path.join(os.pardir(__file__), DATA_DIRNAME, 'targeted_genelist.txt')
+        genelist = os.path.join(os.path.dirname(__file__), DATA_DIRNAME, 'targeted_genelist.txt')
     if meta_config.config_map.get('enscon'):
         enscon = meta_config.config_map.get('enscon')
     else:
-        enscon = os.path.join(os.pardir(__file__), DATA_DIRNAME, ensemble_conversion.txt)
+        enscon = os.path.join(os.path.dirname(__file__), DATA_DIRNAME, 'ensemble_conversion.txt')
 
     logger.info('Started processing data for CAP_expression pipeline')
     

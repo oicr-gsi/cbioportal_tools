@@ -5,6 +5,7 @@ CHANGELOG
 ### Added
 - GRD-273: Enabled and added tests for:
   - `MUTATION_EXTENDED/CAP_CNA.py`
+  - `MRNA_EXPRESSION/Cufflinks.py`
 ### Changed
 - GRD-284: Install and read accessory files
   - R scripts and data files are now installed by `setup.py`
@@ -15,8 +16,10 @@ CHANGELOG
   - Rename to `relocate_inputs`; eliminate system calls; make config update explicit; add test
 - GRD-284: Refactor `concat_files` method and add test
 ### Removed
-- Unused Python file `src/lib/generate/analysis_pipelines/cancer_type.py`
-- Unused Python file `src/lib/support/cbioportal_interface.py`
+- Unused Python files:
+  - `src/lib/generate/analysis_pipelines/cancer_type.py`
+  - `src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/mrna_zscores_data.py`
+  - `src/lib/support/cbioportal_interface.py`
 - Unused R script `src/lib/generate/analysis_pipelines/MRNA_EXPRESSION/get_tcga.r`
 - Obsolete copy of `cancer_colours.csv`
 - Obsolete README files

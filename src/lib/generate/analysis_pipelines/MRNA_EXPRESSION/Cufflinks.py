@@ -1,37 +1,46 @@
-from support import helper
-from study_generation import meta
-from data_type.MRNA_EXPRESSION import mrna_data, mrna_zscores_data
-from analysis_pipelines.MRN_EXPRESSION.support_functions import fix_chrom, fix_seg_id
+"""Process Cufflinks pipeline output"""
 
 def main():
     global meta_config
     global study_config
     global janus_path
-    global verb
+    global logger
 
-    helper.working_on(verb, message='Gathering and decompressing MRNA_EXPRESSION files into temporary folder')
-    helper.decompress_to_temp(meta_config, study_config, verb)
-    helper.working_on(verb)
+    import logging
+    from constants.constants import config2name_map
+    from support import helper
+    from generate import meta
+    from generate.analysis_pipelines.MRNA_EXPRESSION.support_functions import alpha_sort, generate_expression_matrix, generate_expression_zscore
 
-    helper.working_on(verb, message='Alpha sorting each file ...')
-    mrna_data.alpha_sort(meta_config, verb)
-    helper.working_on(verb)
+    verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
 
-    helper.working_on(verb, message='Generating expression matrix ...')
-    mrna_data.generate_expression_matrix(meta_config, study_config, verb)
-    helper.working_on(verb)
+    logger.info('Gathering and decompressing MRNA_EXPRESSION files into temporary folder')
+    meta_config = helper.relocate_inputs(meta_config, study_config, verb)
 
-    # Works because shorting ...
-    if 'zscores' in meta_config.config_map.keys() and meta_config.config_map['zscores'].lower() == 'true':
-        helper.working_on(verb, message='Generating expression Z-Score Meta ...')
-        meta.generate_meta_type(meta_config.type_config + '_ZSCORES',
-                                {'profile_name': 'mRNA expression z-scores',
-                                 'profile_description': 'Expression level z-scores'}, study_config, verb)
-        helper.working_on(verb)
+    logger.info('Alpha sorting each file ...')
+    alpha_sort(meta_config, verb)
 
-        helper.working_on(verb, message='Generating expression Z-Score Data ...')
-        mrna_zscores_data.generate_expression_zscore(meta_config, study_config, verb)
-        helper.working_on(verb)
+    logger.info('Generating expression matrix ...')
+    generate_expression_matrix(meta_config, study_config, verb)
+
+    logger.info('Generating expression Meta ...')
+    meta.generate_meta_type(meta_config,study_config,logger)
+
+    if 'zscores' in meta_config.config_map.keys() and meta_config.config_map['zscores']:
+        logger.info('Generating expression Z-Score Data ...')
+        generate_expression_zscore(
+            meta_config,
+            os.path.join(study_config.config_map['output_folder'],
+                         'data_{}.txt'.format(config2name_map[meta_config.alterationtype+":"+meta_config.datahandler])),
+            study_config.config_map['output_folder'],
+            False,
+            False,
+            verb
+        )
+        logger.info('Generating expression Z-Score Meta ...')
+        # Tweak the config to write zscore metadata; TODO do this more transparently
+        meta_config.datahandler = 'Z-SCORE'
+        meta.generate_meta_type(meta_config, study_config, logger)
 
 
 if __name__ == '__main__':

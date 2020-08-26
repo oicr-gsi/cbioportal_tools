@@ -287,6 +287,7 @@ class pipeline_component_factory(base):
     CLASSNAMES = {
         ('COPY_NUMBER_ALTERATION', 'CAP_CNA'): 'legacy_pipeline_component',
         ('MRNA_EXPRESSION', 'CAP_expression'): 'legacy_pipeline_component',
+        ('MRNA_EXPRESSION', 'Cufflinks'): 'legacy_pipeline_component',
         ('MUTATION_EXTENDED', 'CAP_mutation'): 'legacy_pipeline_component',
         ('MUTATION_EXTENDED', 'Mutect'): 'legacy_pipeline_component',
         ('MUTATION_EXTENDED', 'Mutect2'): 'legacy_pipeline_component',
