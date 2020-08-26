@@ -145,9 +145,10 @@ def generate_expression_matrix(exports_config: Config.Config, study_config: Conf
     
     result.to_csv(output_file, sep='\t', index=None)
 
-    #Append the gepcomp datafiles
-    if os.path.exists(exports_config.config_map['gepfile']):
-        geplist = pd.read_csv(exports_config.config_map['gepfile'], sep=',')
+    # Append the gepcomp datafiles (if any)
+    gep_file = exports_config.config_map.get('gepfile')
+    if gep_file != None and os.path.exists(gep_file):
+        geplist = pd.read_csv(gep_file, sep=',')
         geplist.columns = ['patient_id', 'file_name']
  
         # Filter out the patient ID's that have already been included in the study
