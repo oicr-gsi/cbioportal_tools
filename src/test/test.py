@@ -132,7 +132,8 @@ class TestGenerator(TestStudy):
             'data_expression_continous.txt': '0b5d72e82f10637dd791a35a85f08349',
             'data_expression_zscores.txt': '2944c5b792e697eb37976de9225f21fe',
             'meta_expression_continous.txt': '5db83d4ca1925117abc8837b2eebeb46',
-            'meta_expression_zscores.txt': '',
+            'meta_expression_zscores.txt': '4c807196b4d1e1e47710bd96343b3ccc',
+            'case_lists/cases_rna_seq_mrna.txt': '412bd0b09e0a788dd03d7eb9841d271c'
         }
         self.verify_checksums(cufflinks_checksums, out_dir)
 
