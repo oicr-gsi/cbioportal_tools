@@ -127,7 +127,14 @@ class TestGenerator(TestStudy):
         self.args.out = out_dir
         self.args.dry_run = False
         generator.main(self.args)
-        self.verify_checksums(self.base_checksums, out_dir)
+        checksums = self.base_checksums.copy()
+        cufflinks_checksums = {
+            'data_expression_continous.txt': '0b5d72e82f10637dd791a35a85f08349',
+            'data_expression_zscores.txt': '2944c5b792e697eb37976de9225f21fe',
+            'meta_expression_continous.txt': '5db83d4ca1925117abc8837b2eebeb46',
+            'meta_expression_zscores.txt': '',
+        }
+        self.verify_checksums(cufflinks_checksums, out_dir)
 
     def test_cufflinks_dry_run(self):
         out_dir = os.path.join(self.tmp.name, 'Cufflinks_dry_run')
