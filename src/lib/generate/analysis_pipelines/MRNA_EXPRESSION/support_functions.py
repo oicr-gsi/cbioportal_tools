@@ -99,11 +99,10 @@ def preProcRNA(meta_config: Config.Config, study_config: Config.Config, datafile
 def alpha_sort(exports_config: Config.Config, verb):
     input_folder = exports_config.config_map['input_folder']
     calls = []
-
     for each in exports_config.data_frame['FILE_NAME']:
         output_file = os.path.join(input_folder, each)
-        cmd = 'head -n +1 {0} >  {0}.temp; tail -n +2 {0} | sort >> {0}.temp;'+\
-              'mv {0}.temp {0}'.format(output_file)
+        cmd = 'head -n +1 '+\
+              '{0} > {0}.temp; tail -n +2 {0} | sort >> {0}.temp; mv {0}.temp {0}'.format(output_file)
         calls.append(subprocess.Popen(cmd, shell=True))
     exit_codes = [p.wait() for p in calls]
 
@@ -146,9 +145,10 @@ def generate_expression_matrix(exports_config: Config.Config, study_config: Conf
     
     result.to_csv(output_file, sep='\t', index=None)
 
-    #Append the gepcomp datafiles
-    if os.path.exists(exports_config.config_map['gepfile']):
-        geplist = pd.read_csv(exports_config.config_map['gepfile'], sep=',')
+    # Append the gepcomp datafiles (if any)
+    gep_file = exports_config.config_map.get('gepfile')
+    if gep_file != None and os.path.exists(gep_file):
+        geplist = pd.read_csv(gep_file, sep=',')
         geplist.columns = ['patient_id', 'file_name']
  
         # Filter out the patient ID's that have already been included in the study

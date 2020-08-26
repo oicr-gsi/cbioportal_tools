@@ -116,6 +116,32 @@ class TestGenerator(TestStudy):
         os.mkdir(out_dir)
         self.args.config = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
         self.args.out = out_dir
+        self.args.dry_run = False
+        generator.main(self.args)
+        self.verify_checksums(self.base_checksums, out_dir)
+
+    def test_cufflinks(self):
+        out_dir = os.path.join(self.tmp.name, 'Cufflinks')
+        os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, 'Cufflinks', 'study.txt')
+        self.args.out = out_dir
+        self.args.dry_run = False
+        generator.main(self.args)
+        checksums = self.base_checksums.copy()
+        cufflinks_checksums = {
+            'data_expression_continous.txt': '0b5d72e82f10637dd791a35a85f08349',
+            'data_expression_zscores.txt': '2944c5b792e697eb37976de9225f21fe',
+            'meta_expression_continous.txt': '5db83d4ca1925117abc8837b2eebeb46',
+            'meta_expression_zscores.txt': '4c807196b4d1e1e47710bd96343b3ccc',
+            'case_lists/cases_rna_seq_mrna.txt': '412bd0b09e0a788dd03d7eb9841d271c'
+        }
+        self.verify_checksums(cufflinks_checksums, out_dir)
+
+    def test_cufflinks_dry_run(self):
+        out_dir = os.path.join(self.tmp.name, 'Cufflinks_dry_run')
+        os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, 'Cufflinks', 'study.txt')
+        self.args.out = out_dir
         generator.main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
 

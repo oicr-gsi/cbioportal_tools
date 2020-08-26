@@ -188,9 +188,10 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
         output_temp = output_file + '.temp'
 
         cmd = 'head -n 1 "{}" > {}; '.format(input_file, output_temp) +\
-              'cat  {} |'+\
-              'awk -F"\\t" \'NR>1 {{ OFS="\\t"; print "{}", $2, $3, $4, $5, $6}}\' >> {}; '+\
-              'mv {} {}'.format(input_file, sample_id, output_temp, output_temp, output_file)
+              'cat  {} |'.format(input_file) +\
+              'awk -F"\\t" \'NR>1 {{ OFS="\\t"; '+\
+              'print "{}", $2, $3, $4, $5, $6}}\' >> {}; '.format(sample_id, output_temp) +\
+              'mv {} {}'.format(output_temp, output_file)
         calls.append(subprocess.Popen(cmd, shell=True))
 
     exports_config.config_map['input_folder'] = seg_temp
@@ -233,15 +234,16 @@ def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, 
         # TODO get rid of this ugly & fragile bash script, rewrite using Python
         # See comments by LEH in earlier commit
         columns = '1' # placeholder for num.mark columns
-        cmd = 'echo "{}" > {}; '.format(header, output_temp)+\
-              'cat  {} | '+\
-              'awk \'BEGIN{{split("{}",t); for (i in t) vals[t[i]]}} ($2 in vals)\' | '+\
-              'awk -F"\\t" \'{{ OFS="\\t"; print "{}", $2, $3, $4, {}, $5}}\' >> '+\
-              '{}; '.format(input_file, '|'.join(bed_filter), sample_id, output_temp, columns)+\
+        cmd = 'echo "{}" > {}; '.format(header, output_temp) +\
+              'cat  {} | '.format(input_file) +\
+              'awk \'BEGIN{{split("{}",t); '.format('|'.join(bed_filter))+\
+              'for (i in t) vals[t[i]]}} ($2 in vals)\' | '+\
+              'awk -F"\\t" \'{{ OFS="\\t"; '+\
+              'print "{}", $2, $3, $4, {}, $5}}\' >> {}; '.format(sample_id, output_temp, columns) +\
               'mv {} {}'.format(output_temp, output_file)
-        calls.append((subprocess.Popen(cmd, shell=True))
-    exports_config.config_map['input_folder'] = seg_temp
-    exit_codes = [p.wait() for p in calls]
+        calls.append(subprocess.Popen(cmd, shell=True))
+        exports_config.config_map['input_folder'] = seg_temp
+        exit_codes = [p.wait() for p in calls]
     if any(exit_codes):
         raise ValueError('ERROR:: Something went wrong when parsing HMMCopy format file? Please resolve the issue')
     if verb:
@@ -263,12 +265,10 @@ def fix_hmmcopy_max_chrom(exports_config: Config.Config, study_config: Config.Co
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
         dictionary = os.path.join(os.path.dirname(__file__), DATA_DIRNAME, 'hmmcopy_chrom_positions.txt')
-
         output_temp = output_file + '.temp'
-
         cmd = "awk -F'\\t' 'BEGIN {{OFS = FS}} FNR==NR {{dict[$1]=$2; next}} "+\
-              "FNR >= 2 {{$4=($4 in dict) ? dict[$4] : $4; $5=int(($4-$3)/1000)}}1' {} {}"+\
-              "> {};".format(dictionary, input_file, output_temp)+\
+              "FNR >= 2 {{$4=($4 in dict) ? dict[$4] : $4; "+\
+              "$5=int(($4-$3)/1000)}}1' {} {} > {};".format(dictionary, input_file, output_temp)+\
               'mv {} {}'.format(output_temp, output_file)
         calls.append(subprocess.Popen(cmd, shell=True))
 
@@ -319,12 +319,11 @@ def gen_log2cna(exports_config: Config.Config, study_config: Config.Config, janu
     executable = 'Rscript'
     r_script_path = os.path.join(os.dirname(__file__), R_SCRIPT_DIRNAME, 'seg2gene.r')
     if os.path.exists(r_script_path):
-        cmd = [executable, path2script, seg_file, bed_file, l_o_file]
-        command_string = ', '.join(cmd)
-        logger.debug('Running R script command: '+command_string)
+        cmd = ', '.join([executable, r_script_path, seg_file, bed_file, l_o_file])
+        logger.debug('Running R script command: '+cmd)
         rc = subprocess.call(cmd)
         if rc != 0:
-            msg = "Non-zero exit code %i from R script command '%s'" % (rc, command_string)
+            msg = "Non-zero exit code %i from R script command '%s'" % (rc, cmd)
             raise ValueError(msg)
     else:
         raise FileNotFoundError('Cannot find R script path {}'.format(r_script_path))
