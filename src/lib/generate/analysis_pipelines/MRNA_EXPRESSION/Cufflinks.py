@@ -24,8 +24,6 @@ def main():
     generate_expression_matrix(meta_config, study_config, verb)
 
     if 'zscores' in meta_config.config_map.keys() and meta_config.config_map['zscores']:
-        logger.info('Generating expression Z-Score Meta ...')
-        meta.generate_meta_type(meta_config, study_config, logger)
         logger.info('Generating expression Z-Score Data ...')
         generate_expression_zscore(
             meta_config,
@@ -36,6 +34,10 @@ def main():
             False,
             verb
         )
+        logger.info('Generating expression Z-Score Meta ...')
+        # Tweak the config to write zscore metadata; TODO do this more transparently
+        meta_config.datahandler = 'Z-SCORE'
+        meta.generate_meta_type(meta_config, study_config, logger)
 
 
 if __name__ == '__main__':
