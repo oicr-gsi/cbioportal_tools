@@ -23,6 +23,9 @@ def main():
     logger.info('Generating expression matrix ...')
     generate_expression_matrix(meta_config, study_config, verb)
 
+    logger.info('Generating expression Meta ...')
+    meta.generate_meta_type(meta_config,study_config,logger)
+
     if 'zscores' in meta_config.config_map.keys() and meta_config.config_map['zscores']:
         logger.info('Generating expression Z-Score Data ...')
         generate_expression_zscore(
