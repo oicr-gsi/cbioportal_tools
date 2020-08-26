@@ -169,8 +169,7 @@ def verify_dual_columns(exports_config: Config.Config, verb):
                   'else if ($1 ~ "#"){{ for(i = 1; i <= NF;i++){{ printf "%s\\t", $i }}'+\
                   ' print "UNMATCHED" }}'+\
                   'else {{ for(i = 1; i <= NF; i++){{ printf "%s\\t", $i}} print $NF }}'+\
-                  '}}\' {0} > {0}.temp;'+\
-                  'mv {0}.temp {0}'.format(file)
+                  '}}\' {0} > {0}.temp; mv {0}.temp {0}'.format(file)
             processes.append(subprocess.Popen(cmd, shell=True))
 
     # Wait until Baked
@@ -266,15 +265,15 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
 
         # run calls in parallel
         cmd = 'vcf2maf  '+\
-              '--input-vcf {} '+\
-              '--output-maf {}/{} '+\
-              '--normal-id {} '+\
-              '--tumor-id {} '+\
-              '--vcf-normal-id {} '+\
-              '--vcf-tumor-id {} '+\
-              '--ref-fasta {} '+\
-              '--filter-vcf {} '+\
-              '--vep-path $VEP_PATH '+\
+              '--input-vcf {} '.format(input_vcf)+\
+              '--output-maf {}/{} '.format(maf_temp, output_maf)+\
+              '--normal-id {} '.format(normal_id)+\
+              '--tumor-id {} '.format(tumors_id)+\
+              '--vcf-normal-id {} '.format(gene_col_normal)+\
+              '--vcf-tumor-id {} '.format(gene_col_tumors)+\
+              '--ref-fasta {} '.format(ref_fasta)+\
+              '--filter-vcf {} '.format(filter_vcf)+\
+              '--vep-path ${VEP_ROOT}/bin '+\
               '--vep-data $VEP_DATA '+\
               '--species homo_sapiens'.format(input_vcf,
                                               maf_temp,
