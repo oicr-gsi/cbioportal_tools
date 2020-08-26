@@ -274,7 +274,7 @@ def export2maf(exports_config: Config.Config, study_config: Config.Config, verb)
               '--ref-fasta {} '.format(ref_fasta)+\
               '--filter-vcf {} '.format(filter_vcf)+\
               '--vep-path ${VEP_ROOT}/bin '+\
-              '--vep-data $VEP_DATA '+\
+              '--vep-data ${VEP_HG19_CACHE_ROOT}/.vep '+\
               '--species homo_sapiens'.format(input_vcf,
                                               maf_temp,
                                               output_maf,
