@@ -7,9 +7,13 @@ import pandas as pd
 from generate import generator
 from generate.study import study
 from support.helper import concat_files, relocate_inputs
+from utilities import config
 
 class TestBase(unittest.TestCase):
 
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix='janus_test_')
+    
     def verify_checksums(self, checksums, out_dir):
         """Checksums is a dictionary: md5sum -> relative path from output directory """
         for relative_path in checksums.keys():
@@ -265,6 +269,36 @@ class mock_legacy_config:
         self.type_config = type_config
         self.datahandler = datahandler
         self.alterationtype = alterationtype
+
+class TestSchema(TestBase):
+
+    """Test the configuration schema: Validation and template generation"""
+
+    def setUp(self):
+        self.testDir = os.path.dirname(os.path.realpath(__file__))
+        self.dataDir = os.path.join(self.testDir, 'data')
+        self.schema_path = os.path.join(self.dataDir, 'schema', 'test_schema.yaml')
+        self.tmp = tempfile.TemporaryDirectory(prefix='janus_schema_test_')
+
+    def test_template(self):
+        schema = config.schema(self.schema_path)
+        out_dir = self.tmp.name
+        template_path = os.path.join(out_dir, 'template.txt')
+        with open(template_path, 'w') as out_file:
+            schema.write_template(out_file)
+        self.assertTrue(os.path.exists(template_path))
+        checksums = {'template.txt': 'f221c0e5f905485c86ca6d142a671d84'}
+        self.verify_checksums(checksums, out_dir)
+
+    def test_config(self):
+        for good_config in ['config1.txt', 'config2.txt']:
+             config_path = os.path.join(self.dataDir, 'schema', good_config)
+             test_config = config.config(config_path, self.schema_path, log_level=logging.ERROR)
+             self.assertTrue(test_config.validate_syntax())
+        for bad_config in ['config3.txt', 'config4.txt', 'config5.txt', 'config6.txt']:
+             config_path = os.path.join(self.dataDir, 'schema', bad_config)
+             test_config = config.config(config_path, self.schema_path, log_level=logging.ERROR)
+             self.assertFalse(test_config.validate_syntax())
 
 
 if __name__ == '__main__':

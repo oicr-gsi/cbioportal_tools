@@ -1,0 +1,8 @@
+---
+#building:
+#  toolbox:
+#    hammer: 'sledgehammer'
+#name: 'Castle Frankenstein'
+---
+FOO	BAR	BAZ
+dracula	mummy	werewolf
