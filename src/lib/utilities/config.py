@@ -156,11 +156,42 @@ class schema(base):
             msg = "No 'body' entry in Janus schema path '%s'" % schema_path
             self.logger.error(msg)
             raise JanusConfigError(msg)
-        self.all_head_keys = set(self.head.keys())
-        self.required_head_keys = set()
-        for key in self.head.keys():
-            if self.head[key].get('required'):
-                self.required_head_keys.add(key)
+        self.all_head_keys = self._find_key_structure(self.head, required_only=False)
+        self.required_head_keys = self._find_key_structure(self.head, required_only=True)
+
+    def _check_required_keys(self, meta, required_keys, ancestors='head'):
+        """
+        Recursively check if all required keys are present
+        If a key is missing, log its name and ancestors in the tree structure
+        """
+        valid = True
+        for key, val in required_keys.items():
+            if key == '_LEAF_':
+                for required_key in val:
+                    if not meta.get(required_key):
+                        key_location = ancestors+':'+required_key
+                        msg = "Required key %s is not present" % key_location
+                        self.logger.warning(msg)
+                        valid = False
+            else:
+                next_ancestors = ancestors+':'+key
+                valid = valid and self._check_required_keys(meta[key], val, next_ancestors)
+        return valid
+
+    def _find_key_structure(self, schema_dict, required_only=True):
+        """Recursively generate a structure of all/required keys"""
+        if '_LEAF_' in schema_dict.keys():
+            raise JanusConfigError("Reserved key '_LEAF_' cannot be used in schema YAML")
+        structure = {}
+        leaf_keys = []
+        for (key, value) in schema_dict.items():
+            if value.get('type') == 'dictionary':
+                structure[key] = self._find_key_structure(value.get('contents'), required_only)
+            elif required_only == False or value.get('required'):
+                leaf_keys.append(key)
+        structure['_LEAF_'] = leaf_keys
+        self.logger.debug('Key structure: '+str(structure))
+        return structure
 
     def _generate_header_template(self, schema_dict):
         """
@@ -194,8 +225,12 @@ class schema(base):
         return valid
             
     def validate_meta(self, meta):
-        """validate a header dictionary against the schema"""
+        """Validate the metadata header against the schema."""
         valid = True
+        # check required keys are all present
+        valid = self._check_required_keys(meta, self.required_head_keys)
+
+        """
         meta_key_set = set(meta.keys())
         missing_set = self.required_head_keys - meta_key_set
         if len(missing_set) > 0:
@@ -207,6 +242,12 @@ class schema(base):
             extra = ', '.join(sorted(list(extra_set)))
             self.logger.warning("Extra fields not present in schema: %s" % extra)
             valid = False
+        # recursively validate any dictionaries in the header
+        self.logger.debug("meta:"+str(meta))
+        for val in meta.values():
+            if val.get('type') == 'dictionary':
+                valid = self.validate_meta(val['contents'])
+        """
         return valid
 
     def validate_meta_paths(self, meta):
