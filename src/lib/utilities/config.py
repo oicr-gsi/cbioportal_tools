@@ -151,12 +151,12 @@ class schema(base):
         if not self.head:
             msg = "No 'head' entry in Janus schema path '%s'" % schema_path
             self.logger.error(msg)
-            raise JanusConfigError(msg)
+            raise JanusSchemaError(msg)
         self.body = schema.get('body')
         if not self.body:
             msg = "No 'body' entry in Janus schema path '%s'" % schema_path
             self.logger.error(msg)
-            raise JanusConfigError(msg)
+            raise JanusSchemaError(msg)
         self.permitted_head_keys = self._find_key_structure(self.head, required_only=False)
         self.required_head_keys = self._find_key_structure(self.head, required_only=True)
 
@@ -207,7 +207,7 @@ class schema(base):
     def _find_key_structure(self, schema_dict, required_only=True):
         """Recursively generate a structure of all/required keys"""
         if '_LEAF_' in schema_dict.keys():
-            raise JanusConfigError("Reserved key '_LEAF_' cannot be used in schema YAML")
+            raise JanusSchemaError("Reserved key '_LEAF_' cannot be used in schema YAML")
         structure = {}
         leaf_keys = []
         for (key, value) in schema_dict.items():
@@ -294,4 +294,7 @@ class schema(base):
 
 
 class JanusConfigError(Exception):
+    pass
+
+class JanusSchemaError(Exception):
     pass
