@@ -292,13 +292,15 @@ class TestSchema(TestBase):
 
     def test_config(self):
         for good_config in ['config1.txt', 'config2.txt']:
-             config_path = os.path.join(self.dataDir, 'schema', good_config)
-             test_config = config.config(config_path, self.schema_path, log_level=logging.ERROR)
-             self.assertTrue(test_config.validate_syntax())
+            #print('###', good_config)
+            config_path = os.path.join(self.dataDir, 'schema', good_config)
+            test_config = config.config(config_path, self.schema_path, log_level=logging.WARNING)
+            self.assertTrue(test_config.validate_syntax())
         for bad_config in ['config3.txt', 'config4.txt', 'config5.txt', 'config6.txt']:
-             config_path = os.path.join(self.dataDir, 'schema', bad_config)
-             test_config = config.config(config_path, self.schema_path, log_level=logging.ERROR)
-             self.assertFalse(test_config.validate_syntax())
+            #print('###', bad_config)
+            config_path = os.path.join(self.dataDir, 'schema', bad_config)
+            test_config = config.config(config_path, self.schema_path, log_level=logging.WARNING)
+            self.assertFalse(test_config.validate_syntax())
 
 
 if __name__ == '__main__':
