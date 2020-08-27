@@ -31,6 +31,7 @@ class config(base):
         if name == None:
             name = "%s.%s"% (__name__, type(self).__name__)
         self.logger = self.get_logger(log_level, name)
+        self.input_path = input_path
         if schema_path != None:
             self.schema = schema(schema_path, log_level=log_level)
         else:
@@ -101,7 +102,7 @@ class config(base):
         """Validate header and body syntax against the schema"""
         if self.schema == None:
             raise JanusConfigError("Cannot validate syntax because no schema is specified")
-        meta_valid = self.schema.validate_meta(self.meta)
+        meta_valid = self.schema.validate_meta(self.meta, self.input_path)
         body_valid = self.schema.validate_table(self.table)
         return meta_valid and body_valid
 
@@ -159,7 +160,7 @@ class schema(base):
         self.all_head_keys = self._find_key_structure(self.head, required_only=False)
         self.required_head_keys = self._find_key_structure(self.head, required_only=True)
 
-    def _check_required_keys(self, meta, required_keys, ancestors='head'):
+    def _check_required_keys(self, meta, required_keys, input_name, ancestors='head'):
         """
         Recursively check if all required keys are present
         If a key is missing, log its name and ancestors in the tree structure
@@ -170,12 +171,14 @@ class schema(base):
                 for required_key in val:
                     if not meta.get(required_key):
                         key_location = ancestors+':'+required_key
-                        msg = "Required key %s is not present" % key_location
+                        msg = "Required key %s is not present in %s" % \
+                              (key_location, input_name)
                         self.logger.warning(msg)
                         valid = False
             else:
                 next_ancestors = ancestors+':'+key
-                valid = valid and self._check_required_keys(meta[key], val, next_ancestors)
+                next_valid = self._check_required_keys(meta[key], val, input_name, next_ancestors)
+                valid = valid and next_valid
         return valid
 
     def _find_key_structure(self, schema_dict, required_only=True):
@@ -224,11 +227,11 @@ class schema(base):
             valid = False
         return valid
             
-    def validate_meta(self, meta):
+    def validate_meta(self, meta, input_name='UNKNOWN_JANUS_CONFIG_FILE'):
         """Validate the metadata header against the schema."""
         valid = True
         # check required keys are all present
-        valid = self._check_required_keys(meta, self.required_head_keys)
+        valid = self._check_required_keys(meta, self.required_head_keys, input_name)
 
         """
         meta_key_set = set(meta.keys())
