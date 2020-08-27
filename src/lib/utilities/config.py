@@ -157,8 +157,31 @@ class schema(base):
             msg = "No 'body' entry in Janus schema path '%s'" % schema_path
             self.logger.error(msg)
             raise JanusConfigError(msg)
-        self.all_head_keys = self._find_key_structure(self.head, required_only=False)
+        self.permitted_head_keys = self._find_key_structure(self.head, required_only=False)
         self.required_head_keys = self._find_key_structure(self.head, required_only=True)
+
+    def _check_permitted_keys(self, meta, permitted_keys, input_name, ancestors='head'):
+        """
+        Recursively check if only permitted keys are present
+        If an unauthorised key is found, log its name and ancestors in the tree structure
+        """
+        valid = True
+        for key, val in meta.items():
+            key_location = ancestors+':'+key
+            if permitted_keys.get(key):
+                self.logger.debug("Recursively checking dictionary key %s" % key)
+                next_valid = self._check_permitted_keys(val,
+                                                        permitted_keys[key],
+                                                        input_name,
+                                                        key_location)
+                valid = valid and next_valid
+            elif not key in permitted_keys['_LEAF_']:
+                msg = "Unexpected key %s found in %s" % (key_location, input_name)
+                self.logger.warning(msg)
+                valid = False
+            else:
+                self.logger.debug('Found permitted key '+key_location)
+        return valid
 
     def _check_required_keys(self, meta, required_keys, input_name, ancestors='head'):
         """
@@ -193,7 +216,6 @@ class schema(base):
             elif required_only == False or value.get('required'):
                 leaf_keys.append(key)
         structure['_LEAF_'] = leaf_keys
-        self.logger.debug('Key structure: '+str(structure))
         return structure
 
     def _generate_header_template(self, schema_dict):
@@ -229,29 +251,9 @@ class schema(base):
             
     def validate_meta(self, meta, input_name='UNKNOWN_JANUS_CONFIG_FILE'):
         """Validate the metadata header against the schema."""
-        valid = True
-        # check required keys are all present
-        valid = self._check_required_keys(meta, self.required_head_keys, input_name)
-
-        """
-        meta_key_set = set(meta.keys())
-        missing_set = self.required_head_keys - meta_key_set
-        if len(missing_set) > 0:
-            missing = ', '.join(sorted(list(missing_set)))
-            self.logger.warning("Missing required header fields: %s" % missing)
-            valid = False
-        extra_set = meta_key_set - self.all_head_keys
-        if len(extra_set) > 0:
-            extra = ', '.join(sorted(list(extra_set)))
-            self.logger.warning("Extra fields not present in schema: %s" % extra)
-            valid = False
-        # recursively validate any dictionaries in the header
-        self.logger.debug("meta:"+str(meta))
-        for val in meta.values():
-            if val.get('type') == 'dictionary':
-                valid = self.validate_meta(val['contents'])
-        """
-        return valid
+        required_valid = self._check_required_keys(meta, self.required_head_keys, input_name)
+        permitted_valid = self._check_permitted_keys(meta, self.permitted_head_keys, input_name)
+        return required_valid and permitted_valid
 
     def validate_meta_paths(self, meta):
         """
