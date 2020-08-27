@@ -1,0 +1,31 @@
+body:
+- FOO
+- BAR
+- BAZ
+head:
+  building:
+    contents:
+      chair:
+        required: true
+        type: string
+      toolbox:
+        contents:
+          flux_capacitor:
+            required: false
+            type: string
+          hammer:
+            required: true
+            type: string
+        required: true
+        type: dictionary
+    required: true
+    type: dictionary
+  description:
+    required: false
+    type: string
+  input_path:
+    required: true
+    type: path
+  name:
+    required: true
+    type: string

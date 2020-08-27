@@ -1,0 +1,10 @@
+---
+#building:
+#  chair: 'armchair'
+#  toolbox:
+#    hammer: 'sledgehammer'
+#input_path: '/home/victor/castle.json'
+#name: 'Castle Frankenstein'
+---
+FOO	BAR	BAZ
+dracula	mummy	werewolf

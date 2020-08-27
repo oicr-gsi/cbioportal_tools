@@ -1,0 +1,12 @@
+---
+#building:
+#  chair: 'armchair'
+#  toolbox:
+#    flux_capacitor: 'fluxatious'
+#    hammer: 'sledgehammer'
+#description: 'A dark and forbidding edifice high on a mountain crag'
+#input_path: '/home/victor/castle.json'
+#name: 'Castle Frankenstein'
+---
+FOO	BAR	BAZ	SNAFU
+dracula	mummy	werewolf	ghost
