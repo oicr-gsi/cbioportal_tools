@@ -41,6 +41,8 @@ class config(base):
         if strict:
             self.validate_meta_fields()
         self.table = pd.read_csv(input_path, sep="\t", comment="#", skiprows=skip_total)
+        if self.table.isnull().values.any():
+            self.logger.warning("Body of %s has null values" % input_path)
 
     def data_as_tsv(self):
         return self.table.to_csv(sep="\t", index=False)
