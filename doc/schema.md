@@ -30,5 +30,5 @@ In addition, dictionaries have:
 
 ## Examples
 
-- [Example schema](.src/test/data/schema/schema1.yaml)
-- [Example template](.src/test/data/schema/example_template.txt)
+- [Example schema](../src/test/data/schema/schema1.yaml)
+- [Example template](../src/test/data/schema/example_template.txt)
