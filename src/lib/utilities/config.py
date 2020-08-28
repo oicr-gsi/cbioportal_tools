@@ -104,16 +104,14 @@ class config(base):
         """Validate header and body syntax against the schema"""
         if self.schema == None:
             raise JanusConfigError("Cannot validate syntax because no schema is specified")
-        meta_valid = self.schema.validate_meta(self.meta, self.input_path)
-        body_valid = self.schema.validate_table(self.table)
-        return meta_valid and body_valid
-
-    def validate_meta_paths(self):
-        """Validate paths in the header"""
-        if self.schema == None:
-            raise JanusConfigError("Cannot validate syntax because no schema is specified")
-        return self.schema.validate_meta_paths(self.header)
-
+        meta_valid = self.schema.validate_meta(self.meta, os.path.basename(self.input_path))
+        body_valid = self.schema.validate_table(self.table, os.path.basename(self.input_path))
+        valid = meta_valid and body_valid
+        if valid:
+            self.logger.info("Config syntax for %s is valid" % self.input_path)
+        else:
+            self.logger.warning("Config syntax for %s IS NOT valid" % self.input_path)
+        return valid
 
 class legacy_config_wrapper(base):
 
@@ -256,12 +254,17 @@ class schema(base):
         valid = True
         table_column_names = list(table.columns.values)
         if table_column_names != self.body:
-            msg = "Input columns [%s] do not match schema columns [%s]" % (
+            msg = "Input columns [%s] do not match schema columns [%s] in %s" % (
                 ', '.join(table_column_names),
                 ', '.join(self.body),
+                input_name
             )
             self.logger.warning(msg)
             valid = False
+        if valid:
+            self.logger.info("Table body in %s complies with schema" % input_name)
+        else:
+            self.logger.warning("Table body in %s DOES NOT comply with schema" % input_name)
         return valid
             
     def validate_meta(self, meta, input_name=None):
@@ -270,7 +273,12 @@ class schema(base):
             input_name = self.UNKNOWN_FILE
         required_valid = self._check_required_keys(meta, self.required_head_keys, input_name, self.HEAD)
         permitted_valid = self._check_permitted_keys(meta, self.permitted_head_keys, input_name, self.HEAD)
-        return required_valid and permitted_valid
+        valid = required_valid and permitted_valid
+        if valid:
+            self.logger.info("Metadata header in %s complies with schema" % input_name)
+        else:
+            self.logger.warning("Metadata header in %s DOES NOT comply with schema" % input_name)
+        return valid
 
     # TODO have a 'path' datatype, and check paths in the config for readability
     #def validate_meta_paths(self, meta):
