@@ -142,17 +142,28 @@ class schema(base):
 
     """Schema class for a Janus config file, with validation/template methods"""
 
+    BODY = 'body'
+    CONTENTS = 'contents'
+    HEAD = 'head'
+    LEAF = '_LEAF_'
+    REQUIRED = 'required'
+    TYPE = 'type'
+
+    DICT_TYPE = 'dictionary'
+    SCALAR_TYPE = 'scalar'
+    UNKNOWN_FILE = 'UNKNOWN_JANUS_CONFIG_FILE'
+
     def __init__(self, schema_path, log_level=logging.WARNING):
         name = "%s.%s"% (__name__, type(self).__name__)
         self.logger = self.get_logger(log_level, name)
         with open(schema_path, 'r') as schema_file:
             schema = yaml.safe_load(schema_file.read())
-        self.head = schema.get('head')
+        self.head = schema.get(self.HEAD)
         if not self.head:
             msg = "No 'head' entry in Janus schema path '%s'" % schema_path
             self.logger.error(msg)
             raise JanusSchemaError(msg)
-        self.body = schema.get('body')
+        self.body = schema.get(self.BODY)
         if not self.body:
             msg = "No 'body' entry in Janus schema path '%s'" % schema_path
             self.logger.error(msg)
@@ -160,7 +171,7 @@ class schema(base):
         self.permitted_head_keys = self._find_key_structure(self.head, required_only=False)
         self.required_head_keys = self._find_key_structure(self.head, required_only=True)
 
-    def _check_permitted_keys(self, meta, permitted_keys, input_name, ancestors='head'):
+    def _check_permitted_keys(self, meta, permitted_keys, input_name, ancestors=''):
         """
         Recursively check if only permitted keys are present
         If an unauthorised key is found, log its name and ancestors in the tree structure
@@ -175,7 +186,7 @@ class schema(base):
                                                         input_name,
                                                         key_location)
                 valid = valid and next_valid
-            elif not key in permitted_keys['_LEAF_']:
+            elif not key in permitted_keys[self.LEAF]:
                 msg = "Unexpected key %s found in %s" % (key_location, input_name)
                 self.logger.warning(msg)
                 valid = False
@@ -183,14 +194,14 @@ class schema(base):
                 self.logger.debug('Found permitted key '+key_location)
         return valid
 
-    def _check_required_keys(self, meta, required_keys, input_name, ancestors='head'):
+    def _check_required_keys(self, meta, required_keys, input_name, ancestors=''):
         """
         Recursively check if all required keys are present
         If a key is missing, log its name and ancestors in the tree structure
         """
         valid = True
         for key, val in required_keys.items():
-            if key == '_LEAF_':
+            if key == self.LEAF:
                 for required_key in val:
                     if not meta.get(required_key):
                         key_location = ancestors+':'+required_key
@@ -206,16 +217,16 @@ class schema(base):
 
     def _find_key_structure(self, schema_dict, required_only=True):
         """Recursively generate a structure of all/required keys"""
-        if '_LEAF_' in schema_dict.keys():
-            raise JanusSchemaError("Reserved key '_LEAF_' cannot be used in schema YAML")
+        if self.LEAF in schema_dict.keys():
+            raise JanusSchemaError("Reserved key %s cannot be used in schema YAML" % self.LEAF)
         structure = {}
-        leaf_keys = []
+        leaf_keys = [] # 'leaf' keys have values with no children, ie. not dictionaries
         for (key, value) in schema_dict.items():
-            if value.get('type') == 'dictionary':
-                structure[key] = self._find_key_structure(value.get('contents'), required_only)
-            elif required_only == False or value.get('required'):
+            if value.get(self.TYPE) == self.DICT_TYPE:
+                structure[key] = self._find_key_structure(value.get(self.CONTENTS), required_only)
+            elif required_only == False or value.get(self.REQUIRED):
                 leaf_keys.append(key)
-        structure['_LEAF_'] = leaf_keys
+        structure[self.LEAF] = leaf_keys
         return structure
 
     def _generate_header_template(self, schema_dict):
@@ -226,18 +237,20 @@ class schema(base):
         template = {}
         for key in schema_dict.keys():
             schema_val = schema_dict.get(key)
-            type_string = schema_val.get('type', 'any')
-            if type_string == 'dictionary':
-                template_val = self._generate_header_template(schema_val['contents'])
-            elif schema_val.get('required'):
+            type_string = schema_val.get(self.TYPE, self.SCALAR_TYPE)
+            if type_string == self.DICT_TYPE:
+                template_val = self._generate_header_template(schema_val[self.CONTENTS])
+            elif schema_val.get(self.REQUIRED):
                 template_val = '%s: REQUIRED' % type_string
             else:
                 template_val = '%s: OPTIONAL' % type_string
             template[key] = template_val
         return template
 
-    def validate_table(self, table):
+    def validate_table(self, table, input_name=None):
         """validate a Pandas dataframe against the schema"""
+        if not input_name:
+            input_name = self.UNKNOWN_FILE
         valid = True
         table_column_names = list(table.columns.values)
         if table_column_names != self.body:
@@ -249,35 +262,17 @@ class schema(base):
             valid = False
         return valid
             
-    def validate_meta(self, meta, input_name='UNKNOWN_JANUS_CONFIG_FILE'):
+    def validate_meta(self, meta, input_name=None):
         """Validate the metadata header against the schema."""
-        required_valid = self._check_required_keys(meta, self.required_head_keys, input_name)
-        permitted_valid = self._check_permitted_keys(meta, self.permitted_head_keys, input_name)
+        if not input_name:
+            input_name = self.UNKNOWN_FILE
+        required_valid = self._check_required_keys(meta, self.required_head_keys, input_name, self.HEAD)
+        permitted_valid = self._check_permitted_keys(meta, self.permitted_head_keys, input_name, self.HEAD)
         return required_valid and permitted_valid
 
-    def validate_meta_paths(self, meta):
-        """
-        Check any paths in the header dictionary exist and are readable.
-        Relative paths are checked with respect to the current working directory.
-        Does not (yet) check for type (file vs. directory) or writability.
-        """
-        valid = True
-        msg = "Validating paths with respect to the current working directory %s" % os.getcwd()
-        self.logger.info(msg)
-        for key, val in meta:
-            schema_val = self.head.get(key)
-            if schema_val.get('type') == 'path':
-                if not os.path.exists(val):
-                    self.logger.warn("Path '%s' does not exist" % val)
-                    valid = False
-                elif not os.access(val, os.R_OK):
-                    self.logger.warn("Path '%s' exists but is not readable" % val)
-                    valid = False
-        if valid:
-            self.logger.info("All paths in metadata exist and are readable.")
-        else:
-            self.logger.warn("One or more path in metadata does not exist or is not readable.")
-        return valid
+    # TODO have a 'path' datatype, and check paths in the config for readability
+    #def validate_meta_paths(self, meta):
+    #    pass
 
     def write_template(self, out_file):
         """write a template based on the schema"""

@@ -7,25 +7,25 @@ head:
     contents:
       chair:
         required: true
-        type: string
+        type: scalar
       toolbox:
         contents:
           flux_capacitor:
             required: false
-            type: string
+            type: scalar
           hammer:
             required: true
-            type: string
+            type: scalar
         required: true
         type: dictionary
     required: true
     type: dictionary
   description:
     required: false
-    type: string
+    type: scalar
   input_path:
     required: true
-    type: path
+    type: scalar
   name:
     required: true
-    type: string
+    type: scalar

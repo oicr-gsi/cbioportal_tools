@@ -1,0 +1,27 @@
+body:
+- FOO
+- BAR
+- BAZ
+head:
+  building:
+    contents:
+      chair:
+        required: true
+      toolbox:
+        contents:
+          flux_capacitor:
+            required: false
+          hammer:
+            required: true
+        required: true
+        type: dictionary
+    required: true
+    type: dictionary
+  description:
+    required: false
+  input_path:
+    required: true
+    type: scalar
+  name:
+    required: true
+

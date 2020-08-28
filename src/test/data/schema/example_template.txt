@@ -1,0 +1,12 @@
+---
+#building:
+#  chair: 'scalar: REQUIRED'
+#  toolbox:
+#    flux_capacitor: 'scalar: OPTIONAL'
+#    hammer: 'scalar: REQUIRED'
+#description: 'scalar: OPTIONAL'
+#input_path: 'scalar: REQUIRED'
+#name: 'scalar: REQUIRED'
+---
+FOO	BAR	BAZ
+foo_value	bar_value	baz_value
