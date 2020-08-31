@@ -1,0 +1,15 @@
+---
+#building:
+#  chair: 'armchair'
+#  toolbox:
+#    flux_capacitor: 'fluxatious'
+#    hammer: 'sledgehammer'
+#  games_room:
+#    console: 'megaGame3000'
+#    snooker_table: 'yes'
+#description: 'A dark and forbidding edifice high on a mountain crag'
+#input_path: '/home/victor/castle.json'
+#name: 'Castle Frankenstein'
+---
+FOO	BAR	BAZ
+dracula	mummy	werewolf

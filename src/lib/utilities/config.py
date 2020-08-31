@@ -146,7 +146,8 @@ class schema(base):
     CONTENTS = 'contents'
     DESCRIPTION = 'description'
     HEAD = 'head'
-    LEAF = '_LEAF_'
+    LEAF = '_LEAF_' # reserved key for representing schema structure
+    REQ = '_REQUIRED_' # reserved key for representing schema structure
     REQUIRED = 'required'
     TYPE = 'type'
 
@@ -170,7 +171,10 @@ class schema(base):
             self.logger.error(msg)
             raise JanusSchemaError(msg)
         self.permitted_head_keys = self._find_key_structure(self.head, required_only=False)
+        self.logger.debug("Permitted head keys:\n"+yaml.dump(self.permitted_head_keys))
         self.required_head_keys = self._find_key_structure(self.head, required_only=True)
+        self.logger.debug("Required head keys:\n"+yaml.dump(self.required_head_keys))
+
 
     def _check_permitted_keys(self, meta, permitted_keys, input_name, ancestors=''):
         """
@@ -187,12 +191,12 @@ class schema(base):
                                                         input_name,
                                                         key_location)
                 valid = valid and next_valid
-            elif not key in permitted_keys[self.LEAF]:
+            elif key in permitted_keys[self.LEAF]:
+                self.logger.debug('Found permitted scalar '+key_location)
+            else:
                 msg = "Unexpected key %s found in %s" % (key_location, input_name)
                 self.logger.warning(msg)
                 valid = False
-            else:
-                self.logger.debug('Found permitted key '+key_location)
         return valid
 
     def _check_required_keys(self, meta, required_keys, input_name, ancestors=''):
@@ -206,10 +210,22 @@ class schema(base):
                 for required_key in val:
                     if not meta.get(required_key):
                         key_location = ancestors+':'+required_key
-                        msg = "Required key %s is not present in %s" % \
+                        msg = "Required scalar %s is not present in %s" % \
                               (key_location, input_name)
                         self.logger.warning(msg)
                         valid = False
+            elif key == self.REQ:
+                pass
+            elif key not in meta:
+                key_location = ancestors+':'+key
+                if val[self.REQ]:
+                    msg = "Required dictionary '%s' not present" % key_location
+                    self.logger.warning(msg)
+                    valid = False
+                else:
+                    msg = "Optional dictionary "+\
+                          "'%s' not present, omitting downstream checks" % key_location
+                    self.logger.info(msg)
             else:
                 next_ancestors = ancestors+':'+key
                 next_valid = self._check_required_keys(meta[key], val, input_name, next_ancestors)
@@ -226,6 +242,7 @@ class schema(base):
         for (key, value) in schema_dict.items():
             if value.get(self.TYPE) == self.DICT_TYPE:
                 structure[key] = self._find_key_structure(value.get(self.CONTENTS), required_only)
+                structure[key][self.REQ] = value.get(self.REQUIRED, False) # is dictionary required?
             elif required_only == False or value.get(self.REQUIRED):
                 leaf_keys.append(key)
         structure[self.LEAF] = leaf_keys

@@ -293,15 +293,24 @@ class TestSchema(TestBase):
         self.verify_checksums(checksums, out_dir)
 
     def test_validate_syntax(self):
-        for good_config in ['config1.txt', 'config2.txt']:
-            #print('###', good_config)
+        for good_config in [
+                'good_config1.txt', # fully specified config
+                'good_config2.txt', # missing optional scalar
+                'good_config3.txt', # missing optional dictionary
+        ]:
             config_path = os.path.join(self.dataDir, good_config)
-            test_config = config.config(config_path, self.schema_path, log_level=logging.WARNING)
+            test_config = config.config(config_path, self.schema_path, log_level=logging.WARN)
             self.assertTrue(test_config.validate_syntax())
-        for bad_config in ['config3.txt', 'config4.txt', 'config5.txt', 'config6.txt']:
-            #print('###', bad_config)
+        for bad_config in [
+                'bad_config1.txt', # unexpected scalar keys
+                'bad_config2.txt', # missing required scalar
+                'bad_config3.txt', # extra body column
+                'bad_config4.txt', # missing body column
+                'bad_config5.txt', # missing required dictionary
+                'bad_config6.txt', # unexpected dictionary key
+        ]:
             config_path = os.path.join(self.dataDir, bad_config)
-            test_config = config.config(config_path, self.schema_path, log_level=logging.WARNING)
+            test_config = config.config(config_path, self.schema_path, log_level=logging.ERROR)
             self.assertFalse(test_config.validate_syntax())
 
 
