@@ -170,9 +170,9 @@ class schema(base):
             msg = "No 'body' entry in Janus schema path '%s'" % schema_path
             self.logger.error(msg)
             raise JanusSchemaError(msg)
-        self.permitted_head_keys = self._find_key_structure(self.head, required_only=False)
+        self.permitted_head_keys = self._parse_schema_header(self.head, required_only=False)
         self.logger.debug("Permitted head keys:\n"+yaml.dump(self.permitted_head_keys))
-        self.required_head_keys = self._find_key_structure(self.head, required_only=True)
+        self.required_head_keys = self._parse_schema_header(self.head, required_only=True)
         self.logger.debug("Required head keys:\n"+yaml.dump(self.required_head_keys))
 
 
@@ -232,33 +232,6 @@ class schema(base):
                 valid = valid and next_valid
         return valid
 
-    def _find_key_structure(self, schema_dict, required_only=True):
-        """Recursively generate a structure of all/required keys"""
-        for key in [self.LEAF]:
-            if key in schema_dict.keys():
-                msg = "Reserved key %s cannot be used in schema YAML" % key
-                self.logger.error(msg)
-                raise JanusSchemaError(msg)
-        structure = {}
-        leaf_keys = [] # 'leaf' keys have values with no children, ie. not dictionaries
-        for (key, value) in schema_dict.items():
-            value_type = value.get(self.TYPE)
-            if value_type == None:
-                msg = "No type string specified for key %s" % key
-                self.logger.error(msg)
-                raise JanusSchemaError(msg)
-            elif not value_type in [self.DICT_TYPE, self.SCALAR_TYPE]:
-                msg = "Illegal type string {}".format(value_type)
-                self.logger.error(msg)
-                raise JanusSchemaError(msg)
-            elif value.get(self.TYPE) == self.DICT_TYPE:
-                structure[key] = self._find_key_structure(value.get(self.CONTENTS), required_only)
-                structure[key][self.REQ] = value.get(self.REQUIRED, False) # is dictionary required?
-            elif required_only == False or value.get(self.REQUIRED):
-                leaf_keys.append(key)
-        structure[self.LEAF] = leaf_keys
-        return structure
-
     def _generate_header_template(self, schema_dict, verbose=False):
         """
         Change a schema dictionary into a Janus config header template.
@@ -281,6 +254,43 @@ class schema(base):
                     template_val = '%s: %s' % (template_val, schema_val.get(self.DESCRIPTION))
             template[key] = template_val
         return template
+
+    def _parse_schema_header(self, schema_dict, required_only=True):
+        """Recursively generate a structure of all/required keys and check for errors"""
+        for key in [self.LEAF, self.REQ]:
+            if key in schema_dict.keys():
+                msg = "Reserved key %s cannot be used in schema YAML" % key
+                self.logger.error(msg)
+                raise JanusSchemaError(msg)
+        structure = {}
+        leaf_keys = [] # 'leaf' keys have values with no children, ie. not dictionaries
+        try:
+            items = schema_dict.items()
+        except AttributeError as err:
+            msg = "Expected dictionary, found other object type; malformed Janus schema? "+str(err)
+            self.log.error(msg)
+            raise JanusSchemaError(msg)
+        for (key, value) in items:
+            value_type = value.get(self.TYPE)
+            if value_type == None:
+                msg = "No type string specified for key %s" % key
+                self.logger.error(msg)
+                raise JanusSchemaError(msg)
+            elif not value_type in [self.DICT_TYPE, self.SCALAR_TYPE]:
+                msg = "Illegal type string {}".format(value_type)
+                self.logger.error(msg)
+                raise JanusSchemaError(msg)
+            elif value.get(self.TYPE) == self.DICT_TYPE:
+                if not self.CONTENTS in value:
+                    msg = "No contents specified for dictionary key %s" % key
+                    self.logger.error(msg)
+                    raise JanusSchemaError(msg)
+                structure[key] = self._parse_schema_header(value.get(self.CONTENTS), required_only)
+                structure[key][self.REQ] = value.get(self.REQUIRED, False) # is dictionary required?
+            elif required_only == False or value.get(self.REQUIRED):
+                leaf_keys.append(key)
+        structure[self.LEAF] = leaf_keys
+        return structure
 
     def validate_table(self, table, input_name=None):
         """validate a Pandas dataframe against the schema"""
