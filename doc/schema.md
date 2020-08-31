@@ -23,7 +23,7 @@ The head has two types of entries: `scalar` and `dictionary`. A `dictionary` may
 
 Scalars and dictionaries both **must** have:
 - `type`: Respectively `scalar` or `dictionary`
-- `required`: Boolean value. See "Note" below.
+- `required`: Boolean value. If true, the entry is required. See "Note" below.
 
 In addition, dictionaries **must** have:
 - `contents`: A mapping which holds the contents of the dictionary.
@@ -33,7 +33,7 @@ In addition, scalars **may** have:
 
 #### Note on required entries
 
-What if a dictionary has `required=false` but one of more of its children has `required=true`?
+What if a dictionary has `required=false` but one or more of its children has `required=true`?
 
 Then the dictionary does not have to be present; but if the dictionary _is_ present, then all children with `required=true` must also be present.
 

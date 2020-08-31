@@ -236,11 +236,22 @@ class schema(base):
         """Recursively generate a structure of all/required keys"""
         for key in [self.LEAF]:
             if key in schema_dict.keys():
-                raise JanusSchemaError("Reserved key %s cannot be used in schema YAML" % key)
+                msg = "Reserved key %s cannot be used in schema YAML" % key
+                self.logger.error(msg)
+                raise JanusSchemaError(msg)
         structure = {}
         leaf_keys = [] # 'leaf' keys have values with no children, ie. not dictionaries
         for (key, value) in schema_dict.items():
-            if value.get(self.TYPE) == self.DICT_TYPE:
+            value_type = value.get(self.TYPE)
+            if value_type == None:
+                msg = "No type string specified for key %s" % key
+                self.logger.error(msg)
+                raise JanusSchemaError(msg)
+            elif not value_type in [self.DICT_TYPE, self.SCALAR_TYPE]:
+                msg = "Illegal type string {}".format(value_type)
+                self.logger.error(msg)
+                raise JanusSchemaError(msg)
+            elif value.get(self.TYPE) == self.DICT_TYPE:
                 structure[key] = self._find_key_structure(value.get(self.CONTENTS), required_only)
                 structure[key][self.REQ] = value.get(self.REQUIRED, False) # is dictionary required?
             elif required_only == False or value.get(self.REQUIRED):
