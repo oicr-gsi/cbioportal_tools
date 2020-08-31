@@ -276,38 +276,33 @@ class TestSchema(TestBase):
 
     def setUp(self):
         self.testDir = os.path.dirname(os.path.realpath(__file__))
-        self.dataDir = os.path.join(self.testDir, 'data')
-        schemas = ['schema1.yaml', 'schema2.yaml']
-        self.schema_paths = [os.path.join(self.dataDir, 'schema', x) for x in schemas]
+        self.dataDir = os.path.join(self.testDir, 'data', 'schema')
+        self.schema_path = os.path.join(self.dataDir, 'schema1.yaml')
         self.tmp = tempfile.TemporaryDirectory(prefix='janus_schema_test_')
 
     def test_template(self):
-        i = 0
-        for schema_path in self.schema_paths:
-            i += 1
-            schema = config.schema(schema_path)
-            out_dir = os.path.join(self.tmp.name, 'template_%i' % i)
-            os.mkdir(out_dir)
-            out_name = 'template.txt'
-            template_path = os.path.join(out_dir, out_name)
-            with open(template_path, 'w') as out_file:
-                schema.write_template(out_file)
-            self.assertTrue(os.path.exists(template_path))
-            checksums = {out_name: '13edcf5e67efdb2f8caf5c0bf9618bf8'}
-            self.verify_checksums(checksums, out_dir)
+        schema = config.schema(self.schema_path)
+        out_dir = os.path.join(self.tmp.name, 'template')
+        os.mkdir(out_dir)
+        out_name = 'template.txt'
+        template_path = os.path.join(out_dir, out_name)
+        with open(template_path, 'w') as out_file:
+            schema.write_template(out_file, verbose=True)
+        self.assertTrue(os.path.exists(template_path))
+        checksums = {out_name: '4f6686c757cebb8a7b00886c2b82f0f4'}
+        self.verify_checksums(checksums, out_dir)
 
     def test_validate_syntax(self):
-        for schema_path in self.schema_paths:
-            for good_config in ['config1.txt', 'config2.txt']:
-                #print('###', good_config)
-                config_path = os.path.join(self.dataDir, 'schema', good_config)
-                test_config = config.config(config_path, schema_path, log_level=logging.WARNING)
-                self.assertTrue(test_config.validate_syntax())
-            for bad_config in ['config3.txt', 'config4.txt', 'config5.txt', 'config6.txt']:
-                #print('###', bad_config)
-                config_path = os.path.join(self.dataDir, 'schema', bad_config)
-                test_config = config.config(config_path, schema_path, log_level=logging.WARNING)
-                self.assertFalse(test_config.validate_syntax())
+        for good_config in ['config1.txt', 'config2.txt']:
+            #print('###', good_config)
+            config_path = os.path.join(self.dataDir, good_config)
+            test_config = config.config(config_path, self.schema_path, log_level=logging.WARNING)
+            self.assertTrue(test_config.validate_syntax())
+        for bad_config in ['config3.txt', 'config4.txt', 'config5.txt', 'config6.txt']:
+            #print('###', bad_config)
+            config_path = os.path.join(self.dataDir, bad_config)
+            test_config = config.config(config_path, self.schema_path, log_level=logging.WARNING)
+            self.assertFalse(test_config.validate_syntax())
 
 
 if __name__ == '__main__':

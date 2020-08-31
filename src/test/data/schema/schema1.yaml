@@ -13,9 +13,11 @@ head:
           flux_capacitor:
             required: false
             type: scalar
+            description: "Makes time travel possible"
           hammer:
             required: true
             type: scalar
+            description: "Universal tool of last resort"
         required: true
         type: dictionary
     required: true

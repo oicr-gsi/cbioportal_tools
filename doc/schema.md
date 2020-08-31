@@ -9,24 +9,33 @@ The schema can be used to:
 
 ## Schema format
 
-The Janus schema is written in YAML format. Its structure is as follows:
+The Janus schema is written in YAML format. The basic structure is a mapping with two key/value pairs: `body` and `head`.
 
 ### body
 
-The schema must contain a `body` entry. This represents the tabular body of the Janus config file. Its value is a list of column headers, in the same order they are expected to appear in the config file.
+The schema must contain a `body` entry. This represents the tabular body of the Janus config file. Its value is a sequence of column headers, in the same order they are expected to appear in the config file.
 
 ### head
 
-The schema must contain a `head` entry. This represents the YAML header of the Janus config file.
+The schema must contain a `head` entry. This represents the YAML header of the Janus config file. Entries in the head are represented as YAML mappings.
 
 The head has two types of entries: `scalar` and `dictionary`. A `dictionary` may contain scalars, other dictionaries, or a mixture of both.
 
-Scalars and dictionaries both have:
-- A `type` entry, which is `scalar` or `dictionary` respectively.
-- A `required` entry, which is a Boolean value.
+Scalars and dictionaries both **must** have:
+- `type`: Respectively `scalar` or `dictionary`
+- `required`: Boolean value. See "Note" below.
 
-In addition, dictionaries have:
-- A `contents` entry, which holds the contents of the dictionary.
+In addition, dictionaries **must** have:
+- `contents`: A mapping which holds the contents of the dictionary.
+
+In addition, scalars **may** have:
+- `description`: Optional string describing the variable.
+
+#### Note on required entries
+
+What if a dictionary has `required=false` but one of more of its children has `required=true`?
+
+Then the dictionary does not have to be present; but if the dictionary _is_ present, then all children with `required=true` must also be present.
 
 ## Examples
 

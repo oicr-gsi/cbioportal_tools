@@ -144,6 +144,7 @@ class schema(base):
 
     BODY = 'body'
     CONTENTS = 'contents'
+    DESCRIPTION = 'description'
     HEAD = 'head'
     LEAF = '_LEAF_'
     REQUIRED = 'required'
@@ -217,8 +218,9 @@ class schema(base):
 
     def _find_key_structure(self, schema_dict, required_only=True):
         """Recursively generate a structure of all/required keys"""
-        if self.LEAF in schema_dict.keys():
-            raise JanusSchemaError("Reserved key %s cannot be used in schema YAML" % self.LEAF)
+        for key in [self.LEAF]:
+            if key in schema_dict.keys():
+                raise JanusSchemaError("Reserved key %s cannot be used in schema YAML" % key)
         structure = {}
         leaf_keys = [] # 'leaf' keys have values with no children, ie. not dictionaries
         for (key, value) in schema_dict.items():
@@ -229,7 +231,7 @@ class schema(base):
         structure[self.LEAF] = leaf_keys
         return structure
 
-    def _generate_header_template(self, schema_dict):
+    def _generate_header_template(self, schema_dict, verbose=False):
         """
         Change a schema dictionary into a Janus config header template.
         Use recursively to generate templates for dictionaries in the header.
@@ -237,13 +239,18 @@ class schema(base):
         template = {}
         for key in schema_dict.keys():
             schema_val = schema_dict.get(key)
-            type_string = schema_val.get(self.TYPE, self.SCALAR_TYPE)
-            if type_string == self.DICT_TYPE:
-                template_val = self._generate_header_template(schema_val[self.CONTENTS])
-            elif schema_val.get(self.REQUIRED):
-                template_val = '%s: REQUIRED' % type_string
+            type_string = schema_val.get(self.TYPE)
+            if type_string == None:
+                raise JanusSchemaError("'type' must be specified for all schema entries")
+            elif type_string == self.DICT_TYPE:
+                template_val = self._generate_header_template(schema_val[self.CONTENTS], verbose)
             else:
-                template_val = '%s: OPTIONAL' % type_string
+                if schema_val.get(self.REQUIRED):
+                    template_val = '%s: REQUIRED' % type_string
+                else:
+                    template_val = '%s: OPTIONAL' % type_string
+                if verbose and schema_val.get(self.DESCRIPTION):
+                    template_val = '%s: %s' % (template_val, schema_val.get(self.DESCRIPTION))
             template[key] = template_val
         return template
 
@@ -284,11 +291,11 @@ class schema(base):
     #def validate_meta_paths(self, meta):
     #    pass
 
-    def write_template(self, out_file):
+    def write_template(self, out_file, verbose=False):
         """write a template based on the schema"""
         yaml_delimiter = '---'
         print(yaml_delimiter, file=out_file)
-        header = self._generate_header_template(self.head)
+        header = self._generate_header_template(self.head, verbose=verbose)
         # dump header to YAML and convert to list of (non-empty) strings
         header_lines = [x for x in re.split('\n', yaml.dump(header)) if x!='']
         for line in header_lines:
