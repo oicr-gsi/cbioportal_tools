@@ -2,6 +2,7 @@
 #building:
 #  toolbox:
 #    hammer: 'sledgehammer'
+#    explosive: 'dynamite'
 #monster_hunter: 'Van Helsing'
 #input_path: '/home/victor/castle.json'
 #name: 'Castle Frankenstein'
