@@ -2,8 +2,8 @@
 #building:
 #  chair: 'scalar: REQUIRED'
 #  toolbox:
-#    flux_capacitor: 'scalar: OPTIONAL'
-#    hammer: 'scalar: REQUIRED'
+#    flux_capacitor: 'scalar: OPTIONAL: Makes time travel possible'
+#    hammer: 'scalar: REQUIRED: Universal tool of last resort'
 #description: 'scalar: OPTIONAL'
 #input_path: 'scalar: REQUIRED'
 #name: 'scalar: REQUIRED'
