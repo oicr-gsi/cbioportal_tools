@@ -15,18 +15,17 @@ def super_parser() -> argparse.ArgumentParser:
     parser.add_argument('--verbose', action='store_true', help="More verbose logging")
     parser.add_argument('-l', '--log-path', metavar='PATH', help='Path of file where '+\
                         'log output will be appended. Optional, defaults to STDERR.')
-
     subparsers = parser.add_subparsers(title='Janus subcommands',
                                        dest='which')
-
-    gp = subparsers.add_parser('generate',
-                               help='Generate cBioPortal study from pipeline data. Requires '+\
-                               'appropriate Janus configuration files.')
-    gp = add_generation_arguments(gp)
-    vp = subparsers.add_parser('validate',
-                               help='Validate a Janus configuration file against a schema.')
-    vp = add_validation_arguments(vp)
-
+    add_generation_arguments(
+        subparsers.add_parser('generate',
+                              help='Generate cBioPortal study from pipeline data. Requires '+\
+                              'appropriate Janus configuration files.')
+    )
+    add_validation_arguments(
+        subparsers.add_parser('validate',
+                              help='Validate a Janus configuration file against a schema.')
+    )
     return parser
 
 def add_generation_arguments(parser):
@@ -44,14 +43,12 @@ def add_generation_arguments(parser):
     optional.add_argument("-f", "--force",
                           action="store_true",
                           help="Force overwrite of output folder; delete previous contents, if any.")
-    return parser
 
 def add_validation_arguments(parser):
     parser.add_argument("-c", "--config", help="Path to Janus config file",
                         metavar='PATH', required=True)
     parser.add_argument("-s", "--schema", help="Path to Janus schema file",
                         metavar='PATH', required=True)
-    return parser
 
 if __name__ == '__main__':
     parser = super_parser()
