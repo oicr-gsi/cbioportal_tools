@@ -17,7 +17,9 @@ The schema must contain a `body` entry. This represents the tabular body of the 
 
 ### head
 
-The schema must contain a `head` entry. This represents the YAML header of the Janus config file. Entries in the head are represented as YAML mappings.
+The schema may contain a `head` entry. In addition, the `head` entry may be an empty mapping.
+
+If present and not empty, the `head` entry represents the YAML header of the Janus config file. Entries in the head are represented as YAML mappings.
 
 The head has two types of entries: `scalar` and `dictionary`. A `dictionary` may contain scalars, other dictionaries, or a mixture of both.
 

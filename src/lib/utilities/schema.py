@@ -29,21 +29,21 @@ class schema(base):
         self.logger = self.get_logger(log_level, name, log_path)
         with open(schema_path, 'r') as schema_file:
             schema = yaml.safe_load(schema_file.read())
-        self.head = schema.get(self.HEAD)
-        if not self.head:
-            msg = "No 'head' entry in Janus schema path '%s'" % schema_path
-            self.logger.error(msg)
-            raise JanusSchemaError(msg)
         self.body = schema.get(self.BODY)
         if not self.body:
             msg = "No 'body' entry in Janus schema path '%s'" % schema_path
             self.logger.error(msg)
             raise JanusSchemaError(msg)
-        self.permitted_head_keys = self._parse_schema_header(self.head, required_only=False)
-        self.logger.debug("Permitted head keys:\n"+yaml.dump(self.permitted_head_keys))
-        self.required_head_keys = self._parse_schema_header(self.head, required_only=True)
-        self.logger.debug("Required head keys:\n"+yaml.dump(self.required_head_keys))
-
+        self.head = schema.get(self.HEAD, None)
+        if self.head:
+            self.permitted_head_keys = self._parse_schema_header(self.head, required_only=False)
+            self.logger.debug("Permitted head keys:\n"+yaml.dump(self.permitted_head_keys))
+            self.required_head_keys = self._parse_schema_header(self.head, required_only=True)
+            self.logger.debug("Required head keys:\n"+yaml.dump(self.required_head_keys))
+        else:
+            self.logger.info("No 'head' entry in Janus schema path '%s'" % schema_path)
+            self.required_head_keys = {}
+            self.permitted_head_keys = {}
 
     def _check_permitted_keys(self, meta, permitted_keys, input_name, ancestors=''):
         """
@@ -161,6 +161,12 @@ class schema(base):
         structure[self.LEAF] = leaf_keys
         return structure
 
+    def has_head(self):
+        if self.head==None or self.head=={}:
+            return False
+        else:
+            return True
+
     def validate_table(self, table, input_name=None):
         """validate a Pandas dataframe against the schema"""
         if not input_name:
@@ -185,9 +191,21 @@ class schema(base):
         """Validate the metadata header against the schema."""
         if not input_name:
             input_name = self.UNKNOWN_FILE
-        required_valid = self._check_required_keys(meta, self.required_head_keys, input_name, self.HEAD)
-        permitted_valid = self._check_permitted_keys(meta, self.permitted_head_keys, input_name, self.HEAD)
-        valid = required_valid and permitted_valid
+        if self.has_head():
+            required_valid = self._check_required_keys(meta,
+                                                       self.required_head_keys,
+                                                       input_name,
+                                                       self.HEAD)
+            permitted_valid = self._check_permitted_keys(meta,
+                                                         self.permitted_head_keys,
+                                                         input_name,
+                                                         self.HEAD)
+            valid = required_valid and permitted_valid
+        else:
+            msg = "No header specified in schema; omitting requested metadata check "+\
+                  "on '%s'"% input_name
+            self.logger.warning(msg)
+            valid = True
         if valid:
             self.logger.info("Metadata header in %s complies with schema" % input_name)
         else:
