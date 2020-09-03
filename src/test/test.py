@@ -289,7 +289,7 @@ class TestSchema(TestBase):
         out_name = 'template.txt'
         template_path = os.path.join(out_dir, out_name)
         with open(template_path, 'w') as out_file:
-            test_schema.write_template(out_file, verbose=True)
+            test_schema.write_template(out_file, describe=True)
         self.assertTrue(os.path.exists(template_path))
         checksums = {out_name: '4f6686c757cebb8a7b00886c2b82f0f4'}
         self.verify_checksums(checksums, out_dir)
