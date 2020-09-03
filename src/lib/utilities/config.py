@@ -14,15 +14,6 @@ from utilities.schema import schema
 
 class config(base):
 
-    # TODO validate the CSV contents against a schema, eg. using https://pypi.org/project/csvvalidator/
-
-    # The optional YAML header block must:
-    # - be at the start of the file
-    # - start and finish with a line consisting of only '...' or '---'
-    # - have body lines which each start with a #
-    #
-    # Outwith the header, a line starting with # is treated as a comment and ignored
-
     REQUIRED_META_FIELDS = []
     OPTIONAL_META_FIELDS = []
     
