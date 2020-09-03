@@ -22,6 +22,10 @@ def super_parser() -> argparse.ArgumentParser:
                               help='Generate cBioPortal study from pipeline data. Requires '+\
                               'appropriate Janus configuration files.')
     )
+    add_template_arguments(
+        subparsers.add_parser('template',
+                              help='Write a template Janus configuration file using a schema.')
+    )
     add_validation_arguments(
         subparsers.add_parser('validate',
                               help='Validate a Janus configuration file against a schema.')
@@ -43,6 +47,15 @@ def add_generation_arguments(parser):
     optional.add_argument("-f", "--force",
                           action="store_true",
                           help="Force overwrite of output folder; delete previous contents, if any.")
+
+def add_template_arguments(parser):
+    parser.add_argument("-d", "--describe",
+                        action="store_true",
+                        help="Print additional description from schema, if available")
+    parser.add_argument("-o", "--out", help="Path to output file, or - for STDOUT",
+                        metavar='PATH', required=True)
+    parser.add_argument("-s", "--schema", help="Path to Janus schema file",
+                        metavar='PATH', required=True)
 
 def add_validation_arguments(parser):
     parser.add_argument("-c", "--config", help="Path to Janus config file",
