@@ -24,9 +24,9 @@ class schema(base):
     PERMITTED_TYPES = [DICT_TYPE, SCALAR_TYPE]
     UNKNOWN_FILE = 'UNKNOWN_JANUS_CONFIG_FILE'
 
-    def __init__(self, schema_path, log_level=logging.WARNING):
+    def __init__(self, schema_path, log_level=logging.WARNING, log_path=None):
         name = "%s.%s"% (__name__, type(self).__name__)
-        self.logger = self.get_logger(log_level, name)
+        self.logger = self.get_logger(log_level, name, log_path)
         with open(schema_path, 'r') as schema_file:
             schema = yaml.safe_load(schema_file.read())
         self.head = schema.get(self.HEAD)
