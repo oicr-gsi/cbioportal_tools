@@ -101,7 +101,7 @@ class schema(base):
                 valid = valid and next_valid
         return valid
 
-    def _generate_header_template(self, schema_dict, verbose=False):
+    def _generate_header_template(self, schema_dict, describe=False):
         """
         Change a schema dictionary into a Janus config header template.
         Use recursively to generate templates for dictionaries in the header.
@@ -113,13 +113,13 @@ class schema(base):
             if type_string == None:
                 raise JanusSchemaError("'type' must be specified for all schema entries")
             elif type_string == self.DICT_TYPE:
-                template_val = self._generate_header_template(schema_val[self.CONTENTS], verbose)
+                template_val = self._generate_header_template(schema_val[self.CONTENTS], describe)
             else:
                 if schema_val.get(self.REQUIRED):
                     template_val = '%s: REQUIRED' % type_string
                 else:
                     template_val = '%s: OPTIONAL' % type_string
-                if verbose and schema_val.get(self.DESCRIPTION):
+                if describe and schema_val.get(self.DESCRIPTION):
                     template_val = '%s: %s' % (template_val, schema_val.get(self.DESCRIPTION))
             template[key] = template_val
         return template
@@ -198,11 +198,11 @@ class schema(base):
     #def validate_meta_paths(self, meta):
     #    pass
 
-    def write_template(self, out_file, verbose=False):
+    def write_template(self, out_file, describe=False):
         """write a template based on the schema"""
         yaml_delimiter = '---'
         print(yaml_delimiter, file=out_file)
-        header = self._generate_header_template(self.head, verbose=verbose)
+        header = self._generate_header_template(self.head, describe=describe)
         # dump header to YAML and convert to list of (non-empty) strings
         header_lines = [x for x in re.split('\n', yaml.dump(header)) if x!='']
         for line in header_lines:
