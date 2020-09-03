@@ -7,7 +7,8 @@ import pandas as pd
 from generate import generator
 from generate.study import study
 from support.helper import concat_files, relocate_inputs
-from utilities import config
+from utilities.config import config
+from utilities.schema import schema
 
 class TestBase(unittest.TestCase):
 
@@ -281,13 +282,13 @@ class TestSchema(TestBase):
         self.tmp = tempfile.TemporaryDirectory(prefix='janus_schema_test_')
 
     def test_template(self):
-        schema = config.schema(self.schema_path)
+        test_schema = schema(self.schema_path)
         out_dir = os.path.join(self.tmp.name, 'template')
         os.mkdir(out_dir)
         out_name = 'template.txt'
         template_path = os.path.join(out_dir, out_name)
         with open(template_path, 'w') as out_file:
-            schema.write_template(out_file, verbose=True)
+            test_schema.write_template(out_file, verbose=True)
         self.assertTrue(os.path.exists(template_path))
         checksums = {out_name: '4f6686c757cebb8a7b00886c2b82f0f4'}
         self.verify_checksums(checksums, out_dir)
@@ -299,7 +300,7 @@ class TestSchema(TestBase):
                 'good_config3.txt', # missing optional dictionary
         ]:
             config_path = os.path.join(self.dataDir, good_config)
-            test_config = config.config(config_path, self.schema_path, log_level=logging.WARN)
+            test_config = config(config_path, self.schema_path, log_level=logging.WARN)
             self.assertTrue(test_config.validate_syntax())
         for bad_config in [
                 'bad_config1.txt', # unexpected scalar keys
@@ -310,7 +311,7 @@ class TestSchema(TestBase):
                 'bad_config6.txt', # unexpected dictionary key
         ]:
             config_path = os.path.join(self.dataDir, bad_config)
-            test_config = config.config(config_path, self.schema_path, log_level=logging.ERROR)
+            test_config = config(config_path, self.schema_path, log_level=logging.ERROR)
             self.assertFalse(test_config.validate_syntax())
 
 
