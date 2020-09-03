@@ -17,10 +17,11 @@ class config(base):
     REQUIRED_META_FIELDS = []
     OPTIONAL_META_FIELDS = []
     
-    def __init__(self, input_path, schema_path=None, log_level=logging.WARNING, name=None, strict=False):
-        if name == None:
-            name = "%s.%s"% (__name__, type(self).__name__)
-        self.logger = self.get_logger(log_level, name)
+    def __init__(self, input_path, schema_path=None, log_level=logging.WARNING, log_name=None,
+                 log_path=None):
+        if log_name == None:
+            log_name = "%s.%s"% (__name__, type(self).__name__)
+        self.logger = self.get_logger(log_level, log_name, log_path)
         self.input_path = input_path
         if schema_path != None:
             self.schema = schema(schema_path, log_level=log_level)
@@ -28,8 +29,6 @@ class config(base):
             self.schema = None
         self.config_dir = os.path.abspath(os.path.dirname(input_path))
         [self.meta, skip_total] = self.read_meta(input_path)
-        if strict:
-            self.validate_meta_fields()
         self.table = pd.read_csv(input_path, sep="\t", comment="#", skiprows=skip_total)
         if self.table.isnull().values.any():
             self.logger.warning("Body of %s has null values" % input_path)

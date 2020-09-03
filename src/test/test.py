@@ -4,10 +4,10 @@ import argparse, hashlib, logging, os, tempfile, unittest
 
 import pandas as pd
 
-from generate import generator
 from generate.study import study
 from support.helper import concat_files, relocate_inputs
 from utilities.config import config
+from utilities.main import main
 from utilities.schema import schema
 
 class TestBase(unittest.TestCase):
@@ -67,6 +67,7 @@ class TestGenerator(TestStudy):
     def setUp(self):
         super().setUp()
         argsDict = {
+            "which": "generate",
             "config": None, # placeholder
             "out": None, # placeholder
             "force": False,
@@ -84,7 +85,7 @@ class TestGenerator(TestStudy):
         os.mkdir(out_dir)
         self.args.config = os.path.join(self.dataDir, 'CAP_CNA', 'study.txt')
         self.args.out = out_dir
-        generator.main(self.args)
+        main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
 
     def test_CAP_CNA(self):
@@ -95,7 +96,7 @@ class TestGenerator(TestStudy):
         self.args.dry_run = False
         self.args.config = os.path.join(self.dataDir, 'CAP_CNA', 'study.txt')
         self.args.out = out_dir
-        generator.main(self.args)
+        main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
             
     def test_CAP_expression(self):
@@ -104,7 +105,7 @@ class TestGenerator(TestStudy):
         self.args.config = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
         self.args.out = out_dir
         self.args.dry_run = False
-        generator.main(self.args)
+        main(self.args)
         checksums = self.base_checksums.copy()
         CAP_expression_checksums = {
             'data_expression_continous.txt': 'e2b50dc44307e0b9bee27d253b02c6d9',
@@ -121,8 +122,8 @@ class TestGenerator(TestStudy):
         os.mkdir(out_dir)
         self.args.config = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
         self.args.out = out_dir
-        self.args.dry_run = False
-        generator.main(self.args)
+        self.args.dry_run = True
+        main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
 
     def test_cufflinks(self):
@@ -131,7 +132,7 @@ class TestGenerator(TestStudy):
         self.args.config = os.path.join(self.dataDir, 'Cufflinks', 'study.txt')
         self.args.out = out_dir
         self.args.dry_run = False
-        generator.main(self.args)
+        main(self.args)
         checksums = self.base_checksums.copy()
         cufflinks_checksums = {
             'data_expression_continous.txt': '0b5d72e82f10637dd791a35a85f08349',
@@ -147,7 +148,7 @@ class TestGenerator(TestStudy):
         os.mkdir(out_dir)
         self.args.config = os.path.join(self.dataDir, 'Cufflinks', 'study.txt')
         self.args.out = out_dir
-        generator.main(self.args)
+        main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
 
     def test_legacy_mutation_dry_run(self):
@@ -165,7 +166,7 @@ class TestGenerator(TestStudy):
             os.mkdir(out_dir)
             self.args.config = os.path.join(self.dataDir, name, 'study.txt')
             self.args.out = out_dir
-            generator.main(self.args)
+            main(self.args)
             self.verify_checksums(self.base_checksums, out_dir)
 
     def test_CAP_mutation(self):
@@ -211,7 +212,7 @@ class TestGenerator(TestStudy):
         self.args.config = os.path.join(self.dataDir, name, 'study.txt')
         self.args.out = out_dir
         self.args.dry_run = False
-        generator.main(self.args)
+        main(self.args)
         checksums = self.base_checksums.copy()
         checksums.update(additional_checksums)
         self.verify_checksums(checksums, out_dir)

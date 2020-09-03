@@ -12,7 +12,7 @@ class generation_config(config):
 
     def __init__(self, input_path, log_level=logging.WARNING, strict=False):
         name = "%s.%s" % (__name__, type(self).__name__)
-        super().__init__(input_path, log_level, name, strict)
+        super().__init__(input_path, log_level=log_level, log_name=name)
 
 class cancer_type_config(generation_config):
     """cBioPortal cancer type config"""
@@ -37,7 +37,7 @@ class clinical_config(generation_config):
     # TODO check validity of table body
 
     def __init__(self, input_path, log_level=logging.WARNING, strict=False):
-        super().__init__(input_path, log_level, strict)
+        super().__init__(input_path, log_level=log_level)
         self.PATIENT_DATATYPE = utilities.constants.PATIENT_DATATYPE
         self.SAMPLE_DATATYPE = utilities.constants.SAMPLE_DATATYPE
 
@@ -82,7 +82,7 @@ class study_config(generation_config):
     ]
 
     def __init__(self, input_path, log_level=logging.WARNING, strict=False):
-        super().__init__(input_path, log_level, strict)
+        super().__init__(input_path, log_level=log_level)
         self.logger = self.get_logger(log_level, __name__) # more specific logger name
 
     def get_cancer_study_identifier(self):
