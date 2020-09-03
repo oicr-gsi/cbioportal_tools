@@ -93,7 +93,11 @@ class config(base):
         """Validate header and body syntax against the schema"""
         if self.schema == None:
             raise JanusConfigError("Cannot validate syntax because no schema is specified")
-        meta_valid = self.schema.validate_meta(self.meta, os.path.basename(self.input_path))
+        if self.schema.has_head():
+            meta_valid = self.schema.validate_meta(self.meta, os.path.basename(self.input_path))
+        else:
+            self.logger.info("No header specified in schema, omitting metadata validation")
+            meta_valid = True
         body_valid = self.schema.validate_table(self.table, os.path.basename(self.input_path))
         valid = meta_valid and body_valid
         if valid:
