@@ -20,6 +20,19 @@ head:
             description: "Universal tool of last resort"
         required: false
         type: dictionary
+      bookshelf:
+        type: constant_list
+        required: true
+        contents:
+        - "Frankenstein"
+        - "Dracula"
+        - "Pride and Prejudice and Zombies"
+      pantry:
+        type: constant_list
+        required: false
+        contents:
+        - "Eye of newt"
+        - "Toe of frog"
     required: true
     type: dictionary
   description:

@@ -6,9 +6,8 @@
 #  bookshelf:
 #    contents:
 #    - 'Frankenstein'
-#    - 'Dracula'
 #    - 'Pride and Prejudice and Zombies'
-#monster_hunter: 'Van Helsing'
+#    - 'Bunnicula'
 #input_path: '/home/victor/castle.json'
 #name: 'Castle Frankenstein'
 ---
