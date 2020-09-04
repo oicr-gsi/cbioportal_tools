@@ -60,7 +60,7 @@ class schema(base):
                 if permitted_val.get(self.TYPE_RESERVED) == self.LIST_TYPE:
                     self.logger.debug("Checking contents of list key %s" % key)
                     expected = permitted_val.get(self.CONTENTS)
-                    found = val.get(self.CONTENTS)
+                    found = val
                     if expected != found:
                         msg = "List contents do not match; expected "+\
                               "%s, found %s" % (str(expected), str(found))
@@ -114,7 +114,7 @@ class schema(base):
                     self.logger.info(msg)
             elif val.get(self.TYPE_RESERVED) == self.LIST_TYPE:
                 expected = val.get(self.CONTENTS)
-                found = meta.get(key).get(self.CONTENTS)
+                found = meta.get(key)
                 if expected != found:
                     msg = "List contents do not match; expected "+\
                           "%s, found %s" % (str(expected), str(found))
