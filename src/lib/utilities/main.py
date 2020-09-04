@@ -24,7 +24,9 @@ def main(args):
             out_file = sys.stdout
         else:
             out_file = open(args.out, 'w')
-        schema(args.schema, log_level, log_path).write_template(out_file, args.describe)
+        schema(args.schema, log_level, log_path).write_template(out_file,
+                                                                args.describe,
+                                                                args.modify_keys)
         if args.out!='-':
             out_file.close()
     elif args.which == 'validate':
