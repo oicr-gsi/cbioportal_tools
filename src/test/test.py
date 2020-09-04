@@ -285,13 +285,23 @@ class TestSchema(TestBase):
     def test_template(self):
         test_schema = schema(self.schema_path)
         out_dir = os.path.join(self.tmp.name, 'template')
+        out_dir = '/tmp/janus'
         os.mkdir(out_dir)
-        out_name = 'template.txt'
-        template_path = os.path.join(out_dir, out_name)
-        with open(template_path, 'w') as out_file:
-            test_schema.write_template(out_file, describe=True)
-        self.assertTrue(os.path.exists(template_path))
-        checksums = {out_name: '4f6686c757cebb8a7b00886c2b82f0f4'}
+        out_names = ['template%i.txt' % i for i in [1,2,3]]
+        template_paths = [os.path.join(out_dir, out_name) for out_name in out_names]
+        with open(template_paths[0], 'w') as out_file:
+            test_schema.write_template(out_file, describe=False, req_keys=False) # vanilla
+        with open(template_paths[1], 'w') as out_file:
+            test_schema.write_template(out_file, describe=True, req_keys=False) # more description
+        with open(template_paths[2], 'w') as out_file:
+            test_schema.write_template(out_file, describe=True, req_keys=True) # even more description
+        for template_path in template_paths:
+            self.assertTrue(os.path.exists(template_path))
+        checksums = {
+            out_names[0]: '204860499235bb35448a8b92b62dd07c',
+            out_names[1]: 'e0b42022e72ed6e9214b311a45e40841',
+            out_names[2]: 'd808e432b81220c103badac36d19cbdb'
+        }
         self.verify_checksums(checksums, out_dir)
 
     def test_validate_syntax(self):

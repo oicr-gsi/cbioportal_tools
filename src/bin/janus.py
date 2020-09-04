@@ -51,7 +51,11 @@ def add_generation_arguments(parser):
 def add_template_arguments(parser):
     parser.add_argument("-d", "--describe",
                         action="store_true",
-                        help="Print additional description from schema, if available")
+                        help="Print additional description for scalars, if available")
+    parser.add_argument("-m", "--modify-keys",
+                        action="store_true",
+                        help="Modify template keys to show if list/dictionary entries are required. "+\
+                        "Keys must then be edited to make template valid with respect to schema.")
     parser.add_argument("-o", "--out", help="Path to output file, or - for STDOUT",
                         metavar='PATH', required=True)
     parser.add_argument("-s", "--schema", help="Path to Janus schema file",
