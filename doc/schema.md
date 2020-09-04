@@ -21,14 +21,18 @@ The schema may contain a `head` entry. In addition, the `head` entry may be an e
 
 If present and not empty, the `head` entry represents the YAML header of the Janus config file. Entries in the head are represented as YAML mappings.
 
-The head has two types of entries: `scalar` and `dictionary`. A `dictionary` may contain scalars, other dictionaries, or a mixture of both.
+The head has three types of entries:
 
-Scalars and dictionaries both **must** have:
-- `type`: Respectively `scalar` or `dictionary`
-- `required`: Boolean value. If true, the entry is required. See "Note" below.
+1. `dictionary`: May contain any mixture of scalars, lists, or other dictionaries.
+2. `constant_list`: Contains a simple collection of constants. It may _not_ contain entries for scalars, dictionaries, or other constant-lists. If a `constant_list` is present in a config file, it must have _exactly_ the same contents as in the schema.
+3. `scalar`: Represents a scalar variable, such as a string or integer.
 
-In addition, dictionaries **must** have:
-- `contents`: A mapping which holds the contents of the dictionary.
+All entries **must** have:
+- `type`: Respectively `scalar`, `constant_list` or `dictionary`.
+- `required`: Boolean value. See "Note" below.
+
+In addition, constant-lists and dictionaries **must** have:
+- `contents`: Respectively, a YAML sequence or mapping to hold the contents of the constant-list or dictionary.
 
 In addition, scalars **may** have:
 - `description`: Optional string describing the variable.

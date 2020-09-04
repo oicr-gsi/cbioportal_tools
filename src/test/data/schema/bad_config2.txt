@@ -2,6 +2,11 @@
 #building:
 #  toolbox:
 #    hammer: 'sledgehammer'
+#  bookshelf:
+#    contents:
+#    - 'Frankenstein'
+#    - 'Dracula'
+#    - 'Pride and Prejudice and Zombies'
 #name: 'Castle Frankenstein'
 ---
 FOO	BAR	BAZ

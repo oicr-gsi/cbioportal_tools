@@ -1,6 +1,11 @@
 ---
 #building:
 #  chair: 'armchair'
+#  bookshelf:
+#    contents:
+#    - 'Frankenstein'
+#    - 'Dracula'
+#    - 'Pride and Prejudice and Zombies'
 #description: 'A dark and forbidding edifice high on a mountain crag'
 #input_path: '/home/victor/castle.json'
 #name: 'Castle Frankenstein'

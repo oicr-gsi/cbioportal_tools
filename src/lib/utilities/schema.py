@@ -18,10 +18,12 @@ class schema(base):
     REQ = '_REQUIRED_' # reserved key for representing schema structure
     REQUIRED = 'required'
     TYPE = 'type'
+    TYPE_RESERVED = '_TYPE_'
 
     DICT_TYPE = 'dictionary'
+    LIST_TYPE = 'constant_list'
     SCALAR_TYPE = 'scalar'
-    PERMITTED_TYPES = [DICT_TYPE, SCALAR_TYPE]
+    PERMITTED_TYPES = [DICT_TYPE, LIST_TYPE, SCALAR_TYPE]
     UNKNOWN_FILE = 'UNKNOWN_JANUS_CONFIG_FILE'
 
     def __init__(self, schema_path, log_level=logging.WARNING, log_path=None):
@@ -54,12 +56,23 @@ class schema(base):
         for key, val in meta.items():
             key_location = ancestors+':'+key
             if permitted_keys.get(key):
-                self.logger.debug("Recursively checking dictionary key %s" % key)
-                next_valid = self._check_permitted_keys(val,
-                                                        permitted_keys[key],
-                                                        input_name,
-                                                        key_location)
-                valid = valid and next_valid
+                permitted_val = permitted_keys[key]
+                if permitted_val.get(self.TYPE_RESERVED) == self.LIST_TYPE:
+                    self.logger.debug("Checking contents of list key %s" % key)
+                    expected = permitted_val.get(self.CONTENTS)
+                    found = val.get(self.CONTENTS)
+                    if expected != found:
+                        msg = "List contents do not match; expected "+\
+                              "%s, found %s" % (str(expected), str(found))
+                        self.logger.warning(msg)
+                        valid = False
+                else:
+                    self.logger.debug("Recursively checking dictionary key %s" % key)
+                    next_valid = self._check_permitted_keys(val,
+                                                            permitted_keys[key],
+                                                            input_name,
+                                                            key_location)
+                    valid = valid and next_valid
             elif key in permitted_keys[self.LEAF]:
                 self.logger.debug('Found permitted scalar '+key_location)
             else:
@@ -83,11 +96,15 @@ class schema(base):
                               (key_location, input_name)
                         self.logger.warning(msg)
                         valid = False
-            elif key == self.REQ:
+            elif key == self.REQ or key == self.TYPE_RESERVED:
                 pass
             elif key not in meta:
                 key_location = ancestors+':'+key
-                if val[self.REQ]:
+                if val.get(self.TYPE_RESERVED) == self.LIST_TYPE:
+                    msg = "Required list '%s' not present" % key_location
+                    self.logger.warning(msg)
+                    valid = False
+                elif val[self.REQ]:
                     msg = "Required dictionary '%s' not present" % key_location
                     self.logger.warning(msg)
                     valid = False
@@ -95,6 +112,14 @@ class schema(base):
                     msg = "Optional dictionary "+\
                           "'%s' not present, omitting downstream checks" % key_location
                     self.logger.info(msg)
+            elif val.get(self.TYPE_RESERVED) == self.LIST_TYPE:
+                expected = val.get(self.CONTENTS)
+                found = meta.get(key).get(self.CONTENTS)
+                if expected != found:
+                    msg = "List contents do not match; expected "+\
+                          "%s, found %s" % (str(expected), str(found))
+                    self.logger.warning(msg)
+                    valid = False
             else:
                 next_ancestors = ancestors+':'+key
                 next_valid = self._check_required_keys(meta[key], val, input_name, next_ancestors)
@@ -126,13 +151,13 @@ class schema(base):
 
     def _parse_schema_header(self, schema_dict, required_only=True):
         """Recursively generate a structure of all/required keys and check for errors"""
-        for key in [self.LEAF, self.REQ]:
+        for key in [self.LEAF, self.REQ, self.TYPE_RESERVED]:
             if key in schema_dict.keys():
                 msg = "Reserved key %s cannot be used in schema YAML" % key
                 self.logger.error(msg)
                 raise JanusSchemaError(msg)
-        structure = {}
-        leaf_keys = [] # 'leaf' keys have values with no children, ie. not dictionaries
+        parsed = {}
+        leaf_keys = [] # 'leaf' keys have values with no children, ie. scalars
         try:
             items = schema_dict.items()
         except AttributeError as err:
@@ -141,26 +166,50 @@ class schema(base):
             raise JanusSchemaError(msg)
         for (key, value) in items:
             value_type = value.get(self.TYPE)
+            error_msg = None
             if value_type == None:
-                msg = "No type string specified for key %s" % key
-                self.logger.error(msg)
-                raise JanusSchemaError(msg)
-            elif not value_type in self.PERMITTED_TYPES: #[self.DICT_TYPE, self.SCALAR_TYPE]:
-                msg = "Illegal type string {}".format(value_type)
-                self.logger.error(msg)
-                raise JanusSchemaError(msg)
-            elif value.get(self.TYPE) == self.DICT_TYPE:
+                error_msg = "No type string specified"
+            elif not value_type in self.PERMITTED_TYPES:
+                error_msg = "Illegal type: %s" % str(value_type)
+            elif value_type in [self.DICT_TYPE, self.LIST_TYPE] and self.CONTENTS not in value:
+                error_msg = "No contents specified for dictionary/list"
+            if error_msg:
+                self.logger.error(error_msg)
+                raise JanusSchemaError(error_msg)
+            # sanity checks passed, proceed with parsing
+            if value_type == self.DICT_TYPE:
                 if not self.CONTENTS in value:
                     msg = "No contents specified for dictionary key %s" % key
                     self.logger.error(msg)
                     raise JanusSchemaError(msg)
-                structure[key] = self._parse_schema_header(value.get(self.CONTENTS), required_only)
-                structure[key][self.REQ] = value.get(self.REQUIRED, False) # is dictionary required?
+                parsed[key] = self._parse_schema_header(value.get(self.CONTENTS), required_only)
+                parsed[key][self.TYPE_RESERVED] = self.DICT_TYPE
+                parsed[key][self.REQ] = value.get(self.REQUIRED, False) # is dictionary required?
             elif required_only == False or value.get(self.REQUIRED):
-                leaf_keys.append(key)
-        structure[self.LEAF] = leaf_keys
-        return structure
+                # True if we include everything, or value is flagged as required; false otherwise
+                if value_type == self.LIST_TYPE:
+                    # TODO We could add another list type (or modify the current one) to include
+                    # scalar/list/dictionary entries and parse them recursively.
+                    # But this is not needed for now, so a list is a simple collection of constants.
+                    parsed[key] = {
+                        self.TYPE_RESERVED: self.LIST_TYPE,
+                        self.CONTENTS: value.get(self.CONTENTS)
+                    }
+                else:
+                    leaf_keys.append(key)
+        parsed[self.LEAF] = leaf_keys
+        return parsed
 
+    def _validate_type(self, value_type):
+        if value_type == None:
+            msg = "No type string specified for key %s" % key
+            self.logger.error(msg)
+            raise JanusSchemaError(msg)
+        elif not value_type in self.PERMITTED_TYPES:
+            msg = "Illegal type string {}".format(value_type)
+            self.logger.error(msg)
+            raise JanusSchemaError(msg)
+    
     def has_head(self):
         if self.head==None or self.head=={}:
             return False

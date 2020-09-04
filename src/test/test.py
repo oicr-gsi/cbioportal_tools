@@ -299,6 +299,7 @@ class TestSchema(TestBase):
                 'good_config1.txt', # fully specified config
                 'good_config2.txt', # missing optional scalar
                 'good_config3.txt', # missing optional dictionary
+                'good_config4.txt', # has optional list
         ]:
             config_path = os.path.join(self.dataDir, good_config)
             test_config = config(config_path, self.schema_path, log_level=logging.WARN)
@@ -310,6 +311,7 @@ class TestSchema(TestBase):
                 'bad_config4.txt', # missing body column
                 'bad_config5.txt', # missing required dictionary
                 'bad_config6.txt', # unexpected dictionary key
+                'bad_config7.txt', # mismatched list contents
         ]:
             config_path = os.path.join(self.dataDir, bad_config)
             test_config = config(config_path, self.schema_path, log_level=logging.ERROR)
