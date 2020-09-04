@@ -1,0 +1,28 @@
+body:
+  - PATIENT_ID
+  - PATIENT_DISPLAY_NAME
+head:
+  datatypes:
+    type: constant_list
+    required: true
+    contents:
+      - STRING
+      - STRING
+  descriptions:
+    type: constant_list
+    required: true
+    contents:
+      - "Patient Identifier"
+      - "Patient Name"
+  display_names:
+    type: constant_list
+    required: true
+    contents:
+      - "Patient Identifier"
+      - "Patient Name"
+  priorities:
+    type: constant_list
+    required: true
+    contents:
+      - "1"
+      - "1"
