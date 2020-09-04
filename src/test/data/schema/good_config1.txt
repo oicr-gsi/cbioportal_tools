@@ -5,14 +5,12 @@
 #    flux_capacitor: 'fluxatious'
 #    hammer: 'sledgehammer'
 #  bookshelf:
-#    contents:
-#    - 'Frankenstein'
-#    - 'Dracula'
-#    - 'Pride and Prejudice and Zombies'
+#  - 'Frankenstein'
+#  - 'Dracula'
+#  - 'Pride and Prejudice and Zombies'
 #  pantry:
-#    contents:
-#    - 'Eye of newt'
-#    - 'Toe of frog'
+#  - 'Eye of newt'
+#  - 'Toe of frog'
 #description: 'A dark and forbidding edifice high on a mountain crag'
 #input_path: '/home/victor/castle.json'
 #name: 'Castle Frankenstein'

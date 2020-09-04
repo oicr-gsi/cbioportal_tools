@@ -4,10 +4,9 @@
 #  toolbox:
 #    hammer: 'sledgehammer'
 #  bookshelf:
-#    contents:
-#    - 'Frankenstein'
-#    - 'Dracula'
-#    - 'Pride and Prejudice and Zombies'
+#  - 'Frankenstein'
+#  - 'Dracula'
+#  - 'Pride and Prejudice and Zombies'
 #input_path: '/home/victor/castle.json'
 #name: 'Castle Frankenstein'
 ---

@@ -4,10 +4,9 @@
 #    hammer: 'sledgehammer'
 #    explosive: 'dynamite'
 #  bookshelf:
-#    contents:
-#    - 'Frankenstein'
-#    - 'Pride and Prejudice and Zombies'
-#    - 'Bunnicula'
+#  - 'Frankenstein'
+#  - 'Pride and Prejudice and Zombies'
+#  - 'Bunnicula'
 #input_path: '/home/victor/castle.json'
 #name: 'Castle Frankenstein'
 ---
