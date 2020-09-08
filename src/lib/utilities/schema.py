@@ -19,12 +19,16 @@ class schema(base):
     REQUIRED = 'required'
     TYPE = 'type'
     TYPE_RESERVED = '_TYPE_'
+    VALIDATION = 'validation'
 
     DICT_TYPE = 'dictionary'
     LIST_TYPE = 'constant_list'
     SCALAR_TYPE = 'scalar'
     PERMITTED_TYPES = [DICT_TYPE, LIST_TYPE, SCALAR_TYPE]
     UNKNOWN_FILE = 'UNKNOWN_JANUS_CONFIG_FILE'
+    VALIDATE_STRICT = 'strict'
+    VALIDATE_LENGTH = 'length'
+    VALIDATE_NONE = 'none'
 
     def __init__(self, schema_path, log_level=logging.WARNING, log_path=None):
         name = "%s.%s"% (__name__, type(self).__name__)
@@ -59,13 +63,32 @@ class schema(base):
                 permitted_val = permitted_keys[key]
                 if permitted_val.get(self.TYPE_RESERVED) == self.LIST_TYPE:
                     self.logger.debug("Checking contents of list key %s" % key)
+                    validation = permitted_val.get(self.VALIDATION, self.VALIDATE_STRICT)
                     expected = permitted_val.get(self.CONTENTS)
                     found = val
-                    if expected != found:
+                    if not validation in [self.VALIDATE_STRICT,
+                                          self.VALIDATE_LENGTH,
+                                          self.VALIDATE_NONE]:
+                        msg = "Undefined validation mode: '%s'. " % str(validation)
+                        msg = msg+"Permitted modes: [%s, %s, %s]" % (self.VALIDATE_STRICT,
+                                                                     self.VALIDATE_LENGTH,
+                                                                     self.VALIDATE_NONE)
+                        self.logger.error(msg)
+                        raise JanusSchemaError(msg)
+                    elif validation == self.VALIDATE_STRICT and expected != found:
                         msg = "List contents do not match; expected "+\
                               "%s, found %s" % (str(expected), str(found))
                         self.logger.warning(msg)
                         valid = False
+                    elif validation == self.VALIDATE_LENGTH and len(expected)!=len(found):
+                        msg = "List lengths do not match; expected "+\
+                              "%i items, found %i" % (len(expected), len(found))
+                        self.logger.warning(msg)
+                        valid = False
+                    elif validation == self.VALIDATE_NONE:
+                        self.logger.debug("No validation specified for list contents %s" % str(found))
+                    else:
+                        self.logger.debug("List contents are valid, mode %s" % validation)
                 else:
                     self.logger.debug("Recursively checking dictionary key %s" % key)
                     next_valid = self._check_permitted_keys(val,
@@ -201,6 +224,7 @@ class schema(base):
                     # But this is not needed for now, so a list is a simple collection of constants.
                     parsed[key] = {
                         self.TYPE_RESERVED: self.LIST_TYPE,
+                        self.VALIDATION: value.get(self.VALIDATION),
                         self.CONTENTS: value.get(self.CONTENTS)
                     }
                 else:
