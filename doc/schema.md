@@ -31,10 +31,13 @@ All entries **must** have:
 - `type`: Respectively `scalar`, `constant_list` or `dictionary`.
 - `required`: Boolean value. See "Note" below.
 
-In addition, constant-lists and dictionaries **must** have:
+Constant-lists and dictionaries **must** have:
 - `contents`: Respectively, a YAML sequence or mapping to hold the contents of the constant-list or dictionary.
 
-In addition, scalars **may** have:
+Constant-lists **may** have:
+- `validation`: One of `strict`, `length`, or `none`. Respectively, the config list must match the schema list exactly; must have the same length as the schema list; and can have any value. If not present, default is to `strict` validation.
+
+Scalars **may** have:
 - `description`: Optional string describing the variable.
 
 #### Note on required entries
