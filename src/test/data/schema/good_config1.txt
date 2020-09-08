@@ -9,8 +9,8 @@
 #  - 'Dracula'
 #  - 'Pride and Prejudice and Zombies'
 #  pantry:
-#  - 'Eye of newt'
-#  - 'Toe of frog'
+#  - "Adder's fork"
+#  - "Blind-worm's sting"
 #description: 'A dark and forbidding edifice high on a mountain crag'
 #input_path: '/home/victor/castle.json'
 #name: 'Castle Frankenstein'

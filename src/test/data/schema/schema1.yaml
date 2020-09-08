@@ -23,6 +23,7 @@ head:
       bookshelf:
         type: constant_list
         required: true
+        validation: "strict"
         contents:
         - "Frankenstein"
         - "Dracula"
@@ -30,6 +31,7 @@ head:
       pantry:
         type: constant_list
         required: false
+        validation: "length"
         contents:
         - "Eye of newt"
         - "Toe of frog"
