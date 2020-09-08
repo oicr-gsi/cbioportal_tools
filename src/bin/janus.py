@@ -12,6 +12,8 @@ GENERATE = 'Generate cBioPortal study from pipeline data. Requires '+\
            'appropriate Janus configuration files.'
 TEMPLATE = 'Write a template Janus configuration file using a schema.'
 VALIDATE = 'Validate a Janus configuration file against a schema.'
+VALIDATE_EPILOG = 'Return code is 0 if valid, 1 otherwise. '+\
+                  'Run top-level script with --verbose or --debug option for more details.'
 
 def super_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -30,7 +32,7 @@ def super_parser() -> argparse.ArgumentParser:
         subparsers.add_parser('template', description=TEMPLATE, help=TEMPLATE)
     )
     add_validation_arguments(
-        subparsers.add_parser('validate', description=VALIDATE, help=VALIDATE)
+        subparsers.add_parser('validate', description=VALIDATE, help=VALIDATE, epilog=VALIDATE_EPILOG)
     )
     return parser
 
