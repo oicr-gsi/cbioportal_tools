@@ -30,6 +30,19 @@ class TestBase(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+class TestScript(TestBase):
+    """Minimal test of command-line script; other tests run the main() method"""
+
+    def setUp(self):
+        super().setUp()
+        self.testDir = os.path.dirname(os.path.realpath(__file__))
+        self.scriptName = 'janus.py'
+        self.scriptPath = os.path.join(self.testDir, os.pardir, 'bin', self.scriptName)
+
+    def test_compile(self):
+        with open(self.scriptPath, 'rb') as inFile:
+            compiled = compile(inFile.read(), self.scriptName, 'exec')
+        self.assertTrue(True, 'Script compiled without error')
 
 class TestStudy(TestBase):
 
@@ -59,8 +72,6 @@ class TestStudy(TestBase):
         test_study = study(self.config_path, log_level=logging.WARN)
         test_study.write_all(out_dir, dry_run=True)
         self.verify_checksums(self.base_checksums, out_dir)
-
-
 
 class TestGenerator(TestStudy):
 
