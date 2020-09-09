@@ -60,6 +60,11 @@ class alteration_type(component):
         factory = pipeline_component_factory(log_level)
         for key in config_paths_by_datatype.keys():
             pc = factory.get_component(self.name, key, config_paths_by_datatype[key], study_config)
+            if pc == None:
+                msg = "No component found for alteration type '%s', " % self.name +\
+                      "config path '%s'" % config_paths_by_datatype[key]
+                self.logger.error(msg)
+                raise JanusComponentError(msg)
             self.components.append(pc)
         self.logger.debug("Created %i components for %s" % (len(self.components), self.name))
 
@@ -286,6 +291,7 @@ class pipeline_component_factory(base):
 
     CLASSNAMES = {
         ('COPY_NUMBER_ALTERATION', 'CAP_CNA'): 'legacy_pipeline_component',
+        ('COPY_NUMBER_ALTERATION', 'Sequenza'): 'legacy_pipeline_component',
         ('MRNA_EXPRESSION', 'CAP_expression'): 'legacy_pipeline_component',
         ('MRNA_EXPRESSION', 'Cufflinks'): 'legacy_pipeline_component',
         ('MUTATION_EXTENDED', 'CAP_mutation'): 'legacy_pipeline_component',
@@ -439,3 +445,6 @@ class study_meta(component):
         out = open(os.path.join(out_dir, self.META_FILENAME), 'w')
         out.write(yaml.dump(meta, sort_keys=True))
         out.close()
+
+class JanusComponentError(Exception):
+    pass

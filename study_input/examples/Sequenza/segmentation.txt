@@ -1,0 +1,12 @@
+---
+#input_folder: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests/data/Sequenza
+#pipeline: Sequenza
+#profile_name: CNVs (Ductal Carcinoma)
+#profile_description: Sequenza Copy Number Variations from whole exome sequencing. (10 Samples)
+---
+FILE_NAME	PATIENT_ID	SAMPLE_ID
+TEST_0001_Br_P_EX.varscanSomatic_Total_CN.seg	TEST_0001	TEST_0001_Br_R_EX_1
+TEST_0002_Br_P_EX.varscanSomatic_Total_CN.seg	TEST_0002	TEST_0002_Br_R_EX_1
+TEST_0003_Br_P_EX.varscanSomatic_Total_CN.seg	TEST_0003	TEST_0003_Br_R_EX_1
+TEST_0004_Br_P_EX.varscanSomatic_Total_CN.seg	TEST_0004	TEST_0004_Br_R_EX_1
+TEST_0005_Br_P_EX.varscanSomatic_Total_CN.seg	TEST_0005	TEST_0005_Br_R_EX_1

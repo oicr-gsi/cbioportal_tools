@@ -91,6 +91,8 @@ class TestGenerator(TestStudy):
         for key in argsDict.keys():
             setattr(self.args, key, argsDict[key])
 
+    ### test legacy copy number alteration pipelines ###
+
     def test_CAP_CNA_dry_run(self):
         out_dir = os.path.join(self.tmp.name, 'CAP_CNA_dry_run')
         os.mkdir(out_dir)
@@ -109,7 +111,17 @@ class TestGenerator(TestStudy):
         self.args.out = out_dir
         main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
-            
+
+    def test_sequenza_dry_run(self):
+        out_dir = os.path.join(self.tmp.name, 'sequenza_dry_run')
+        os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, 'Sequenza', 'study.txt')
+        self.args.out = out_dir
+        main(self.args)
+        self.verify_checksums(self.base_checksums, out_dir)
+
+    ### test legacy expression pipelines ###
+
     def test_CAP_expression(self):
         out_dir = os.path.join(self.tmp.name, 'CAP_expression')
         os.mkdir(out_dir)
@@ -162,6 +174,8 @@ class TestGenerator(TestStudy):
         main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
 
+    ### test legacy mutation pipelines ###
+        
     def test_legacy_mutation_dry_run(self):
         """test the legacy mutation scripts in dry-run mode"""
         names = [

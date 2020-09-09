@@ -1,27 +1,33 @@
-from support import helper
-from analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id
+"""Process Sequenza data"""
 
 def main():
     global meta_config
     global study_config
     global janus_path
-    global verb
+    global logger
 
-    helper.working_on(verb, message='Gathering and decompressing SEG files into temporary folder')
-    helper.decompress_to_temp(meta_config, study_config, verb)
-    helper.working_on(verb)
+    import logging
 
-    helper.working_on(verb, message='Fixing Chromosome numbering ...')
+    from support import helper
+    from analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id
+
+    verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
+
+    logger.info('Gathering and decompressing SEG files into temporary folder, and updating config')
+    meta_config = helper.relocate_inputs(meta_config, study_config, verb)
+    logger.info('Done.')
+
+    logger.info('Fixing Chromosome numbering ...')
     fix_chrom(meta_config, study_config, verb)
-    helper.working_on(verb)
+    logger.info('Done.')
 
-    helper.working_on(verb, message='Fixing .SEG IDs')
+    logger.info('Fixing .SEG IDs')
     fix_seg_id(meta_config, study_config, verb)
-    helper.working_on(verb)
+    logger.info('Done.')
 
-    helper.working_on(verb, message='Concatenating SEG Files to export folder')
+    logger.info('Concatenating SEG Files to export folder')
     helper.concat_files(meta_config, study_config, verb)
-    helper.working_on(verb)
+    logger.info('Done.')
 
 
 if __name__ == '__main__':
