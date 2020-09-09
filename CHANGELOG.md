@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-## Unreleased
+## v0.0.4: 2020-09-09
 ### Added
 - GRD-273: Enabled and added tests for:
   - `MUTATION_EXTENDED/CAP_CNA.py`
@@ -14,6 +14,7 @@ CHANGELOG
   - R scripts and data files are now installed by `setup.py`
   - Data files for legacy pipeline scripts default to source tree versions; some can be overridden in config
   - Clean up execution of `seg2gene.r`
+  - Refactoring and test for main `janus.py` script
 - GRD-284: If FASTA reference is not in config file, try to find from environment module
 - GRD-284: Refactor `decompress_to_temp` method
   - Rename to `relocate_inputs`; eliminate system calls; make config update explicit; add test
