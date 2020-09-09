@@ -1,0 +1,12 @@
+---
+#building:
+#  toolbox:
+#    hammer: 'sledgehammer'
+#  bookshelf:
+#  - 'Frankenstein'
+#  - 'Dracula'
+#  - 'Pride and Prejudice and Zombies'
+#name: 'Castle Frankenstein'
+---
+FOO	BAR	BAZ
+dracula	mummy	werewolf

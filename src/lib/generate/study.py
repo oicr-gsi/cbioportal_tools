@@ -14,7 +14,7 @@ class study(base):
 
     def __init__(self, config_path, log_level=logging.WARNING, log_path=None):
         self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__), log_path)
-        config = study_config(config_path, log_level)
+        config = study_config(config_path, log_level=log_level)
         self.study_id = config.get_cancer_study_identifier()
         self.study_meta = self.get_study_meta(config) # required
         self.clinical_data = self.get_clinical_data(config) # sample data is required

@@ -1,0 +1,19 @@
+---
+#building:
+#  bookshelf:
+#  - Frankenstein
+#  - Dracula
+#  - Pride and Prejudice and Zombies
+#  chair: 'scalar: REQUIRED'
+#  pantry:
+#  - Eye of newt
+#  - Toe of frog
+#  toolbox:
+#    flux_capacitor: 'scalar: OPTIONAL: Makes time travel possible'
+#    hammer: 'scalar: REQUIRED: Universal tool of last resort'
+#description: 'scalar: OPTIONAL'
+#input_path: 'scalar: REQUIRED'
+#name: 'scalar: REQUIRED'
+---
+FOO	BAR	BAZ
+foo_value	bar_value	baz_value

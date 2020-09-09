@@ -4,12 +4,17 @@ import argparse, hashlib, logging, os, tempfile, unittest
 
 import pandas as pd
 
-from generate import generator
 from generate.study import study
 from support.helper import concat_files, relocate_inputs
+from utilities.config import config
+from utilities.main import main
+from utilities.schema import schema
 
 class TestBase(unittest.TestCase):
 
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix='janus_test_')
+    
     def verify_checksums(self, checksums, out_dir):
         """Checksums is a dictionary: md5sum -> relative path from output directory """
         for relative_path in checksums.keys():
@@ -25,6 +30,19 @@ class TestBase(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+class TestScript(TestBase):
+    """Minimal test of command-line script; other tests run the main() method"""
+
+    def setUp(self):
+        super().setUp()
+        self.testDir = os.path.dirname(os.path.realpath(__file__))
+        self.scriptName = 'janus.py'
+        self.scriptPath = os.path.join(self.testDir, os.pardir, 'bin', self.scriptName)
+
+    def test_compile(self):
+        with open(self.scriptPath, 'rb') as inFile:
+            compiled = compile(inFile.read(), self.scriptName, 'exec')
+        self.assertTrue(True, 'Script compiled without error')
 
 class TestStudy(TestBase):
 
@@ -55,13 +73,12 @@ class TestStudy(TestBase):
         test_study.write_all(out_dir, dry_run=True)
         self.verify_checksums(self.base_checksums, out_dir)
 
-
-
 class TestGenerator(TestStudy):
 
     def setUp(self):
         super().setUp()
         argsDict = {
+            "which": "generate",
             "config": None, # placeholder
             "out": None, # placeholder
             "force": False,
@@ -79,7 +96,7 @@ class TestGenerator(TestStudy):
         os.mkdir(out_dir)
         self.args.config = os.path.join(self.dataDir, 'CAP_CNA', 'study.txt')
         self.args.out = out_dir
-        generator.main(self.args)
+        main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
 
     def test_CAP_CNA(self):
@@ -90,7 +107,7 @@ class TestGenerator(TestStudy):
         self.args.dry_run = False
         self.args.config = os.path.join(self.dataDir, 'CAP_CNA', 'study.txt')
         self.args.out = out_dir
-        generator.main(self.args)
+        main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
             
     def test_CAP_expression(self):
@@ -99,7 +116,7 @@ class TestGenerator(TestStudy):
         self.args.config = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
         self.args.out = out_dir
         self.args.dry_run = False
-        generator.main(self.args)
+        main(self.args)
         checksums = self.base_checksums.copy()
         CAP_expression_checksums = {
             'data_expression_continous.txt': 'e2b50dc44307e0b9bee27d253b02c6d9',
@@ -116,8 +133,8 @@ class TestGenerator(TestStudy):
         os.mkdir(out_dir)
         self.args.config = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
         self.args.out = out_dir
-        self.args.dry_run = False
-        generator.main(self.args)
+        self.args.dry_run = True
+        main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
 
     def test_cufflinks(self):
@@ -126,7 +143,7 @@ class TestGenerator(TestStudy):
         self.args.config = os.path.join(self.dataDir, 'Cufflinks', 'study.txt')
         self.args.out = out_dir
         self.args.dry_run = False
-        generator.main(self.args)
+        main(self.args)
         checksums = self.base_checksums.copy()
         cufflinks_checksums = {
             'data_expression_continous.txt': '0b5d72e82f10637dd791a35a85f08349',
@@ -142,7 +159,7 @@ class TestGenerator(TestStudy):
         os.mkdir(out_dir)
         self.args.config = os.path.join(self.dataDir, 'Cufflinks', 'study.txt')
         self.args.out = out_dir
-        generator.main(self.args)
+        main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
 
     def test_legacy_mutation_dry_run(self):
@@ -160,7 +177,7 @@ class TestGenerator(TestStudy):
             os.mkdir(out_dir)
             self.args.config = os.path.join(self.dataDir, name, 'study.txt')
             self.args.out = out_dir
-            generator.main(self.args)
+            main(self.args)
             self.verify_checksums(self.base_checksums, out_dir)
 
     def test_CAP_mutation(self):
@@ -206,7 +223,7 @@ class TestGenerator(TestStudy):
         self.args.config = os.path.join(self.dataDir, name, 'study.txt')
         self.args.out = out_dir
         self.args.dry_run = False
-        generator.main(self.args)
+        main(self.args)
         checksums = self.base_checksums.copy()
         checksums.update(additional_checksums)
         self.verify_checksums(checksums, out_dir)
@@ -265,6 +282,61 @@ class mock_legacy_config:
         self.type_config = type_config
         self.datahandler = datahandler
         self.alterationtype = alterationtype
+
+class TestSchema(TestBase):
+
+    """Test the configuration schema: Validation and template generation"""
+
+    def setUp(self):
+        self.testDir = os.path.dirname(os.path.realpath(__file__))
+        self.dataDir = os.path.join(self.testDir, 'data', 'schema')
+        self.schema_path = os.path.join(self.dataDir, 'schema1.yaml')
+        self.tmp = tempfile.TemporaryDirectory(prefix='janus_schema_test_')
+
+    def test_template(self):
+        test_schema = schema(self.schema_path)
+        out_dir = os.path.join(self.tmp.name, 'template')
+        out_dir = '/tmp/janus'
+        os.mkdir(out_dir)
+        out_names = ['template%i.txt' % i for i in [1,2,3]]
+        template_paths = [os.path.join(out_dir, out_name) for out_name in out_names]
+        with open(template_paths[0], 'w') as out_file:
+            test_schema.write_template(out_file, describe=False, req_keys=False) # vanilla
+        with open(template_paths[1], 'w') as out_file:
+            test_schema.write_template(out_file, describe=True, req_keys=False) # more description
+        with open(template_paths[2], 'w') as out_file:
+            test_schema.write_template(out_file, describe=True, req_keys=True) # even more description
+        for template_path in template_paths:
+            self.assertTrue(os.path.exists(template_path))
+        checksums = {
+            out_names[0]: '204860499235bb35448a8b92b62dd07c',
+            out_names[1]: 'e0b42022e72ed6e9214b311a45e40841',
+            out_names[2]: 'd808e432b81220c103badac36d19cbdb'
+        }
+        self.verify_checksums(checksums, out_dir)
+
+    def test_validate_syntax(self):
+        for good_config in [
+                'good_config1.txt', # fully specified config
+                'good_config2.txt', # missing optional scalar
+                'good_config3.txt', # missing optional dictionary
+                'good_config4.txt', # has optional list
+        ]:
+            config_path = os.path.join(self.dataDir, good_config)
+            test_config = config(config_path, self.schema_path, log_level=logging.WARN)
+            self.assertTrue(test_config.validate_syntax())
+        for bad_config in [
+                'bad_config1.txt', # unexpected scalar keys
+                'bad_config2.txt', # missing required scalar
+                'bad_config3.txt', # extra body column
+                'bad_config4.txt', # missing body column
+                'bad_config5.txt', # missing required dictionary
+                'bad_config6.txt', # unexpected dictionary key
+                'bad_config7.txt', # mismatched list contents
+        ]:
+            config_path = os.path.join(self.dataDir, bad_config)
+            test_config = config(config_path, self.schema_path, log_level=logging.ERROR)
+            self.assertFalse(test_config.validate_syntax())
 
 
 if __name__ == '__main__':

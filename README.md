@@ -50,9 +50,13 @@ Example study input appears in the `study_input` subdirectory.
 
 The main script is `janus.py`, which is copied to the `bin` subdirectory of the installation. Run `janus.py --help` for usage information.
 
-### Config files
+### Config files and schemas
 
-Study generation requires a master config file, and a number of subsidiary config files. Config file format is CSVY, documented in [config_format.md](./doc/config_format.md). Documentation of required variables for each config file type is TBD, but the examples in `study_input` can be used as templates.
+Study generation requires a master config file, and a number of subsidiary config files. Config file format is CSVY, documented in [config_format.md](./doc/config_format.md).
+
+Config file structure may be specified using a _schema_, documented in [schema.md](./doc/schema.md).
+
+Example config files for various pipelines are in `study_input`.
 
 ### Data files
 

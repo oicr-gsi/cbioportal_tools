@@ -21,3 +21,13 @@ See the [CSVY](http://csvy.org) homepage for a full specification. In brief, the
 - The first line of the TSV body contains column headers.
 - The second and subsequent lines of the TSV body contain data fields.
 - Lines in the TSV body which begin with `#` are interpreted as comments and ignored.
+
+## Schema for Janus config files
+
+The content of a Janus config file may be defined by a _schema_.
+
+A schema allows us to:
+- Validate that a config file is in the correct format
+- Write a template to use for creating a new config file
+
+See [schema.md](./doc/schema.md) for details.

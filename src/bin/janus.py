@@ -2,72 +2,76 @@
 
 """Main script to run the Janus tools"""
 
-# Python library imports
 import argparse
 import logging
 import sys
 
-# Janus tools
-from generate import generator
-from query import query
-from remove import remove
-from upload import importer
+from utilities.main import main
 
+GENERATE = 'Generate cBioPortal study from pipeline data. Requires '+\
+           'appropriate Janus configuration files.'
+TEMPLATE = 'Write a template Janus configuration file using a schema.'
+VALIDATE = 'Validate a Janus configuration file against a schema.'
+VALIDATE_EPILOG = 'Return code is 0 if valid, 1 otherwise. '+\
+                  'Run top-level script with --verbose or --debug option for more details.'
 
 def super_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description='janus.py: A toolkit for cBioPortal interaction. '+\
-                    'Supports generation of folders for upload; other prototype modes currently disabled.')
+        description='janus: A cBioPortal gateway')
     parser.add_argument('--debug', action='store_true', help="Even more verbose logging")
     parser.add_argument('--verbose', action='store_true', help="More verbose logging")
     parser.add_argument('-l', '--log-path', metavar='PATH', help='Path of file where '+\
                         'log output will be appended. Optional, defaults to STDERR.')
+    subparsers = parser.add_subparsers(title='Janus subcommands', dest='which')
 
-    subparsers = parser.add_subparsers(title='Janus a set of cBioPortal Tools',
-                                       description='Current set of tools',
-                                       dest='which')
-
-    subparsers.add_parser('generator',
-                          add_help=False,
-                          parents=[generator.define_parser()],
-                          help='Generator Functions for generating whole studies from data pipelines. '
-                               'Will require configuration of study configuration files')
-    """
-    # deprecated for now -- may reinstate later
-    subparsers.add_parser('import',
-                          add_help=False,
-                          parents=[importer.define_parser()],
-                          help='Importer for complete studies or gene_panels. Requires a cBioPortal '
-                               'ready study or a complete gene_panel')
-    subparsers.add_parser('remove',
-                          add_help=False,
-                          parents=[remove.define_parser()],
-                          help='Removal tool for studies. Requires study_id of particular study')
-    subparsers.add_parser('query',
-                          add_help=False,
-                          parents=[query.define_parser()],
-                          help='Query tool for gene_panels and cancer_type. Requires password to root MySQL user')
-    """
+    # 'help' appears in main help, 'description' in subparser help
+    add_generation_arguments(
+        subparsers.add_parser('generate', description=GENERATE, help=GENERATE)
+    )
+    add_template_arguments(
+        subparsers.add_parser('template', description=TEMPLATE, help=TEMPLATE)
+    )
+    add_validation_arguments(
+        subparsers.add_parser('validate', description=VALIDATE, help=VALIDATE, epilog=VALIDATE_EPILOG)
+    )
     return parser
 
-def main():
+def add_generation_arguments(parser):
+    parser.add_argument("-d", "--dry-run",
+                          action="store_true",
+                          help="Dry-run mode; write sample, patient, and metadata files, but "+\
+                          "do not process pipeline data. Used for rapid testing and sanity-checking.")
+    parser.add_argument("-f", "--force",
+                          action="store_true",
+                          help="Force overwrite of output folder; delete previous contents, if any.")
+    required = parser.add_argument_group('required arguments')
+    required.add_argument("-c", "--config", help="Path to study config file",
+                          metavar='PATH', required=True)
+    required.add_argument("-o", "--out", help="Directory for study output",
+                          metavar='PATH', required=True)
+
+def add_template_arguments(parser):
+    parser.add_argument("-d", "--describe",
+                        action="store_true",
+                        help="Print additional description for scalars, if available")
+    parser.add_argument("-m", "--modify-keys",
+                        action="store_true",
+                        help="Modify template keys to show if list/dictionary entries are required. "+\
+                        "Keys must then be edited to make template valid with respect to schema.")
+    parser.add_argument("-o", "--out", help="Path to output file, or - for STDOUT",
+                        metavar='PATH', required=True)
+    parser.add_argument("-s", "--schema", help="Path to Janus schema file",
+                        metavar='PATH', required=True)
+
+def add_validation_arguments(parser):
+    parser.add_argument("-c", "--config", help="Path to Janus config file",
+                        metavar='PATH', required=True)
+    parser.add_argument("-s", "--schema", help="Path to Janus schema file",
+                        metavar='PATH', required=True)
+
+if __name__ == '__main__':
     parser = super_parser()
-    args = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
-
-    if args.which == 'generator':
-        generator.main(args)
-    """
-    # deprecated modes -- may reinstate later
-    elif args.which == 'import':
-        importer.main(args)
-    elif args.which == 'remove':
-        remove.main(args)
-    elif args.which == 'query':
-        query.main(args)
-    """
-
-if __name__ == '__main__':
-    main()
+    main(parser.parse_args())

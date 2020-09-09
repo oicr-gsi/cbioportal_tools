@@ -1,0 +1,13 @@
+---
+#building:
+#  chair: 'armchair'
+#  bookshelf:
+#  - 'Frankenstein'
+#  - 'Dracula'
+#  - 'Pride and Prejudice and Zombies'
+#description: 'A dark and forbidding edifice high on a mountain crag'
+#input_path: '/home/victor/castle.json'
+#name: 'Castle Frankenstein'
+---
+FOO	BAR	BAZ
+dracula	mummy	werewolf

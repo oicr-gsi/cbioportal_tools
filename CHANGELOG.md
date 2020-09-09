@@ -6,6 +6,9 @@ CHANGELOG
 - GRD-273: Enabled and added tests for:
   - `MUTATION_EXTENDED/CAP_CNA.py`
   - `MRNA_EXPRESSION/Cufflinks.py`
+- GRD-279: Validate and generate templates for config files
+  - Schema class added, with tests
+  - Documentation in [/doc/schema.md](./doc/schema.md).
 ### Changed
 - GRD-284: Install and read accessory files
   - R scripts and data files are now installed by `setup.py`

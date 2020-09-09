@@ -1,0 +1,28 @@
+body:
+  - PATIENT_ID
+  - SAMPLE_ID
+head:
+  datatypes:
+    type: constant_list
+    required: true
+    contents:
+      - STRING
+      - STRING
+  descriptions:
+    type: constant_list
+    required: true
+    contents:
+      - "Patient Identifier"
+      - "Sample Identifier"
+  display_names:
+    type: constant_list
+    required: true
+    contents:
+      - "Patient Identifier"
+      - "Sample Identifier"
+  priorities:
+    type: constant_list
+    required: true
+    contents:
+      - "1"
+      - "1"

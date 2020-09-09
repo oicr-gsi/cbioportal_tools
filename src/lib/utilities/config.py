@@ -10,34 +10,42 @@ import yaml
 
 import utilities.constants
 from utilities.base import base
+from utilities.schema import schema
 
 class config(base):
-
-    # TODO validate the CSV contents against a schema, eg. using https://pypi.org/project/csvvalidator/
-
-    # The optional YAML header block must:
-    # - be at the start of the file
-    # - start and finish with a line consisting of only '...' or '---'
-    # - have body lines which each start with a #
-    #
-    # Outwith the header, a line starting with # is treated as a comment and ignored
 
     REQUIRED_META_FIELDS = []
     OPTIONAL_META_FIELDS = []
     
-    def __init__(self, input_path, log_level=logging.WARNING, name=None, strict=False):
-        if name == None:
-            name = "%s.%s"% (__name__, type(self).__name__)
-        self.logger = self.get_logger(log_level, name)
+    def __init__(self, input_path, schema_path=None, log_level=logging.WARNING, log_name=None,
+                 log_path=None):
+        if log_name == None:
+            log_name = "%s.%s"% (__name__, type(self).__name__)
+        self.logger = self.get_logger(log_level, log_name, log_path)
+        self.input_path = input_path
+        if schema_path != None:
+            self.schema = schema(schema_path, log_level=log_level)
+        else:
+            self.schema = None
         self.config_dir = os.path.abspath(os.path.dirname(input_path))
         [self.meta, skip_total] = self.read_meta(input_path)
-        if strict:
-            self.validate_meta_fields()
         self.table = pd.read_csv(input_path, sep="\t", comment="#", skiprows=skip_total)
+        if self.table.isnull().values.any():
+            self.logger.warning("Body of %s has null values" % input_path)
 
     def data_as_tsv(self):
         return self.table.to_csv(sep="\t", index=False)
 
+    def contents_equal(self, other):
+        """Check if contents equal with another config"""
+        try:
+            equal = self.meta == other.get_meta() and self.table.equals(other.get_table())
+        except AttributeError as err:
+            msg = "Attribute not found. Attempting to compare with a non-config object? "+str(err)
+            self.logger.error(msg)
+            raise
+        return equal
+    
     def get_meta(self):
         return self.meta
 
@@ -81,25 +89,22 @@ class config(base):
         meta = yaml.safe_load(''.join(yaml_lines))
         return (meta, skip_rows)
 
-    def validate_meta_fields(self):
-        missing_required = []
-        for field in self.REQUIRED_META:
-            if not self.meta.has_key(field):
-                missing_required.append(field)
-        expected_fields = set()
-        expected_fields.update(self.REQUIRED_META)
-        expected_fields.update(self.OPTIONAL_META)
-        unexpected = []
-        for field in self.meta.keys():
-            if field not in self.expected_fields():
-                unexpected.append(field)
-        if len(unexpected) > 0:
-            self.logger.warn('Unexpected metadata fields found: '+', '.join(unexpected))
-        if len(missing_required) > 0:
-            msg = 'Missing required metadata fields: '+', '.join(missing_required)
-            self.logger.error(msg)
-            raise JanusConfigError(msg)
-
+    def validate_syntax(self):
+        """Validate header and body syntax against the schema"""
+        if self.schema == None:
+            raise JanusConfigError("Cannot validate syntax because no schema is specified")
+        if self.schema.has_head():
+            meta_valid = self.schema.validate_meta(self.meta, os.path.basename(self.input_path))
+        else:
+            self.logger.info("No header specified in schema, omitting metadata validation")
+            meta_valid = True
+        body_valid = self.schema.validate_table(self.table, os.path.basename(self.input_path))
+        valid = meta_valid and body_valid
+        if valid:
+            self.logger.info("Config syntax for %s is valid" % self.input_path)
+        else:
+            self.logger.warning("Config syntax for %s IS NOT valid" % self.input_path)
+        return valid
 
 class legacy_config_wrapper(base):
 
@@ -129,3 +134,4 @@ class legacy_config_wrapper(base):
 
 class JanusConfigError(Exception):
     pass
+

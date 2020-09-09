@@ -1,0 +1,23 @@
+body:
+- ALTERATIONTYPE
+- DATAHANDLER
+- FILE_NAME
+head:
+  cancer_study_identifier:
+    required: true
+    type: scalar
+  description:
+    required: true
+    type: scalar
+  name:
+    required: true
+    type: scalar
+  output_folder:
+    required: true
+    type: scalar
+  short_name:
+    required: true
+    type: scalar
+  type_of_cancer:
+    required: true
+    type: scalar

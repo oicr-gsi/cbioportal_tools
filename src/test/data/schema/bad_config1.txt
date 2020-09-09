@@ -1,0 +1,15 @@
+---
+#building:
+#  toolbox:
+#    hammer: 'sledgehammer'
+#    explosive: 'dynamite'
+#  bookshelf:
+#  - 'Frankenstein'
+#  - 'Dracula'
+#  - 'Pride and Prejudice and Zombies'
+#monster_hunter: 'Van Helsing'
+#input_path: '/home/victor/castle.json'
+#name: 'Castle Frankenstein'
+---
+FOO	BAR	BAZ
+dracula	mummy	werewolf
