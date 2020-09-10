@@ -9,6 +9,7 @@ def main():
     import logging
 
     from support import helper
+    from generate import meta
     from generate.analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id
 
     verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
@@ -27,6 +28,10 @@ def main():
 
     logger.info('Concatenating SEG Files to export folder')
     helper.concat_files(meta_config, study_config, verb)
+    logger.info('Done.')
+
+    logger.info('Generating segments Meta ...')
+    meta.generate_meta_type(meta_config,study_config,logger)
     logger.info('Done.')
 
 

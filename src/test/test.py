@@ -102,9 +102,7 @@ class TestGenerator(TestStudy):
         self.verify_checksums(self.base_checksums, out_dir)
 
     def test_CAP_CNA(self):
-        #out_dir = os.path.join(self.tmp.name, 'CAP_CNA_dry_run')
-        # temporary out_dir to retain output
-        out_dir = os.path.join('/scratch2/users/ibancarz/cbioportal_tools/unittest', 'CAP_CNA')
+        out_dir = os.path.join(self.tmp.name, 'CAP_CNA_dry_run')
         os.mkdir(out_dir)
         self.args.dry_run = False
         self.args.config = os.path.join(self.dataDir, 'CAP_CNA', 'study.txt')
@@ -121,14 +119,19 @@ class TestGenerator(TestStudy):
         self.verify_checksums(self.base_checksums, out_dir)
 
     def test_sequenza(self):
-        #out_dir = os.path.join(self.tmp.name, 'sequenza')
-        out_dir = '/u/ibancarz/tmp/sequenza'
+        out_dir = os.path.join(self.tmp.name, 'sequenza')
         os.mkdir(out_dir)
         self.args.dry_run = False
         self.args.config = os.path.join(self.dataDir, 'Sequenza', 'study.txt')
         self.args.out = out_dir
         main(self.args)
-        self.verify_checksums(self.base_checksums, out_dir)
+        checksums = self.base_checksums.copy()
+        sequenza_checksums = {
+            'data_segments_concat.txt': 'ea71ab46e72eafaaec415f3ed1520c68',
+            'meta_segments.txt': '056bc1c506c856f52197389676d9a4d3'
+        }
+        checksums.update(sequenza_checksums)
+        self.verify_checksums(checksums, out_dir)
 
     ### test legacy expression pipelines ###
 
