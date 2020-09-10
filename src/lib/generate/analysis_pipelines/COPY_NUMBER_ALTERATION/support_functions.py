@@ -154,7 +154,7 @@ def fix_chrom(exports_config: Config.Config, study_config: Config.Config, logger
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
         output_temp = output_file + '.temp'
         cmd = 'awk \'NR>1 {{sub(/\\tchr/,"\\t")}} 1\' {} > {}; mv {} {}'.format(input_file, output_temp, output_temp, output_file)
-        logger.debug("fix_chrom command :"+cmd)
+        logger.debug("fix_chrom command: "+cmd)
         calls.append(subprocess.Popen(cmd, shell=True))
 
     exports_config.config_map['input_folder'] = seg_temp
