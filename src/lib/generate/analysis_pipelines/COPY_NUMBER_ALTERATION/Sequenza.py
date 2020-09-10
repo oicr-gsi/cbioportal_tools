@@ -9,7 +9,7 @@ def main():
     import logging
 
     from support import helper
-    from analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id
+    from generate.analysis_pipelines.COPY_NUMBER_ALTERATION.support_functions import fix_chrom, fix_seg_id
 
     verb = logger.isEnabledFor(logging.INFO) # TODO replace the 'verb' switch with logger
 

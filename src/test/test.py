@@ -120,6 +120,16 @@ class TestGenerator(TestStudy):
         main(self.args)
         self.verify_checksums(self.base_checksums, out_dir)
 
+    def test_sequenza(self):
+        #out_dir = os.path.join(self.tmp.name, 'sequenza')
+        out_dir = '/u/ibancarz/tmp/sequenza'
+        os.mkdir(out_dir)
+        self.args.dry_run = False
+        self.args.config = os.path.join(self.dataDir, 'Sequenza', 'study.txt')
+        self.args.out = out_dir
+        main(self.args)
+        self.verify_checksums(self.base_checksums, out_dir)
+
     ### test legacy expression pipelines ###
 
     def test_CAP_expression(self):

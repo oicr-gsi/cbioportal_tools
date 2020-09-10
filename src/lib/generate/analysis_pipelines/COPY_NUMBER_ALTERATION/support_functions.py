@@ -156,7 +156,7 @@ def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
         output_temp = output_file + '.temp'
         cmd = 'awk \'NR>1 {{sub(/\\tchr/,"\\t")}} 1\' {} > {}; mv {} {}'.format(input_file, output_temp, output_temp, output_file)
-        calls.append(subprocess.Popen(command, shell=True))
+        calls.append(subprocess.Popen(cmd, shell=True))
 
     exports_config.config_map['input_folder'] = seg_temp
     # Wait until Baked
@@ -187,11 +187,14 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
 
         output_temp = output_file + '.temp'
 
-        cmd = 'head -n 1 "{}" > {}; '.format(input_file, output_temp) +\
-              'cat  {} |'.format(input_file) +\
+        # use % instead of .format, otherwise {} chars for awk will confuse string interpolation
+        cmd = 'head -n 1 "%s" > %s; ' % (input_file, output_temp) +\
+              'cat  %s | ' % input_file +\
               'awk -F"\\t" \'NR>1 {{ OFS="\\t"; '+\
-              'print "{}", $2, $3, $4, $5, $6}}\' >> {}; '.format(sample_id, output_temp) +\
-              'mv {} {}'.format(output_temp, output_file)
+              'print "%s", $2, $3, $4, $5, $6}}\' >> %s; ' % (sample_id, output_temp) +\
+              'mv %s %s' % (output_temp, output_file)
+        import sys
+        print(cmd, file=sys.stderr)
         calls.append(subprocess.Popen(cmd, shell=True))
 
     exports_config.config_map['input_folder'] = seg_temp
