@@ -139,9 +139,8 @@ def ProcCNA(meta_config: Config.Config, study_config: Config.Config, genebed, ge
         else:
             print('{} wrong file or file path'.format(data_path))
 
-def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
-    # Append 'chr' to chromosome if needed
-    # Gather ingredients
+def fix_chrom(exports_config: Config.Config, study_config: Config.Config, logger):
+    """Append 'chr' to chromosome if needed"""
     calls = []
     output_folder = study_config.config_map['output_folder']
     input_folder = exports_config.config_map['input_folder']
@@ -149,28 +148,25 @@ def fix_chrom(exports_config: Config.Config, study_config: Config.Config, verb):
 
     seg_temp = helper.get_temp_folder(output_folder, 'seg')
 
-    # Cook
     for i in range(len(export_data)):
-        helper.working_on(verb, 'Removing chr from {}'.format(export_data['FILE_NAME'][i]))
+        logger.info('Removing chr from {}'.format(export_data['FILE_NAME'][i]))
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
         output_temp = output_file + '.temp'
         cmd = 'awk \'NR>1 {{sub(/\\tchr/,"\\t")}} 1\' {} > {}; mv {} {}'.format(input_file, output_temp, output_temp, output_file)
+        logger.debug("fix_chrom command :"+cmd)
         calls.append(subprocess.Popen(cmd, shell=True))
 
     exports_config.config_map['input_folder'] = seg_temp
-    # Wait until Baked
     exit_codes = [p.wait() for p in calls]
-    # Clean up
     if any(exit_codes):
-        raise ValueError('ERROR:: Something went wrong when parsing Segmented format file? Please resolve the issue')
-    if verb:
-        print(exit_codes)
+        message = "Non-zero value for one or more fix_chrom exit codes: "+str(exit_codes)
+        logger.error(message)
+        raise ValueError(message)
 
+def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, logger):
+    """Replace whatever ID is there with the Sample_ID"""
 
-def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb):
-    # Replace whatever ID is there with the Sample_ID
-    # Gather ingredients
     calls = []
     output_folder = study_config.config_map['output_folder']
     input_folder = exports_config.config_map['input_folder']
@@ -179,7 +175,7 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
     seg_temp = helper.get_temp_folder(output_folder, 'seg')
 
     for i in range(len(export_data)):
-        helper.working_on(verb, 'Resolving Sample_ID {}'.format(export_data['FILE_NAME'][i]))
+        logger.info('Resolving Sample_ID {}'.format(export_data['FILE_NAME'][i]))
 
         input_file = os.path.join(input_folder, export_data['FILE_NAME'][i])
         output_file = os.path.join(seg_temp, export_data['FILE_NAME'][i])
@@ -193,16 +189,15 @@ def fix_seg_id(exports_config: Config.Config, study_config: Config.Config, verb)
               'awk -F"\\t" \'NR>1 {{ OFS="\\t"; '+\
               'print "%s", $2, $3, $4, $5, $6}}\' >> %s; ' % (sample_id, output_temp) +\
               'mv %s %s' % (output_temp, output_file)
-        import sys
-        print(cmd, file=sys.stderr)
+        logger.debug("seg_id command: "+cmd)
         calls.append(subprocess.Popen(cmd, shell=True))
 
     exports_config.config_map['input_folder'] = seg_temp
     exit_codes = [p.wait() for p in calls]
     if any(exit_codes):
-        raise ValueError('ERROR:: Something went wrong when parsing Segmented format file? Please resolve the issue')
-    if verb:
-        print(exit_codes)
+        message = "Non-zero value for one or more seg_id exit codes: "+str(exit_codes)
+        logger.error(message)
+        raise ValueError(message)
 
 
 def fix_hmmcopy_tsv(exports_config: Config.Config, study_config: Config.Config, verb):

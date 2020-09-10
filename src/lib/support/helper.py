@@ -66,12 +66,11 @@ def clean_folder(path,force):
     else:
         os.makedirs(path)
 
-def working_on(verbose, message='Success reported via deprecated working_on() method'):
-    # Method is for verbose option. Prints Success if no parameter specified
+def working_on(verbose, message='Success reported.'):
     logger = logging.getLogger(__name__)
     logger = configure_logger(logger, verbose=verbose)
     logger.warning("Use of deprecated 'working_on' method")
-    logger.info(message)
+    logger.info("Via deprecated working_on(): "+message)
 
 def get_temp_folder(output_folder, ext) -> str:
     return os.path.abspath(os.path.join(output_folder, 'temp/temp_{}/'.format(ext)))

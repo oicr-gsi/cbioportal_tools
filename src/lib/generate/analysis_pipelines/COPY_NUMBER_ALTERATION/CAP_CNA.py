@@ -33,11 +33,11 @@ def main():
     logger.info('Done.')
 
     logger.info('Fixing Chromosome numbering ...')
-    fix_chrom(meta_config, study_config, verb)
+    fix_chrom(meta_config, study_config, logger)
     logger.info('Done.')
     
     logger.info('Fixing .SEG IDs')
-    fix_seg_id(meta_config, study_config, verb)
+    fix_seg_id(meta_config, study_config, logger)
     logger.info('Done.')
 
     logger.info('Concatenating SEG Files to export folder')
