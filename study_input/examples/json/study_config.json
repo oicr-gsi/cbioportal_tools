@@ -1,0 +1,74 @@
+{
+    "study_meta": {
+	"type_of_cancer": "ductal carcinoma",
+	"cancer_study_identifier": "janus_test_001",
+	"name": "Janus Test 001",
+	"description": "Test of Janus software package (September 2020)",
+	"citation": null,
+	"pmid": null,
+	"short_name": "Janus 001",
+	"groups": null,
+	"add_global_case_list": true,
+	"tags_file": null,
+	"reference_genome": null
+    },
+    "cancer_type": {
+	"data_file": null
+    },
+    "sample_attribute_meta": {
+	"display_names": ["Patient identifier", "Sample identifier"],
+	"descriptions": ["Patient identifier", "Sample identifier"],
+	"datatypes": ["STRING", "STRING"],
+	"priorities": [1,1],
+	"names": ["PATIENT_ID", "SAMPLE_ID"]
+    },
+    "samples": [
+	{
+	    "PATIENT_ID": "OCT-01-0118",
+	    "SAMPLE_ID": "OCT-01-0118-CAP",
+	},
+	{
+	    "PATIENT_ID": "OCT-01-0266",
+	    "SAMPLE_ID": "OCT-01-0266-CAP",
+	},
+	{
+	    "PATIENT_ID": "OCT-01-0384",
+	    "SAMPLE_ID": "OCT-01-0394-CAP",
+	}
+    ],
+    "case_lists": [
+	{
+	    "stable_id_suffix": "custom",
+	    "case_list_name": "janus_example",
+	    "case_list_description": "Example case list for Janus",
+	    "case_list_ids": [
+		"OCT-01-0118-CAP",
+		"OCT-01-0394-CAP"
+	    ]
+	}
+    ],
+    "genetic alterations": [
+	{
+	    "genetic_alteration_type": "COPY_NUMBER_ALTERATION",
+	    "datatype": "SEG",
+	    "output_meta": {
+		"description": "CAP_CNA Copy Number Variations from whole exome sequencing. (10 Samples)",
+		"reference_genome_id": "hg19"
+	    },
+	    "input_meta": {
+		"pipeline": "CAP_CNA",
+		"typec": "mixed",
+		"gain": 0.3,
+		"ampl": 0.7,
+		"htzd": -0.3,
+		"hmzd": -0.7,
+		"oncokb_api_token": "e326982a-02ba-4f04-8ef6-80b04fa74acd"
+	    },
+	    "input_files": {
+		"OCT-01-0118-CAP": "OCT-01-0118-CAP.tumour.bam.varscanSomatic_Total_CN.seg",
+		"OCT-01-0266-CAP": "OCT-01-0266-CAP.tumour.bam.varscanSomatic_Total_CN.seg",
+		"OCT-01-0384-CAP": "OCT-01-0384-CAP.tumour.bam.varscanSomatic_Total_CN.seg"
+	    }
+	}
+    ]
+}
