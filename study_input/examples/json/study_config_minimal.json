@@ -1,40 +1,5 @@
 {
-    "study_meta": {
-	"type_of_cancer": "ductal carcinoma",
-	"cancer_study_identifier": "janus_test_001",
-	"name": "Janus Test 001",
-	"description": "Test of Janus software package (September 2020)",
-	"citation": null,
-	"pmid": null,
-	"short_name": "Janus 001",
-	"groups": null,
-	"add_global_case_list": true,
-	"tags_file": null,
-	"reference_genome": null
-    },
-    "cancer_type": {
-	"data_file": null
-    },
-    "sample_attribute_meta": {
-	"display_names": ["Patient identifier", "Sample identifier"],
-	"descriptions": ["Patient identifier", "Sample identifier"],
-	"datatypes": ["STRING", "STRING"],
-	"priorities": [1,1],
-	"names": ["PATIENT_ID", "SAMPLE_ID"]
-    },
     "samples": [
-	{
-	    "PATIENT_ID": "OCT-01-0118",
-	    "SAMPLE_ID": "OCT-01-0118-CAP",
-	},
-	{
-	    "PATIENT_ID": "OCT-01-0266",
-	    "SAMPLE_ID": "OCT-01-0266-CAP",
-	},
-	{
-	    "PATIENT_ID": "OCT-01-0384",
-	    "SAMPLE_ID": "OCT-01-0394-CAP",
-	},
 	{
             "PATIENT_ID": "OCT-01-0472",
             "SAMPLE_ID": "OCT-01-0472-CAP",
@@ -60,39 +25,40 @@
             "sampleTMB": 82.38
         }
     ],
-    "case lists": [
-	{
-	    "stable_id_suffix": "custom",
-	    "case_list_name": "janus_example",
-	    "case_list_description": "Example case list for Janus",
-	    "case_list_ids": [
-		"OCT-01-0118-CAP",
-		"OCT-01-0394-CAP"
-	    ]
-	}
-    ],
     "genetic alterations": [
 	{
-	    "genetic_alteration_type": "COPY_NUMBER_ALTERATION",
-	    "datatype": "SEG",
-	    "oicr_workflow": "cap_varscan_2_1_1.niassawf",
+	    "genetic_alteration_type": "MUTATION_EXTENDED",
+	    "oicr_workflow": "cap_strelka2_somatic_0_1_0.niassawf",
+	    "datatype": "MAF",
 	    "metadata": {
-		"input_folder": "/.mounts/labs/gsiprojects/gsi/cBioGSI/tests/data/CAP_CNA",
-		"pipeline": "CAP_CNA",
-		"typec": "mixed",
-		"gain": 0.3,
-		"ampl": 0.7,
-		"htzd": -0.3,
-		"hmzd": -0.7,
+		"input_folder": "/.mounts/labs/gsiprojects/gsi/cBioGSI/tests/data/Strelka",
 		"oncokb_api_token": "e326982a-02ba-4f04-8ef6-80b04fa74acd",
-		"reference_genome_id": "hg19",
-		"profile_name": "CNVs (Ductal Carcinoma)",
-		"profile_description": "CAP_CNA Copy Number Variations from whole exome sequencing. (10 Samples)"
+		"filter_vcf: /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz"
 	    },
 	    "input_files": {
-		"OCT-01-0118-CAP": "OCT-01-0118-CAP.tumour.bam.varscanSomatic_Total_CN.seg",
-		"OCT-01-0266-CAP": "OCT-01-0266-CAP.tumour.bam.varscanSomatic_Total_CN.seg",
-		"OCT-01-0384-CAP": "OCT-01-0384-CAP.tumour.bam.varscanSomatic_Total_CN.seg"
+		"OCT-01-0472-CAP.sorted.filter.dedup.P.GID1.final.strelka.snvs.vcf.gz"
+	    }
+	},
+	    "genetic_alteration_type": "COPY_NUMBER_ALTERATION",
+	    "oicr_workflow": "cap_varscan_2_1_1.niassawf",
+	    "datatype": "SEG",
+	    "metadata": {
+		"input_folder": "/.mounts/labs/gsiprojects/gsi/cBioGSI/tests/data/CAP_CNA",
+		"oncokb_api_token": "e326982a-02ba-4f04-8ef6-80b04fa74acd"
+	    },
+	    "input_files": {
+		"OCT-01-0472-CAP": "OCT-01-0472-CAP.tumour.bam.varscanSomatic_Total_CN.seg"
+	    }
+	},
+	{
+	    "genetic_alteration_type": "COPY_NUMBER_ALTERATION",
+	    "oicr_workflow": "cap_varscan_2_1_1.niassawf",
+	    "datatype": "SEG",
+	    "metadata": {
+		"input_folder": "/.mounts/labs/gsiprojects/gsi/cBioGSI/tests/data/CAP_CNA",
+		"oncokb_api_token": "e326982a-02ba-4f04-8ef6-80b04fa74acd"
+	    },
+	    "input_files": {
 		"OCT-01-0472-CAP": "OCT-01-0472-CAP.tumour.bam.varscanSomatic_Total_CN.seg"
 	    }
 	},
@@ -112,9 +78,6 @@
 		"studyid": "OCTCAP"
 	    },
 	    "input_files": {
-		"OCT-01-0118-CAP": "OCT-01-0118-TS_191217_A00469_0073_BHWWL3DSXX_ATTCAGAA-ATAGAGGC_L004.genes.results",
-		"OCT-01-0266-CAP": "OCT-01-0266-TS_191217_A00469_0073_BHWWL3DSXX_CTGAAGCT-ATAGAGGC_L004.genes.results",
-		"OCT-01-0384-CAP": "OCT-01-0384-TS_191121_A00469_0067_BHK3JLDSXX_TAATGCGC-ATAGAGGC_L001.genes.results",
 		"OCT-01-0472-CAP": "OCT-01-0472-TS_191121_A00469_0067_BHK3JLDSXX_ATTCAGAA-CCTATCCT_L001.genes.results"
 	    }
 	}
