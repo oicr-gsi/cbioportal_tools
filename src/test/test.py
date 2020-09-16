@@ -1,9 +1,12 @@
 #! /usr/bin/env python3
 
-import argparse, hashlib, logging, os, tempfile, unittest
+import argparse, hashlib, logging, json, os, random, tempfile, unittest
 
 import pandas as pd
 
+from generate.genetic_alteration import genetic_alteration
+from generate.report import report
+from generate.sample import sample
 from generate.study import study
 from support.helper import concat_files, relocate_inputs
 from utilities.config import config
@@ -29,6 +32,35 @@ class TestBase(unittest.TestCase):
 
     def tearDown(self):
         self.tmp.cleanup()
+
+class TestReport(TestBase):
+    """Tests for clinical report outout"""
+
+    def setUp(self):
+        self.testDir = os.path.dirname(os.path.realpath(__file__))
+        self.dataDir = os.path.realpath(
+            os.path.join(self.testDir, os.pardir, os.pardir, 'study_input', 'examples')
+        )
+        self.tmp = tempfile.TemporaryDirectory(prefix='janus_report_test_')
+
+    def test_demo(self):
+        """Test with default 'demo' output of the genetic_alteration superclass"""
+        random.seed(42)
+        out_dir = os.path.join(self.tmp.name, 'test_report_demo')
+        #out_dir = '/tmp/janus_report'
+        os.mkdir(out_dir)
+        with open(os.path.join(self.dataDir, 'json', 'study_config.json')) as configFile:
+            config = json.loads(configFile.read())
+        test_sample = sample(config['samples'][0]) # use the first sample in the config
+        alterations = []
+        for alteration_config in config['genetic alterations']:
+            alterations.append(genetic_alteration(alteration_config))
+        report_name = 'sample_report.json'
+        report_path = os.path.join(out_dir, report_name)
+        report_config = report(test_sample, alterations).write_report_config(report_path)
+        self.assertTrue(os.path.exists(report_path), "JSON report exists")
+        checksum = {report_name: '3d444097ea07f45e625e4b52ea002fba'}
+        self.verify_checksums(checksum, out_dir)
 
 class TestScript(TestBase):
     """Minimal test of command-line script; other tests run the main() method"""
