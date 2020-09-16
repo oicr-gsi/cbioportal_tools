@@ -5,7 +5,7 @@ Setup script for Janus
 import os
 from setuptools import setup, find_packages
 
-package_version = '0.0.4'
+package_version = '0.0.5'
 package_root = 'src/lib'
 
 with open("README.md", "r") as fh:

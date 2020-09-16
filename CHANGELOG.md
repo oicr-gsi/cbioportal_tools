@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-## Unreleased
+## v0.0.5: 2020-09-16
 ### Added
 - GRD-273: Enabled and added tests for:
   - `COPY_NUMBER_ALTERATION/Sequenza.py`
