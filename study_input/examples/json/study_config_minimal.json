@@ -1,4 +1,28 @@
 {
+    "study_meta": {
+	"type_of_cancer": "ductal carcinoma",
+	"cancer_study_identifier": "janus_test_001",
+	"name": "Janus Test 001",
+	"description": "Test of Janus software package (September 2020)",
+	"citation": null,
+	"pmid": null,
+	"short_name": "Janus 001",
+	"groups": null,
+	"add_global_case_list": true,
+	"tags_file": null,
+	"reference_genome": null
+    },
+    "cancer_type": {
+	"data_file": null
+    },
+    "case lists": [],
+    "sample_attribute_meta": {
+	"display_names": ["Patient identifier", "Sample identifier"],
+	"descriptions": ["Patient identifier", "Sample identifier"],
+	"datatypes": ["STRING", "STRING"],
+	"priorities": [1,1],
+	"names": ["PATIENT_ID", "SAMPLE_ID"]
+    },
     "samples": [
 	{
             "PATIENT_ID": "OCT-01-0472",
@@ -33,12 +57,13 @@
 	    "metadata": {
 		"input_folder": "/.mounts/labs/gsiprojects/gsi/cBioGSI/tests/data/Strelka",
 		"oncokb_api_token": "e326982a-02ba-4f04-8ef6-80b04fa74acd",
-		"filter_vcf: /.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz"
+		"filter_vcf": "/.mounts/labs/gsiprojects/gsi/cBioGSI/data/reference/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz"
 	    },
 	    "input_files": {
-		"OCT-01-0472-CAP.sorted.filter.dedup.P.GID1.final.strelka.snvs.vcf.gz"
+		"OCT-01-0472-CAP": "OCT-01-0472-CAP.sorted.filter.dedup.P.GID1.final.strelka.snvs.vcf.gz"
 	    }
 	},
+	{
 	    "genetic_alteration_type": "COPY_NUMBER_ALTERATION",
 	    "oicr_workflow": "cap_varscan_2_1_1.niassawf",
 	    "datatype": "SEG",
@@ -66,7 +91,7 @@
 	    "genetic_alteration_type": "MRNA_EXPRESSION",
 	    "oicr_workflow": "CAP expression",
 	    "datatype": "MULTIPLE_TYPES",
-	    "datatypes": ["CONTINUOUS", "ZSCORE"]
+	    "datatypes": ["CONTINUOUS", "ZSCORE"],
 	    "metadata": {
 		"input_folder": "/.mounts/labs/gsiprojects/gsi/cBioGSI/tests-handlers/data/CAP_expression",
 		"zscores": true,
