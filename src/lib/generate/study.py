@@ -1,50 +1,74 @@
 """Class to represent a study directory, formatted for upload to cBioPortal"""
 
+import json
 import logging
 import os
 from shutil import rmtree
 
 
-from generate.components import alteration_type, cancer_type, case_list, study_meta, patients, samples
+from generate.components import alteration_type, cancer_type, case_list, study_meta, \
+    patients_component, samples_component,
+
 from generate.config import study_config
+
+from generate.sample import sample
+
 from utilities.base import base
 import utilities.constants
 
 class study(base):
 
+    CANCER_TYPE_KEY = 'cancer_type'
+    CASE_LISTS_KEY = 'case_lists'
+    GENETIC_ALTERATIONS_KEY = 'genetic_alterations'
+    SAMPLES_KEY = 'samples'
+    SAMPLES_META_KEY = 'samples_meta'
+    STUDY_ID_KEY = 'cancer_study_identifier'
+    STUDY_META_KEY = 'study_meta'
+    TYPE_OF_CANCER_KEY = 'type_of_cancer'
+    WRITE_PATIENTS_KEY = 'write_patients'
+
+    # 'cancer type' and 'type of cancer' are distinct terms in cBioPortal
+    # respectively, they are an output file format, and a string in study metadata
+    
     def __init__(self, config_path, log_level=logging.WARNING, log_path=None):
         self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__), log_path)
-        config = study_config(config_path, log_level=log_level)
-        self.study_id = config.get_cancer_study_identifier()
-        self.study_meta = self.get_study_meta(config) # required
-        self.clinical_data = self.get_clinical_data(config) # sample data is required
-        self.cancer_type = self.get_cancer_type(config)
-        self.pipelines = self.get_pipelines(config) # warn if empty
-        self.case_lists = self.get_case_lists(config)
+        with config_file as open(config_path, 'r'):
+            config = json.loads(config_file.read())
+        # TODO validate the config JSON
+        study_meta_config = config.get(self.STUDY_META_KEY)
+        self.study_id = study_meta_config.get(self.STUDY_ID_KEY)
+        type_of_cancer_string = study_meta_config.get(self.TYPE_OF_CANCER_KEY)
+        self.cancer_type = cancer_type(config.get(self.CANCER_TYPE_KEY), type_of_cancer_string)
+        self.study_meta = study_meta(study_meta_config)
+        
+        # TODO update case list handling
+        self.case_list_config = config.get(self.CASE_LISTS_KEY)                                       
 
-    def get_study_meta(self, config):
-        return study_meta(config)
+        # read sample info; cross-reference with attribute meta to get clinical data components
+        self.samples = []
+        for sample_json in config.get(self.SAMPLES_KEY):
+            self.samples.append(sample(sample_json))
 
-    def get_clinical_data(self, config):
-        # read sample data
-        sample_config_path = config.get_sample_config_path()
-        if sample_config_path == None:
-            msg = "Clinical sample data is required, but has not been configured"
-            self.logger.error(msg)
-            raise ValueError(msg)
-        sample_component = samples(sample_config_path, self.study_id)
-        # read optional patient data
-        patient_config_path = config.get_patient_config_path()
-        if patient_config_path == None:
-            patient_component = None
+        # get patient/sample data components
+        # TODO could allow patient/sample output to be configured independently
+        # But for now, use the same config for both
+        self.clinical_data = self.get_clinical_data(config.get(self.SAMPLES_META_KEY))
+
+
+
+        self.genetic_alterations = []
+        for genetic_alteration_json in config.get(self.GENETIC_ALTERATIONS_KEY):
+            self.genetic_alterations.append(genetic_alteration(genetic_alteration_json))
+
+    def get_clinical_data(self, samples_meta):
+        sc = samples_component(self.samples, samples_meta, self.study_id)
+        if samples_meta.get(self.WRITE_PATIENTS_KEY):
+            pc = patients_component(self.samples, samples_meta, self.study_id)
         else:
-            patient_component = patients(patient_config_path, self.study_id)
-        return [sample_component, patient_component]
+            pc = None
+        return [sc, pc]
     
-    def get_cancer_type(self, config):
-        type_of_cancer_string = self.study_meta.get('type_of_cancer')
-        return cancer_type(config.get_cancer_type_config_path(), type_of_cancer_string)
-
     def get_case_lists(self, config):
         # generate default case lists based on pipelines in study:
         # - case lists for alteration_types MAF, SEG, MRNA_EXPRESSION

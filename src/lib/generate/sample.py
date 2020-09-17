@@ -20,6 +20,9 @@ class sample(base):
             raise ValueError(msg)
         self.attributes = attributes
 
+    def get(self, key):
+        return self.attributes.get(key)
+        
     def get_attributes(self):
         return self.attributes
 

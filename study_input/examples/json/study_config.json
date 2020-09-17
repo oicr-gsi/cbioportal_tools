@@ -13,15 +13,22 @@
 	"reference_genome": null
     },
     "cancer_type": {
-	"data_file": null
+	"type_of_cancer": null,
+	"name": ["Ductal Carcinoma"],
+	"clinical_trial_keywords": ["carcinoma,ductal carcinoma"],
+	"dedicated_color": null,
+	"parent_type_of_cancer": ["tissue"],
+	"data_filename": "cancer_type.txt"
     },
-    "case lists": [],
-    "sample_attribute_meta": {
+    "case_lists": [],
+    "samples_meta": {
 	"display_names": ["Patient identifier", "Sample identifier"],
 	"descriptions": ["Patient identifier", "Sample identifier"],
 	"datatypes": ["STRING", "STRING"],
 	"priorities": [1,1],
-	"names": ["PATIENT_ID", "SAMPLE_ID"]
+	"attribute_names": ["PATIENT_ID", "SAMPLE_ID"],
+	"write_patients": true,
+	"precision": 3
     },
     "samples": [
 	{

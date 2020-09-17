@@ -129,52 +129,76 @@ class cancer_type(dual_output_component):
     META_FILENAME = 'meta_cancer_type.txt'
     COLOUR_FILENAME = 'cancer_colours.csv'
     DEFAULT_COLOUR = 'lavender' # default colour for general cancer awareness
-    CONFIG_NAME_KEY = 'NAME'
 
-    def __init__(self, cancer_type_config_path, cancer_type_string):
+    COLOR_KEY = 'dedicated_color'
+    DATA_FILENAME_KEY = 'data_filename_key'
+    KEYWORDS_KEY = 'clinical_trial_keywords'
+    NAME_KEY = 'name'
+    PARENT_KEY = 'parent_type_of_cancer'
+    TYPE_OF_CANCER_KEY = 'type_of_cancer'
+
+    def __init__(self, config, default_cancer_type_string=None):
         super().__init__()
-        # cancer_type_string is obtained from study metadata, used for "type_of_cancer" field
-        self.config = cancer_type_config(cancer_type_config_path)
-        self.cancer_type_string = cancer_type_string
-        config_table = self.config.get_table()
-        # generate the 'type_of_cancer' column from study metadata
-        rows, cols = config_table.shape
-        self.type_of_cancer_column = [self.cancer_type_string]*rows
+        # default_cancer_type_string is from study metadata, may be used for "type_of_cancer" field
+        self.config = config
+        # check config fields are consistent
+        self.rows = len(config.get(self.NAME_KEY))
+        for key in [self.KEYWORDS_KEY, self.PARENT_KEY, self.COLOR_KEY, self.TYPE_OF_CANCER_KEY]:
+            value = config.get(key)
+            if key in [self.COLOR_KEY, self.TYPE_OF_CANCER_KEY] and value == None:
+                pass # these values may be null
+            elif len(config.get(key)) != self.rows:
+                msg = "Incorrect number of fields for cancer_type config key %s" % key
+                self.logger.error(msg)
+                raise ValueError(msg)
+        # generate the 'type_of_cancer' column
+        if config.get(self.TYPE_OF_CANCER_KEY):
+            self.type_of_cancer_column = config.get(self.TYPE_OF_CANCER_KEY)
+        else:
+            self.type_of_cancer_column = [default_cancer_type_string]*self.rows
         # generate the 'colours' column; attempt to find a matching colour in reference file
-        components = [os.path.dirname(__file__), utilities.constants.DATA_DIRNAME, self.COLOUR_FILENAME]
-        colours = pd.read_csv(os.path.join(*components))
-        self.colours_column = []
-        for name in config_table[self.CONFIG_NAME_KEY].tolist():
-            # use .casefold() instead of .lower() to handle special cases
-            name_expr = re.compile(name.casefold())
-            candidate_colours = []
-            for index, row in colours.iterrows():
-                ref_name = row[self.CONFIG_NAME_KEY]
-                if name_expr.search(ref_name.casefold()):
-                    candidate_colours.append(row['COLOUR'])
-            distinct_colour_total = len(set(candidate_colours))
-            if distinct_colour_total == 0:
-                colour = self.DEFAULT_COLOUR_NAME
-            elif distinct_colour_total == 1:
-                colour = candidate_colours[0].casefold()
-            else:
-                colour = self.DEFAULT_COLOUR_NAME
-                msg = "Conflicting colour values found for cancer name "+\
-                      "'%s', defaulting to '%s'" % (name, colour)
-                self.logger.warning(msg)
-            self.colours_column.append(colour)
+        if config.get(self.COLOR_KEY):
+            self.colours_column = config.get(self.COLOR_KEY)
+        else:
+            # read colours reference as a pandas dataframe
+            ref_path = os.path.join(
+                os.path.dirname(__file__),
+                utilities.constants.DATA_DIRNAME,
+                self.COLOUR_FILENAME
+            )
+            colours = pd.read_csv(ref_path))
+            self.colours_column = []
+            for name in config.get(self.NAME_KEY):
+                # use .casefold() instead of .lower() to handle special cases
+                name_expr = re.compile(name.casefold())
+                candidate_colours = []
+                for index, row in colours.iterrows():
+                    ref_name = row[self.CONFIG_NAME_KEY]
+                    if name_expr.search(ref_name.casefold()):
+                        candidate_colours.append(row['COLOUR'])
+                distinct_colour_total = len(set(candidate_colours))
+                if distinct_colour_total == 0:
+                    colour = self.DEFAULT_COLOUR_NAME
+                elif distinct_colour_total == 1:
+                    colour = candidate_colours[0].casefold()
+                else:
+                    colour = self.DEFAULT_COLOUR_NAME
+                    msg = "Conflicting colour values found for cancer name "+\
+                          "'%s', defaulting to '%s'" % (name, colour)
+                    self.logger.warning(msg)
+                self.colours_column.append(colour)
 
     def write_data(self, out_dir):
-        table = pd.DataFrame()
-        config_table = self.config.get_table()
-        # assemble columns into the cancer_type data table
-        table.insert(0, 'type_of_cancer', self.type_of_cancer_column)
-        table.insert(1, 'name', config_table[self.CONFIG_NAME_KEY])
-        table.insert(2, 'clinical_trial_keywords', config_table['CLINICAL_TRIAL_KEYWORDS'])
-        table.insert(3, 'dedicated_color', self.colours_column)
-        table.insert(4, 'parent_type_of_cancer', config_table['PARENT_TYPE_OF_CANCER'])
         out = open(os.path.join(out_dir, self.DATA_FILENAME), 'w')
-        table.to_csv(out, sep="\t", header=False, index=False) # TODO check if header is required
+        for i in range(self.rows):
+            values = [
+                self.type_of_cancer_column[i],
+                self.config.get(self.NAME_KEY)[i],
+                self.config.get(self.KEYWORDS_KEY)[i],
+                self.colours_column[i],
+                self.config.get(self.PARENT_KEY)[i],
+            ]
+            print("\t".join(values), file=out)
         out.close()
 
     def write_meta(self, out_dir):
@@ -249,17 +273,46 @@ class clinical_data_component(dual_output_component):
     DATATYPE = '_placeholder_'
     DATA_FILENAME = '_data_placeholder_'
     META_FILENAME = '_meta_placeholder_'
+    DEFAULT_PRECISION = 3
+    
+    ATTRIBUTE_NAMES_KEY = 'attribute_names'
+    DATATYPES_KEY = 'datatypes'
+    DESCRIPTIONS_KEY = 'descriptions'
+    DISPLAY_NAMES_KEY = 'display_names'
+    PRIORITIES_KEY = 'priorities'
+    PRECISION_KEY = 'precision'
 
-    def __init__(self, clinical_config_path, study_id, log_level=logging.WARN):
+    def __init__(self, samples, samples_meta, study_id, log_level=logging.WARN):
         super().__init__(log_level)
         self.cancer_study_identifier = study_id
-        self.config = clinical_config(clinical_config_path)
+        self.samples = samples
+        self.samples_meta = samples_meta
+        self.precision = self.sample_meta.get(self.PRECISION_KEY, self.DEFAULT_PRECISION)
 
     def write_data(self, out_dir):
+        """Write header; then write selected attributes of samples"""
         out = open(os.path.join(out_dir, self.DATA_FILENAME), 'w')
-        for row in self.config.get_clinical_headers():
-            print('#'+'\t'.join(row), file=out)
-        print(self.config.data_as_tsv(), end='', file=out)
+        attribute_names = self.samples_meta[self.ATTRIBUTE_NAMES_KEY]
+        self.logger.debug("Writing data file header for %s" % self.DATATYPE)
+        print("#"+"\t".join(self.samples_meta[self.DISPLAY_NAMES_KEY]), file=out)
+        print("#"+"\t".join(self.samples_meta[self.DESCRIPTIONS_KEY]), file=out)
+        print("#"+"\t".join(self.samples_meta[self.DATATYPES_KEY]), file=out)
+        print("#"+"\t".join(self.samples_meta[self.PRIORITIES_KEY]), file=out)
+        print("#"+"\t".join(attribute_names), file=out)
+        self.logger.debug("Writing data file table for %s" % self.DATATYPE)
+        for sample in self.samples:
+            fields = []
+            for name in attribute_names:
+                value = sample.get(name)
+                if value == None:
+                    field = 'NULL' # interpreted as NaN by pandas
+                elif isinstance(value, float):
+                    format_str = "%.{}f".format(self.precision)
+                    field = format_str % value
+                else:
+                    field = str(value)
+                fields.append(field)
+            print("\t".join(fields), file=out)
         out.close()
 
     def write_meta(self, out_dir):
@@ -272,13 +325,13 @@ class clinical_data_component(dual_output_component):
         out.write(yaml.dump(meta, sort_keys=True))
         out.close()
 
-class patients(clinical_data_component):
+class patients_component(clinical_data_component):
 
     DATATYPE = utilities.constants.PATIENT_DATATYPE
     DATA_FILENAME = 'data_clinical_patients.txt'
     META_FILENAME = 'meta_clinical_patients.txt'
 
-class samples(clinical_data_component):
+class samples_component(clinical_data_component):
 
     DATATYPE = utilities.constants.SAMPLE_DATATYPE
     DATA_FILENAME = 'data_clinical_samples.txt'
@@ -423,9 +476,9 @@ class study_meta(component):
 
     META_FILENAME = 'meta_study.txt'
 
-    def __init__(self, study_config, log_level=logging.WARN):
+    def __init__(self, study_meta, log_level=logging.WARN):
         super().__init__(log_level)
-        self.study_meta = study_config.get_meta()
+        self.study_meta = study_meta
 
     def get(self, key):
         return self.study_meta.get(key)
