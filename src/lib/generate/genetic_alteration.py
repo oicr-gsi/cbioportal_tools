@@ -35,9 +35,18 @@ class genetic_alteration(base):
             data.append([sample_id, input_files[sample_id], "Placeholder; no metrics here"])
         return data
 
+    def get_datatype(self):
+        return self.datatype
+
+    def get_genetic_alteration_type(self):
+        return self.genetic_alteration_type
+
     def get_genes(self):
         """Placeholder; subclasses will read genes from input files"""
         return ["Gene001", "Gene002"]
+
+    def get_sample_ids(self):
+        return self.sample_ids
     
     def get_small_mutation_indel_data(self, sample_id):
         """Placeholder; subclasses read results for gene & alteration type from input file"""
@@ -53,3 +62,7 @@ class genetic_alteration(base):
                 }
             )
         return data
+
+    def write(self, out_dir):
+        """Write cBioPortal data and metadata"""
+        pass

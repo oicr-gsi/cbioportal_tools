@@ -141,7 +141,7 @@ class cancer_type(dual_output_component):
         super().__init__()
         # default_cancer_type_string is from study metadata, may be used for "type_of_cancer" field
         self.config = config
-        # check config fields are consistent
+        # check config fields are consistent in length
         self.rows = len(config.get(self.NAME_KEY))
         for key in [self.KEYWORDS_KEY, self.PARENT_KEY, self.COLOR_KEY, self.TYPE_OF_CANCER_KEY]:
             value = config.get(key)
@@ -192,11 +192,11 @@ class cancer_type(dual_output_component):
         out = open(os.path.join(out_dir, self.DATA_FILENAME), 'w')
         for i in range(self.rows):
             values = [
-                self.type_of_cancer_column[i],
-                self.config.get(self.NAME_KEY)[i],
-                self.config.get(self.KEYWORDS_KEY)[i],
-                self.colours_column[i],
-                self.config.get(self.PARENT_KEY)[i],
+                self.type_of_cancer_column[i],          # type_of_cancer
+                self.config.get(self.NAME_KEY)[i],      # name
+                self.config.get(self.KEYWORDS_KEY)[i],  # clinical_trial_keywords
+                self.colours_column[i],                 # dedicated_color
+                self.config.get(self.PARENT_KEY)[i],    # parent_type_of_cancer
             ]
             print("\t".join(values), file=out)
         out.close()
@@ -216,34 +216,21 @@ class case_list(component):
     NAME_KEY = 'case_list_name'
     DESC_KEY = 'case_list_description'
 
-    def __init__(self, study_id, suffix, name, description, samples, category=None,
-                 log_level=logging.WARN):
+    SUFFIX_KEY = 'suffix'
+    CASE_LIST_NAME_KEY = 'case_list_name'
+    CASE_LIST_DESCRIPTION_KEY = 'case_list_description'
+    CASE_LIST_IDS_KEY = 'case_list_ids'
+    CASE_LIST_CATEGORY_KEY = 'case_list_category'
+
+    def __init__(self, study_id, config, log_level=logging.WARN):
         super().__init__(log_level)
         self.cancer_study_identifier = study_id
-        self.suffix = suffix
-        self.stable_id = "%s_%s" % (study_id, suffix)
-        self.case_list_name = name
-        self.case_list_description = description
-        self.samples = samples
-        self.category = category
-
-    @classmethod
-    def from_config_path(klass, path, study_id):
-        # Creates & returns a new instance of case_list, with parameters read from path
-        config = case_list_config(path)
-        meta = config.get_meta()
-        if klass.CATEGORY_KEY in meta:
-            category = meta[klass.CATEGORY_KEY]
-        else:
-            category = None
-        return klass(
-            study_id,
-            meta['suffix'],
-            meta[klass.NAME_KEY],
-            meta[klass.DESC_KEY],
-            config.get_sample_ids(),
-            category
-        )
+        self.suffix = config[self.SUFFIX_KEY]
+        self.stable_id = "%s_%s" % (study_id, self.suffix)
+        self.case_list_name = config[self.CASE_LIST_NAME_KEY]
+        self.case_list_description = config[self.CASE_LIST_DESCRIPTION_KEY]
+        self.sample_ids = config[self.CASE_LIST_IDS_KEY]
+        self.category = config[self.CASE_LIST_CATEGORY_KEY]
 
     def write(self, out_dir):
         data = {}
@@ -256,8 +243,8 @@ class case_list(component):
             data[self.CATEGORY_KEY] = self.category
         out_path = os.path.join(out_dir, 'cases_%s.txt' % self.suffix)
         if os.path.exists(out_path):
-            msg = "Output path already exists; not overwriting; case list suffix %s may not be unique" \
-                  % self.suffix
+            msg = "Output path already exists; not overwriting; "+\
+                  "case list suffix %s may not be unique" % self.suffix
             self.logger.warn(msg)
         out = open(out_path, 'w')
         for key in data.keys():

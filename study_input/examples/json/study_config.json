@@ -20,7 +20,15 @@
 	"parent_type_of_cancer": ["tissue"],
 	"data_filename": "cancer_type.txt"
     },
-    "case_lists": [],
+    "case_lists": [
+	{
+	    "suffix": "custom",
+	    "case_list_name": "janus_custom_case_list",
+	    "case_list_description": "custom case list demonstration",
+	    "case_list_ids": ["OCT-01-0472-CAP"],
+	    "case_list_category": null
+	}
+    ],
     "samples_meta": {
 	"display_names": ["Patient identifier", "Sample identifier"],
 	"descriptions": ["Patient identifier", "Sample identifier"],
