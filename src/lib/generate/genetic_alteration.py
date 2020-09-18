@@ -64,5 +64,7 @@ class genetic_alteration(base):
         return data
 
     def write(self, out_dir):
-        """Write cBioPortal data and metadata"""
-        pass
+        """Override this method in subclasses to write cBioPortal data and metadata"""
+        msg = "Cannot use placeholder write() method of genetic_alteration parent class"
+        self.logger.error(msg)
+        raise RuntimeError(msg)
