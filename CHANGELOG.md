@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+## Unreleased
+**Major revision:** Move to JSON config format and prepare to support clinical report JSON output
+### Changed
+- GCGI-20: Use new Janus config format for cBioPortal
+
 ## v0.0.5: 2020-09-16
 ### Added
 - GRD-273: Enabled and added tests for:
