@@ -168,20 +168,6 @@ class study(base):
             pc = None
         return [sc, pc]
 
-    def is_valid_output_dir(self, out_dir):
-        """validate an output directory"""
-        valid = True
-        if not os.path.exists(out_dir):
-            valid = False
-            self.logger.error("Output directory %s does not exist" % out_dir)
-        elif not os.path.isdir(out_dir):
-            valid = False
-            self.logger.error("Output path %s is not a directory" % out_dir)
-        elif not os.access(out_dir, os.W_OK):
-            valid = False
-            self.logger.error("Output path %s is not writable" % out_dir)
-        return valid
-
     def write_all(self, out_dir, dry_run=False, force=False):
         """Write all outputs to the given directory path"""
         self.check_output_dir(out_dir)
