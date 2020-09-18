@@ -230,7 +230,7 @@ class case_list(component):
         self.case_list_name = config[self.CASE_LIST_NAME_KEY]
         self.case_list_description = config[self.CASE_LIST_DESCRIPTION_KEY]
         self.sample_ids = config[self.CASE_LIST_IDS_KEY]
-        self.category = config[self.CASE_LIST_CATEGORY_KEY]
+        self.category = config.get(self.CASE_LIST_CATEGORY_KEY, None)
 
     def write(self, out_dir):
         data = {}

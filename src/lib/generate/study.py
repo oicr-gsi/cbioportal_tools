@@ -128,7 +128,6 @@ class study(base):
                         "case_list_name": "CNA discrete",
                         "case_list_description": "Samples with discrete CNA data",
                         "case_list_ids": ga.get_sample_ids(),
-                        "case_list_category": null
                     }
                     case_lists.append(case_list_component(self.study_id, config))
             elif ga_type == self.MUTATION_TYPE:
@@ -138,7 +137,6 @@ class study(base):
                     "case_list_name": "sequenced mutation data",
                     "case_list_description": "Samples with mutation data",
                     "case_list_ids": ga.get_sample_ids(),
-                    "case_list_category": null
                 }
                 case_lists.append(case_list_component(self.study_id, config))
             elif ga_type == self.EXPRESSION_TYPE:
@@ -151,7 +149,6 @@ class study(base):
                 "case_list_name": "Samples profiled for mutations and CNAs",
                 "case_list_description": "Case list containing all samples profiled for mutations and CNAs",
                 "case_list_ids": list(cnaseq_ids),
-                "case_list_category": null
             }
             case_lists.append(case_list_component(self.study_id, config))
         triple_complete_ids = cna_samples.intersection(mutation_samples, expression_samples)
@@ -161,7 +158,6 @@ class study(base):
                 "case_list_name": "Samples profiled for mutations, CNAs, and mRNA expression",
                 "case_list_description": "Case list containing all samples profiled for mutations, CNAs, and mRNA expression",
                 "case_list_ids": list(triple_complete_ids),
-                "case_list_category": null
             }
             case_lists.append(case_list_component(self.study_id, config))
         return case_lists
