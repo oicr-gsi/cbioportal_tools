@@ -7,7 +7,7 @@ from shutil import rmtree
 
 
 from generate.components import alteration_type, cancer_type, case_list, study_meta, \
-    patients_component, samples_component,
+    patients_component, samples_component
 
 from generate.config import study_config
 
@@ -33,7 +33,7 @@ class study(base):
     
     def __init__(self, config_path, log_level=logging.WARNING, log_path=None):
         self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__), log_path)
-        with config_file as open(config_path, 'r'):
+        with open(config_path, 'r') as config_file:
             config = json.loads(config_file.read())
         # TODO validate the config JSON
         study_meta_config = config.get(self.STUDY_META_KEY)

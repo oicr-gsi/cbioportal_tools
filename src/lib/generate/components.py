@@ -166,7 +166,7 @@ class cancer_type(dual_output_component):
                 utilities.constants.DATA_DIRNAME,
                 self.COLOUR_FILENAME
             )
-            colours = pd.read_csv(ref_path))
+            colours = pd.read_csv(ref_path)
             self.colours_column = []
             for name in config.get(self.NAME_KEY):
                 # use .casefold() instead of .lower() to handle special cases
