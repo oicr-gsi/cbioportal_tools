@@ -6,10 +6,11 @@ import os
 from shutil import rmtree
 
 
-from generate.components import alteration_type, cancer_type, case_list, study_meta, \
-    patients_component, samples_component
+from generate.components import alteration_type, cancer_type, case_list, \
+    study_meta, patients_component, samples_component
 
 from generate.config import study_config
+from generate.genetic_alteration import genetic_alteration
 from generate.sample import sample
 from utilities.base import base
 import utilities.constants
@@ -49,17 +50,18 @@ class study(base):
         self.samples = []
         sample_id_set = set()
         for sample_json in config.get(self.SAMPLES_KEY):
-            self.samples.append(sample(sample_json))
-            sample_id_set.add(sample.get_id())
-        # TODO could allow patient/sample output to be configured independently
-        # But for now, use the same config for both
+            sample_object = sample(sample_json)
+            self.samples.append(sample_object)
+            sample_id_set.add(sample_object.get_id())
+        # TODO allow patient/sample output to be configured independently
+        # for now, we are using the same config for both; technically correct, but inflexible
         clinical_data = self.get_clinical_data(config.get(self.SAMPLES_META_KEY))
         [self.sample_component, self.patient_component] = clinical_data
         self.genetic_alterations = []
         self.ga_ids = set()
         # find genetic alterations and check study-wide consistency
-        for genetic_alteration_json in config.get(self.GENETIC_ALTERATIONS_KEY):
-            ga = genetic_alteration(genetic_alteration_json)
+        for genetic_alteration_config in config.get(self.GENETIC_ALTERATIONS_KEY):
+            ga = genetic_alteration(genetic_alteration_config)
             # check uniqueness of genetic alteration id
             genetic_alt_id = ga.get_alteration_id()
             if genetic_alt_id in self.ga_ids:
@@ -111,7 +113,7 @@ class study(base):
         """Generate required and custom case lists"""
         case_lists = []
         for config in case_list_config: # custom case lists
-            case_lists.append(case_list_component(self.study_id, config))
+            case_lists.append(case_list(self.study_id, config))
         cna_samples = set()
         mutation_samples = set()
         expression_samples = set()
@@ -126,7 +128,7 @@ class study(base):
                         case_list.CASE_LIST_DESCRIPTION_KEY: "Samples with discrete CNA data",
                         case_list.CASE_LIST_IDS_KEY: ga.get_sample_ids(),
                     }
-                    case_lists.append(case_list_component(self.study_id, config))
+                    case_lists.append(case_list(self.study_id, config))
             elif ga_type == self.MUTATION_TYPE:
                 mutation_samples.update(set(ga.get_sample_ids()))
                 config = {    # case list required by cBioPortal
@@ -135,7 +137,7 @@ class study(base):
                     case_list.CASE_LIST_DESCRIPTION_KEY: "Samples with mutation data",
                     case_list.CASE_LIST_IDS_KEY: ga.get_sample_ids(),
                 }
-                case_lists.append(case_list_component(self.study_id, config))
+                case_lists.append(case_list(self.study_id, config))
             elif ga_type == self.EXPRESSION_TYPE:
                 expression_samples.update(set(ga.get_sample_ids()))
         cnaseq_ids = cna_samples.intersection(mutation_samples)
@@ -147,7 +149,7 @@ class study(base):
                 case_list.CASE_LIST_DESCRIPTION_KEY: "Case list containing all samples profiled for mutations and CNAs",
                 case_list.CASE_LIST_IDS_KEY: list(cnaseq_ids),
             }
-            case_lists.append(case_list_component(self.study_id, config))
+            case_lists.append(case_list(self.study_id, config))
         triple_complete_ids = cna_samples.intersection(mutation_samples, expression_samples)
         if len(triple_complete_ids) > 0:
             config =  {
@@ -156,7 +158,7 @@ class study(base):
                 case_list.CASE_LIST_DESCRIPTION_KEY: "Case list containing all samples profiled for mutations, CNAs, and mRNA expression",
                 case_list.CASE_LIST_IDS_KEY: list(triple_complete_ids),
             }
-            case_lists.append(case_list_component(self.study_id, config))
+            case_lists.append(case_list(self.study_id, config))
         return case_lists
 
     def get_clinical_data(self, samples_meta):

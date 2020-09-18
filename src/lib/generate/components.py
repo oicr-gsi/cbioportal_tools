@@ -173,7 +173,7 @@ class cancer_type(dual_output_component):
                 name_expr = re.compile(name.casefold())
                 candidate_colours = []
                 for index, row in colours.iterrows():
-                    ref_name = row[self.CONFIG_NAME_KEY]
+                    ref_name = row['NAME']
                     if name_expr.search(ref_name.casefold()):
                         candidate_colours.append(row['COLOUR'])
                 distinct_colour_total = len(set(candidate_colours))
@@ -238,7 +238,7 @@ class case_list(component):
         data['stable_id'] = self.stable_id
         data[self.NAME_KEY] = self.case_list_name
         data[self.DESC_KEY] = self.case_list_description
-        data['case_list_ids'] = "\t".join(self.samples)
+        data['case_list_ids'] = "\t".join(self.sample_ids)
         if self.category != None:
             data[self.CATEGORY_KEY] = self.category
         out_path = os.path.join(out_dir, 'cases_%s.txt' % self.suffix)
@@ -274,7 +274,7 @@ class clinical_data_component(dual_output_component):
         self.cancer_study_identifier = study_id
         self.samples = samples
         self.samples_meta = samples_meta
-        self.precision = self.sample_meta.get(self.PRECISION_KEY, self.DEFAULT_PRECISION)
+        self.precision = self.samples_meta.get(self.PRECISION_KEY, self.DEFAULT_PRECISION)
 
     def write_data(self, out_dir):
         """Write header; then write selected attributes of samples"""
@@ -284,7 +284,7 @@ class clinical_data_component(dual_output_component):
         print("#"+"\t".join(self.samples_meta[self.DISPLAY_NAMES_KEY]), file=out)
         print("#"+"\t".join(self.samples_meta[self.DESCRIPTIONS_KEY]), file=out)
         print("#"+"\t".join(self.samples_meta[self.DATATYPES_KEY]), file=out)
-        print("#"+"\t".join(self.samples_meta[self.PRIORITIES_KEY]), file=out)
+        print("#"+"\t".join([str(x) for x in self.samples_meta[self.PRIORITIES_KEY]]), file=out)
         print("#"+"\t".join(attribute_names), file=out)
         self.logger.debug("Writing data file table for %s" % self.DATATYPE)
         for sample in self.samples:

@@ -87,15 +87,19 @@ class TestStudy(TestBase):
         )
         self.tmp = tempfile.TemporaryDirectory(prefix='janus_study_test_')
         self.config_path = os.path.join(self.dataDir, 'CAP_expression', 'study.txt')
+        # clinical patients/samples files currently identical, but this will change
         self.base_checksums = {
-            'data_cancer_type.txt': '2756288ed26ccafbf762c52543bd4fe0',
-            'data_clinical_patients.txt': '852777b8f1bc60b134c9dc999ac87a24',
-            'data_clinical_samples.txt': '199053f38a24c52072418a42dba3fdf4',
+            'data_cancer_type.txt': '31d0678d437a5305dcf8e76a9ccc40ff',
+            'data_clinical_patients.txt': 'd6fb18fa41b196964b45603fa06daf93',
+            'data_clinical_samples.txt': 'd6fb18fa41b196964b45603fa06daf93',
             'meta_cancer_type.txt': '19d950648288bb7428e8aaf5ee2939a0',
-            'meta_clinical_patients.txt': '0de6a7ae349e16b26b68ac5a4eb62a0c',
-            'meta_clinical_samples.txt': '42609db9577d6192113be9ffeba92292',
-            'meta_study.txt': '5ca90314306ad1f1aae94bc345bd0a23',
-            'case_lists/cases_merp.txt': '43685fab767e5961a11e68a45d68c5ec'
+            'meta_clinical_patients.txt': '4193bbcfc52c10413c34c2b75d53efc5',
+            'meta_clinical_samples.txt': '2b665da238824fc8ee4f44ac1d3d1cc6',
+            'meta_study.txt': '58eb6d6b7df072279a9da38be6f82d05',
+            'case_lists/cases_3way_complete.txt': 'b5e5d0c300b3365eda75955c1be1f405',
+            'case_lists/cases_cnaseq.txt': 'a02611d78ab9ef7d7ac6768a2b9042b7',
+            'case_lists/cases_custom.txt': 'f689cf4411b1223a0a907e3e0e48b5d0',
+            'case_lists/cases_sequenced.txt': '634dfc2e289fe6877c35b8ab6d31c091'
         }
 
     def test_dry_run(self):
@@ -122,6 +126,15 @@ class TestGenerator(TestStudy):
         self.args = argparse.Namespace()
         for key in argsDict.keys():
             setattr(self.args, key, argsDict[key])
+
+    def test_new_config_dry_run(self):
+        """Initial test for new config format; will eventually supersede existing tests"""
+        out_dir = os.path.join('/tmp', 'janus_study_json_dry_run')
+        os.mkdir(out_dir)
+        self.args.config = os.path.join(self.dataDir, 'json', 'study_config.json')
+        self.args.out = out_dir
+        main(self.args)
+        self.verify_checksums(self.base_checksums, out_dir)
 
     ### test legacy copy number alteration pipelines ###
 

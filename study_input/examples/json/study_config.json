@@ -64,7 +64,7 @@
             "sampleTMB": 82.38
         }
     ],
-    "genetic alterations": [
+    "genetic_alterations": [
 	{
 	    "genetic_alteration_type": "MUTATION_EXTENDED",
 	    "oicr_workflow": "cap_strelka2_somatic_0_1_0.niassawf",
