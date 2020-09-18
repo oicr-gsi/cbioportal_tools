@@ -26,6 +26,16 @@ class genetic_alteration(base):
             self.logger.error("Missing required config key: {0}".format(err))
             raise
         self.sample_ids = sorted(self.input_files.keys())
+        self.sample_attributes = self.read_sample_attributes()
+
+    def get_attributes_for_sample(self, sample):
+        """Placeholder for metrics defined on a per-sample rather than per-gene basis"""
+        # dummy results for demonstration; subclasses will retrieve from self.sample_attributes
+        metric_key = ":".join([self.genetic_alteration_type, self.datatype, 'dummy_sample_metric'])
+        attributes = {
+            metric_key: random.randrange(100)
+        }
+        return attributes
 
     def get_cbioportal_data(self):
         """Placeholder; subclasses process the input files to get cBioPortal data table"""
@@ -47,7 +57,7 @@ class genetic_alteration(base):
 
     def get_sample_ids(self):
         return self.sample_ids
-    
+
     def get_small_mutation_indel_data(self, sample_id):
         """Placeholder; subclasses read results for gene & alteration type from input file"""
         input_file = self.input_files[sample_id]
@@ -58,10 +68,14 @@ class genetic_alteration(base):
             data.append(
                 {
                     "Gene": gene,
-                    metric_key: random.randrange(1000)
+                    metric_key: random.randrange(101, 1000)
                 }
             )
         return data
+
+    def read_sample_attributes(self):
+        """Placeholder; read self.input_files and populate a sample attributes dictionary"""
+        return {}
 
     def write(self, out_dir):
         """Override this method in subclasses to write cBioPortal data and metadata"""

@@ -10,6 +10,7 @@ class sample(base):
     (key/value pairs) for the sample. The only required attribute is SAMPLE_ID."""
     
     SAMPLE_ID_KEY = 'SAMPLE_ID'
+    GENE_KEY = 'Gene' # TODO move to utilities.constants
     
     def __init__(self, attributes, log_level=logging.WARNING, log_path=None):
         self.logger = self.get_logger(log_level, "%s.%s" % (__name__, type(self).__name__), log_path)
@@ -28,3 +29,12 @@ class sample(base):
 
     def get_id(self):
         return self.sample_id
+
+    def update_attributes(self, new_attributes):
+        shared_keys = set(self.attributes.keys()).intersection(set(new_attributes.keys()))
+        if len(shared_keys)>1 or (len(shared_keys)==1 and self.GENE_KEY not in shared_keys):
+            # found shared keys other than 'Gene': issue a warning
+            key_string = "\t".join(sorted([str(x) for x in shared_keys]))
+            msg = "Existing attribute values will be overwritten for keys: %s" % key_string
+            self.logger.warning(msg)
+        self.attributes.update(new_attributes)

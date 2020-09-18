@@ -59,7 +59,7 @@ class TestReport(TestBase):
         report_path = os.path.join(out_dir, report_name)
         report_config = report(test_sample, alterations).write_report_config(report_path)
         self.assertTrue(os.path.exists(report_path), "JSON report exists")
-        checksum = {report_name: '3d444097ea07f45e625e4b52ea002fba'}
+        checksum = {report_name: '6014b90db5f15bd5def4b5701611d01f'}
         self.verify_checksums(checksum, out_dir)
 
 class TestScript(TestBase):
