@@ -56,29 +56,26 @@ class study(base):
         clinical_data = self.get_clinical_data(config.get(self.SAMPLES_META_KEY))
         [self.sample_component, self.patient_component] = clinical_data
         self.genetic_alterations = []
-        self.ga_type_pairs = set()
+        self.ga_ids = set()
         # find genetic alterations and check study-wide consistency
         for genetic_alteration_json in config.get(self.GENETIC_ALTERATIONS_KEY):
             ga = genetic_alteration(genetic_alteration_json)
-            type_pair = (ga.get_genetic_alteration_type(), ga.get_datatype())
-            if type_pair in self.ga_type_pairs:
-                msg = "Non-unique (genetic_alteration_type, datatype) pair : %s" % str(type_pair)
+            # check uniqueness of genetic alteration id
+            genetic_alt_id = ga.get_alteration_id()
+            if genetic_alt_id in self.ga_ids:
+                msg = "Non-unique (genetic_alteration_type, datatype) pair : %s" % genetic_alt_id
                 self.logger.error(msg)
                 raise ValueError(msg)
             else:
-                self.ga_type_pairs.add(type_pair)
+                self.ga_ids.add(genetic_alt_id)
             ga_sample_id_set = set(ga.get_sample_ids())
+            # check samples are a subset of the study samples list
             if not ga_sample_id_set.issubset(sample_id_set):
                 diff = ga_sample_id_set - sample_id_set
                 msg = "Sample IDs for alteration %s:%s do not appear in study samples list: %s" \
-                      % (ga.get_genetic_alteration_type(), ga.get_datatype(), ", ".join(diff))
+                      % (ga.get_alteration_id(), ", ".join(diff))
                 self.logger.error(msg)
                 raise ValueError(msg)
-            ga_type = ga.get_genetic_alteration_type()
-            if ga.get_datatype() == self.DISCRETE_DATATYPE and ga_type == self.CNA_TYPE:
-                self.has_discrete_cna_data = True
-            elif ga_type == self.MUTATION_TYPE:
-                self.has_mutation_data = True
             self.genetic_alterations.append(ga)
         # find case lists last, so we can refer to genetic_alteration setup
         self.case_lists = self.get_case_lists(config.get(self.CASE_LISTS_KEY))
@@ -203,6 +200,11 @@ class study(base):
             for case_list in self.case_lists:
                 case_list.write(case_list_dir)
         for genetic_alteration in self.genetic_alterations:
-            genetic_alteration.write(out_dir)
+            if dry_run:
+                ga_id = genetic_alteration.get_alteration_id()
+                msg = "Dry-run mode; omitting output for genetic alteration %s" % ga_id
+                self.logger.warning(msg)
+            else:
+                genetic_alteration.write(out_dir)
 
 

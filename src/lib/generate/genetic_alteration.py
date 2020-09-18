@@ -27,6 +27,11 @@ class genetic_alteration(base):
             raise
         self.sample_ids = sorted(self.input_files.keys())
         self.sample_attributes = self.read_sample_attributes()
+        # identifier for the genetic_alteration; should be unique in any given config
+        self.alteration_id = "%s:%s" % (self.genetic_alteration_type, self.datatype)
+
+    def get_alteration_id(self):
+        return self.alteration_id
 
     def get_attributes_for_sample(self, sample):
         """Placeholder for metrics defined on a per-sample rather than per-gene basis"""
