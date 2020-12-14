@@ -1,0 +1,25 @@
+---
+#input_folder: /.mounts/labs/gsiprojects/gsi/cBioGSI/tests/data/CAP_CNA
+#DATATYPE: SEG
+#profile_name: CNVs (Ductal Carcinoma)
+#profile_description: CAP_CNA Copy Number Variations from whole exome sequencing. (10 Samples)
+#typec: mixed
+#gain: 0.3
+#ampl: 0.7
+#htzd: -0.3
+#hmzd: -0.7
+#oncokb_api_token: TOKEN_PLACEHOLDER
+#study: OCTCAP
+#DISCRETE: True
+#CONTINUOUS: True
+---
+FILE_NAME	PATIENT_ID	SAMPLE_ID
+OCT-01-0118-CAP.tumour.bam.varscanSomatic_Total_CN.seg	OCT-01-0118	OCT-01-0118-CAP
+OCT-01-0266-CAP.tumour.bam.varscanSomatic_Total_CN.seg	OCT-01-0266	OCT-01-0266-CAP
+OCT-01-0384-CAP.tumour.bam.varscanSomatic_Total_CN.seg	OCT-01-0384	OCT-01-0384-CAP
+OCT-01-0472-CAP.tumour.bam.varscanSomatic_Total_CN.seg	OCT-01-0472	OCT-01-0472-CAP
+OCT-01-0676-CAP.tumour.bam.varscanSomatic_Total_CN.seg	OCT-01-0676	OCT-01-0676-CAP
+OCT-01-1256-CAP.tumour.bam.varscanSomatic_Total_CN.seg	OCT-01-1256	OCT-01-1256-CAP
+OCT-01-1322-CAP.tumour.bam.varscanSomatic_Total_CN.seg	OCT-01-1322	OCT-01-1322-CAP
+OCT-01-1328-CAP.tumour.bam.varscanSomatic_Total_CN.seg	OCT-01-1328	OCT-01-1328-CAP
+OCT-01-1493-CAP.tumour.bam.varscanSomatic_Total_CN.seg	OCT-01-1493	OCT-01-1493-CAP
